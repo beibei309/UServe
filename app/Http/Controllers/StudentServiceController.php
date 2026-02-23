@@ -31,9 +31,12 @@ class StudentServiceController extends Controller
         ->withAvg(['reviews' => function ($query) {
             $query->whereColumn('reviews.reviewee_id', 'student_services.user_id');
         }], 'rating')
-        ->where('approval_status', 'approved') // Kita hanya mahu yang approved, tapi status boleh available/unavailable
+        ->where('approval_status', 'approved')
+        // START MODIFICATION
         ->whereHas('student', function ($q) {
-            $q->where('role', 'helper');
+            $q->where('role', 'helper')
+              ->where('is_suspended', 0)     // Exclude suspended users
+              ->where('is_blacklisted', 0);  // Exclude blacklisted  users
         });
 
     if ($currentUserId) {
@@ -280,6 +283,10 @@ $isUnavailable = $request->has('is_unavailable'); // Check checkbox status
             return response()->json(['error' => 'User is not a student.'], 422);
         }
 
+	if ($user->is_suspended == 1 || $user->is_blacklisted  == 1) {
+        return response()->json(['error' => 'This user is currently unavailable.'], 404);
+    }
+
         $services = StudentService::query()
             ->where('user_id', $user->id)
             ->where('is_active', true)
@@ -518,6 +525,10 @@ $isUnavailable = $request->has('is_unavailable'); // Check checkbox status
     public function details(Request $request, $id)
     {
         $service = StudentService::with(['user', 'category', 'orders'])->findOrFail($id);
+	if ($service->user->is_suspended == 1 || $service->user->is_blacklisted == 1) {
+        // Return 404 Not Found so no info is displayed
+        abort(404); 
+    }
         $viewer = $request->user(); 
 
         // Fetch orders for this service (Stats logic)

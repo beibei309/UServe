@@ -33,7 +33,6 @@
                 @endphp
                 <img src="{{ $imageUrl }}" class="w-full h-full object-cover" alt="{{ $user->name }}" />
             </div>
-
             <div class="flex-1">
 
                 <!-- Name -->
@@ -289,6 +288,7 @@
         </div>
 
     </div>
+
 
     <!-- BLACKLIST MODAL -->
     <div id="blacklistModal" class="hidden fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">

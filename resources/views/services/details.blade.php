@@ -254,7 +254,7 @@
                                         <i class="fa-solid fa-graduation-cap mr-1.5 text-xs"></i>
                                         {{ $service->user->faculty ?? 'Faculty of Computing' }}
                                     </span>
-                                    <span class="text-gray-400 hidden sm:inline">•</span>
+                                    <span class="text-gray-400 hidden sm:inline">�</span>
                                     <span class="text-gray-500">Member since
                                         {{ $service->user->created_at->format('M Y') }}</span>
                                 </div>
@@ -386,7 +386,7 @@
                                     @endif
                                 </span>
                                 @if ($review->replied_at)
-                                    <span class="text-[10px] text-gray-400">•
+                                    <span class="text-[10px] text-gray-400">�
                                         {{ \Carbon\Carbon::parse($review->replied_at)->diffForHumans() }}</span>
                                 @endif
                             </div>
@@ -480,7 +480,7 @@
                                 <span class="text-4xl font-extrabold" :class="priceColorClass"
                                     x-text="'RM' + calculateTotal()"></span>
 
-                                {{-- 🟢 UPDATED: Simple Data Display (No labels) --}}
+                                {{-- ?? UPDATED: Simple Data Display (No labels) --}}
                                 <div class="text-sm font-medium text-gray-500 mt-1 flex items-center gap-1"
                                     x-show="packages[currentPackage].duration || packages[currentPackage].frequency">
                                     <span x-text="packages[currentPackage].duration"></span>
@@ -945,7 +945,7 @@
                     // Filter real bookings for the selected date
                     let daysBookings = this.bookedSlots.filter(slot => slot.date === this.selectedDate);
 
-                    // --- 🟢 NEW: Get Current Real Time Data ---
+                    // --- ?? NEW: Get Current Real Time Data ---
                     const now = new Date();
                     // Create YYYY-MM-DD string for today to compare with selectedDate
                     const todayStr = now.getFullYear() + '-' + 
@@ -966,7 +966,7 @@
                         let proposedStart = currentMinutes;
                         let proposedEnd = currentMinutes + durationMinutes;
 
-                        // --- 🟢 NEW: Filter Past Times ---
+                        // --- ?? NEW: Filter Past Times ---
                         // If selected date is Today AND the slot start time is less than right now
                         // We skip adding it to the list (Do not display)
                         if (isToday && proposedStart <= currentRealTimeMinutes) {
@@ -1020,7 +1020,7 @@
                     let [h, m] = timeStr.split(':').map(Number);
                     let startMinutes = h * 60 + m;
 
-                    // 🟢 NEW LOGIC: If Task Based, only show Start Time
+                    // ?? NEW LOGIC: If Task Based, only show Start Time
                     if (!this.isSessionBased) {
                         return this.minutesToTime(startMinutes);
                     }
@@ -1043,7 +1043,7 @@
 
                     let [h, m] = startTime.split(':').map(Number);
 
-                    // 🟢 Guna selectedDuration (jam) darab 60 minit
+                    // ?? Guna selectedDuration (jam) darab 60 minit
                     let totalMinutes = (h * 60) + m + (this.selectedDuration * 60);
 
                     let endH = Math.floor(totalMinutes / 60);
@@ -1252,13 +1252,13 @@
                     if (!data.success) return;
 
                     if (data.favorited) {
-                        // ❤️ UI update
+                        // ?? UI update
                         icon.className = "fas fa-heart";
                         icon.parentElement.classList.remove('text-gray-500');
                         icon.parentElement.classList.add('text-red-500');
                         text.innerText = "Saved";
 
-                        // ✅ SweetAlert success
+                        // ? SweetAlert success
                         Swal.fire({
                             icon: 'success',
                             title: 'Saved!',
@@ -1270,13 +1270,13 @@
                         });
 
                     } else {
-                        // 💔 UI update
+                        // ?? UI update
                         icon.className = "far fa-heart";
                         icon.parentElement.classList.remove('text-red-500');
                         icon.parentElement.classList.add('text-gray-500');
                         text.innerText = "Save";
 
-                        // ⚠️ SweetAlert removed
+                        // ?? SweetAlert removed
                         Swal.fire({
                             icon: 'info',
                             title: 'Removed',

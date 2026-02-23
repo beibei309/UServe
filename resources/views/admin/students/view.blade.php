@@ -384,6 +384,7 @@
             form.action = "{{ route('admin.students.ban', 'ID_PLACEHOLDER') }}"
                           .replace('ID_PLACEHOLDER', selectedStudentId);
 
+
             const input = document.createElement('input');
             input.type = 'hidden';
             input.name = 'blacklist_reason';

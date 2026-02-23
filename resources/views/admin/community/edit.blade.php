@@ -38,7 +38,6 @@
                     @endphp
                     <img src="{{ $imageUrl }}" class="w-full h-full object-cover" alt="Profile" />
                 </div>
-
                     <input type="file" name="profile_photo" 
                            class="border p-2 rounded-lg w-full text-sm">
                 </div>

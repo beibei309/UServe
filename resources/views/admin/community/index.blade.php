@@ -73,7 +73,7 @@
         </a>
 
         <!-- BLACKLISTED -->
-        <a href="{{ route('admin.community.index', ['status' => 'blacklisted'] + request()->except('page')) }}"
+        <a href="{{ route('admin.community.index', ['status' => 'suspended'] + request()->except('page')) }}"
             class="{{ $pill }} {{ request('status') == 'blacklisted' ? $active : $inactive }}">
             Suspended
         </a>

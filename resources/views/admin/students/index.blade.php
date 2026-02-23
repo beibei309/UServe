@@ -56,7 +56,7 @@
 
             <a href="{{ route('admin.students.index', ['status' => 'banned'] + request()->except('page')) }}"
                 class="{{ $pill }} {{ request('status') == 'banned' ? $active : $inactive }}">
-                Banned
+                Suspended
             </a>
         </div>
 
@@ -102,7 +102,7 @@
 
                             <td class="py-3 px-4">
                                 @if ($student->is_suspended)
-                                    <span class="px-3 py-1 text-xs bg-red-100 text-red-700 rounded-full">Banned</span>
+                                    <span class="px-3 py-1 text-xs bg-red-100 text-red-700 rounded-full">Suspended</span>
                                 @elseif ($student->verification_status === 'approved')
                                     <span class="px-3 py-1 text-xs bg-green-100 text-green-700 rounded-full">Verified</span>
                                 @else

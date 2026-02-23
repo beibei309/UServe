@@ -40,7 +40,7 @@
 
         {{-- CENTER LOGO: Dengan Kesan Hover --}}
         <div class="absolute left-1/2 transform -translate-x-1/2 z-20">
-            <a href="/" class="block transition-transform duration-300 hover:scale-105 active:scale-95">
+            <a href="https://www.upsi.edu.my/" class="block transition-transform duration-300 hover:scale-105 active:scale-95">
                 <img src="{{ asset('images/upsilogo.png') }}" class="h-12 md:h-16 w-auto object-contain"
                     alt="UPSI Logo">
             </a>

@@ -97,6 +97,9 @@
                             </div>
                         </div>
 
+                      {{-- ========================== --}}
+                        {{-- 1. PENDING TAB CONTENT     --}}
+                        {{-- ========================== --}}
                         <div id="pending-content"
                             class="sr-status-tab-content {{ $defaultStatusTab === 'pending' ? '' : 'hidden' }}">
                             @if ($sentRequests->where('status', 'pending')->isEmpty())
@@ -126,7 +129,6 @@
                                             // Data Setup
                                             $service = $request->studentService;
                                             $pkgType = strtolower($request->selected_package ?? 'basic');
-                                            $pkgDescription = $service->{$pkgType . '_description'} ?? null;
                                             $pkgDuration = $service->{$pkgType . '_duration'} ?? null;
                                             $pkgFrequency = $service->{$pkgType . '_frequency'} ?? null;
 
@@ -134,13 +136,16 @@
                                             $dates = $request->selected_dates;
                                             $firstDate = is_array($dates) ? $dates[0] : $dates;
                                             $dateCount = is_array($dates) ? count($dates) : 1;
+
+                                            // CHECK IF SELLER BANNED
+                                            $isSellerBanned = $request->provider->is_suspended == 1 || $request->provider->is_blacklisted == 1;
                                         @endphp
 
                                         <div
-                                            class="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:shadow-md hover:border-yellow-300">
+                                            class="group relative overflow-hidden rounded-2xl border {{ $isSellerBanned ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-white hover:border-yellow-300' }} shadow-sm transition-all duration-300 hover:shadow-md">
 
                                             <div
-                                                class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-yellow-400 to-orange-300">
+                                                class="absolute top-0 left-0 right-0 h-1 {{ $isSellerBanned ? 'bg-red-500' : 'bg-gradient-to-r from-yellow-400 to-orange-300' }}">
                                             </div>
 
                                             <div class="p-5 sm:p-6">
@@ -148,20 +153,27 @@
                                                     class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mb-6">
                                                     <div class="flex-1">
                                                         <div class="flex items-center gap-3 mb-2">
-                                                            <span
-                                                                class="inline-flex items-center rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-bold text-yellow-700">
-                                                                {{ strtoupper($request->status) }}
-                                                            </span>
+                                                            @if ($isSellerBanned)
+                                                                <span
+                                                                    class="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-bold text-red-700">
+                                                                    SELLER SUSPENDED
+                                                                </span>
+                                                            @else
+                                                                <span
+                                                                    class="inline-flex items-center rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-bold text-yellow-700">
+                                                                    {{ strtoupper($request->status) }}
+                                                                </span>
+                                                            @endif
                                                             <span
                                                                 class="text-xs text-gray-400">#{{ $request->id }}</span>
                                                         </div>
 
                                                         <h4
-                                                            class="text-lg font-bold text-gray-900 group-hover:text-yellow-600 transition-colors leading-tight">
+                                                            class="text-lg font-bold {{ $isSellerBanned ? 'text-gray-500 line-through' : 'text-gray-900' }} group-hover:text-yellow-600 transition-colors leading-tight">
                                                             {{ optional($request->studentService)->title ?? 'Custom Request' }}
                                                         </h4>
 
-                                                        @if (optional($service)->category)
+                                                        @if (optional($service)->category && !$isSellerBanned)
                                                             <div class="mt-2 inline-flex items-center gap-1.5 rounded-md px-2 py-1"
                                                                 style="color:{{ $service->category->color }}; background-color: {{ $service->category->color }}10; border: 1px solid {{ $service->category->color }};">
                                                                 <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24"
@@ -183,7 +195,8 @@
 
                                                     <div class="text-left sm:text-right mt-2 sm:mt-0">
                                                         @if ($request->offered_price)
-                                                            <div class="text-2xl font-bold text-gray-900">
+                                                            <div
+                                                                class="text-2xl font-bold {{ $isSellerBanned ? 'text-gray-400' : 'text-gray-900' }}">
                                                                 RM {{ number_format($request->offered_price, 2) }}
                                                             </div>
                                                             <div
@@ -195,77 +208,80 @@
                                                     </div>
                                                 </div>
 
-                                                <div class="h-px w-full bg-gray-100 my-4"></div>
+                                                {{-- Hide details if banned to keep it clean --}}
+                                                @if (!$isSellerBanned)
+                                                    <div class="h-px w-full bg-gray-100 my-4"></div>
 
-                                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+                                                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
 
-                                                    <div class="flex items-start gap-3">
-                                                        <div
-                                                            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-500">
-                                                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                                                                stroke="currentColor">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    stroke-width="2"
-                                                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                                            </svg>
-                                                        </div>
-                                                        <div>
-                                                            <p class="text-xs font-medium text-gray-500 uppercase">
-                                                                Provider</p>
-                                                            <p class="text-sm font-semibold text-gray-900">
-                                                                {{ $request->provider->name }}</p>
-                                                        </div>
-                                                    </div>
-
-                                                    @if ($request->selected_dates)
                                                         <div class="flex items-start gap-3">
                                                             <div
-                                                                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-50 text-blue-600">
-                                                                <svg class="h-5 w-5" fill="none"
-                                                                    viewBox="0 0 24 24" stroke="currentColor">
-                                                                    <path stroke-linecap="round"
-                                                                        stroke-linejoin="round" stroke-width="2"
-                                                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-500">
+                                                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                                                                    stroke="currentColor">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                                        stroke-width="2"
+                                                                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                                                 </svg>
                                                             </div>
                                                             <div>
                                                                 <p class="text-xs font-medium text-gray-500 uppercase">
-                                                                    Start Date</p>
+                                                                    Provider</p>
                                                                 <p class="text-sm font-semibold text-gray-900">
-                                                                    {{ \Carbon\Carbon::parse($firstDate)->format('M j, Y') }}
-                                                                    @if ($dateCount > 1)
-                                                                        <span
-                                                                            class="text-xs font-normal text-gray-500 ml-1">(+{{ $dateCount - 1 }}
-                                                                            days)</span>
-                                                                    @endif
+                                                                    {{ $request->provider->name }}</p>
+                                                            </div>
+                                                        </div>
+
+                                                        @if ($request->selected_dates)
+                                                            <div class="flex items-start gap-3">
+                                                                <div
+                                                                    class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-50 text-blue-600">
+                                                                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                                                                        stroke="currentColor">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                                            stroke-width="2"
+                                                                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                                    </svg>
+                                                                </div>
+                                                                <div>
+                                                                    <p class="text-xs font-medium text-gray-500 uppercase">
+                                                                        Start Date</p>
+                                                                    <p class="text-sm font-semibold text-gray-900">
+                                                                        {{ \Carbon\Carbon::parse($firstDate)->format('M j, Y') }}
+                                                                        @if ($dateCount > 1)
+                                                                            <span
+                                                                                class="text-xs font-normal text-gray-500 ml-1">(+{{ $dateCount - 1 }}
+                                                                                days)</span>
+                                                                        @endif
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                        @endif
+
+                                                        <div class="flex items-start gap-3">
+                                                            <div
+                                                                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-purple-50 text-purple-600">
+                                                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                                                                    stroke="currentColor">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                                        stroke-width="2"
+                                                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                                </svg>
+                                                            </div>
+                                                            <div>
+                                                                <p class="text-xs font-medium text-gray-500 uppercase">
+                                                                    Details</p>
+                                                                <p class="text-sm font-semibold text-gray-900">
+                                                                    {{ $pkgDuration ? $pkgDuration . ' Hrs' : 'N/A' }}
+                                                                    <span class="text-gray-300 mx-1">|</span>
+                                                                    {{ $pkgFrequency ? ucfirst($pkgFrequency) : 'One-time' }}
                                                                 </p>
                                                             </div>
                                                         </div>
-                                                    @endif
-
-                                                    <div class="flex items-start gap-3">
-                                                        <div
-                                                            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-purple-50 text-purple-600">
-                                                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                                                                stroke="currentColor">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    stroke-width="2"
-                                                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                            </svg>
-                                                        </div>
-                                                        <div>
-                                                            <p class="text-xs font-medium text-gray-500 uppercase">
-                                                                Details</p>
-                                                            <p class="text-sm font-semibold text-gray-900">
-                                                                {{ $pkgDuration ? $pkgDuration . ' Hrs' : 'N/A' }}
-                                                                <span class="text-gray-300 mx-1">|</span>
-                                                                {{ $pkgFrequency ? ucfirst($pkgFrequency) : 'One-time' }}
-                                                            </p>
-                                                        </div>
                                                     </div>
-                                                </div>
+                                                @endif
 
-                                                @if ($request->message)
+                                                @if ($request->message && !$isSellerBanned)
                                                     <div class="rounded-lg bg-gray-50 p-4 border border-gray-100 mb-6">
                                                         <p class="text-xs font-bold text-gray-400 uppercase mb-1">Your
                                                             Note</p>
@@ -277,13 +293,27 @@
                                                 <div
                                                     class="flex flex-col-reverse sm:flex-row items-center justify-between gap-4 pt-2">
                                                     <div class="flex items-center gap-4 w-full sm:w-auto">
-                                                        <button onclick="cancelRequest({{ $request->id }})"
-                                                            class="w-full sm:w-auto inline-flex justify-center items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 bg-white border border-red-200 rounded-lg hover:bg-red-50 hover:border-red-300 transition-colors focus:ring-2 focus:ring-offset-1 focus:ring-red-500">
-                                                            Cancel
-                                                        </button>
-                                                        <form id="cancel-form-{{ $request->id }}"
-                                                            action="{{ route('service-requests.cancel', $request->id) }}"
-                                                            method="POST" class="hidden">@csrf</form>
+                                                        @if ($isSellerBanned)
+                                                            {{-- BANNED STATE: No Cancel button (visually cancelled) --}}
+                                                            <span
+                                                                class="inline-flex items-center gap-2 text-sm font-bold text-red-600 bg-red-50 px-3 py-2 rounded-lg border border-red-100 w-full sm:w-auto justify-center">
+                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                                    viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                                        stroke-width="2"
+                                                                        d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                                                                </svg>
+                                                                Service Cancelled
+                                                            </span>
+                                                        @else
+                                                            <button onclick="cancelRequest({{ $request->id }})"
+                                                                class="w-full sm:w-auto inline-flex justify-center items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 bg-white border border-red-200 rounded-lg hover:bg-red-50 hover:border-red-300 transition-colors focus:ring-2 focus:ring-offset-1 focus:ring-red-500">
+                                                                Cancel
+                                                            </button>
+                                                            <form id="cancel-form-{{ $request->id }}"
+                                                                action="{{ route('service-requests.cancel', $request->id) }}"
+                                                                method="POST" class="hidden">@csrf</form>
+                                                        @endif
 
                                                         <a href="{{ route('service-requests.show', $request) }}"
                                                             class="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors hidden sm:block">
@@ -291,22 +321,25 @@
                                                         </a>
                                                     </div>
 
-                                                    <div class="flex gap-3 w-full sm:w-auto">
-                                                        <a href="{{ route('service-requests.show', $request) }}"
-                                                            class="w-full sm:hidden text-center text-sm font-medium text-gray-500 hover:text-gray-900 border border-gray-200 rounded-lg py-2">
-                                                            Details
-                                                        </a>
-                                                        <a href="https://wa.me/6{{ $request->provider->phone }}"
-                                                            target="_blank"
-                                                            class="flex-1 sm:flex-none inline-flex justify-center items-center gap-2 px-6 py-2 text-sm font-medium text-white bg-green-500 rounded-lg hover:bg-green-600 shadow-sm transition-all hover:-translate-y-0.5">
-                                                            <svg class="w-4 h-4" fill="currentColor"
-                                                                viewBox="0 0 24 24">
-                                                                <path
-                                                                    d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z" />
-                                                            </svg>
-                                                            WhatsApp
-                                                        </a>
-                                                    </div>
+                                                    {{-- Only show WhatsApp if NOT banned --}}
+                                                    @if (!$isSellerBanned)
+                                                        <div class="flex gap-3 w-full sm:w-auto">
+                                                            <a href="{{ route('service-requests.show', $request) }}"
+                                                                class="w-full sm:hidden text-center text-sm font-medium text-gray-500 hover:text-gray-900 border border-gray-200 rounded-lg py-2">
+                                                                Details
+                                                            </a>
+                                                            <a href="https://wa.me/6{{ $request->provider->phone }}"
+                                                                target="_blank"
+                                                                class="flex-1 sm:flex-none inline-flex justify-center items-center gap-2 px-6 py-2 text-sm font-medium text-white bg-green-500 rounded-lg hover:bg-green-600 shadow-sm transition-all hover:-translate-y-0.5">
+                                                                <svg class="w-4 h-4" fill="currentColor"
+                                                                    viewBox="0 0 24 24">
+                                                                    <path
+                                                                        d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z" />
+                                                                </svg>
+                                                                WhatsApp
+                                                            </a>
+                                                        </div>
+                                                    @endif
                                                 </div>
 
                                             </div>
@@ -316,10 +349,13 @@
                             @endif
                         </div>
 
+                        {{-- ========================== --}}
+                        {{-- 2. IN PROGRESS TAB CONTENT --}}
+                        {{-- ========================== --}}
                         <div id="in-progress-content"
                             class="sr-status-tab-content {{ $defaultStatusTab === 'in-progress' ? '' : 'hidden' }}">
                             @if ($sentRequests->whereIn('status', ['accepted', 'in_progress', 'waiting_payment', 'disputed'])->isEmpty())
-                                {{-- Empty State (No Changes) --}}
+                                {{-- Empty State --}}
                                 <div
                                     class="flex flex-col items-center justify-center py-16 text-center bg-white rounded-xl border border-dashed border-gray-300">
                                     <div class="rounded-full bg-blue-50 p-4 mb-4">
@@ -338,41 +374,48 @@
                                     @foreach ($sentRequests->whereIn('status', ['accepted', 'in_progress', 'waiting_payment', 'disputed']) as $request)
                                         @php
                                             // --- SETUP DATA ---
+                                            $isSellerBanned = $request->provider->is_suspended == 1 || $request->provider->is_blacklisted == 1;
                                             $service = $request->studentService;
 
                                             // Date Parsing
                                             $dates = $request->selected_dates;
-                                            // Handle array or string dates
                                             if (is_string($dates)) {
-                                                // Try to decode if JSON, otherwise assume single string
                                                 $decoded = json_decode($dates, true);
                                                 $dateList = is_array($decoded) ? $decoded : [$dates];
                                             } else {
                                                 $dateList = is_array($dates) ? $dates : [$dates];
                                             }
-
-                                            // Get the very first date of the service
                                             $firstServiceDate = \Carbon\Carbon::parse($dateList[0]);
+                                            $hasDatePassed = now()
+                                                ->startOfDay()
+                                                ->gte($firstServiceDate->startOfDay());
 
-                                            // Check if service date has passed (Compare start of day to now)
-                                            $hasDatePassed = now()->startOfDay()->gte($firstServiceDate->startOfDay());
-
-                                            // --- STYLING LOGIC ---
-                                            $badgeColors = match ($request->status) {
-                                                'disputed' => 'border-red-200 bg-red-50 text-red-700',
-                                                'waiting_payment' => 'border-yellow-200 bg-yellow-50 text-yellow-700',
-                                                default => 'border-blue-200 bg-blue-50 text-blue-700',
-                                            };
-                                            $cardBorder = match ($request->status) {
-                                                'disputed' => 'border-red-200 hover:border-red-300',
-                                                'waiting_payment' => 'border-yellow-200 hover:border-yellow-300',
-                                                default => 'border-blue-100 hover:border-blue-200',
-                                            };
-                                            $stripeColor = match ($request->status) {
-                                                'disputed' => 'bg-red-500',
-                                                'waiting_payment' => 'bg-yellow-500',
-                                                default => 'bg-blue-500',
-                                            };
+                                            // STYLING LOGIC
+                                            if ($isSellerBanned) {
+                                                // BANNED STYLING
+                                                $badgeColors = 'border-red-200 bg-red-100 text-red-700';
+                                                $cardBorder = 'border-red-300 bg-red-50 hover:border-red-400';
+                                                $stripeColor = 'bg-red-500';
+                                                $statusText = 'SELLER SUSPENDED';
+                                            } else {
+                                                // NORMAL STYLING
+                                                $statusText = strtoupper(str_replace('_', ' ', $request->status));
+                                                $badgeColors = match ($request->status) {
+                                                    'disputed' => 'border-red-200 bg-red-50 text-red-700',
+                                                    'waiting_payment' => 'border-yellow-200 bg-yellow-50 text-yellow-700',
+                                                    default => 'border-blue-200 bg-blue-50 text-blue-700',
+                                                };
+                                                $cardBorder = match ($request->status) {
+                                                    'disputed' => 'border-red-200 hover:border-red-300 bg-white',
+                                                    'waiting_payment' => 'border-yellow-200 hover:border-yellow-300 bg-white',
+                                                    default => 'border-blue-100 hover:border-blue-200 bg-white',
+                                                };
+                                                $stripeColor = match ($request->status) {
+                                                    'disputed' => 'bg-red-500',
+                                                    'waiting_payment' => 'bg-yellow-500',
+                                                    default => 'bg-blue-500',
+                                                };
+                                            }
                                         @endphp
 
                                         <div
@@ -386,16 +429,15 @@
                                                         <div class="flex items-center gap-3 mb-2">
                                                             <span
                                                                 class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold {{ $badgeColors }}">
-                                                                {{ strtoupper(str_replace('_', ' ', $request->status)) }}
+                                                                {{ $statusText }}
                                                             </span>
-                                                            <span
-                                                                class="text-xs text-gray-400">#{{ $request->id }}</span>
+                                                            <span class="text-xs text-gray-400">#{{ $request->id }}</span>
                                                         </div>
                                                         <h4
-                                                            class="text-lg font-bold text-gray-900 group-hover:text-blue-600 transition-colors leading-tight">
+                                                            class="text-lg font-bold {{ $isSellerBanned ? 'text-gray-500 line-through' : 'text-gray-900' }} group-hover:text-blue-600 transition-colors leading-tight">
                                                             {{ optional($service)->title ?? 'Custom Request' }}
                                                         </h4>
-                                                        @if (optional($service)->category)
+                                                        @if (optional($service)->category && !$isSellerBanned)
                                                             <div class="mt-2 inline-flex items-center gap-1.5 rounded-md px-2 py-1"
                                                                 style="color:{{ $service->category->color }}; background-color: {{ $service->category->color }}10; border: 1px solid {{ $service->category->color }};">
                                                                 <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24"
@@ -413,59 +455,69 @@
                                                             {{ $request->updated_at->diffForHumans() }}</p>
                                                     </div>
                                                     <div class="text-left sm:text-right mt-2 sm:mt-0">
-                                                        <div class="text-2xl font-bold text-gray-900">RM
-                                                            {{ number_format($request->offered_price, 2) }}</div>
+                                                        @if ($request->offered_price)
+                                                            <div
+                                                                class="text-2xl font-bold {{ $isSellerBanned ? 'text-gray-400' : 'text-gray-900' }}">
+                                                                RM {{ number_format($request->offered_price, 2) }}
+                                                            </div>
+                                                            <div
+                                                                class="text-xs font-medium text-gray-400 uppercase tracking-wide">
+                                                                {{ str_replace('"', '', $request->selected_package) ?? 'Custom' }}
+                                                                Package
+                                                            </div>
+                                                        @endif
                                                     </div>
                                                 </div>
 
                                                 <div class="h-px w-full bg-gray-100 my-4"></div>
 
-                                                {{-- Details Grid --}}
-                                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-                                                    {{-- Provider --}}
-                                                    <div class="flex items-start gap-3">
-                                                        <div
-                                                            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-500">
-                                                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                                                                stroke="currentColor">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    stroke-width="2"
-                                                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                                            </svg>
+                                                {{-- Details Grid - Only show if valid --}}
+                                                @if (!$isSellerBanned)
+                                                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+                                                        {{-- Provider --}}
+                                                        <div class="flex items-start gap-3">
+                                                            <div
+                                                                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-500">
+                                                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                                                                    stroke="currentColor">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                                        stroke-width="2"
+                                                                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                                                </svg>
+                                                            </div>
+                                                            <div>
+                                                                <p class="text-xs font-medium text-gray-500 uppercase">
+                                                                    Provider</p>
+                                                                <p class="text-sm font-semibold text-gray-900">
+                                                                    {{ $request->provider->name }}</p>
+                                                            </div>
                                                         </div>
-                                                        <div>
-                                                            <p class="text-xs font-medium text-gray-500 uppercase">
-                                                                Provider</p>
-                                                            <p class="text-sm font-semibold text-gray-900">
-                                                                {{ $request->provider->name }}</p>
-                                                        </div>
-                                                    </div>
-                                                    
 
-                                                    {{-- Date --}}
-                                                    <div class="flex items-start gap-3">
-                                                        <div
-                                                            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-50 text-blue-600">
-                                                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                                                                stroke="currentColor">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    stroke-width="2"
-                                                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                            </svg>
-                                                        </div>
-                                                        <div>
-                                                            <p class="text-xs font-medium text-gray-500 uppercase">
-                                                                Service Date</p>
-                                                            <p class="text-sm font-semibold text-gray-900">
-                                                                {{ $firstServiceDate->format('M j, Y') }}
-                                                                @if ($hasDatePassed)
-                                                                    <span
-                                                                        class="text-xs text-orange-500 font-normal ml-1">(Passed)</span>
-                                                                @endif
-                                                            </p>
+                                                        {{-- Date --}}
+                                                        <div class="flex items-start gap-3">
+                                                            <div
+                                                                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-50 text-blue-600">
+                                                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                                                                    stroke="currentColor">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                                        stroke-width="2"
+                                                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                                </svg>
+                                                            </div>
+                                                            <div>
+                                                                <p class="text-xs font-medium text-gray-500 uppercase">
+                                                                    Service Date</p>
+                                                                <p class="text-sm font-semibold text-gray-900">
+                                                                    {{ $firstServiceDate->format('M j, Y') }}
+                                                                    @if ($hasDatePassed)
+                                                                        <span
+                                                                            class="text-xs text-orange-500 font-normal ml-1">(Passed)</span>
+                                                                    @endif
+                                                                </p>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                </div>
+                                                @endif
 
 
                                                 {{-- ACTION BUTTONS ROW --}}
@@ -475,35 +527,45 @@
                                                     {{-- LEFT SIDE: Cancel & Report --}}
                                                     <div class="flex items-center gap-4 w-full sm:w-auto">
 
-                                                        {{-- 1. Cancel Button (Only if NOT waiting payment/disputed/completed) --}}
-                                                        @if (!in_array($request->status, ['waiting_payment', 'disputed', 'completed', 'canceled']))
-                                                            <button onclick="cancelRequest({{ $request->id }})"
-                                                                class="text-sm font-medium text-red-600 hover:text-red-700 hover:underline">
-                                                                Cancel Request
-                                                            </button>
-                                                            <form id="cancel-form-{{ $request->id }}"
-                                                                action="{{ route('service-requests.cancel', $request->id) }}"
-                                                                method="POST" class="hidden">
-                                                                @csrf
-                                                            </form>
-                                                        @endif
-                                                          <a href="{{ route('service-requests.show', $request) }}"
-                                                            class="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors hidden sm:block">
-                                                            View Details
-                                                        </a>
-
-                                                        {{-- 2. REPORT ISSUE BUTTON --}}
-                                                        @if (in_array($request->status, ['accepted', 'in_progress']) && $hasDatePassed && !$request->dispute_reason)
-                                                            <button onclick="openReportModal({{ $request->id }})"
-                                                                class="inline-flex items-center gap-1 text-sm font-medium text-orange-600 hover:text-orange-800 bg-orange-50 hover:bg-orange-100 px-3 py-1.5 rounded-lg border border-orange-200 transition-colors">
-                                                                <svg class="w-4 h-4" fill="none"
-                                                                    stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path stroke-linecap="round"
-                                                                        stroke-linejoin="round" stroke-width="2"
-                                                                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                                        @if ($isSellerBanned)
+                                                            {{-- Banned State: Show cancelled text --}}
+                                                            <span
+                                                                class="inline-flex items-center gap-2 text-sm font-bold text-red-600 bg-red-50 px-3 py-2 rounded-lg border border-red-100 w-full sm:w-auto justify-center">
+                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                                    viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                                        stroke-width="2"
+                                                                        d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
                                                                 </svg>
-                                                                Report Issue
-                                                            </button>
+                                                                Service Cancelled
+                                                            </span>
+                                                        @else
+                                                            {{-- 1. Cancel Button (Only if NOT waiting payment/disputed/completed) --}}
+                                                            @if (!in_array($request->status, ['waiting_payment', 'disputed', 'completed', 'canceled']))
+                                                                <button onclick="cancelRequest({{ $request->id }})"
+                                                                    class="text-sm font-medium text-red-600 hover:text-red-700 hover:underline">
+                                                                    Cancel Request
+                                                                </button>
+                                                                <form id="cancel-form-{{ $request->id }}"
+                                                                    action="{{ route('service-requests.cancel', $request->id) }}"
+                                                                    method="POST" class="hidden">
+                                                                    @csrf
+                                                                </form>
+                                                            @endif
+
+                                                            {{-- 2. REPORT ISSUE BUTTON --}}
+                                                            @if (in_array($request->status, ['accepted', 'in_progress']) && $hasDatePassed && !$request->dispute_reason)
+                                                                <button onclick="openReportModal({{ $request->id }})"
+                                                                    class="inline-flex items-center gap-1 text-sm font-medium text-orange-600 hover:text-orange-800 bg-orange-50 hover:bg-orange-100 px-3 py-1.5 rounded-lg border border-orange-200 transition-colors">
+                                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                                        viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                                            stroke-width="2"
+                                                                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                                                    </svg>
+                                                                    Report Issue
+                                                                </button>
+                                                            @endif
                                                         @endif
 
                                                         {{-- Show if already reported --}}
@@ -514,59 +576,63 @@
                                                                 "{{ Str::limit($request->dispute_reason, 20) }}"
                                                             </span>
                                                         @endif
+
+                                                        <a href="{{ route('service-requests.show', $request) }}"
+                                                            class="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors hidden sm:block">
+                                                            View Details
+                                                        </a>
                                                     </div>
 
                                                     {{-- RIGHT SIDE: Actions (Payment & Contact) --}}
-                                                    <div class="flex gap-3 w-full sm:w-auto">
+                                                    @if (!$isSellerBanned)
+                                                        <div class="flex gap-3 w-full sm:w-auto">
 
-                                                        {{-- 1. PAY NOW BUTTON --}}
-                                                        {{-- Redirects to 'show' page because that is where the Upload Proof form lives --}}
-                                                        @if ($request->status == 'waiting_payment')
-                                                            {{-- CASE A: Payment Sent, Waiting for Seller Verification --}}
-                                                            @if ($request->payment_status == 'verification_status')
-                                                                <button disabled
-                                                                    class="flex-1 sm:flex-none inline-flex justify-center items-center gap-2 px-6 py-2 text-sm font-bold text-yellow-700 bg-yellow-100 border border-yellow-200 rounded-lg cursor-not-allowed">
-                                                                    <svg class="w-4 h-4 animate-spin"
-                                                                        xmlns="http://www.w3.org/2000/svg"
-                                                                        fill="none" viewBox="0 0 24 24">
-                                                                        <circle class="opacity-25" cx="12"
-                                                                            cy="12" r="10"
-                                                                            stroke="currentColor" stroke-width="4">
-                                                                        </circle>
-                                                                        <path class="opacity-75" fill="currentColor"
-                                                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                                                                        </path>
-                                                                    </svg>
-                                                                    Verifying Payment
-                                                                </button>
-
-                                                                {{-- CASE B: Hasn't Paid Yet --}}
-                                                            @else
-                                                                <button
-                                                                    onclick="openPaymentModal({{ $request->id }}, '{{ number_format($request->offered_price, 2) }}')"
-                                                                    class="flex-1 sm:flex-none inline-flex justify-center items-center gap-2 px-6 py-2 text-sm font-bold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 shadow-sm transition-all hover:-translate-y-0.5">
-                                                                    <svg class="w-4 h-4" fill="none"
-                                                                        stroke="currentColor" viewBox="0 0 24 24">
-                                                                        <path stroke-linecap="round"
-                                                                            stroke-linejoin="round" stroke-width="2"
-                                                                            d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                                                                    </svg>
-                                                                    Mark as Paid
-                                                                </button>
+                                                            {{-- 1. PAY NOW BUTTON --}}
+                                                            @if ($request->status == 'waiting_payment')
+                                                                @if ($request->payment_status == 'verification_status')
+                                                                    <button disabled
+                                                                        class="flex-1 sm:flex-none inline-flex justify-center items-center gap-2 px-6 py-2 text-sm font-bold text-yellow-700 bg-yellow-100 border border-yellow-200 rounded-lg cursor-not-allowed">
+                                                                        <svg class="w-4 h-4 animate-spin"
+                                                                            xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                                            viewBox="0 0 24 24">
+                                                                            <circle class="opacity-25" cx="12" cy="12"
+                                                                                r="10" stroke="currentColor"
+                                                                                stroke-width="4">
+                                                                            </circle>
+                                                                            <path class="opacity-75" fill="currentColor"
+                                                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                                                            </path>
+                                                                        </svg>
+                                                                        Verifying Payment
+                                                                    </button>
+                                                                @else
+                                                                    <button
+                                                                        onclick="openPaymentModal({{ $request->id }}, '{{ number_format($request->offered_price, 2) }}')"
+                                                                        class="flex-1 sm:flex-none inline-flex justify-center items-center gap-2 px-6 py-2 text-sm font-bold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 shadow-sm transition-all hover:-translate-y-0.5">
+                                                                        <svg class="w-4 h-4" fill="none"
+                                                                            stroke="currentColor" viewBox="0 0 24 24">
+                                                                            <path stroke-linecap="round"
+                                                                                stroke-linejoin="round" stroke-width="2"
+                                                                                d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                                                                        </svg>
+                                                                        Mark as Paid
+                                                                    </button>
+                                                                @endif
                                                             @endif
-                                                        @endif
-                                                        {{-- 2. Contact WhatsApp --}}
-                                                        <a href="https://wa.me/6{{ $request->provider->phone }}"
-                                                            target="_blank"
-                                                            class="flex-1 sm:flex-none inline-flex justify-center items-center gap-2 px-6 py-2 text-sm font-medium text-white bg-green-500 rounded-lg hover:bg-green-600 shadow-sm transition-all hover:-translate-y-0.5">
-                                                            <svg class="w-4 h-4" fill="currentColor"
-                                                                viewBox="0 0 24 24">
-                                                                <path
-                                                                    d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z" />
-                                                            </svg>
-                                                            WhatsApp
-                                                        </a>
-                                                    </div>
+
+                                                            {{-- 2. Contact WhatsApp --}}
+                                                            <a href="https://wa.me/6{{ $request->provider->phone }}"
+                                                                target="_blank"
+                                                                class="flex-1 sm:flex-none inline-flex justify-center items-center gap-2 px-6 py-2 text-sm font-medium text-white bg-green-500 rounded-lg hover:bg-green-600 shadow-sm transition-all hover:-translate-y-0.5">
+                                                                <svg class="w-4 h-4" fill="currentColor"
+                                                                    viewBox="0 0 24 24">
+                                                                    <path
+                                                                        d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z" />
+                                                                </svg>
+                                                                WhatsApp
+                                                            </a>
+                                                        </div>
+                                                    @endif
                                                 </div>
 
                                             </div>
@@ -575,105 +641,6 @@
                                 </div>
                             @endif
                         </div>
-
-                        {{-- =============================================== --}}
-                        {{-- REPORT / DISPUTE MODAL (Place outside the loop) --}}
-                        {{-- =============================================== --}}
-                        <div id="reportModal" class="fixed inset-0 z-50 hidden overflow-y-auto"
-                            aria-labelledby="modal-title" role="dialog" aria-modal="true">
-                            <div
-                                class="flex min-h-screen items-end justify-center px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-                                {{-- Background Overlay --}}
-                                <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
-                                    aria-hidden="true" onclick="closeReportModal()"></div>
-                                <span class="hidden sm:inline-block sm:h-screen sm:align-middle"
-                                    aria-hidden="true">&#8203;</span>
-
-                                {{-- Modal Content --}}
-                                <div
-                                    class="inline-block transform overflow-hidden rounded-lg bg-white text-left align-bottom shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:align-middle">
-                                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                                        <div class="sm:flex sm:items-start">
-                                            <div
-                                                class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
-                                                <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24"
-                                                    stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2"
-                                                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                                </svg>
-                                            </div>
-                                            <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
-                                                <h3 class="text-lg font-medium leading-6 text-gray-900"
-                                                    id="modal-title">Report Issue with Service</h3>
-                                                <div class="mt-2">
-                                                    <p class="text-sm text-gray-500 mb-4">
-                                                        The service date has passed. Please tell us why the status
-                                                        hasn't been updated.
-                                                    </p>
-
-                                                    <form id="reportForm" method="POST" action="">
-                                                        @csrf
-                                                        <div class="space-y-3">
-                                                            <label
-                                                                class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
-                                                                <input type="radio" name="dispute_reason"
-                                                                    value="Seller forgot to update status"
-                                                                    class="h-4 w-4 text-orange-600 focus:ring-orange-500"
-                                                                    required checked>
-                                                                <span class="text-sm text-gray-700">Seller finished
-                                                                    work but forgot to update</span>
-                                                            </label>
-
-                                                            <label
-                                                                class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
-                                                                <input type="radio" name="dispute_reason"
-                                                                    value="Seller did not show up"
-                                                                    class="h-4 w-4 text-orange-600 focus:ring-orange-500">
-                                                                <span class="text-sm text-gray-700">Seller did not show
-                                                                    up / ghosted</span>
-                                                            </label>
-
-                                                            <label
-                                                                class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
-                                                                <input type="radio" name="dispute_reason"
-                                                                    value="Incomplete work"
-                                                                    class="h-4 w-4 text-orange-600 focus:ring-orange-500">
-                                                                <span class="text-sm text-gray-700">Work was incomplete
-                                                                    or poor quality</span>
-                                                            </label>
-
-                                                            <label
-                                                                class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
-                                                                <input type="radio" name="dispute_reason"
-                                                                    value="Other"
-                                                                    class="h-4 w-4 text-orange-600 focus:ring-orange-500">
-                                                                <span class="text-sm text-gray-700">Other Issue</span>
-                                                            </label>
-
-                                                            <textarea name="additional_notes" rows="2"
-                                                                class="w-full mt-2 border-gray-300 rounded-md shadow-sm focus:border-orange-300 focus:ring focus:ring-orange-200 focus:ring-opacity-50 text-sm"
-                                                                placeholder="Additional details (optional)..."></textarea>
-                                                        </div>
-                                                    </form>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
-                                        <button type="button" onclick="submitReport()"
-                                            class="inline-flex w-full justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-red-700 sm:ml-3 sm:w-auto sm:text-sm">
-                                            Submit Report
-                                        </button>
-                                        <button type="button" onclick="closeReportModal()"
-                                            class="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
-                                            Cancel
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
                         <script>
                             function openReportModal(requestId) {
                                 // Set the form action dynamically
