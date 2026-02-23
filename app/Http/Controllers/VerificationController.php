@@ -1,0 +1,298 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+
+class VerificationController extends Controller
+{
+   public function index() {
+    $user = auth()->user();
+    
+    // 1. Redirect if already helper
+    if ($user->role === 'helper') {
+        return redirect()->route('dashboard')->with('info', 'You are already a verified helper!');
+    }
+    
+    // 2. Fetch Real Student Status from DB
+    $studentStatus = \DB::table('student_statuses')
+                        ->where('student_id', $user->id)
+                        ->latest()
+                        ->first();
+
+    // 3. Initialize Status Variables
+    $isEligible = false;
+    $statusMessage = 'Checking...';
+    $statusColor = 'gray';
+    $reason = '';
+    $matricNo = $user->student_id ?? 'N/A'; // Fallback if no matric no
+    $gradDateDisplay = 'N/A';
+
+    // 4. Run Eligibility Logic
+    if ($studentStatus) {
+        $matricNo = $studentStatus->matric_no;
+        $today = \Carbon\Carbon::now();
+        $gradDate = $studentStatus->graduation_date ? \Carbon\Carbon::parse($studentStatus->graduation_date) : null;
+        $gradDateDisplay = $gradDate ? $gradDate->format('d M Y') : 'Not Set';
+        
+        // Rule A: Status must be Active (case-insensitive)
+        $isActive = strtolower($studentStatus->status) === 'active';
+        
+        // Rule B: Graduation must be > 3 months away
+        $isNotGraduatingSoon = true;
+        if ($gradDate) {
+            // Returns float (e.g., 2.5 months)
+            $monthsUntilGrad = $today->floatDiffInMonths($gradDate, false);
+            
+            // IF date is in past OR less than 3 months in future -> Block
+            if ($monthsUntilGrad < 3) {
+                $isNotGraduatingSoon = false;
+            }
+        }
+
+        if (!$isActive) {
+            $isEligible = false;
+            $statusMessage = 'Inactive (' . $studentStatus->status . ')';
+            $statusColor = 'red';
+            $reason = 'Your student status is currently set to ' . $studentStatus->status . '. Please contact admin.';
+        } elseif (!$isNotGraduatingSoon) {
+            $isEligible = false;
+            $statusMessage = 'Graduating Soon';
+            $statusColor = 'orange';
+            $reason = "You are too close to graduation ($gradDateDisplay). You must have at least 3 months remaining to register as a helper.";
+        } else {
+            // PASS
+            $isEligible = true;
+            $statusMessage = 'Active Student';
+            $statusColor = 'green';
+        }
+    } else {
+        // --- NO RECORD FOUND SCENARIO ---
+        // For development/testing, you might want to allow this.
+        // Change $isEligible to true if you want to allow users without status records.
+        $isEligible = true; 
+        $statusMessage = 'Active (No Record)'; 
+        $statusColor = 'green';
+        $reason = 'No specific status record found, assuming active.';
+    }
+
+    // 5. Pass variables to the view
+    return view('onboarding.students_verification', compact(
+        'isEligible', 
+        'statusMessage', 
+        'statusColor', 
+        'reason', 
+        'matricNo',
+        'gradDateDisplay'
+    )); 
+}
+
+   public function uploadPhoto(Request $request)
+    {
+        $request->validate([
+            'profile_photo' => 'required|image|max:4096'
+        ]);
+
+        $user = auth()->user();
+
+        if ($request->hasFile('profile_photo')) {
+
+            // 1. Delete old image if it exists
+            if ($user->profile_photo_path && file_exists(public_path($user->profile_photo_path))) {
+                unlink(public_path($user->profile_photo_path));
+            }
+
+            $file = $request->file('profile_photo');
+            $filename = time() . '_' . $file->getClientOriginalName();
+
+            // 2. Make sure folder exists
+            if (!file_exists(public_path('profile-photos'))) {
+                mkdir(public_path('profile-photos'), 0755, true);
+            }
+
+            // 3. Move file directly to public/profile-photos
+            $file->move(public_path('profile-photos'), $filename);
+
+            // 4. Save relative path to DB
+            $user->profile_photo_path = 'profile-photos/' . $filename;
+            
+            // Only save if the move was successful
+            $user->save();
+        }
+
+        // Return JSON for AJAX requests
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json(['success' => true, 'message' => 'Profile photo uploaded!']);
+        }
+
+        return redirect()->back()->with('status', 'Profile photo uploaded!');
+    }
+    // --- STUDENT HELPER VERIFICATION METHOD ---
+    
+    public function uploadSelfie(Request $request)
+    {
+        $request->validate([
+            'selfie_image' => 'required'
+        ]);
+
+        ini_set('memory_limit', '256M');
+        ini_set('max_execution_time', 300);
+
+        \Illuminate\Support\Facades\Log::info('Student Helper Selfie Upload Started for user: ' . auth()->id());
+
+        $user = auth()->user();
+        
+        try {
+            $image = $request->input('selfie_image'); // Base64 string
+            \Illuminate\Support\Facades\Log::info('Selfie payload received. Length: ' . strlen($image));
+
+            // Convert base64 to image file
+            $image = preg_replace('/^data:image\/\w+;base64,/', '', $image);
+            $image = str_replace(' ', '+', $image);
+            
+            $decodedImage = base64_decode($image);
+            if ($decodedImage === false) {
+                 throw new \Exception('Base64 decode failed');
+            }
+
+            $imageName = 'helper_selfie_' . $user->id . '_' . time() . '.jpg';
+            
+            \Illuminate\Support\Facades\Log::info('Saving helper selfie to: uploads/verification/' . $imageName);
+            
+            // Store in 'local' disk (private storage)
+            Storage::disk('local')->put('uploads/verification/' . $imageName, $decodedImage);
+            
+            if (!Storage::disk('local')->exists('uploads/verification/' . $imageName)) {
+                throw new \Exception('Failed to verify file existence after write.');
+            }
+
+            // Update user with selfie path
+            $user->selfie_media_path = 'uploads/verification/' . $imageName;
+            
+            // Convert student to helper role
+            $user->role = 'helper';
+            $user->helper_verified_at = now();
+            
+            $user->save();
+
+            \Illuminate\Support\Facades\Log::info('Student converted to helper. User ID: ' . $user->id);
+
+            return response()->json([
+                'success' => true, 
+                'message' => 'Verification complete! You are now a helper.',
+                'redirect' => route('dashboard') . '?mode=seller'
+            ]);
+
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Helper Selfie Upload Error: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Upload failed: ' . $e->getMessage()], 500);
+        }
+    }
+
+    // Save verified location data
+    public function saveLocation(Request $request)
+    {
+        $request->validate([
+            'latitude' => 'required|numeric|between:-90,90',
+            'longitude' => 'required|numeric|between:-180,180',
+            'address' => 'nullable|string|max:500'
+        ]);
+
+        $user = auth()->user();
+        
+        $user->update([
+            'latitude' => $request->latitude,
+            'longitude' => $request->longitude,
+            'address' => $request->address,
+            'location_verified_at' => now()
+        ]);
+
+        \Illuminate\Support\Facades\Log::info('Location saved for user: ' . $user->id . ' - Lat: ' . $request->latitude . ', Lng: ' . $request->longitude);
+
+        return response()->json(['success' => true, 'message' => 'Location verified and saved!']);
+    }
+
+    // --- COMMUNITY VERIFICATION METHODS ---
+
+    public function uploadCommunitySelfie(Request $request)
+    {
+        $request->validate([
+            'selfie_image' => 'required'
+        ]);
+
+        // PREVENT TIMEOUTS/MEMORY ISSUES
+        ini_set('memory_limit', '256M');
+        ini_set('max_execution_time', 300);
+
+        \Illuminate\Support\Facades\Log::info('Community Selfie Upload Started for user: ' . auth()->id());
+
+        $user = auth()->user();
+        try {
+            $image = $request->input('selfie_image'); // Base64 string
+            \Illuminate\Support\Facades\Log::info('Selfie payload received. Length: ' . strlen($image));
+
+            // Convert base64 to image file
+            $image = preg_replace('/^data:image\/\w+;base64,/', '', $image);
+            $image = str_replace(' ', '+', $image);
+            
+            $decodedImage = base64_decode($image);
+            if ($decodedImage === false) {
+                 throw new \Exception('Base64 decode failed');
+            }
+
+            $imageName = 'selfie_' . $user->id . '_' . time() . '.jpg';
+            
+            \Illuminate\Support\Facades\Log::info('Saving selfie to: uploads/verification/' . $imageName);
+            
+            // PRIVACY: Store in 'local' disk (private) instead of public
+            Storage::disk('local')->put('uploads/verification/' . $imageName, $decodedImage);
+            
+            if (!Storage::disk('local')->exists('uploads/verification/' . $imageName)) {
+                throw new \Exception('Failed to verify file existence after write.');
+            }
+
+            $user->selfie_media_path = 'uploads/verification/' . $imageName;
+            // Save the challenge note (e.g. "Peace Sign")
+            $user->verification_note = $request->input('verification_note');
+            $user->save();
+
+            return response()->json(['success' => true, 'message' => 'Selfie verified & uploaded!']);
+
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Selfie Upload Error: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Upload failed: ' . $e->getMessage()], 500);
+        }
+    }
+
+    
+
+    public function submitDoc(Request $request)
+    {
+        $request->validate([
+            'verification_document' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120', // Max 5MB
+        ]);
+
+        $user = auth()->user();
+
+        if ($request->hasFile('verification_document')) {
+            $file = $request->file('verification_document');
+            $filename = 'verify_' . $user->id . '_' . time() . '.' . $file->getClientOriginalExtension();
+            
+            // Store in storage/app/verification_docs
+            $path = $file->storeAs('verification_docs', $filename, 'local');
+
+            // Update User
+            $user->verification_document_path = $path;
+            $user->verification_status = 'approved'; 
+            $user->save();
+
+	return redirect()->back()->with('success', 'Verification Successfully!');        }
+
+        return redirect()->back()->withErrors(['verification_document' => 'Upload failed. Please try again.']);
+    }
+
+    // Keep original submit for backward compatibility if needed, but we use submitDoc now
+    public function submit(Request $request) { return $this->submitDoc($request); }
+}
