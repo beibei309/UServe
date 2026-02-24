@@ -9,19 +9,35 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up()
-{
-    Schema::table('student_services', function (Blueprint $table) {
-        // Kita tambah 2 column ni
-        $table->integer('warning_count')->default(0)->after('status'); // Simpan bilangan warning (0, 1, 2, 3)
-        $table->text('warning_reason')->nullable()->after('warning_count'); // Simpan sebab warning
-    });
-}
+    public function up(): void
+    {
+        Schema::table('student_services', function (Blueprint $table) {
+            if (!Schema::hasColumn('student_services', 'warning_count')) {
+                $table->integer('warning_count')->default(0)->after('status');
+            }
 
-public function down()
-{
-    Schema::table('student_services', function (Blueprint $table) {
-        $table->dropColumn(['warning_count', 'warning_reason']);
-    });
-}
+            if (!Schema::hasColumn('student_services', 'warning_reason')) {
+                $table->text('warning_reason')->nullable()->after('warning_count');
+            }
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('student_services', function (Blueprint $table) {
+            $columnsToDrop = [];
+
+            if (Schema::hasColumn('student_services', 'warning_count')) {
+                $columnsToDrop[] = 'warning_count';
+            }
+
+            if (Schema::hasColumn('student_services', 'warning_reason')) {
+                $columnsToDrop[] = 'warning_reason';
+            }
+
+            if ($columnsToDrop) {
+                $table->dropColumn($columnsToDrop);
+            }
+        });
+    }
 };
