@@ -2,65 +2,68 @@
 
 namespace Database\Seeders;
 
+use App\Models\ServiceRequest;
+use App\Models\StudentService;
+use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Hash;
 
 class RequestSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. Dapatkan sekurang-kurangnya 2 user (Satu requester, satu provider)
-        $users = DB::table('users')->pluck('id')->toArray();
+        $services = StudentService::with('user')->get();
 
-        // Kalau user tak cukup, kita create fake user
-        while (count($users) < 2) {
-            $newId = DB::table('users')->insertGetId([
-                'name' => 'User ' . count($users),
-                'email' => 'user' . count($users) . '@test.com',
-                'password' => bcrypt('password'),
-                'created_at' => now(), 'updated_at' => now()
-            ]);
-            $users[] = $newId;
+        if ($services->isEmpty()) {
+            return;
         }
 
-        // 2. Dapatkan satu Service (Untuk tahu siapa Provider)
-        $service = DB::table('student_services')->first();
+        $communityUsers = User::where('role', 'community')->get();
 
-        // Kalau tak ada service langsung, create satu
-        if (!$service) {
-            $providerId = $users[0]; // Kita lantik user pertama jadi provider
-            $serviceId = DB::table('student_services')->insertGetId([
-                'user_id' => $providerId, // Pastikan table student_services guna 'user_id' untuk owner
-                'title' => 'Servis Format Laptop',
-                'category' => 'Tech',
-                'price' => 30.00,
-                'description' => 'Servis laju siap 1 jam.',
-                'created_at' => now(), 'updated_at' => now()
-            ]);
-        } else {
-            $serviceId = $service->id;
-            $providerId = $service->user_id; // Ambil owner service yang sedia ada
+        if ($communityUsers->isEmpty()) {
+            $communityUsers->push(User::create([
+                'name' => 'Seeder Community',
+                'email' => 'community+tester@example.com',
+                'password' => Hash::make('password'),
+                'role' => 'community',
+                'phone' => '0190000000',
+                'verification_status' => 'approved',
+                'public_verified_at' => now(),
+            ]));
         }
 
-        // 3. Masukkan Fake Requests
-        $statuses = ['pending', 'accepted', 'rejected', 'completed', 'cancelled'];
+        $statusOptions = ['pending', 'accepted', 'in_progress', 'completed', 'cancelled'];
+        $paymentOptions = ['unpaid', 'paid', 'verification_status', 'dispute'];
 
         foreach (range(1, 10) as $index) {
-            // Pilih requester (Pastikan requester BUKAN provider yang sama)
-            $potentialRequesters = array_diff($users, [$providerId]);
-            
-            // Kalau tak ada orang lain, terpaksa guna provider jugak (edge case)
-            $requesterId = !empty($potentialRequesters) ? $potentialRequesters[array_rand($potentialRequesters)] : $providerId;
+            $service = $services->random();
+            $requester = $communityUsers->random();
 
-            DB::table('service_requests')->insert([
-                'student_service_id' => $serviceId,
-                'requester_id' => $requesterId, // Guna 'requester_id' (ikut migration kau)
-                'provider_id' => $providerId,   // Guna 'provider_id' (ikut migration kau)
-                'offered_price' => rand(10, 50) . '.00',
-                'message' => 'Hi, saya berminat nak guna servis ni.',
-                'status' => $statuses[array_rand($statuses)],
-                'created_at' => now()->subDays(rand(1, 14)),
-                'updated_at' => now(),
+            $status = Arr::random($statusOptions);
+            $paymentStatus = $status === 'completed' ? 'paid' : Arr::random($paymentOptions);
+
+            ServiceRequest::create([
+                'student_service_id' => $service->id,
+                'requester_id' => $requester->id,
+                'provider_id' => $service->user_id,
+                'status' => $status,
+                'message' => fake()->sentence(),
+                'offered_price' => $service->suggested_price ?? rand(20, 100),
+                'selected_dates' => now()->addDays(rand(1, 7))->toDateString(),
+                'start_time' => '09:00:00',
+                'end_time' => '11:00:00',
+                'selected_package' => json_encode([
+                    'tier' => 'basic',
+                    'price' => $service->basic_price,
+                ]),
+                'payment_status' => $paymentStatus,
+                'payment_proof' => null,
+                'dispute_reason' => $paymentStatus === 'dispute' ? 'Sample dispute reason for QA.' : null,
+                'accepted_at' => in_array($status, ['accepted', 'in_progress', 'completed'], true) ? now()->subDays(3) : null,
+                'started_at' => in_array($status, ['in_progress', 'completed'], true) ? now()->subDays(2) : null,
+                'finished_at' => $status === 'completed' ? now()->subDay() : null,
+                'completed_at' => $status === 'completed' ? now()->subDay() : null,
             ]);
         }
     }

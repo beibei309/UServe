@@ -134,8 +134,21 @@
 
                                             // Logic for display dates
                                             $dates = $request->selected_dates;
-                                            $firstDate = is_array($dates) ? $dates[0] : $dates;
-                                            $dateCount = is_array($dates) ? count($dates) : 1;
+
+                                            if (is_string($dates)) {
+                                                $decodedDates = json_decode($dates, true);
+                                                if (json_last_error() === JSON_ERROR_NONE) {
+                                                    $dates = $decodedDates;
+                                                }
+                                            }
+
+                                            if ($dates instanceof \Carbon\Carbon) {
+                                                $firstDate = $dates->toDateString();
+                                                $dateCount = 1;
+                                            } else {
+                                                $firstDate = is_array($dates) ? ($dates[0] ?? null) : $dates;
+                                                $dateCount = is_array($dates) ? count($dates) : ($firstDate ? 1 : 0);
+                                            }
 
                                             // CHECK IF SELLER BANNED
                                             $isSellerBanned = $request->provider->is_suspended == 1 || $request->provider->is_blacklisted == 1;
@@ -232,7 +245,7 @@
                                                             </div>
                                                         </div>
 
-                                                        @if ($request->selected_dates)
+                                                        @if ($firstDate)
                                                             <div class="flex items-start gap-3">
                                                                 <div
                                                                     class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-50 text-blue-600">
@@ -687,7 +700,19 @@
                                             $pkgFrequency = $service->{$pkgType . '_frequency'} ?? null;
 
                                             $dates = $request->selected_dates;
-                                            $firstDate = is_array($dates) ? $dates[0] : $dates;
+
+                                            if (is_string($dates)) {
+                                                $decodedDates = json_decode($dates, true);
+                                                if (json_last_error() === JSON_ERROR_NONE) {
+                                                    $dates = $decodedDates;
+                                                }
+                                            }
+
+                                            if ($dates instanceof \Carbon\Carbon) {
+                                                $firstDate = $dates->toDateString();
+                                            } else {
+                                                $firstDate = is_array($dates) ? ($dates[0] ?? null) : $dates;
+                                            }
 
                                             // 2. Theme Logic
                                             $theme = match ($request->status) {

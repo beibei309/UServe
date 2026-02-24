@@ -116,15 +116,20 @@ class RegisteredUserController extends Controller
         ]);
 
         if ($user->role === 'student') {
-             StudentStatus::create([
-            'student_id'      => $user->id,              // FK to users
-            'matric_no'       => $user->student_id,      // SAME value
-            'semester'        => null,
-            'status'          => 'active',            
-            'graduation_date' => null,
-           'effective_date'  => now(),   
-        ]);
-    }
+            $semesterValue = $request->input('semester');
+            $semesterValue = is_string($semesterValue) && trim($semesterValue) !== ''
+                ? trim($semesterValue)
+                : null;
+
+            StudentStatus::create([
+                'student_id' => $user->id,
+                'matric_no' => $user->student_id,
+                'semester' => $semesterValue,
+                'status' => 'active',
+                'graduation_date' => null,
+                'effective_date' => now(),
+            ]);
+        }
 
 
         event(new Registered($user));

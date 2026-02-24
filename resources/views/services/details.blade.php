@@ -168,10 +168,32 @@
                     class="group relative overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-md transition-all duration-300 hover:shadow-xl">
                     {{-- Image Container --}}
                     <div class="aspect-video h-[400px] w-full overflow-hidden bg-gray-100">
-                        @if ($service->image_path)
-                            <img src="{{ Str::startsWith($service->image_path, 'services/') ? asset('storage/' . $service->image_path) : asset($service->image_path) }}"
+                        @php
+                            $imageUrl = null;
+                            $defaultPlaceholder = 'https://ui-avatars.com/api/?name=' . urlencode($service->title ?? 'Service');
+
+                            if (!empty($service->image_path)) {
+                                $path = $service->image_path;
+
+                                if (Str::startsWith($path, ['http://', 'https://'])) {
+                                    $imageUrl = $path;
+                                } elseif (Str::startsWith($path, 'storage/')) {
+                                    $imageUrl = asset($path);
+                                } elseif (file_exists(public_path('storage/' . $path))) {
+                                    $imageUrl = asset('storage/' . $path);
+                                } elseif (file_exists(public_path($path))) {
+                                    $imageUrl = asset($path);
+                                } else {
+                                    $imageUrl = $defaultPlaceholder;
+                                }
+                            }
+                        @endphp
+
+                        @if ($imageUrl)
+                            <img src="{{ $imageUrl }}"
                                 alt="{{ $service->name ?? 'Service Image' }}"
-                                class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105">
+                                class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                onerror="this.onerror=null; this.src='{{ $defaultPlaceholder }}';">
                         @else
                             <div
                                 class="flex h-full w-full flex-col items-center justify-center bg-gray-50 text-gray-400">
@@ -254,7 +276,7 @@
                                         <i class="fa-solid fa-graduation-cap mr-1.5 text-xs"></i>
                                         {{ $service->user->faculty ?? 'Faculty of Computing' }}
                                     </span>
-                                    <span class="text-gray-400 hidden sm:inline">•</span>
+                                    <span class="text-gray-400 hidden sm:inline">ï¿½</span>
                                     <span class="text-gray-500">Member since
                                         {{ $service->user->created_at->format('M Y') }}</span>
                                 </div>
@@ -386,7 +408,7 @@
                                     @endif
                                 </span>
                                 @if ($review->replied_at)
-                                    <span class="text-[10px] text-gray-400">•
+                                    <span class="text-[10px] text-gray-400">ï¿½
                                         {{ \Carbon\Carbon::parse($review->replied_at)->diffForHumans() }}</span>
                                 @endif
                             </div>

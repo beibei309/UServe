@@ -2,32 +2,61 @@
 
 namespace Database\Seeders;
 
-use Database\Seeders\AboutSeeder;
-use Database\Seeders\FaqSeeder;
-use App\Models\User;
 use App\Models\Category;
-use App\Models\StudentService;
 use App\Models\Review;
+use App\Models\ServiceRequest;
+use App\Models\StudentService;
+use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
 {
     use WithoutModelEvents;
 
+    private bool $studentServiceHasPriceRange = false;
+    private bool $reviewsHasServiceRequestId = false;
+
     public function run(): void
     {
-        StudentService::query()->delete();
-        User::query()->delete();
-        Category::query()->delete();
+        DB::transaction(function () {
+            $this->resetTables();
 
-        $this->call(AboutSeeder::class);
-        $this->call(FaqSeeder::class);
-        $this->seedCategories();
-        
-        User::create([
+            $this->studentServiceHasPriceRange = Schema::hasColumn('student_services', 'price_range');
+            $this->reviewsHasServiceRequestId = Schema::hasColumn('reviews', 'service_request_id');
+
+            $this->call([
+                AboutSeeder::class,
+                FaqSeeder::class,
+            ]);
+
+            $categories = $this->seedCategories();
+            $communityUser = $this->seedCommunityUser();
+            $services = $this->seedHelpersWithServices($categories);
+
+            $this->seedSampleRequestsAndReviews($communityUser, $services);
+
+            $this->call(AdminSeeder::class);
+        });
+    }
+
+    private function resetTables(): void
+    {
+        Review::query()->delete();
+        ServiceRequest::query()->delete();
+        StudentService::query()->delete();
+        Category::query()->delete();
+        User::query()->delete();
+    }
+
+    private function seedCommunityUser(): User
+    {
+        return User::create([
             'name' => 'Community User',
             'email' => 'community@example.com',
             'password' => Hash::make('password'),
@@ -35,74 +64,14 @@ class DatabaseSeeder extends Seeder
             'phone' => '0123456789',
             'verification_status' => 'approved',
             'public_verified_at' => now(),
+            'is_available' => true,
         ]);
-
-        $studentsData = $this->getStudentData();
-
-        foreach ($studentsData as $studentData) {
-            $student = User::create([
-                'name' => $studentData['name'],
-                'email' => $studentData['email'],
-                'password' => Hash::make('password'),
-                'role' => 'helper',
-                'phone' => '0123456789',
-                'student_id' => $studentData['student_id'],
-                'staff_email' => $studentData['email'],
-                'verification_status' => 'approved',
-                'staff_verified_at' => now(), 
-                'is_available' => rand(0, 1) == 1,
-            ]);
-
-            foreach ($studentData['services'] as $serviceData) {
-                $category = Category::where('name', $serviceData['category'])->first();
-                
-                StudentService::create([
-                    'user_id' => $student->id,
-                    'category_id' => $category->id,
-                    'title' => $serviceData['title'],
-                    'image_path' => $serviceData['image_path'],
-                    'description' => $serviceData['description'],
-                    
-                    // 👇 FIX 2: Complete Package Details Mapping
-                    'basic_duration' => $serviceData['packages']['basic']['duration'],
-                    'basic_frequency' => $serviceData['packages']['basic']['frequency'],
-                    'basic_price' => $serviceData['packages']['basic']['price'],
-                    'basic_description' => $serviceData['packages']['basic']['description'],
-
-                    'standard_duration' => $serviceData['packages']['standard']['duration'],
-                    'standard_frequency' => $serviceData['packages']['standard']['frequency'],
-                    'standard_price' => $serviceData['packages']['standard']['price'],
-                    'standard_description' => $serviceData['packages']['standard']['description'],
-                    
-                    'premium_duration' => $serviceData['packages']['premium']['duration'],
-                    'premium_frequency' => $serviceData['packages']['premium']['frequency'],
-                    'premium_price' => $serviceData['packages']['premium']['price'],
-                    'premium_description' => $serviceData['packages']['premium']['description'],
-
-                    'status' => 'available',
-                    'is_active' => true,
-                    'approval_status' => 'approved',
-                ]);
-            }
-        }
-
-        // admin 
-        $this->call(AdminSeeder::class);
     }
-    
-    protected function seedCategories()
-    {
-        $categories = [
-            ['name' => 'Academic Tutoring','slug' => 'academic-tutoring', 'description' => 'Help with studies and assignments','image_path' => 'tutor.png','color' => '#4F46E5','is_active' => true],
-            ['name' => 'Programming & Tech','slug' => 'programming-tech', 'description' => 'Web development, mobile apps, and technical services','image_path' => 'tech.svg','color' => '#10B981','is_active' => true],
-            ['name' => 'Design & Creative','slug' => 'design-creative', 'description' => 'Graphic design, video editing, and creative services','image_path' => 'graphic.svg','color' => '#F59E0B','is_active' => true],
-            ['name' => 'Housechores','slug' => 'housechores', 'description' => 'Ironing services, house cleaning, laundry helper','image_path' => 'cleaning.png','color' => '#540863','is_active' => true],
-            ['name' => 'Event Planning','slug' => 'event-planning', 'description' => 'Event organization and planning services','image_path' => 'event.png','color' => '#4FB7B3','is_active' => true],
-            ['name' => 'Runner & Errands','slug' => 'runner-errands', 'description' => 'Pickup parcel, help buy personal things','image_path' => 'runner.png','color' => '#EC4899','is_active' => true],
-        ];
 
-        foreach ($categories as $categoryData) {
-            Category::create([
+    private function seedCategories(): Collection
+    {
+        return collect($this->categoryDefinitions())->mapWithKeys(function ($categoryData) {
+            $category = Category::create([
                 'name' => $categoryData['name'],
                 'slug' => Str::slug($categoryData['name']),
                 'description' => $categoryData['description'],
@@ -110,10 +79,134 @@ class DatabaseSeeder extends Seeder
                 'color' => $categoryData['color'],
                 'is_active' => $categoryData['is_active'],
             ]);
-        }
+
+            return [$categoryData['name'] => $category];
+        });
     }
 
-     protected function getStudentData()
+    private function seedHelpersWithServices(Collection $categories): Collection
+    {
+        return collect($this->helperProfiles())
+            ->flatMap(function ($profile) use ($categories) {
+                $helper = User::create([
+                    'name' => $profile['name'],
+                    'email' => $profile['email'],
+                    'password' => Hash::make('password'),
+                    'role' => 'helper',
+                    'phone' => '0123456789',
+                    'student_id' => $profile['student_id'],
+                    'staff_email' => $profile['email'],
+                    'verification_status' => 'approved',
+                    'staff_verified_at' => now(),
+                    'public_verified_at' => now(),
+                    'is_available' => true,
+                ]);
+
+                return collect($profile['services'])->map(function ($serviceData) use ($helper, $categories) {
+                    $category = $categories->get($serviceData['category']);
+                    $packages = $serviceData['packages'];
+
+                    $payload = [
+                        'user_id' => $helper->id,
+                        'category_id' => $category?->id,
+                        'title' => $serviceData['title'],
+                        'image_path' => $serviceData['image_path'],
+                        'description' => $serviceData['description'],
+                        'suggested_price' => $packages['standard']['price'],
+                        'status' => 'available',
+                        'is_active' => true,
+                        'approval_status' => 'approved',
+                        'warning_count' => 0,
+                        'warning_reason' => null,
+                        'basic_duration' => $packages['basic']['duration'],
+                        'basic_frequency' => $packages['basic']['frequency'],
+                        'basic_price' => $packages['basic']['price'],
+                        'basic_description' => $packages['basic']['description'],
+                        'standard_duration' => $packages['standard']['duration'],
+                        'standard_frequency' => $packages['standard']['frequency'],
+                        'standard_price' => $packages['standard']['price'],
+                        'standard_description' => $packages['standard']['description'],
+                        'premium_duration' => $packages['premium']['duration'],
+                        'premium_frequency' => $packages['premium']['frequency'],
+                        'premium_price' => $packages['premium']['price'],
+                        'premium_description' => $packages['premium']['description'],
+                    ];
+
+                    if ($this->studentServiceHasPriceRange) {
+                        $payload['price_range'] = $this->formatPriceRange($packages);
+                    }
+
+                    return StudentService::create($payload);
+                });
+            })
+            ->values();
+    }
+
+    private function seedSampleRequestsAndReviews(User $requester, Collection $services): void
+    {
+        if ($services->isEmpty()) {
+            return;
+        }
+
+        $services->take(3)->each(function (StudentService $service, int $index) use ($requester) {
+            $status = match ($index) {
+                0 => 'completed',
+                1 => 'in_progress',
+                default => 'pending',
+            };
+
+            $request = ServiceRequest::create([
+                'student_service_id' => $service->id,
+                'requester_id' => $requester->id,
+                'provider_id' => $service->user_id,
+                'status' => $status,
+                'message' => 'Hi, I need help with this service!',
+                'offered_price' => $service->suggested_price,
+                'payment_status' => $status === 'completed' ? 'paid' : 'unpaid',
+                'selected_dates' => now()->addDays($index + 1)->toDateString(),
+                'start_time' => '10:00:00',
+                'end_time' => '12:00:00',
+                'selected_package' => json_encode([
+                    'tier' => 'standard',
+                    'price' => $service->standard_price,
+                ]),
+                'accepted_at' => $status !== 'pending' ? now()->subDays(2) : null,
+                'started_at' => in_array($status, ['in_progress', 'completed'], true) ? now()->subDay() : null,
+                'finished_at' => $status === 'completed' ? now()->subDay() : null,
+                'completed_at' => $status === 'completed' ? now()->subDay() : null,
+            ]);
+
+            if ($status === 'completed') {
+                $reviewPayload = [
+                    'reviewer_id' => $requester->id,
+                    'reviewee_id' => $service->user_id,
+                    'student_service_id' => $service->id,
+                    'rating' => 5,
+                    'comment' => 'Excellent service, highly recommended!'
+                ];
+
+                if ($this->reviewsHasServiceRequestId) {
+                    $reviewPayload['service_request_id'] = $request->id;
+                }
+
+                Review::create($reviewPayload);
+            }
+        });
+    }
+
+    private function categoryDefinitions(): array
+    {
+        return [
+            ['name' => 'Academic Tutoring', 'description' => 'Help with studies and assignments', 'image_path' => 'tutor.png', 'color' => '#4F46E5', 'is_active' => true],
+            ['name' => 'Programming & Tech', 'description' => 'Web development, mobile apps, and technical services', 'image_path' => 'tech.svg', 'color' => '#10B981', 'is_active' => true],
+            ['name' => 'Design & Creative', 'description' => 'Graphic design, video editing, and creative services', 'image_path' => 'graphic.svg', 'color' => '#F59E0B', 'is_active' => true],
+            ['name' => 'Housechores', 'description' => 'Ironing services, house cleaning, laundry helper', 'image_path' => 'cleaning.png', 'color' => '#540863', 'is_active' => true],
+            ['name' => 'Event Planning', 'description' => 'Event organization and planning services', 'image_path' => 'event.png', 'color' => '#4FB7B3', 'is_active' => true],
+            ['name' => 'Runner & Errands', 'description' => 'Pickup parcel, help buy personal things', 'image_path' => 'runner.png', 'color' => '#EC4899', 'is_active' => true],
+        ];
+    }
+
+    private function helperProfiles(): array
     {
         return [
             [
@@ -123,8 +216,8 @@ class DatabaseSeeder extends Seeder
                 'services' => [
                     [
                         'title' => 'Mathematics Tutoring',
-                        'image_path' => 'service_tutor.jpg', 
-                        'description' => 'Expert help in calculus, algebra, and statistics.', 
+                        'image_path' => 'service_tutor.jpg',
+                        'description' => 'Expert help in calculus, algebra, and statistics.',
                         'category' => 'Academic Tutoring',
                         'packages' => [
                             'basic' => [
@@ -147,9 +240,8 @@ class DatabaseSeeder extends Seeder
                             ],
                         ],
                     ],
-                ]
+                ],
             ],
-            // ... (Other student data remains the same structure, but I've updated the languages to English for consistency)
             [
                 'name' => 'Siti Nurhaliza',
                 'email' => 'siti@siswa.upsi.edu.my',
@@ -158,7 +250,7 @@ class DatabaseSeeder extends Seeder
                     [
                         'title' => 'Web Development (Laravel/React)',
                         'image_path' => 'programming_service.jpg',
-                        'description' => 'Full-stack web development services using Laravel and React.', 
+                        'description' => 'Full-stack web development services using Laravel and React.',
                         'category' => 'Programming & Tech',
                         'packages' => [
                             'basic' => [
@@ -181,7 +273,7 @@ class DatabaseSeeder extends Seeder
                             ],
                         ],
                     ],
-                ]
+                ],
             ],
             [
                 'name' => 'Lim Wei Ming',
@@ -191,7 +283,7 @@ class DatabaseSeeder extends Seeder
                     [
                         'title' => 'Logo & Branding Design',
                         'image_path' => 'service_planning.jpg',
-                        'description' => 'Professional logo design, posters, and branding materials.', 
+                        'description' => 'Professional logo design, posters, and branding materials.',
                         'category' => 'Design & Creative',
                         'packages' => [
                             'basic' => [
@@ -214,7 +306,7 @@ class DatabaseSeeder extends Seeder
                             ],
                         ],
                     ],
-                ]
+                ],
             ],
             [
                 'name' => 'Priya Devi',
@@ -224,7 +316,7 @@ class DatabaseSeeder extends Seeder
                     [
                         'title' => 'Laundry & Ironing Helper',
                         'image_path' => 'laundry_service.jpg',
-                        'description' => 'Washing and ironing assistance in the campus area.', 
+                        'description' => 'Washing and ironing assistance in the campus area.',
                         'category' => 'Housechores',
                         'packages' => [
                             'basic' => [
@@ -247,7 +339,7 @@ class DatabaseSeeder extends Seeder
                             ],
                         ],
                     ],
-                ]
+                ],
             ],
             [
                 'name' => 'Raj Kumar',
@@ -257,14 +349,14 @@ class DatabaseSeeder extends Seeder
                     [
                         'title' => 'Runner & Parcel Pickup',
                         'image_path' => 'runner_service.jpg',
-                        'description' => 'Help pick up parcels, buy food/items, or run errands around Tanjong Malim.', 
+                        'description' => 'Help pick up parcels, buy food/items, or run errands around Tanjong Malim.',
                         'category' => 'Runner & Errands',
                         'packages' => [
                             'basic' => [
                                 'duration' => '30',
                                 'frequency' => '1 Location',
                                 'price' => 10.00,
-                                'description' => 'Parcel pickup from the nearest Post Office.'
+                                'description' => 'Parcel pickup from the nearest post office.'
                             ],
                             'standard' => [
                                 'duration' => '1',
@@ -280,92 +372,30 @@ class DatabaseSeeder extends Seeder
                             ],
                         ],
                     ],
-                ]
+                ],
             ],
         ];
+    }
 
-        foreach ($students as $studentData) {
-            $student = User::create([
-                'name' => $studentData['name'],
-                'email' => $studentData['email'],
-                'password' => Hash::make('password'),
-                'role' => 'student',
-                'phone' => '0123456789',
-                'student_id' => $studentData['student_id'],
-                'staff_email' => $studentData['email'],
-                'verification_status' => 'approved',
-                'staff_verified_at' => now(),
-                'is_available' => rand(0, 1) == 1, 
-            ]);
+    private function formatPriceRange(array $packages): string
+    {
+        $prices = array_filter([
+            $packages['basic']['price'] ?? 0,
+            $packages['standard']['price'] ?? 0,
+            $packages['premium']['price'] ?? 0,
+        ]);
 
-            foreach ($studentData['services'] as $serviceData) {
-                $category = Category::where('name', $serviceData['category'])->first();
-                
-                StudentService::create([
-                    'user_id' => $student->id,
-                    'category_id' => $category->id,
-                    'title' => $serviceData['title'],
-                    'image_path' => $serviceData['image_path'],
-                    'description' => $serviceData['description'],
-                    'suggested_price' => $serviceData['price'],
-                    'is_active' => true,
-                ]);
-            }
+        if (empty($prices)) {
+            return 'RM0.00';
         }
-               $allServices = \App\Models\StudentService::all();
-               $requester = $communityUser; 
 
-               foreach ($allServices->random(3) as $service) {
-                \App\Models\ServiceRequest::create([
-                    'student_service_id' => $service->id,      
-                    'requester_id'       => $requester->id,    
-                    'provider_id'        => $service->user_id, 
-                    'status'             => 'pending',
-                    'message'            => 'Hi, I need help with this!',
-                    'offered_price'      => $service->suggested_price,
-                    'created_at'         => now(),
-               ]);
-            }
- 
-        $ahmad = User::where('email', 'ahmad@siswa.upsi.edu.my')->first();
-        $siti = User::where('email', 'siti@siswa.upsi.edu.my')->first();
-        $requester = $communityUser; 
+        $min = min($prices);
+        $max = max($prices);
 
-        $completedRequest = \App\Models\ServiceRequest::first(); 
+        if ($min === $max) {
+            return sprintf('RM%s', number_format($min, 2));
+        }
 
-
-	if ($ahmad && $siti && $requester && $completedRequest) {
-
-    Review::create([
-        'reviewer_id' => $requester->id,
-        'reviewee_id' => $ahmad->id,
-        'service_request_id' => $completedRequest->id,
-        'conversation_id' => null,
-        'rating' => 1, 
-        'comment' => 'Service was extremely poor and slow. Need improvement.',
-    ]);
-
-    Review::create([
-        'reviewer_id' => $requester->id,
-        'reviewee_id' => $ahmad->id,
-        'service_request_id' => $completedRequest->id,
-        'conversation_id' => null,
-        'rating' => 1, 
-        'comment' => 'Second time using, still disappointing.',
-    ]);
-
-    Review::create([
-        'reviewer_id' => $requester->id,
-        'reviewee_id' => $siti->id,
-        'service_request_id' => $completedRequest->id,
-        'conversation_id' => null,
-        'rating' => 5,
-        'comment' => 'Excellent service, highly recommended!',
-    ]);
-}
-
-        //admin 
-        $this->call(AdminSeeder::class);
-
+        return sprintf('RM%s - RM%s', number_format($min, 2), number_format($max, 2));
     }
 }

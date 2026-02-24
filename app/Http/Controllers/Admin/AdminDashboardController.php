@@ -46,7 +46,7 @@ class AdminDashboardController extends Controller
      |  MONTHLY STUDENT REGISTRATIONS (Line Chart)
      --------------------------------------------- */
     $studentData = User::where('role', 'student')
-        ->selectRaw('MONTH(created_at) as month, COUNT(*) as total')
+        ->selectRaw('EXTRACT(MONTH FROM created_at) as month, COUNT(*) as total')
         ->groupBy('month')
         ->pluck('total', 'month');   // returns: [1 => 10, 2 => 14, ...]
 
@@ -59,7 +59,7 @@ class AdminDashboardController extends Controller
     /* ---------------------------------------------
      |  MONTHLY SERVICES CREATED (Bar Chart)
      --------------------------------------------- */
-    $serviceData = StudentService::selectRaw('MONTH(created_at) as month, COUNT(*) as total')
+    $serviceData = StudentService::selectRaw('EXTRACT(MONTH FROM created_at) as month, COUNT(*) as total')
         ->groupBy('month')
         ->pluck('total', 'month');
 

@@ -3,32 +3,68 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
     /**
      * Run the migrations.
      */
-     public function up()
+    public function up(): void
     {
-        Schema::table('service_requests', function (Blueprint $table) {
-            // 1️⃣ Move payment_status after status
-            $table->enum('payment_status', ['unpaid', 'paid', 'verification_status'])
-                ->default('unpaid')
-                ->after('status')
-                ->change();
+        $driver = DB::getDriverName();
 
-            // 2️⃣ Add payment_proof after payment_status
-            $table->string('payment_proof')->nullable()->after('payment_status');
-        });
+        if ($driver === 'pgsql') {
+            DB::transaction(function () {
+                DB::statement("ALTER TABLE service_requests DROP CONSTRAINT IF EXISTS service_requests_payment_status_check");
+                DB::statement("ALTER TABLE service_requests ALTER COLUMN payment_status TYPE VARCHAR(32)");
+                DB::statement("ALTER TABLE service_requests ALTER COLUMN payment_status SET DEFAULT 'unpaid'");
+                DB::statement("ALTER TABLE service_requests ADD CONSTRAINT service_requests_payment_status_check CHECK (payment_status IN ('unpaid','paid','verification_status'))");
+            });
+
+            Schema::table('service_requests', function (Blueprint $table) {
+                $table->string('payment_proof')->nullable()->after('payment_status');
+            });
+        } elseif ($driver === 'mysql') {
+            Schema::table('service_requests', function (Blueprint $table) {
+                $table->enum('payment_status', ['unpaid', 'paid', 'verification_status'])
+                    ->default('unpaid')
+                    ->after('status')
+                    ->change();
+
+                $table->string('payment_proof')->nullable()->after('payment_status');
+            });
+        } else {
+            Schema::table('service_requests', function (Blueprint $table) {
+                $table->string('payment_status', 32)->default('unpaid')->change();
+                $table->string('payment_proof')->nullable();
+            });
+        }
     }
 
-    public function down()
+    public function down(): void
     {
-        Schema::table('service_requests', function (Blueprint $table) {
-            $table->dropColumn('payment_proof');
+        $driver = DB::getDriverName();
 
-            // optional revert order if you want
-        });
+        if ($driver === 'pgsql') {
+            Schema::table('service_requests', function (Blueprint $table) {
+                if (Schema::hasColumn('service_requests', 'payment_proof')) {
+                    $table->dropColumn('payment_proof');
+                }
+            });
+
+            DB::transaction(function () {
+                DB::statement("ALTER TABLE service_requests DROP CONSTRAINT IF EXISTS service_requests_payment_status_check");
+                DB::statement("ALTER TABLE service_requests ADD CONSTRAINT service_requests_payment_status_check CHECK (payment_status IN ('unpaid','paid'))");
+                DB::statement("ALTER TABLE service_requests ALTER COLUMN payment_status SET DEFAULT 'unpaid'");
+            });
+        } else {
+            Schema::table('service_requests', function (Blueprint $table) {
+                if (Schema::hasColumn('service_requests', 'payment_proof')) {
+                    $table->dropColumn('payment_proof');
+                }
+                $table->string('payment_status', 32)->default('unpaid')->change();
+            });
+        }
     }
 };
