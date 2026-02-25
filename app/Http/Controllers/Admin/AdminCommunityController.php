@@ -124,16 +124,31 @@ public function update(Request $request, $id)
     // Upload new profile photo
     if ($request->hasFile('profile_photo')) {
 
-        // Delete old photo if exists
-        if ($user->profile_photo_path && Storage::disk('public')->exists($user->profile_photo_path)) {
-            Storage::disk('public')->delete($user->profile_photo_path);
+        // Delete old photo if exists (support both legacy and current paths)
+        if ($user->profile_photo_path) {
+            if (Storage::disk('public')->exists($user->profile_photo_path)) {
+                Storage::disk('public')->delete($user->profile_photo_path);
+            }
+
+            if (file_exists(public_path($user->profile_photo_path))) {
+                unlink(public_path($user->profile_photo_path));
+            }
         }
 
         $file = $request->file('profile_photo');
-        $filename = time() . '_' . $file->getClientOriginalName();
-        $path = $file->storeAs('uploads/profile', $filename, 'public');
+        $filename = $file->hashName();
 
-        $user->profile_photo_path = $path;
+        if (!file_exists(public_path('profile-photos'))) {
+            mkdir(public_path('profile-photos'), 0755, true);
+        }
+
+        $file->move(public_path('profile-photos'), $filename);
+
+        if (!file_exists(public_path('profile-photos/' . $filename))) {
+            return back()->withErrors(['profile_photo' => 'Profile photo upload failed. Please try again.']);
+        }
+
+        $user->profile_photo_path = 'profile-photos/' . $filename;
     }
 
     // Blacklist / Unblacklist
@@ -194,9 +209,15 @@ public function delete($id)
 {
     $user = User::where('role', 'community')->findOrFail($id);
 
-    // Optional: delete profile photo
-    if ($user->profile_photo_path && Storage::disk('public')->exists($user->profile_photo_path)) {
-        Storage::disk('public')->delete($user->profile_photo_path);
+    // Optional: delete profile photo (support both legacy and current paths)
+    if ($user->profile_photo_path) {
+        if (Storage::disk('public')->exists($user->profile_photo_path)) {
+            Storage::disk('public')->delete($user->profile_photo_path);
+        }
+
+        if (file_exists(public_path($user->profile_photo_path))) {
+            unlink(public_path($user->profile_photo_path));
+        }
     }
 
     $user->delete();

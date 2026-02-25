@@ -7,6 +7,7 @@ use App\Models\ServiceRequest;
 use App\Models\StudentService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
 
 class ReviewController extends Controller
 {
@@ -24,7 +25,7 @@ class ReviewController extends Controller
         // --- SERVICE REQUEST LOGIC ---
         $serviceRequest = ServiceRequest::findOrFail($request->service_request_id);
         
-        if ($serviceRequest->requester_id != auth()->id() && $serviceRequest->provider_id != auth()->id()) {
+        if ($serviceRequest->requester_id != Auth::id() && $serviceRequest->provider_id != Auth::id()) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
         
@@ -36,14 +37,14 @@ class ReviewController extends Controller
         $studentServiceId = $serviceRequest->student_service_id;
 
         // Determine who is being reviewed
-        if ($serviceRequest->requester_id == auth()->id()) {
+        if ($serviceRequest->requester_id == Auth::id()) {
             $revieweeId = $serviceRequest->provider_id;
         } else {
             $revieweeId = $serviceRequest->requester_id;
         }
 
         // Check if user has already reviewed
-        $existingReview = Review::where('reviewer_id', auth()->id())
+        $existingReview = Review::where('reviewer_id', Auth::id())
             ->where('service_request_id', $request->service_request_id)
             ->first();
 
@@ -55,7 +56,7 @@ class ReviewController extends Controller
         $review = Review::create([
             'service_request_id' => $request->service_request_id,
             'student_service_id' => $studentServiceId, // Variable ini sekarang dah ada value
-            'reviewer_id' => auth()->id(),
+            'reviewer_id' => Auth::id(),
             'reviewee_id' => $revieweeId,
             'rating' => $request->rating,
             'comment' => $request->comment,
@@ -74,10 +75,10 @@ class ReviewController extends Controller
             'reply' => 'required|string|max:1000',
         ]);
 
-       $review = Review::find($id);
+    $review = Review::findOrFail($id);
 
         // Pastikan hanya helper yang berkaitan boleh reply
-        if ($review->reviewee_id != auth()->id()) {
+        if ($review->reviewee_id != Auth::id()) {
             return back()->with('error', 'Unauthorized');
         }
 

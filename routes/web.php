@@ -41,13 +41,13 @@ Route::get('/help', [HelpController::class, 'index'])->name('help');
 Route::get('/user/{user}', [ProfileController::class, 'showPublic'])->name('profile.public');
 
 // Display the form to join as a part-timer
-Route::get('/students/create', [ProfileController::class, 'create'])->name('students.create');
+Route::get('/students/create', [ProfileController::class, 'create'])->middleware(['auth'])->name('students.create');
 // Handle the profile form submission
-Route::get('/students', [StudentsController::class, 'index'])->name('students.index');
-Route::post('/students/create', [StudentsController::class, 'store'])->name('students.store');
-Route::get('/students/edit-profile', [StudentsController::class, 'edit'])->name('students.edit');
-Route::patch('/students/edit-profile', [StudentsController::class, 'update'])->name('students.update');
-Route::delete('/students/profile/delete-file', [App\Http\Controllers\StudentsController::class, 'deleteWorkExperienceFile'])->name('students.delete-file');
+Route::get('/students', [StudentsController::class, 'index'])->middleware(['auth'])->name('students.index');
+Route::post('/students/create', [StudentsController::class, 'store'])->middleware(['auth'])->name('students.store');
+Route::get('/students/edit-profile', [StudentsController::class, 'edit'])->middleware(['auth'])->name('students.edit');
+Route::patch('/students/edit-profile', [StudentsController::class, 'update'])->middleware(['auth'])->name('students.update');
+Route::delete('/students/profile/delete-file', [App\Http\Controllers\StudentsController::class, 'deleteWorkExperienceFile'])->middleware(['auth'])->name('students.delete-file');
 
 
 // -- AUTHENTICATED ROUTES --
@@ -70,7 +70,7 @@ Route::middleware(['auth'])->group(function () {
         ->name('verification.save_location');
     
     Route::get('/onboarding/community', function() {
-        if (auth()->check() && auth()->user()->verification_status === 'approved') {
+        if (\Illuminate\Support\Facades\Auth::check() && \Illuminate\Support\Facades\Auth::user()->verification_status === 'approved') {
             return redirect()->route('dashboard')->with('info', 'Your account is already verified!');
         }
         return view('onboarding.community_verification');
@@ -110,7 +110,7 @@ Route::get('/services/apply', function () {
 })->middleware(['auth'])->name('services.apply');
 
  Route::get('/service-requests', [ServiceRequestController::class, 'index'])->middleware(['auth'])->name('service-requests.index');
-Route::post('/service-request', [ServiceRequestController::class, 'store'])->name('service-request.store');
+Route::post('/service-request', [ServiceRequestController::class, 'store'])->middleware(['auth'])->name('service-request.store');
 
 // Service Request routes
 Route::middleware(['auth'])->group(function () {
@@ -332,16 +332,18 @@ Route::middleware(['auth:admin', 'prevent-back-history'])->prefix('admin')->grou
     // ========================================
     // SUPERADMIN & SYSTEM
     // ========================================
-    Route::get('/admins', [SuperAdminController::class, 'adminsIndex'])->name('admin.super.admins.index');
-    Route::get('/admins/create', [SuperAdminController::class, 'create'])->name('admin.super.admins.create');
-    Route::post('/admins/store', [SuperAdminController::class, 'store'])->name('admin.super.admins.store');
-    Route::get('/admins/{id}/edit', [SuperAdminController::class, 'edit'])->name('admin.super.admins.edit');
-    Route::post('/admins/{id}/update', [SuperAdminController::class, 'update'])->name('admin.super.admins.update');
-    Route::delete('/admins/{id}', [SuperAdminController::class, 'destroy'])->name('admin.super.admins.delete');
+    Route::middleware(['superadmin'])->group(function () {
+        Route::get('/admins', [SuperAdminController::class, 'adminsIndex'])->name('admin.super.admins.index');
+        Route::get('/admins/create', [SuperAdminController::class, 'create'])->name('admin.super.admins.create');
+        Route::post('/admins/store', [SuperAdminController::class, 'store'])->name('admin.super.admins.store');
+        Route::get('/admins/{id}/edit', [SuperAdminController::class, 'edit'])->name('admin.super.admins.edit');
+        Route::post('/admins/{id}/update', [SuperAdminController::class, 'update'])->name('admin.super.admins.update');
+        Route::delete('/admins/{id}', [SuperAdminController::class, 'destroy'])->name('admin.super.admins.delete');
 
-    Route::get('/link-storage', function () {
-        Artisan::call('storage:link');
-        return 'Storage Link Created!';
+        Route::get('/link-storage', function () {
+            Artisan::call('storage:link');
+            return 'Storage Link Created!';
+        });
     });
 
     Route::post('/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');

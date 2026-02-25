@@ -15,16 +15,16 @@ class AdminAuthController extends Controller
 
     public function login(Request $request)
     {
-        $credentials = $request->only('email', 'password');
+        $credentials = $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required', 'string'],
+        ]);
 
         if (Auth::guard('admin')->attempt($credentials)) {
+            $request->session()->regenerate();
 
-            if (Auth::guard('admin')->attempt($credentials)) {
-                
-                // Redirect ALL admins (including superadmin) to main dashboard
-                return redirect()->route('admin.dashboard');
-            }
-
+            // Redirect ALL admins (including superadmin) to main dashboard
+            return redirect()->route('admin.dashboard');
         }
 
         return back()->with('error', 'Invalid credentials.');

@@ -368,3 +368,6 @@
         @endauth
     </div>
 </nav>
+
+<x-account-restriction-modal />
+<x-verification-modal />

@@ -112,6 +112,19 @@
                 </div>
             @endif
 
+            @if (session('info'))
+                <div class="mb-6 p-4 bg-amber-50 border-l-4 border-amber-500 rounded-lg">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 text-amber-500 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.894.553l-2 4A1 1 0 008 13h4a1 1 0 00.894-1.447l-2-4A1 1 0 0010 7zm0 7a1 1 0 100 2 1 1 0 000-2z" clip-rule="evenodd"></path>
+                        </svg>
+                        <p class="text-sm font-medium text-amber-800">
+                            {{ session('info') }}
+                        </p>
+                    </div>
+                </div>
+            @endif
+
             <!-- Info Box -->
             <div class="mb-6 p-4 bg-blue-50 border border-blue-100 rounded-xl">
                 <div class="flex items-start">

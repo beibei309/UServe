@@ -16,7 +16,7 @@ class StudentsController extends Controller
 {
    public function index(Request $request)
 {
-    $user = auth()->user();
+    $user = Auth::user();
 
     // Range handling (default last 30 days)
     $range = $request->get('range', '30days'); // possible: 30days, 3months, yearly
@@ -134,38 +134,36 @@ class StudentsController extends Controller
         // Validate input
         $validated = $request->validate([
             'profile_photo' => 'nullable|image|max:4096',
+            'faculty' => 'nullable|string|max:255',
+            'course' => 'nullable|string|max:255',
             'bio' => 'nullable|string|max:1000',
             'skills' => 'nullable|string|max:500',
             'work_experience_message' => 'nullable|string|max:1000',
             'work_experience_file' => 'nullable|file|mimes:pdf,doc,docx,txt,jpg,jpeg,png|max:4096',
         ]);
 
-        $user = auth()->user(); // logged-in user
+        $user = Auth::user(); // logged-in user
 
-        // Profile photo upload
-      if ($request->hasFile('profile_photo')) {
+        // Profile photo upload (normalized with app convention: public/profile-photos)
+        if ($request->hasFile('profile_photo')) {
+            if ($user->profile_photo_path && file_exists(public_path($user->profile_photo_path))) {
+                unlink(public_path($user->profile_photo_path));
+            }
 
-    // Delete old image
-    if ($user->profile_photo_path && file_exists(public_path($user->profile_photo_path))) {
-        unlink(public_path($user->profile_photo_path));
-    }
+            $file = $request->file('profile_photo');
+            $filename = $file->hashName();
 
-    $file = $request->file('profile_photo');
-    $filename = time() . '_' . $file->getClientOriginalName();
+            if (!file_exists(public_path('profile-photos'))) {
+                mkdir(public_path('profile-photos'), 0755, true);
+            }
 
-    // Make sure folder exists
-    if (!file_exists(public_path('storage/uploads/profile'))) {
-        mkdir(public_path('/uploads/profile'), 0755, true);
-    }
-
-    // Move file directly
-    $file->move(public_path('/uploads/profile'), $filename);
-
-    // Save path in DB
-    $user->profile_photo_path = '/uploads/profile/' . $filename;
-}
+            $file->move(public_path('profile-photos'), $filename);
+            $user->profile_photo_path = 'profile-photos/' . $filename;
+        }
 
         // Update basic fields
+        $user->faculty = $validated['faculty'] ?? $user->faculty;
+        $user->course = $validated['course'] ?? $user->course;
         $user->bio = $validated['bio'] ?? $user->bio;
         $user->skills = $validated['skills'] ?? $user->skills;
         $user->work_experience_message = $validated['work_experience_message'] ?? $user->work_experience_message;
@@ -173,10 +171,16 @@ class StudentsController extends Controller
         // Handle work experience file
         if ($request->hasFile('work_experience_file')) {
             $file = $request->file('work_experience_file');
-            $filename = time() . '_' . $file->getClientOriginalName();
-            $file->storeAs('uploads/work_experience', $filename, 'public');
+            $filename = $file->hashName();
+            $storedPath = Storage::disk('public')->putFileAs('uploads/work_experience', $file, $filename);
 
-            $user->work_experience_file = 'uploads/work_experience/' . $filename;
+            if ($storedPath && Storage::disk('public')->exists($storedPath)) {
+                $user->work_experience_file = $storedPath;
+            } else {
+                return back()
+                    ->withInput()
+                    ->withErrors(['work_experience_file' => 'Resume upload failed. Please try again.']);
+            }
         }
 
         // **Mark user as helper**
@@ -220,36 +224,30 @@ class StudentsController extends Controller
     $user->skills = $validated['skills'];
     $user->work_experience_message = $validated['work_experience_message'] ?? null;
 
-    // 3. Handle Work Experience File Upload (USING DIRECT MOVE)
+    // 3. Handle Work Experience File Upload
     if ($request->hasFile('work_experience_file')) {
-        
-        // Define the target directory inside 'public/storage' to match your View's asset() helper
-        // View uses: asset('storage/' . $filename)
-        $destinationPath = public_path('storage/uploads/work_experience');
-
-        // Ensure directory exists
-        if (!file_exists($destinationPath)) {
-            mkdir($destinationPath, 0755, true);
-        }
-
-        // Handle File
         $file = $request->file('work_experience_file');
-        $filename = time() . '_' . $file->getClientOriginalName();
-        
-        // Delete old file if it exists
-        // We check public_path('storage/...') because that's where we are putting it now
+        $filename = $file->hashName();
+
+        // Delete old file (new + legacy paths)
         if ($user->work_experience_file) {
-            $oldFilePath = public_path('storage/' . $user->work_experience_file);
-            if (file_exists($oldFilePath)) {
-                unlink($oldFilePath);
+            Storage::disk('public')->delete($user->work_experience_file);
+
+            $legacyPath = public_path('storage/' . $user->work_experience_file);
+            if (file_exists($legacyPath)) {
+                unlink($legacyPath);
             }
         }
 
-        // Move the file directly to public folder
-        $file->move($destinationPath, $filename);
+        $storedPath = Storage::disk('public')->putFileAs('uploads/work_experience', $file, $filename);
 
-        // Save the path relative to 'storage' so the View works
-        $user->work_experience_file = 'uploads/work_experience/' . $filename;
+        if (!$storedPath || !Storage::disk('public')->exists($storedPath)) {
+            return back()
+                ->withInput()
+                ->withErrors(['work_experience_file' => 'Resume upload failed. Please try again.']);
+        }
+
+        $user->work_experience_file = $storedPath;
     }
 
     // 4. Handle Profile Photo Upload
@@ -260,7 +258,7 @@ class StudentsController extends Controller
         }
 
         $file = $request->file('profile_photo_path');
-        $filename = time() . '_' . $file->getClientOriginalName();
+        $filename = $file->hashName();
 
         if (!file_exists(public_path('profile-photos'))) {
             mkdir(public_path('profile-photos'), 0755, true);

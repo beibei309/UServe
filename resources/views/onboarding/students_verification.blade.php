@@ -1,5 +1,10 @@
 <x-guest-layout>
     <div class="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+        @if(session('info'))
+            <div class="fixed top-5 left-1/2 -translate-x-1/2 z-50 max-w-xl w-[95%] p-4 bg-amber-50 border-l-4 border-amber-500 rounded-lg shadow">
+                <p class="text-sm font-medium text-amber-800 text-center">{{ session('info') }}</p>
+            </div>
+        @endif
         
         @if($isEligible)
             <div class="bg-white w-full max-w-5xl rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row min-h-[650px]">
@@ -21,7 +26,7 @@
                     <div class="relative z-10 space-y-8 my-8">
                         <div class="step-indicator flex items-center gap-4 opacity-100 transition-opacity duration-300" id="ind-1">
                             <div class="w-10 h-10 rounded-full border-2 border-white flex items-center justify-center font-bold bg-white text-indigo-600 shadow-lg">1</div>
-                            <div><h4 class="font-bold text-lg">Location</h4><p class="text-xs text-indigo-200">Verify UPSI Area</p></div>
+                            <div><h4 class="font-bold text-lg">Location</h4><p class="text-xs text-indigo-200">Verify Muallim District</p></div>
                         </div>
                         <div class="step-indicator flex items-center gap-4 opacity-50 transition-opacity duration-300" id="ind-2">
                             <div class="w-10 h-10 rounded-full border-2 border-indigo-400 flex items-center justify-center font-bold text-indigo-100">2</div>
@@ -48,22 +53,13 @@
                     <div id="panel-1" class="step-panel w-full animate-fadeIn">
                         <div class="mb-8">
                             <h3 class="text-2xl font-bold text-slate-800">Where are you located?</h3>
-                            <p class="text-slate-500 mt-2">Sellers must be located within the Tanjung Malim / UPSI area.</p>
+                            <p class="text-slate-500 mt-2">Sellers must be located within Muallim District.</p>
                         </div>
                         <div class="space-y-6 max-w-md mx-auto w-full">
-                            <button id="detect_location_btn" class="group w-full flex items-center justify-center gap-3 bg-indigo-600 hover:bg-indigo-700 text-white py-4 px-6 rounded-xl font-bold shadow-lg shadow-indigo-200 transition-all transform hover:-translate-y-1">
+                            <button id="detect_location_btn" class="group w-full max-w-xl mx-auto flex items-center justify-center gap-3 bg-indigo-600 hover:bg-indigo-700 text-white py-4 px-6 rounded-xl font-bold shadow-lg shadow-indigo-200 transition-all transform hover:-translate-y-1">
                                 <svg class="w-6 h-6 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                                 <span>Detect My Location</span>
                             </button>
-                            <div class="relative flex py-2 items-center">
-                                <div class="flex-grow border-t border-slate-200"></div>
-                                <span class="flex-shrink-0 mx-4 text-slate-400 text-xs font-semibold uppercase tracking-wider">Manual Entry</span>
-                                <div class="flex-grow border-t border-slate-200"></div>
-                            </div>
-                            <div class="flex gap-2">
-                                <input type="text" id="manual_address" placeholder="e.g. Kolej Aminuddin Baki" class="flex-1 rounded-xl border-slate-200 bg-slate-50 text-sm py-3 px-4">
-                                <button id="verify_manual_btn" class="bg-white border-2 border-slate-200 hover:border-indigo-600 hover:text-indigo-600 text-slate-600 px-6 rounded-xl font-bold transition-all text-sm">Check</button>
-                            </div>
                             <div id="location_status" class="text-center text-sm min-h-[24px] font-medium flex justify-center items-center"></div>
                         </div>
                     </div>
@@ -172,7 +168,7 @@
     <script>
     const UPSI_LAT = 3.7832;
     const UPSI_LNG = 101.5927;
-    const RADIUS_KM = 1000;
+    const RADIUS_KM = 25;
     let stream = null;
     let selfieDataUrl = null;
 
@@ -230,15 +226,33 @@
 
     function addressVerified(lat, lng, addr){
         const statusEl = document.getElementById('location_status');
-        statusEl.innerHTML = `<div class="flex items-center gap-2 text-green-600 bg-green-50 px-4 py-2 rounded-lg border border-green-100"><span class="font-bold">Verified!</span></div>`;
+        statusEl.innerHTML = `<div class="flex items-center gap-2 text-indigo-600 bg-indigo-50 px-4 py-2 rounded-lg border border-indigo-100"><span class="font-bold">Verifying...</span></div>`;
         if(lat && lng) {
             fetch("{{ route('verification.save_location') }}", {
                 method: 'POST', 
-                headers: {'Content-Type': 'application/json', 'X-CSRF-TOKEN': "{{ csrf_token() }}"}, 
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': "{{ csrf_token() }}"
+                }, 
                 body: JSON.stringify({latitude: lat, longitude: lng, address: addr})
-            }).catch(e=>{});
+            })
+            .then(async res => {
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok || data.success === false) {
+                    throw new Error(data.message || 'Location verification failed.');
+                }
+
+                statusEl.innerHTML = `<div class="flex items-center gap-2 text-green-600 bg-green-50 px-4 py-2 rounded-lg border border-green-100"><span class="font-bold">Verified!</span></div>`;
+                setTimeout(() => goToStep(2), 1000);
+            })
+            .catch(err => {
+                statusEl.innerHTML = '';
+                Swal.fire({icon:'error', text: err.message || 'Unable to verify location. Please try again.'});
+            });
+            return;
         }
-        setTimeout(() => goToStep(2), 1000);
+        statusEl.innerHTML = '';
     }
 
     document.getElementById('detect_location_btn').addEventListener('click', function(){
@@ -255,18 +269,12 @@
                 const dist = R*c;
                 btn.innerHTML = original; btn.disabled = false;
                 if(dist <= RADIUS_KM) addressVerified(lat, lng, `GPS: ${lat}, ${lng}`);
-                else Swal.fire({icon:'error', text:'You must be in the UPSI area.'});
+                else Swal.fire({icon:'error', text:'You must be in Muallim District.'});
             }, err => {
                 btn.innerHTML = original; btn.disabled = false;
                 Swal.fire({icon:'error', text:'Please allow location access.'});
             });
         }
-    });
-
-    document.getElementById('verify_manual_btn').addEventListener('click', () => {
-        const addr = document.getElementById('manual_address').value.toLowerCase();
-        if(addr.includes('tanjung') || addr.includes('upsi') || addr.includes('kolej')) addressVerified(null, null, addr);
-        else Swal.fire({icon:'error', text:'Address invalid.'});
     });
 
     document.getElementById('upload_photo_form').addEventListener('submit', function(e){

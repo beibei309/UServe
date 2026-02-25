@@ -8,18 +8,16 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <div class="py-12">
+    <div class="py-6">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <br><br>
-
             @php
                 $defaultStatusTab = request('tab', 'in-progress');
             @endphp
 
             <div id="sent-content" class="sr-tab-content">
-                <div class=" overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="overflow-hidden rounded-2xl border border-gray-100 bg-gradient-to-b from-white to-slate-50/50 shadow-sm">
                     <div class="p-6 text-gray-800">
-                        <h3 class="font-medium mb-4 700" style="font-size: 25px;">My Order ({{ $sentRequests->count() }}
+                        <h3 class="font-medium mb-4 700" style="font-size: 25px;">My Orders ({{ $sentRequests->count() }}
                             total)</h3>
 
                         {{-- SEARCH & FILTER SECTION --}}
@@ -92,7 +90,7 @@
                                 </button>
                                 <button onclick="showStatusTab('completed')" id="completed-tab"
                                     class="sr-status-tab-button py-2 px-4 text-sm font-medium {{ $defaultStatusTab === 'completed' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-500 hover:text-custom-teal' }} focus:outline-none">
-                                    History
+                                    Completed
                                 </button>
                             </div>
                         </div>
@@ -155,7 +153,8 @@
                                         @endphp
 
                                         <div
-                                            class="group relative overflow-hidden rounded-2xl border {{ $isSellerBanned ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-white hover:border-yellow-300' }} shadow-sm transition-all duration-300 hover:shadow-md">
+                                            class="sr-request-item group relative overflow-hidden rounded-2xl border {{ $isSellerBanned ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-white hover:border-yellow-300' }} shadow-sm transition-all duration-300 hover:shadow-md"
+                                            data-category="{{ optional($service->category)->name ?? 'Other' }}">
 
                                             <div
                                                 class="absolute top-0 left-0 right-0 h-1 {{ $isSellerBanned ? 'bg-red-500' : 'bg-gradient-to-r from-yellow-400 to-orange-300' }}">
@@ -432,7 +431,8 @@
                                         @endphp
 
                                         <div
-                                            class="group relative overflow-hidden rounded-2xl border bg-white shadow-sm transition-all duration-300 hover:shadow-md {{ $cardBorder }}">
+                                            class="sr-request-item group relative overflow-hidden rounded-2xl border bg-white shadow-sm transition-all duration-300 hover:shadow-md {{ $cardBorder }}"
+                                            data-category="{{ optional($service->category)->name ?? 'Other' }}">
                                             <div class="absolute top-0 left-0 right-0 h-1 {{ $stripeColor }}"></div>
                                             <div class="p-5 sm:p-6">
                                                 {{-- Top Header Section --}}
@@ -685,7 +685,7 @@
                                                 d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                                         </svg>
                                     </div>
-                                    <h3 class="text-lg font-semibold text-gray-900">No History Yet</h3>
+                                    <h3 class="text-lg font-semibold text-gray-900">No Completed Requests Yet</h3>
                                     <p class="mt-2 text-sm text-gray-500">Completed and cancelled requests will appear
                                         here.</p>
                                 </div>
@@ -756,7 +756,8 @@
                                         @endphp
 
                                         <div
-                                            class="group relative overflow-hidden rounded-2xl border bg-white shadow-sm transition-all duration-300 hover:shadow-md {{ $theme['border'] }}">
+                                            class="sr-request-item group relative overflow-hidden rounded-2xl border bg-white shadow-sm transition-all duration-300 hover:shadow-md {{ $theme['border'] }}"
+                                            data-category="{{ optional($service->category)->name ?? 'Other' }}">
 
                                             <div class="absolute top-0 left-0 right-0 h-1 {{ $theme['strip'] }}">
                                             </div>
@@ -874,7 +875,7 @@
                                                     class="flex flex-col md:flex-row items-center justify-between gap-4 pt-2">
                                                     <a href="{{ route('service-requests.show', $request) }}"
                                                         class="text-sm font-medium text-gray-400 hover:text-gray-900 transition-colors flex items-center gap-1">
-                                                        View History Details
+                                                        View Request Details
                                                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24"
                                                             stroke="currentColor">
                                                             <path stroke-linecap="round" stroke-linejoin="round"

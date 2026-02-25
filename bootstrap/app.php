@@ -17,6 +17,8 @@ return Application::configure(basePath: dirname(__DIR__))
         'superadmin' => \App\Http\Middleware\SuperAdmin::class,
         'prevent-back-history' => \App\Http\Middleware\PreventBackHistory::class,
     ]);
+
+    $middleware->appendToGroup('web', \App\Http\Middleware\CheckUserStatus::class);
     })
     
     ->withExceptions(function (Exceptions $exceptions): void {

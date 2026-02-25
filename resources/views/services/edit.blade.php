@@ -17,6 +17,19 @@
             $scheduleData[$key] = $val;
         }
     }
+
+    $serviceImagePath = $service->image_path ?? null;
+    if ($serviceImagePath) {
+        if (filter_var($serviceImagePath, FILTER_VALIDATE_URL)) {
+            $serviceImageUrl = $serviceImagePath;
+        } elseif (str_starts_with($serviceImagePath, 'storage/')) {
+            $serviceImageUrl = asset($serviceImagePath);
+        } else {
+            $serviceImageUrl = asset('storage/' . ltrim($serviceImagePath, '/'));
+        }
+    } else {
+        $serviceImageUrl = null;
+    }
 @endphp
 
 @section('content')
@@ -188,18 +201,17 @@
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Service Cover Image</label>
 
-                            @if ($service->image_path)
-                                <div class="mb-3">
-                                    <img src="{{ Str::startsWith($service->image_path, 'services/') ? asset('storage/' . $service->image_path) : asset($service->image_path) }}"
-                                        class="w-32 h-20 object-cover rounded-lg border border-gray-200 shadow-sm">
-                                    <p class="text-xs text-gray-500 mt-1">Current Image</p>
+                            @if ($serviceImageUrl)
+                                <div class="mb-4">
+                                    <img src="{{ $serviceImageUrl }}" alt="Current Image"
+                                        class="w-full h-48 object-cover rounded-lg mb-2 border border-gray-300">
                                 </div>
                             @endif
 
                             <input type="file" id="image" name="image" accept="image/*"
                                 class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
 
-                                                    </div>
+                        </div>
                     </div>
 
                     <div class="mt-8 pt-6 border-t border-gray-100 flex justify-end">
@@ -236,11 +248,11 @@
                                     class="w-full mt-1 border-gray-300 rounded-md focus:ring-gray-500 focus:border-gray-500">
                             </div>
                              <div><label class="text-xs font-bold text-gray-600 uppercase">Duration</label><input
-                                        type="text" name="packages[0][duration]" placeholder="e.g. 2 Hours"
+                                        type="text" name="packages[0][duration]" value="{{ $service->basic_duration }}" placeholder="e.g. 2 Hours"
                                         class="w-full mt-1 border-gray-200 rounded-md"></div>
                             <div>
                                 <label class="text-xs font-bold text-gray-500 uppercase">Frequency</label>
-                                <input type="text" name="packages[0][frequency]" placeholder="e.g. per session"
+                                <input type="text" name="packages[0][frequency]" value="{{ $service->basic_frequency }}" placeholder="e.g. per session"
                                     class="w-full mt-1 border-gray-300 rounded-md">
                             </div>
                         </div>
@@ -275,10 +287,10 @@
                                         type="number" name="packages[1][price]" value="{{ $service->standard_price }}"
                                         class="w-full mt-1 border-blue-200 rounded-md"></div>
                                 <div><label class="text-xs font-bold text-blue-600 uppercase">Duration</label><input
-                                        type="text" name="packages[1][duration]" placeholder="e.g. 2 Hours"
+                                        type="text" name="packages[1][duration]" value="{{ $service->standard_duration }}" placeholder="e.g. 2 Hours"
                                         class="w-full mt-1 border-blue-200 rounded-md"></div>
                                 <div><label class="text-xs font-bold text-blue-600 uppercase">Frequency</label>
-                                    <input type="text" name="packages[1][frequency]" placeholder="e.g. per session"
+                                    <input type="text" name="packages[1][frequency]" value="{{ $service->standard_frequency }}" placeholder="e.g. per session"
                                     class="w-full mt-1 border-blue-300 rounded-md">
                                 </div>
                             </div>
@@ -298,10 +310,10 @@
                                         type="number" name="packages[2][price]" value="{{ $service->premium_price }}"
                                         class="w-full mt-1 border-purple-200 rounded-md"></div>
                                  <div><label class="text-xs font-bold text-purple-600 uppercase">Duration</label><input
-                                        type="text" name="packages[2][duration]" placeholder="e.g. 2 Hours"
-                                        class="w-full mt-1 border-blue-200 rounded-md"></div>
+                                        type="text" name="packages[2][duration]" value="{{ $service->premium_duration }}" placeholder="e.g. 2 Hours"
+                                        class="w-full mt-1 border-purple-200 rounded-md"></div>
                                 <div><label class="text-xs font-bold text-purple-600 uppercase">Frequency</label>
-                                     <input type="text" name="packages[2][frequency]" placeholder="e.g. per session"
+                                     <input type="text" name="packages[2][frequency]" value="{{ $service->premium_frequency }}" placeholder="e.g. per session"
                                     class="w-full mt-1 border-purple-300 rounded-md">
                                 </div>
                             </div>

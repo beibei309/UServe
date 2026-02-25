@@ -10,23 +10,26 @@ class AdminSeeder extends Seeder
 {
     public function run()
     {
-        Admin::create([
-            'name' => 'Super Admin',
+        Admin::updateOrCreate([
             'email' => 'super@s2u.com',
+        ], [
+            'name' => 'Super Admin',
             'password' => Hash::make('password123'),
             'role' => 'superadmin',
         ]);
 
-        Admin::create([
-            'name' => 'Admin One',
+        Admin::updateOrCreate([
             'email' => 'admin1@s2u.com',
+        ], [
+            'name' => 'Admin One',
             'password' => Hash::make('admin123'),
             'role' => 'admin',
         ]);
 
-        Admin::create([
-            'name' => 'Admin Two',
+        Admin::updateOrCreate([
             'email' => 'admin2@s2u.com',
+        ], [
+            'name' => 'Admin Two',
             'password' => Hash::make('admin456'),
             'role' => 'admin',
         ]);

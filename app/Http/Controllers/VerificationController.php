@@ -4,12 +4,18 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class VerificationController extends Controller
 {
+    private const MUALLIM_CENTER_LAT = 3.7832;
+    private const MUALLIM_CENTER_LNG = 101.5927;
+    private const MUALLIM_RADIUS_KM = 25;
+
    public function index() {
-    $user = auth()->user();
+    $user = Auth::user();
     
     // 1. Redirect if already helper
     if ($user->role === 'helper') {
@@ -17,7 +23,7 @@ class VerificationController extends Controller
     }
     
     // 2. Fetch Real Student Status from DB
-    $studentStatus = \DB::table('student_statuses')
+    $studentStatus = DB::table('student_statuses')
                         ->where('student_id', $user->id)
                         ->latest()
                         ->first();
@@ -95,7 +101,7 @@ class VerificationController extends Controller
             'profile_photo' => 'required|image|max:4096'
         ]);
 
-        $user = auth()->user();
+        $user = Auth::user();
 
         if ($request->hasFile('profile_photo')) {
 
@@ -105,7 +111,7 @@ class VerificationController extends Controller
             }
 
             $file = $request->file('profile_photo');
-            $filename = time() . '_' . $file->getClientOriginalName();
+            $filename = $file->hashName();
 
             // 2. Make sure folder exists
             if (!file_exists(public_path('profile-photos'))) {
@@ -140,9 +146,9 @@ class VerificationController extends Controller
         ini_set('memory_limit', '256M');
         ini_set('max_execution_time', 300);
 
-        \Illuminate\Support\Facades\Log::info('Student Helper Selfie Upload Started for user: ' . auth()->id());
+        \Illuminate\Support\Facades\Log::info('Student Helper Selfie Upload Started for user: ' . Auth::id());
 
-        $user = auth()->user();
+        $user = Auth::user();
         
         try {
             $image = $request->input('selfie_image'); // Base64 string
@@ -200,7 +206,28 @@ class VerificationController extends Controller
             'address' => 'nullable|string|max:500'
         ]);
 
-        $user = auth()->user();
+        $distanceKm = $this->distanceKm(
+            (float) $request->latitude,
+            (float) $request->longitude,
+            self::MUALLIM_CENTER_LAT,
+            self::MUALLIM_CENTER_LNG
+        );
+
+        if ($distanceKm > self::MUALLIM_RADIUS_KM) {
+            \Illuminate\Support\Facades\Log::warning('Location verification rejected (outside Muallim District)', [
+                'user_id' => Auth::id(),
+                'latitude' => $request->latitude,
+                'longitude' => $request->longitude,
+                'distance_km' => round($distanceKm, 2),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Location must be inside Muallim District.'
+            ], 422);
+        }
+
+        $user = Auth::user();
         
         $user->update([
             'latitude' => $request->latitude,
@@ -209,9 +236,29 @@ class VerificationController extends Controller
             'location_verified_at' => now()
         ]);
 
-        \Illuminate\Support\Facades\Log::info('Location saved for user: ' . $user->id . ' - Lat: ' . $request->latitude . ', Lng: ' . $request->longitude);
+        \Illuminate\Support\Facades\Log::info('Auto-detected location verified and saved (Muallim District)', [
+            'user_id' => $user->id,
+            'latitude' => $request->latitude,
+            'longitude' => $request->longitude,
+            'distance_km' => round($distanceKm, 2),
+        ]);
 
         return response()->json(['success' => true, 'message' => 'Location verified and saved!']);
+    }
+
+    private function distanceKm(float $lat1, float $lng1, float $lat2, float $lng2): float
+    {
+        $earthRadiusKm = 6371;
+        $dLat = deg2rad($lat2 - $lat1);
+        $dLng = deg2rad($lng2 - $lng1);
+
+        $a = sin($dLat / 2) * sin($dLat / 2)
+            + cos(deg2rad($lat1)) * cos(deg2rad($lat2))
+            * sin($dLng / 2) * sin($dLng / 2);
+
+        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+
+        return $earthRadiusKm * $c;
     }
 
     // --- COMMUNITY VERIFICATION METHODS ---
@@ -226,9 +273,9 @@ class VerificationController extends Controller
         ini_set('memory_limit', '256M');
         ini_set('max_execution_time', 300);
 
-        \Illuminate\Support\Facades\Log::info('Community Selfie Upload Started for user: ' . auth()->id());
+        \Illuminate\Support\Facades\Log::info('Community Selfie Upload Started for user: ' . Auth::id());
 
-        $user = auth()->user();
+        $user = Auth::user();
         try {
             $image = $request->input('selfie_image'); // Base64 string
             \Illuminate\Support\Facades\Log::info('Selfie payload received. Length: ' . strlen($image));
@@ -274,14 +321,18 @@ class VerificationController extends Controller
             'verification_document' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120', // Max 5MB
         ]);
 
-        $user = auth()->user();
+        $user = Auth::user();
 
         if ($request->hasFile('verification_document')) {
             $file = $request->file('verification_document');
-            $filename = 'verify_' . $user->id . '_' . time() . '.' . $file->getClientOriginalExtension();
+            $filename = 'verify_' . $user->id . '_' . $file->hashName();
             
-            // Store in storage/app/verification_docs
+            // Store in storage/app/private/verification_docs (local disk)
             $path = $file->storeAs('verification_docs', $filename, 'local');
+
+            if (!$path || !Storage::disk('local')->exists($path)) {
+                return redirect()->back()->withErrors(['verification_document' => 'Upload failed. Please try again.']);
+            }
 
             // Update User
             $user->verification_document_path = $path;

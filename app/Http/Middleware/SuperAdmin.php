@@ -9,8 +9,16 @@ class SuperAdmin
 {
     public function handle($request, Closure $next)
     {
+        $admin = Auth::guard('admin')->user();
+
         // Check if logged-in admin is superadmin
-        if (Auth::guard('admin')->user()->role !== 'superadmin') {
+        if (!$admin || $admin->role !== 'superadmin') {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => 'Access denied — Superadmin only.',
+                ], 403);
+            }
+
             return redirect()->route('admin.dashboard')
                              ->with('error', 'Access denied — Superadmin only.');
         }

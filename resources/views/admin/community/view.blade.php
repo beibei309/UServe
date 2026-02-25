@@ -174,7 +174,7 @@
                             <h4 class="text-slate-900 font-bold">Verification Document</h4>
                             <p class="text-slate-500 text-xs mb-6">Stored securely in protected local storage</p>
 
-                            <button onclick="document.getElementById('modalDocumentFrame').src='{{ route('view.doc', $user->id) }}'; document.getElementById('documentModal').classList.remove('hidden')"
+                            <button onclick="document.getElementById('modalDocumentFrame').src='{{ route('admin.verifications.document', $user->id) }}'; document.getElementById('documentModal').classList.remove('hidden')"
         class="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white text-sm font-bold rounded-xl w-full justify-center">
     <i class="fas fa-eye"></i> Preview Document
 </button>
@@ -367,8 +367,8 @@
             const loader = document.getElementById('docLoading');
 
             loader.classList.remove('hidden');
-            // Point this to your route that streams the file
-            frame.src = `/admin/verifications/${userId}`;
+            // Point this to secure document route
+            frame.src = `/admin/verifications/${userId}/document`;
 
             modal.classList.remove('hidden');
             document.body.style.overflow = 'hidden';

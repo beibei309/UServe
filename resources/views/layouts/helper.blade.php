@@ -107,7 +107,7 @@
 
         @include('layouts.navbar')
 
-        <main class="pt-20">
+        <main class="pt-0">
             @yield('content')
         </main>
     </div>

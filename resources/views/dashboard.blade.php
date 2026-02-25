@@ -358,8 +358,6 @@
 
     </div>
 
-    <x-verification-modal />
-
 </body>
 
 </html>

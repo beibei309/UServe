@@ -20,15 +20,19 @@ class FavoriteController extends Controller
 
         $user = Auth::user();
         $serviceId = $request->service_id;
+        $service = StudentService::findOrFail($serviceId);
+        $favoritedUserId = $service->user_id;
 
-        $exists = \DB::table('favorites')
+        $exists = DB::table('favorites')
             ->where('user_id', $user->id)
+            ->where('favorited_user_id', $favoritedUserId)
             ->where('service_id', $serviceId)
             ->exists();
 
         if ($exists) {
-            \DB::table('favorites')
+            DB::table('favorites')
                 ->where('user_id', $user->id)
+                ->where('favorited_user_id', $favoritedUserId)
                 ->where('service_id', $serviceId)
                 ->delete();
 
@@ -38,8 +42,9 @@ class FavoriteController extends Controller
             ]);
         }
 
-        \DB::table('favorites')->insert([
+        DB::table('favorites')->insert([
             'user_id' => $user->id,
+            'favorited_user_id' => $favoritedUserId,
             'service_id' => $serviceId,
             'created_at' => now(),
             'updated_at' => now(),

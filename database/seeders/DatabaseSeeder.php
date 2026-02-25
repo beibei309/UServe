@@ -41,6 +41,8 @@ class DatabaseSeeder extends Seeder
 
             $this->seedSampleRequestsAndReviews($communityUser, $services);
 
+            $this->call(IntegrationSnapshotSeeder::class);
+
             $this->call(AdminSeeder::class);
         });
     }
@@ -212,7 +214,7 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'Ahmad Rahman',
                 'email' => 'ahmad@siswa.upsi.edu.my',
-                'student_id' => 'CD21001',
+                'student_id' => 'D20221109111',
                 'services' => [
                     [
                         'title' => 'Mathematics Tutoring',
@@ -245,7 +247,7 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'Siti Nurhaliza',
                 'email' => 'siti@siswa.upsi.edu.my',
-                'student_id' => 'CD21002',
+                'student_id' => 'D20221109112',
                 'services' => [
                     [
                         'title' => 'Web Development (Laravel/React)',
@@ -278,7 +280,7 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'Lim Wei Ming',
                 'email' => 'lim@siswa.upsi.edu.my',
-                'student_id' => 'CD21003',
+                'student_id' => 'D20221109113',
                 'services' => [
                     [
                         'title' => 'Logo & Branding Design',
@@ -311,7 +313,7 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'Priya Devi',
                 'email' => 'priya@siswa.upsi.edu.my',
-                'student_id' => 'CD21004',
+                'student_id' => 'D20221109114',
                 'services' => [
                     [
                         'title' => 'Laundry & Ironing Helper',
@@ -344,7 +346,7 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'Raj Kumar',
                 'email' => 'raj@siswa.upsi.edu.my',
-                'student_id' => 'CD21005',
+                'student_id' => 'D20221109115',
                 'services' => [
                     [
                         'title' => 'Runner & Parcel Pickup',

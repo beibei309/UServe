@@ -253,7 +253,17 @@
                                         {{-- Avatar --}}
                                         <div class="flex-shrink-0">
                                             @if($review->reviewer && $review->reviewer->profile_photo_path)
-                                                <img src="{{ asset('storage/' . $review->reviewer->profile_photo_path) }}" 
+                                                @php
+                                                    $reviewerPhoto = $review->reviewer->profile_photo_path;
+                                                    if (\Illuminate\Support\Str::startsWith($reviewerPhoto, ['http://', 'https://'])) {
+                                                        $reviewerPhotoUrl = $reviewerPhoto;
+                                                    } elseif (\Illuminate\Support\Str::startsWith($reviewerPhoto, 'storage/')) {
+                                                        $reviewerPhotoUrl = asset($reviewerPhoto);
+                                                    } else {
+                                                        $reviewerPhotoUrl = asset($reviewerPhoto);
+                                                    }
+                                                @endphp
+                                                <img src="{{ $reviewerPhotoUrl }}" 
                                                      class="w-12 h-12 md:w-14 md:h-14 rounded-full object-cover shadow-sm border-2 border-white ring-1 ring-slate-100">
                                             @else
                                                 <div class="w-12 h-12 md:w-14 md:h-14 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-black text-lg shadow-sm border-2 border-white ring-1 ring-slate-100">
@@ -297,7 +307,7 @@
                                                     </div>
                                                     <div class="flex flex-col">
                                                         <span class="text-[10px] text-slate-400 uppercase font-bold tracking-wider leading-none">You bought</span>
-                                                        <span class="text-xs font-bold text-slate-700 leading-none mt-1">{{ Str::limit($review->studentService->title, 30) }}</span>
+                                                        <span class="text-xs font-bold text-slate-700 leading-none mt-1">{{ Str::limit($review->studentService->title, 100) }}</span>
                                                     </div>
                                                 </div>
                                             @endif

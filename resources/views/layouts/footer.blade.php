@@ -94,6 +94,3 @@
         </div>
     </div>
 </footer>
-
-{{-- BANNED USER MODAL (Global Include via Footer) --}}
-<x-banned-modal />

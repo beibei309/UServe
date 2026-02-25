@@ -85,7 +85,7 @@ class ProfileController extends Controller
     }
 
     $file = $request->file('profile_photo');
-    $filename = time() . '_' . $file->getClientOriginalName();
+    $filename = $file->hashName();
 
     // Make sure folder exists
     if (!file_exists(public_path('profile-photos'))) {
@@ -94,6 +94,10 @@ class ProfileController extends Controller
 
     // Move file
     $file->move(public_path('profile-photos'), $filename);
+
+    if (!file_exists(public_path('profile-photos/' . $filename))) {
+        return Redirect::back()->withErrors(['profile_photo' => 'Profile photo upload failed. Please try again.']);
+    }
 
     // Save path to DB
     $user->profile_photo_path = 'profile-photos/' . $filename;

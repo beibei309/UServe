@@ -150,13 +150,19 @@
         @if ($errors->has('email'))
             const errorMessage = "{!! addslashes($errors->first('email')) !!}";
 
-            if (errorMessage.toLowerCase().includes('suspended') || errorMessage.toLowerCase().includes('banned')) {
+            if (
+                errorMessage.toLowerCase().includes('suspended') ||
+                errorMessage.toLowerCase().includes('banned') ||
+                errorMessage.toLowerCase().includes('blocked') ||
+                errorMessage.toLowerCase().includes('blacklisted')
+            ) {
                 Swal.fire({
                     icon: 'error',
                     title: 'Account Suspended',
                     html: errorMessage,
                     confirmButtonColor: '#4F46E5',
-                    confirmButtonText: 'Contact Support'
+                    confirmButtonText: 'Back to Login',
+
                 });
             }
         @endif

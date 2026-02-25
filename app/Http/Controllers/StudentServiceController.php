@@ -89,7 +89,7 @@ class StudentServiceController extends Controller
 
   public function edit(StudentService $service)
 {
-    $user = auth()->user();
+        $user = Auth::user();
     if (!$user || $user->id != $service->user_id) {
         abort(403, 'You may only edit your own services.');
     }
@@ -156,7 +156,7 @@ public function update(Request $request, StudentService $service): JsonResponse
     }
 
     $file = $request->file('image');
-    $filename = time() . '_' . $file->getClientOriginalName();
+    $filename = $file->hashName();
 
     // Make sure folder exists
     if (!file_exists(public_path('storage/services'))) {
@@ -381,7 +381,7 @@ $isUnavailable = $request->has('is_unavailable'); // Check checkbox status
     if ($request->hasFile('image')) {
 
     $file = $request->file('image');
-    $filename = time() . '_' . $file->getClientOriginalName();
+    $filename = $file->hashName();
 
     // Make sure folder exists
     if (!file_exists(public_path('storage/services'))) {
@@ -498,7 +498,7 @@ $isUnavailable = $request->has('is_unavailable'); // Check checkbox status
 
     public function approve(StudentService $service)
     {
-        $user = auth()->user();
+        $user = Auth::user();
         if ($user->role !== 'admin') {
             abort(403, 'You are not authorized to approve services.');
         }
@@ -511,7 +511,7 @@ $isUnavailable = $request->has('is_unavailable'); // Check checkbox status
 
     public function reject(StudentService $service)
     {
-        $user = auth()->user();
+        $user = Auth::user();
         if ($user->role !== 'admin') {
             abort(403, 'You are not authorized to reject services.');
         }

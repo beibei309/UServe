@@ -79,15 +79,26 @@
 
                                 {{-- Card Image & Overlays --}}
                                 <div class="relative h-48 overflow-hidden bg-gray-100">
-                                    @php 
-    $isStorageImage = Str::startsWith($service->image_path, 'services/');
-    
-    // Create a new property on the object with the correct full URL
-    $service->full_image_url = $isStorageImage 
-        ? asset('storage/' . $service->image_path) 
-        : asset($service->image_path);
-@endphp
-                                    <img src="{{ $isStorageImage ? asset('storage/' . $service->image_path) : asset($service->image_path) }}"
+                                    @php
+                                        $imageUrl = 'https://via.placeholder.com/400x300?text=Service+Image';
+
+                                        if (!empty($service->image_path)) {
+                                            $path = $service->image_path;
+
+                                            if (Str::startsWith($path, ['http://', 'https://'])) {
+                                                $imageUrl = $path;
+                                            } elseif (Str::startsWith($path, 'storage/')) {
+                                                $imageUrl = asset($path);
+                                            } elseif (Str::startsWith($path, 'services/')) {
+                                                $imageUrl = asset('storage/' . $path);
+                                            } elseif (file_exists(public_path('storage/' . $path))) {
+                                                $imageUrl = asset('storage/' . $path);
+                                            } elseif (file_exists(public_path($path))) {
+                                                $imageUrl = asset($path);
+                                            }
+                                        }
+                                    @endphp
+                                    <img src="{{ $imageUrl }}"
                                         class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                                         onerror="this.src='https://via.placeholder.com/400x300?text=Service+Image'">
 

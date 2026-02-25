@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\ServiceRequest;
 use App\Models\StudentService;
+use App\Models\Review;
 use App\Models\Cat;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Routing\Controller as BaseController;
 use App\Notifications\NewServiceRequest;
 use App\Notifications\ServiceRequestStatusUpdated;
@@ -46,7 +48,7 @@ class ServiceRequestController extends BaseController
 
             // Check availability
             if (!$studentService->is_active || !$studentService->user->is_available) {
-                return response()->json(['error' => 'Service or provider unavailable.'], 400);
+                return response()->json(['message' => 'Service or provider unavailable.'], 400);
             }
 
             // Check for existing active requests from this user
@@ -56,7 +58,7 @@ class ServiceRequestController extends BaseController
                 ->exists();
 
             if ($hasActiveRequest) {
-                return response()->json(['error' => 'You already have an active request with this helper.'], 400);
+                return response()->json(['message' => 'You already have an active request with this helper.'], 400);
             }
 
             // --- LOGIC SPLIT: Session vs Task ---
@@ -66,12 +68,14 @@ class ServiceRequestController extends BaseController
             // If it is Session Based, we MUST have times and check overlap
             if ($studentService->session_duration) {
                 if (!$startTime || !$endTime) {
-                    return response()->json(['error' => 'Start and End time are required for this service.'], 422);
+                    return response()->json(['message' => 'Start and End time are required for this service.'], 422);
                 }
 
                 // Check Overlap logic ONLY for session-based services
+                $selectedDateJson = json_encode($validated['selected_dates']);
+
                 $overlapping = ServiceRequest::where('student_service_id', $studentService->id)
-                    ->where('selected_dates', $validated['selected_dates'])
+                    ->whereRaw('selected_dates::text = ?', [$selectedDateJson])
                     ->whereIn('status', ['pending', 'accepted', 'in_progress', 'approved'])
                     ->where(function ($query) use ($startTime, $endTime) {
                         $query->where('start_time', '<', $endTime)
@@ -80,7 +84,7 @@ class ServiceRequestController extends BaseController
                     ->exists();
 
                 if ($overlapping) {
-                    return response()->json(['error' => 'This time slot is booked. Please select another.'], 400);
+                    return response()->json(['message' => 'This time slot is booked. Please select another.'], 400);
                 }
             } else {
                 $startTime = $startTime ?? '00:00';
@@ -103,18 +107,25 @@ class ServiceRequestController extends BaseController
                 'status'             => 'pending'
             ]);
 
-            // Notify Provider
-            $studentService->user->notify(new NewServiceRequest($serviceRequest));
-            // Through email
-            if ($studentService->user->email) {
-                Mail::to($studentService->user->email)
-                    ->send(new NewServiceRequestNotification($serviceRequest, 'provider'));
-            }
+            // Notify Provider + Email (non-blocking)
+            try {
+                $studentService->user->notify(new NewServiceRequest($serviceRequest));
 
-            // Send Email to Student (Requester)
-            if ($user->email) {
-                Mail::to($user->email)
-                    ->send(new NewServiceRequestNotification($serviceRequest, 'student'));
+                if ($studentService->user->email) {
+                    Mail::to($studentService->user->email)
+                        ->send(new NewServiceRequestNotification($serviceRequest, 'provider'));
+                }
+
+                if ($user->email) {
+                    Mail::to($user->email)
+                        ->send(new NewServiceRequestNotification($serviceRequest, 'student'));
+                }
+            } catch (\Throwable $notifyError) {
+                Log::warning('ServiceRequest notifications failed: ' . $notifyError->getMessage(), [
+                    'service_request_id' => $serviceRequest->id,
+                    'requester_id' => $user->id,
+                    'provider_id' => $studentService->user_id,
+                ]);
             }
             
 
@@ -125,8 +136,8 @@ class ServiceRequestController extends BaseController
             ]);
 
         } catch (\Exception $e) {
-            \Log::error('ServiceRequest store error: ' . $e->getMessage());
-            return response()->json(['error' => 'Server error occurred.'], 500);
+            Log::error('ServiceRequest store error: ' . $e->getMessage());
+            return response()->json(['message' => 'Server error occurred.'], 500);
         }
     }
 
@@ -396,7 +407,7 @@ public function index(Request $request)
    public function buyerConfirmPayment(Request $request, ServiceRequest $serviceRequest)
     {
         // 1. Authorization
-	$user = auth()->user();
+	$user = Auth::user();
        if ($serviceRequest->requester_id != $user->id && $serviceRequest->provider_id != $user->id) {
             abort(403);
         }
@@ -408,10 +419,14 @@ public function index(Request $request)
 
         // 3. Handle File Upload
         if ($request->hasFile('payment_proof')) {
-            // Stores in storage/app/public/payment_proofs
-            $path = $request->file('payment_proof')->store('payment_proofs', 'public');
-            
-            // Save path to DB
+            $file = $request->file('payment_proof');
+            $filename = $file->hashName();
+            $path = Storage::disk('public')->putFileAs('payment_proofs', $file, $filename);
+
+            if (!$path || !Storage::disk('public')->exists($path)) {
+                return back()->withErrors(['payment_proof' => 'Payment proof upload failed. Please try again.']);
+            }
+
             $serviceRequest->update(['payment_proof' => $path]);
         }
 
@@ -426,7 +441,7 @@ public function index(Request $request)
     public function finalizeOrder(Request $request, ServiceRequest $serviceRequest)
     {
         // 1. Authorization
-	$user = auth()->user();
+	$user = Auth::user();
        if ($serviceRequest->requester_id != $user->id && $serviceRequest->provider_id != $user->id) {
             abort(403, 'Unauthorized action.');
         }
@@ -480,7 +495,7 @@ public function index(Request $request)
         $serviceRequest->update([
             'status' => 'disputed',
             'dispute_reason' => $reason,
-            'reported_by' => auth()->id()
+            'reported_by' => Auth::id()
         ]);
 
         return back()->with('success', 'Report submitted. Admin will review the case.');
@@ -497,7 +512,7 @@ public function index(Request $request)
             'status' => 'disputed', 
             'payment_status' => 'dispute', 
             'dispute_reason' => $request->reason,
-            'reported_by' => auth()->id()
+            'reported_by' => Auth::id()
         ]);
 
         $buyerId = $serviceRequest->requester_id;
@@ -514,7 +529,7 @@ public function index(Request $request)
         $request = ServiceRequest::findOrFail($id);
 
         // Optional: Security check to ensure only the creator of the dispute or admin can do this
-        // if (auth()->id() !== $request->user_id) { abort(403); }
+        // if (Auth::id() !== $request->user_id) { abort(403); }
 
         if ($request->status === 'disputed') {
             $request->status = 'completed'; // Set directly to completed as requested
@@ -596,13 +611,13 @@ public function index(Request $request)
         $serviceRequest = ServiceRequest::findOrFail($id);
         
         // Validate that the user owns the request or is the provider
-        if (auth()->id() !== $serviceRequest->requester_id && auth()->id() !== $serviceRequest->provider_id) {
+        if (Auth::id() !== $serviceRequest->requester_id && Auth::id() !== $serviceRequest->provider_id) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
         // Validate the new status
         $validated = $request->validate([
-            'status' => 'required|in:pending,accepted,in_progress,completed,cancelled,rejected'
+            'status' => 'required|in:pending,accepted,rejected,in_progress,waiting_payment,completed,cancelled,disputed,approved'
         ]);
 
         // Update the status
@@ -624,7 +639,7 @@ public function index(Request $request)
         ]);
 
         // ensure only provider can review requester
-        if ($serviceRequest->provider_id !== auth()->id()) {
+        if ($serviceRequest->provider_id !== Auth::id()) {
             abort(403);
         }
 
@@ -635,7 +650,7 @@ public function index(Request $request)
 
         Review::create([
             'service_request_id' => $serviceRequest->id,
-            'reviewer_id' => auth()->id(),
+            'reviewer_id' => Auth::id(),
             'reviewee_id' => $serviceRequest->requester_id,
             'rating' => $request->rating,
             'comment' => $request->comment,

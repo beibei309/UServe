@@ -8,7 +8,7 @@
         </h2>
     </x-slot>
 
-    <div class="py-12">
+    <div class="py-6">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
 
             @php
@@ -17,7 +17,7 @@
             @endphp
 
             <div id="received-content" class="sr-tab-content">
-                <div class="overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="overflow-hidden rounded-2xl border border-gray-100 bg-gradient-to-b from-white to-slate-50/50 shadow-sm">
                     <div class="p-6 text-gray-800">
                          <h3 class="font-medium mb-4 700" style="font-size: 25px;">My Services Orders ({{ $receivedRequests->count() }} total)</h3>
 
@@ -101,7 +101,7 @@
                             <div class="flex space-x-4 border-b border-gray-200">
                                 <button onclick="showStatusTab('pending')" id="pending-tab"
                                     class="sr-status-tab-button py-2 px-4 text-sm font-medium {{ $defaultStatusTab === 'pending' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-500 hover:text-custom-teal' }} focus:outline-none">
-                                    Pending Request
+                                    Pending
                                 </button>
                                 <button onclick="showStatusTab('in-progress')" id="in-progress-tab"
                                     class="sr-status-tab-button py-2 px-4 text-sm font-medium {{ $defaultStatusTab === 'in-progress' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-500 hover:text-custom-teal' }} focus:outline-none">
@@ -141,7 +141,8 @@
                     $dateCount = is_array($dates) ? count($dates) : 1;
                 @endphp
 
-                <div class="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:shadow-md hover:border-indigo-300">
+                <div class="sr-request-item group relative overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:shadow-md hover:border-indigo-300"
+                    data-category="{{ optional($service->category)->name ?? 'Other' }}">
                     
                     <div class="absolute top-0 left-0 right-0 h-1 bg-indigo-500"></div>
 
@@ -309,7 +310,8 @@
                     };
                 @endphp
 
-                <div class="group relative overflow-hidden rounded-2xl border bg-white shadow-sm transition-all duration-300 hover:shadow-md {{ $statusTheme['border'] }}">
+                <div class="sr-request-item group relative overflow-hidden rounded-2xl border bg-white shadow-sm transition-all duration-300 hover:shadow-md {{ $statusTheme['border'] }}"
+                    data-category="{{ optional($service->category)->name ?? 'Other' }}">
                     
                     <div class="absolute top-0 left-0 right-0 h-1 {{ $statusTheme['bg'] }}"></div>
 
@@ -487,7 +489,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                 </svg>
             </div>
-            <h3 class="text-lg font-semibold text-gray-900">No Request History</h3>
+            <h3 class="text-lg font-semibold text-gray-900">No Completed Requests Yet</h3>
             <p class="mt-2 text-sm text-gray-500">Completed and cancelled jobs will appear here.</p>
         </div>
     @else
@@ -524,7 +526,8 @@
                     };
                 @endphp
 
-                <div class="group relative overflow-hidden rounded-2xl border bg-white shadow-sm transition-all duration-300 hover:shadow-md {{ $theme['border'] }}">
+                <div class="sr-request-item group relative overflow-hidden rounded-2xl border bg-white shadow-sm transition-all duration-300 hover:shadow-md {{ $theme['border'] }}"
+                    data-category="{{ optional($service->category)->name ?? 'Other' }}">
                     
                     <div class="absolute top-0 left-0 right-0 h-1 {{ $theme['strip'] }}"></div>
 
@@ -1073,6 +1076,7 @@
                             function openProofModal(fileUrl, requestId) {
                                 const modal = document.getElementById('proofModal');
                                 const img = document.getElementById('proofImage');
+                                const pdf = document.getElementById('proofPdf');
                                 const fallback = document.getElementById('proofFallback');
                                 const link = document.getElementById('proofLink');
                                 const form = document.getElementById('finalizeOrderForm');
@@ -1081,17 +1085,40 @@
                                 // Ensure you have this route defined: Route::post('/service-requests/{id}/finalize', ...)
                                form.action = "{{ url('service-requests') }}/" + requestId + "/finalize";
 
-                                // Handle File Type (Simple check)
-                                const isImage = fileUrl.match(/\.(jpeg|jpg|gif|png)$/) != null;
+                                // Reset viewers
+                                img.classList.add('hidden');
+                                pdf.classList.add('hidden');
+                                fallback.classList.add('hidden');
+                                img.src = '';
+                                pdf.src = '';
+                                link.href = fileUrl;
+
+                                // Detect extension robustly (handles uppercase + query strings)
+                                let ext = '';
+                                try {
+                                    const cleanPath = new URL(fileUrl, window.location.origin).pathname;
+                                    const parts = cleanPath.split('.');
+                                    ext = parts.length > 1 ? parts.pop().toLowerCase() : '';
+                                } catch (e) {
+                                    ext = (fileUrl.split('?')[0].split('.').pop() || '').toLowerCase();
+                                }
+
+                                const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'];
+                                const isImage = imageExts.includes(ext);
+                                const isPdf = ext === 'pdf';
 
                                 if (isImage) {
+                                    img.onerror = function() {
+                                        img.classList.add('hidden');
+                                        fallback.classList.remove('hidden');
+                                    };
                                     img.src = fileUrl;
                                     img.classList.remove('hidden');
-                                    fallback.classList.add('hidden');
+                                } else if (isPdf) {
+                                    pdf.src = fileUrl;
+                                    pdf.classList.remove('hidden');
                                 } else {
-                                    img.classList.add('hidden');
                                     fallback.classList.remove('hidden');
-                                    link.href = fileUrl;
                                 }
 
                                 modal.classList.remove('hidden');
@@ -1100,6 +1127,8 @@
                             // 2. CLOSE MODAL
                             function closeProofModal() {
                                 document.getElementById('proofModal').classList.add('hidden');
+                                document.getElementById('proofImage').src = '';
+                                document.getElementById('proofPdf').src = '';
                             }
 
                             // 3. SUBMIT DECISION (Paid or Unpaid)
