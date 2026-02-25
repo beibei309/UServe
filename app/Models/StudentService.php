@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class StudentService extends Model
 {
@@ -17,13 +19,12 @@ class StudentService extends Model
         'description',
         'status',
         'is_active',
-        'availability' => 'array',
+        'unavailable_dates',
         'operating_hours',
         'session_duration',
         'blocked_slots',
         // Basic package
         'basic_duration',
-        'session_duration',
         'basic_frequency',
         'basic_price',
         'basic_description',
@@ -50,28 +51,19 @@ class StudentService extends Model
         'is_active' => true,
     ];
 
-    public function student()
-    {
-        return $this->belongsTo(User::class, 'user_id');
-    }
-
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+
+    /** Backward compatibility alias */
+    public function student() { return $this->user(); }
 
     public function category()
     {
         return $this->belongsTo(Category::class);
     }
 
-    /**
-     * Get applications for this service
-     */
-    public function applications()
-    {
-        return $this->hasMany(ServiceApplication::class, 'service_id');
-    }
 
     public function reviews()
 {
@@ -122,12 +114,12 @@ public function favoritedBy()
 
 public function getIsFavouritedAttribute()
 {
-    if (!auth()->check()) {
+    if (!Auth::check()) {
         return false;
     }
 
-    return \DB::table('favorites')
-        ->where('user_id', auth()->id())
+    return DB::table('favorites')
+        ->where('user_id', Auth::id())
         ->where('service_id', $this->id)
         ->exists();
 }

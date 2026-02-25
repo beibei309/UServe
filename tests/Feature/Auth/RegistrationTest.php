@@ -12,6 +12,9 @@ test('new users can register', function () {
         'email' => 'test@example.com',
         'password' => 'password',
         'password_confirmation' => 'password',
+        'role' => 'community',
+        'phone' => '0123456789',
+        'community_type' => 'public',
     ]);
 
     $this->assertAuthenticated();

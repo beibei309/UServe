@@ -82,8 +82,9 @@ class AdminFeedbackController extends Controller
             return back()->with('error', 'User must receive 2 warnings before blocking.');
         }
 
-        // Set status blocked
+        // Synchronize moderation flags for legacy/new checks
         $user->is_blocked = true;
+        $user->is_suspended = true;
         $user->save();
 
         // Redirect ikut role

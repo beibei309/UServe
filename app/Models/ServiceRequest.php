@@ -72,7 +72,7 @@ class ServiceRequest extends Model
     public function receivedReviews()
     {
         return $this->hasMany(Review::class)
-                    ->where('reviewee_id', $this->user_id);
+                    ->where('reviewee_id', $this->provider_id);
     }
     public function reviews()
     {
@@ -175,11 +175,23 @@ class ServiceRequest extends Model
 
     public function isPaid()
     {
+        return $this->payment_status === 'paid';
+    }
+
+    public function isPaymentPending()
+    {
         return $this->payment_status === 'verification_status';
     }
 
      public function PaidApproved()
     {
+        // Backward compatibility alias
+        return $this->isPaid();
+    }
+
+    public function isPaidApproved()
+    {
+        // Preferred named helper
         return $this->payment_status === 'paid';
     }
 

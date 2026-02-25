@@ -36,6 +36,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'is_available',
         'is_suspended',
         'is_blacklisted',
+        'is_blocked',
+        'warning_count',
         'blacklist_reason',
         'bio',
         'faculty',
@@ -45,7 +47,6 @@ class User extends Authenticatable implements MustVerifyEmail
         'longitude',
         'location_verified_at',
         'skills',
-        'work_experience_message',
         'work_experience_message',
         'work_experience_file', 
         'verification_document_path',
@@ -82,46 +83,24 @@ class User extends Authenticatable implements MustVerifyEmail
             'is_available' => 'boolean',
             'is_suspended' => 'boolean',
             'is_blacklisted' => 'boolean',
+            'is_blocked' => 'boolean',
             'password' => 'hashed',
         ];
     }
 
     // Relationships
-    public function studentServices()
-    {
-        return $this->hasMany(StudentService::class, 'user_id');
-    }
-    
-    public function reviewsReceived()
-    {
-        // reviews adalah table. reviewee_id adalah foreign key yang merujuk user ini.
-        return $this->hasMany(Review::class, 'reviewee_id');
-    }
-
     public function services()
     {
         return $this->hasMany(StudentService::class, 'user_id');
     }
+
+    /** Backward compatibility aliases */
+    public function studentServices() { return $this->services(); }
+    public function student_services() { return $this->services(); }
     
-
-    public function chatRequestsSent()
+    public function reviewsReceived()
     {
-        return $this->hasMany(ChatRequest::class, 'requester_id');
-    }
-
-    public function chatRequestsReceived()
-    {
-        return $this->hasMany(ChatRequest::class, 'recipient_id');
-    }
-
-    public function conversationsAsStudent()
-    {
-        return $this->hasMany(Conversation::class, 'student_id');
-    }
-
-    public function conversationsAsCustomer()
-    {
-        return $this->hasMany(Conversation::class, 'customer_id');
+        return $this->hasMany(Review::class, 'reviewee_id');
     }
 
     public function reviewsWritten()
@@ -130,10 +109,6 @@ class User extends Authenticatable implements MustVerifyEmail
     }
     
 
-    public function applicationInterests()
-    {
-        return $this->hasMany(ServiceApplicationInterest::class, 'student_id');
-    }
 
 public function favoriteServices()
 {
@@ -211,18 +186,7 @@ public function favoriteServices()
     }
 
     public function serviceRequestsReceived()
-{
-    // provider_id adalah foreign key dalam table service_requests yang merujuk kepada ID user (seller)
-    return $this->hasMany(ServiceRequest::class, 'provider_id');
-}
-
-public function student_services()
-{
-    return $this->hasMany(StudentService::class, 'user_id');
-}
-
-
-    
-
-    
+    {
+        return $this->hasMany(ServiceRequest::class, 'provider_id');
+    }
 }

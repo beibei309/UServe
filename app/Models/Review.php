@@ -10,9 +10,7 @@ class Review extends Model
     use HasFactory;
 
     protected $fillable = [
-        'conversation_id',
         'service_request_id',
-        'service_application_id',
         'student_service_id',
         'reviewer_id',
         'reviewee_id',
@@ -22,31 +20,18 @@ class Review extends Model
         'comment',
     ];
 
-    public function conversation()
-    {
-        return $this->belongsTo(Conversation::class);
-    }
-
     public function serviceRequest()
     {
         return $this->belongsTo(ServiceRequest::class);
     }
 
-    public function serviceApplication()
-    {
-        return $this->belongsTo(ServiceApplication::class);
-    }
-
     public function service()
     {
-
         return $this->belongsTo(StudentService::class, 'student_service_id');
     }
 
-    public function studentService()
-    {
-        return $this->belongsTo(StudentService::class, 'student_service_id');
-    }
+    /** Backward compatibility alias */
+    public function studentService() { return $this->service(); }
 
 
     public function reviewer()

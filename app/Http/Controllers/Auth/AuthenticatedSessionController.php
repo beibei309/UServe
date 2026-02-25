@@ -29,8 +29,8 @@ class AuthenticatedSessionController extends Controller
 
         $user = Auth::user();
 
-        if ($user->is_suspended || $user->is_blacklisted) {
-                $reason = $user->blacklist_reason ?? 'Violation of terms';
+        if ($user->is_suspended || $user->is_blacklisted || $user->is_blocked) {
+            $reason = $user->blacklist_reason ?? 'Violation of terms';
 
             Auth::guard('web')->logout();
 
