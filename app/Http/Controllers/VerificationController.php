@@ -114,8 +114,9 @@ class VerificationController extends Controller
             $filename = $file->hashName();
 
             // 2. Make sure folder exists
-            if (!file_exists(public_path('profile-photos'))) {
-                mkdir(public_path('profile-photos'), 0755, true);
+            $photoPath = public_path('profile-photos');
+            if (!file_exists($photoPath)) {
+                mkdir($photoPath, 0777, true);
             }
 
             // 3. Move file directly to public/profile-photos

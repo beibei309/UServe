@@ -153,8 +153,9 @@ class StudentsController extends Controller
             $file = $request->file('profile_photo');
             $filename = $file->hashName();
 
-            if (!file_exists(public_path('profile-photos'))) {
-                mkdir(public_path('profile-photos'), 0755, true);
+            $photoPath = public_path('profile-photos');
+            if (!file_exists($photoPath)) {
+                mkdir($photoPath, 0777, true);
             }
 
             $file->move(public_path('profile-photos'), $filename);
@@ -260,8 +261,9 @@ class StudentsController extends Controller
         $file = $request->file('profile_photo_path');
         $filename = $file->hashName();
 
-        if (!file_exists(public_path('profile-photos'))) {
-            mkdir(public_path('profile-photos'), 0755, true);
+        $photoPath = public_path('profile-photos');
+        if (!file_exists($photoPath)) {
+            mkdir($photoPath, 0777, true);
         }
 
         $file->move(public_path('profile-photos'), $filename);
