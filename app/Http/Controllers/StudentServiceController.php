@@ -77,7 +77,7 @@ class StudentServiceController extends Controller
         $query->orderBy('basic_price', 'desc');
     }
 
-    $services = $query->paginate(15); 
+    $services = $query->paginate(5);
 
     return view('services.index', [
         'services' => $services,

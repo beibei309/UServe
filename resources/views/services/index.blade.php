@@ -449,7 +449,7 @@
                         @endforeach
                     </div>
                     <div class="mt-10">
-                        {{-- {{ $services->links() }} --}}
+                        {{ $services->appends(request()->query())->links() }}
                     </div>
                 </main>
             </div>

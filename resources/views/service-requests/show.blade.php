@@ -250,6 +250,26 @@
                             </div>
 
                             @if ($service)
+                                @php
+                                    $imageUrl = null;
+                                    $defaultPlaceholder = 'https://ui-avatars.com/api/?name=' . urlencode($service->title ?? 'Service');
+
+                                    if (!empty($service->image_path)) {
+                                        $path = $service->image_path;
+
+                                        if (Str::startsWith($path, ['http://', 'https://'])) {
+                                            $imageUrl = $path;
+                                        } elseif (Str::startsWith($path, 'storage/')) {
+                                            $imageUrl = asset($path);
+                                        } elseif (file_exists(public_path('storage/' . $path))) {
+                                            $imageUrl = asset('storage/' . $path);
+                                        } elseif (file_exists(public_path($path))) {
+                                            $imageUrl = asset($path);
+                                        } else {
+                                            $imageUrl = $defaultPlaceholder;
+                                        }
+                                    }
+                                @endphp
                                 <div>
                                     <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
                                         <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -267,8 +287,8 @@
                                             </div>
 
                                             <div class="w-20 h-20 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0 grayscale">
-                                                @if ($service->image_path)
-                                                    <img src="{{ Str::startsWith($service->image_path, 'services/') ? asset('storage/' . $service->image_path) : asset($service->image_path) }}" class="w-full h-full object-cover">
+                                                @if ($imageUrl)
+                                                    <img src="{{ $imageUrl }}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='{{ $defaultPlaceholder }}';">
                                                 @else
                                                     <div class="w-full h-full flex items-center justify-center text-gray-400">
                                                         <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd" /></svg>
@@ -287,8 +307,8 @@
                                         {{-- ACTIVE: Clickable Link --}}
                                         <a href="{{ route('services.details', $service->id) }}" class="block bg-white rounded-xl border border-gray-200 p-5 flex gap-4 items-start hover:shadow-md transition-all hover:border-indigo-300 group">
                                             <div class="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
-                                                @if ($service->image_path)
-                                                    <img src="{{ Str::startsWith($service->image_path, 'services/') ? asset('storage/' . $service->image_path) : asset($service->image_path) }}" class="w-full h-full object-cover">
+                                                @if ($imageUrl)
+                                                    <img src="{{ $imageUrl }}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='{{ $defaultPlaceholder }}';">
                                                 @else
                                                     <div class="w-full h-full flex items-center justify-center text-gray-300">
                                                         <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd" /></svg>

@@ -1058,12 +1058,12 @@
             document.querySelectorAll('.sr-status-tab-content').forEach(content => content.classList.add('hidden'));
             document.querySelectorAll('.sr-status-tab-button').forEach(button => {
                 button.classList.remove('text-indigo-600', 'border-b-2', 'border-indigo-600');
-                button.classList.add('text-gray-500');
+                button.classList.add('text-gray-500', 'hover:text-custom-teal');
             });
 
             document.getElementById(status + '-content').classList.remove('hidden');
             const activeTab = document.getElementById(status + '-tab');
-            activeTab.classList.remove('text-gray-500');
+            activeTab.classList.remove('text-gray-500', 'hover:text-custom-teal');
             activeTab.classList.add('text-indigo-600', 'border-b-2', 'border-indigo-600');
         }
 
@@ -1311,13 +1311,13 @@
             // Run original tab switch logic (from previous code)
             document.querySelectorAll('.sr-status-tab-content').forEach(content => content.classList.add('hidden'));
             document.querySelectorAll('.sr-status-tab-button').forEach(button => {
-                button.classList.remove('bg-indigo-50', 'text-indigo-700', 'shadow-sm');
-                button.classList.add('text-gray-500', 'hover:text-gray-700', 'hover:bg-gray-50');
+                button.classList.remove('text-indigo-600', 'border-b-2', 'border-indigo-600');
+                button.classList.add('text-gray-500', 'hover:text-custom-teal');
             });
             document.getElementById(status + '-content').classList.remove('hidden');
             const activeTab = document.getElementById(status + '-tab');
-            activeTab.classList.remove('text-gray-500', 'hover:text-gray-700', 'hover:bg-gray-50');
-            activeTab.classList.add('bg-indigo-50', 'text-indigo-700', 'shadow-sm');
+            activeTab.classList.remove('text-gray-500', 'hover:text-custom-teal');
+            activeTab.classList.add('text-indigo-600', 'border-b-2', 'border-indigo-600');
 
             // Re-run filter immediately so the new tab respects current search/category inputs
             filterItems();

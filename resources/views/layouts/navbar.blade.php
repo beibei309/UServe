@@ -55,16 +55,16 @@
                 <i class="fa-brands fa-facebook-f text-sm"></i>
             </a>
 
-            <a href="https://x.com/UPSI_Malaysia" target="_blank"
-                class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-50 text-slate-400 hover:bg-slate-900 hover:text-white hover:shadow-lg hover:shadow-slate-300 transition-all duration-300"
-                title="X (Twitter)">
-                <i class="fa-brands fa-x-twitter text-sm"></i>
-            </a>
-
             <a href="https://www.instagram.com/upsi_malaysia" target="_blank"
                 class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-50 text-slate-400 hover:bg-gradient-to-tr hover:from-[#f9ce34] hover:via-[#ee2a7b] hover:to-[#6228d7] hover:text-white hover:shadow-lg hover:shadow-pink-200 transition-all duration-300"
                 title="Instagram">
                 <i class="fa-brands fa-instagram text-sm"></i>
+            </a>
+            
+            <a href="https://www.tiktok.com/@upsi_malaysia" target="_blank"
+                class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-50 text-slate-400 hover:bg-slate-900 hover:text-white hover:shadow-lg hover:shadow-slate-300 transition-all duration-300"
+                title="TikTok">
+                <i class="fa-brands fa-tiktok text-sm"></i>
             </a>
 
         </div>

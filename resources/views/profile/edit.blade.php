@@ -10,7 +10,7 @@
                
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
-                        <h1 class="text-3xl md:text-4xl font-black text-slate-900 tracking-tight">Account Settings</h1>
+                        <h1 class="text-3xl md:text-4xl font-black text-slate-900 tracking-tight">Profile Settings</h1>
                         <p class="mt-2 text-slate-500 font-medium">Manage your identity, security, and reputation.</p>
                     </div>
                     
