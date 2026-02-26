@@ -11,15 +11,15 @@ return new class extends Migration
      */
         public function up(): void
         {
-        Schema::create('faqs', function (Blueprint $table) {
-        $table->id();
-        $table->string('category');          
-        $table->string('question');
-        $table->text('answer');
-        $table->boolean('is_active')->default(true);
-        $table->integer('display_order')->default(0);
-        $table->timestamps();
-    });
+        Schema::create('h2u_faqs', function (Blueprint $table) {
+            $table->bigIncrements('hfq_id');
+            $table->string('hfq_category');
+            $table->string('hfq_question');
+            $table->text('hfq_answer');
+            $table->boolean('hfq_is_active')->default(true);
+            $table->integer('hfq_display_order')->default(0);
+            $table->timestamps();
+        });
     }
 
     /**
@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('faqs');
+        Schema::dropIfExists('h2u_faqs');
     }
 };

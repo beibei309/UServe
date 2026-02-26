@@ -11,15 +11,15 @@ return new class extends Migration
      */
     public function up()
 {
-    Schema::table('student_statuses', function (Blueprint $table) {
-        $table->date('graduation_date')->nullable()->after('status');
+    Schema::table('h2u_student_statuses', function (Blueprint $table) {
+        $table->date('hss_graduation_date')->nullable()->after('hss_status');
     });
 }
 
 public function down()
 {
-    Schema::table('student_statuses', function (Blueprint $table) {
-        $table->dropColumn('graduation_date');
+    Schema::table('h2u_student_statuses', function (Blueprint $table) {
+        $table->dropColumn('hss_graduation_date');
     });
 }
 };

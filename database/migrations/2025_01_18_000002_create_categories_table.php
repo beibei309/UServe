@@ -7,20 +7,20 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::create('categories', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('slug')->unique();
-            $table->text('description')->nullable();
-            $table->text('image_path')->nullable();
-            $table->text('color')->nullable();
-            $table->boolean('is_active')->default(true);
+        Schema::create('h2u_categories', function (Blueprint $table) {
+            $table->bigIncrements('hc_id');
+            $table->string('hc_name');
+            $table->string('hc_slug')->unique();
+            $table->text('hc_description')->nullable();
+            $table->text('hc_image_path')->nullable();
+            $table->text('hc_color')->nullable();
+            $table->boolean('hc_is_active')->default(true);
             $table->timestamps();
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('categories');
+        Schema::dropIfExists('h2u_categories');
     }
 };

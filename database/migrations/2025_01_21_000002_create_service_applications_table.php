@@ -11,21 +11,22 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('service_applications', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->string('service_type');
-            $table->string('title');
-            $table->text('description');
-            $table->string('budget_range')->nullable();
-            $table->string('timeline');
-            $table->json('contact_methods')->nullable();
-            $table->enum('status', ['open', 'closed', 'completed'])->default('open');
+        Schema::create('h2u_service_applications', function (Blueprint $table) {
+            $table->bigIncrements('hsa_id');
+            $table->unsignedBigInteger('hsa_user_id');
+            $table->foreign('hsa_user_id')->references('hu_id')->on('h2u_users')->onDelete('cascade');
+            $table->string('hsa_service_type');
+            $table->string('hsa_title');
+            $table->text('hsa_description');
+            $table->string('hsa_budget_range')->nullable();
+            $table->string('hsa_timeline');
+            $table->json('hsa_contact_methods')->nullable();
+            $table->enum('hsa_status', ['open', 'closed', 'completed'])->default('open');
             $table->timestamps();
             $table->softDeletes();
-            
-            $table->index(['status', 'created_at']);
-            $table->index(['user_id', 'status']);
+
+            $table->index(['hsa_status', 'created_at']);
+            $table->index(['hsa_user_id', 'hsa_status']);
         });
     }
 
@@ -34,6 +35,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('service_applications');
+        Schema::dropIfExists('h2u_service_applications');
     }
 };

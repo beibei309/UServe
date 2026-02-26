@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-    Schema::table('service_requests', function (Blueprint $table) {
-        $table->json('selected_package')->nullable(); 
+    Schema::table('h2u_service_requests', function (Blueprint $table) {
+        $table->json('hsr_selected_package')->nullable();
     });
     }
 
@@ -21,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
    {
-    Schema::table('service_requests', function (Blueprint $table) {
-        $table->dropColumn('selected_package');
+    Schema::table('h2u_service_requests', function (Blueprint $table) {
+        $table->dropColumn('hsr_selected_package');
         });
     }
 };

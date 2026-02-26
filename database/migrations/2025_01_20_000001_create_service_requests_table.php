@@ -11,21 +11,24 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('service_requests', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('student_service_id')->constrained('student_services')->onDelete('cascade');
-            $table->foreignId('requester_id')->constrained('users')->onDelete('cascade'); // Community member
-            $table->foreignId('provider_id')->constrained('users')->onDelete('cascade'); // Student
-            $table->text('message')->nullable(); // Optional message from requester
-            $table->decimal('offered_price', 10, 2)->nullable(); // Price offered by requester
-            $table->enum('status', ['pending', 'accepted', 'rejected', 'in_progress', 'completed', 'cancelled'])->default('pending');
-            $table->timestamp('accepted_at')->nullable();
-            $table->timestamp('completed_at')->nullable();
+        Schema::create('h2u_service_requests', function (Blueprint $table) {
+            $table->bigIncrements('hsr_id');
+            $table->unsignedBigInteger('hsr_student_service_id');
+            $table->foreign('hsr_student_service_id')->references('hss_id')->on('h2u_student_services')->onDelete('cascade');
+            $table->unsignedBigInteger('hsr_requester_id'); // Community member
+            $table->foreign('hsr_requester_id')->references('hu_id')->on('h2u_users')->onDelete('cascade');
+            $table->unsignedBigInteger('hsr_provider_id'); // Student
+            $table->foreign('hsr_provider_id')->references('hu_id')->on('h2u_users')->onDelete('cascade');
+            $table->text('hsr_message')->nullable(); // Optional message from requester
+            $table->decimal('hsr_offered_price', 10, 2)->nullable(); // Price offered by requester
+            $table->enum('hsr_status', ['pending', 'accepted', 'rejected', 'in_progress', 'completed', 'cancelled'])->default('pending');
+            $table->timestamp('hsr_accepted_at')->nullable();
+            $table->timestamp('hsr_completed_at')->nullable();
             $table->timestamps();
-            
-            $table->index(['provider_id', 'status']);
-            $table->index(['requester_id', 'status']);
-            $table->index(['student_service_id', 'status']);
+
+            $table->index(['hsr_provider_id', 'hsr_status']);
+            $table->index(['hsr_requester_id', 'hsr_status']);
+            $table->index(['hsr_student_service_id', 'hsr_status']);
         });
     }
 
@@ -34,6 +37,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('service_requests');
+        Schema::dropIfExists('h2u_service_requests');
     }
 };

@@ -11,15 +11,15 @@ return new class extends Migration
      */
     public function up()
 {
-    Schema::table('service_requests', function (Blueprint $table) {
-        $table->timestamp('finished_at')->nullable()->after('started_at');
+    Schema::table('h2u_service_requests', function (Blueprint $table) {
+        $table->timestamp('hsr_finished_at')->nullable()->after('hsr_started_at');
     });
 }
 
 public function down()
 {
-    Schema::table('service_requests', function (Blueprint $table) {
-        $table->dropColumn('finished_at');
+    Schema::table('h2u_service_requests', function (Blueprint $table) {
+        $table->dropColumn('hsr_finished_at');
     });
 }
 };

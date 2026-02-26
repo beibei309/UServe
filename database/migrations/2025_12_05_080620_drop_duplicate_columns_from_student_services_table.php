@@ -8,16 +8,16 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('student_services', function (Blueprint $table) {
-            $table->dropColumn(['suggested_price', 'price_range']);
+        Schema::table('h2u_student_services', function (Blueprint $table) {
+            $table->dropColumn(['hss_suggested_price', 'hss_price_range']);
         });
     }
 
     public function down(): void
     {
-        Schema::table('student_services', function (Blueprint $table) {
-            $table->decimal('suggested_price', 10, 2)->nullable();
-            $table->string('price_range')->nullable();
+        Schema::table('h2u_student_services', function (Blueprint $table) {
+            $table->decimal('hss_suggested_price', 10, 2)->nullable();
+            $table->string('hss_price_range')->nullable();
         });
     }
 };

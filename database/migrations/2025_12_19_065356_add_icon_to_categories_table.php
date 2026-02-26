@@ -11,8 +11,8 @@ return new class extends Migration
      */
   public function up()
 {
-    Schema::table('categories', function (Blueprint $table) {
-        $table->string('icon')->nullable()->default('fa fa-folder'); // Default icon
+    Schema::table('h2u_categories', function (Blueprint $table) {
+        $table->string('hc_icon')->nullable()->default('fa fa-folder'); // Default icon
     });
 }
 
@@ -21,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('categories', function (Blueprint $table) {
-            //
+        Schema::table('h2u_categories', function (Blueprint $table) {
+            $table->dropColumn('hc_icon');
         });
     }
 };

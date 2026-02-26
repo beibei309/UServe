@@ -11,12 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('admins', function (Blueprint $table) {
-        $table->id();
-        $table->string('name');
-        $table->string('email')->unique();
-        $table->string('password'); // stored as plain text (your preference)
-        $table->string('role')->default('admin'); // admin or superadmin
+        Schema::create('h2u_admins', function (Blueprint $table) {
+        $table->bigIncrements('ha_id');
+        $table->string('ha_name');
+        $table->string('ha_email')->unique();
+        $table->string('ha_password'); // stored as plain text (your preference)
+        $table->string('ha_role')->default('admin'); // admin or superadmin
         $table->timestamps();
     });
     }
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('admins');
+        Schema::dropIfExists('h2u_admins');
     }
 };

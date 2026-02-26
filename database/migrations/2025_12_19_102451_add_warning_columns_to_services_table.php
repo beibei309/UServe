@@ -11,16 +11,16 @@ return new class extends Migration
      */
     public function up()
 {
-    Schema::table('student_services', function (Blueprint $table) {
-        $table->integer('warning_count')->default(0)->after('approval_status');
-        $table->text('warning_reason')->nullable()->after('warning_count'); // Column baru untuk message
+    Schema::table('h2u_student_services', function (Blueprint $table) {
+        $table->integer('hss_warning_count')->default(0)->after('hss_approval_status');
+        $table->text('hss_warning_reason')->nullable()->after('hss_warning_count'); // Column baru untuk message
     });
 }
 
 public function down()
 {
-    Schema::table('student_services', function (Blueprint $table) {
-        $table->dropColumn(['warning_count', 'warning_reason']);
+    Schema::table('h2u_student_services', function (Blueprint $table) {
+        $table->dropColumn(['hss_warning_count', 'hss_warning_reason']);
     });
 }
 };

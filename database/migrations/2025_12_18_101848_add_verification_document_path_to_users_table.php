@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            if (!Schema::hasColumn('users', 'verification_document_path')) {
-                $table->string('verification_document_path')->nullable()->after('verification_status');
+        Schema::table('h2u_users', function (Blueprint $table) {
+            if (!Schema::hasColumn('h2u_users', 'hu_verification_document_path')) {
+                $table->string('hu_verification_document_path')->nullable()->after('hu_verification_status');
             }
         });
     }
@@ -23,8 +23,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('verification_document_path');
+        Schema::table('h2u_users', function (Blueprint $table) {
+            $table->dropColumn('hu_verification_document_path');
         });
     }
 };

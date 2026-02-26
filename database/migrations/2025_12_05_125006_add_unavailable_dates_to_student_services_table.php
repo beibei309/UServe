@@ -8,15 +8,15 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('student_services', function (Blueprint $table) {
-            $table->json('unavailable_dates')->nullable()->after('description');
+        Schema::table('h2u_student_services', function (Blueprint $table) {
+            $table->json('hss_unavailable_dates')->nullable()->after('hss_description');
         });
     }
 
     public function down(): void
     {
-        Schema::table('student_services', function (Blueprint $table) {
-            $table->dropColumn('unavailable_dates');
+        Schema::table('h2u_student_services', function (Blueprint $table) {
+            $table->dropColumn('hss_unavailable_dates');
         });
     }
 };

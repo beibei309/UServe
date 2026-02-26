@@ -11,15 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('favorites', function (Blueprint $table) {
-        $table->unsignedBigInteger('service_id')->nullable()->after('favorited_user_id');
+          Schema::table('h2u_favorites', function (Blueprint $table) {
+            $table->unsignedBigInteger('hf_service_id')->nullable()->after('hf_favorited_user_id');
 
-        // OPTIONAL foreign key
-        $table->foreign('service_id')
-              ->references('id')
-              ->on('student_services')
-              ->onDelete('cascade');
-    });
+            // OPTIONAL foreign key
+            $table->foreign('hf_service_id')
+                ->references('hss_id')
+                ->on('h2u_student_services')
+                ->onDelete('cascade');
+          });
     }
 
     /**
@@ -27,9 +27,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-  Schema::table('favorites', function (Blueprint $table) {
-        $table->dropForeign(['service_id']);
-        $table->dropColumn('service_id');
-    });
+        Schema::table('h2u_favorites', function (Blueprint $table) {
+            $table->dropForeign(['hf_service_id']);
+            $table->dropColumn('hf_service_id');
+        });
     }
 };

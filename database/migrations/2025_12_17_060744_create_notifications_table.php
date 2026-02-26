@@ -11,12 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('notifications', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->string('type');
-            $table->morphs('notifiable');
-            $table->text('data');
-            $table->timestamp('read_at')->nullable();
+        Schema::create('h2u_notifications', function (Blueprint $table) {
+            $table->uuid('hn_id')->primary();
+            $table->string('hn_type');
+            $table->morphs('hn_notifiable');
+            $table->text('hn_data');
+            $table->timestamp('hn_read_at')->nullable();
             $table->timestamps();
         });
     }
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('notifications');
+        Schema::dropIfExists('h2u_notifications');
     }
 };

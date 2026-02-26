@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->timestamp('helper_verified_at')->nullable()->after('staff_verified_at');
-            $table->decimal('latitude', 10, 8)->nullable()->after('address');
-            $table->decimal('longitude', 11, 8)->nullable()->after('latitude');
-            $table->timestamp('location_verified_at')->nullable()->after('longitude');
+        Schema::table('h2u_users', function (Blueprint $table) {
+            $table->timestamp('hu_helper_verified_at')->nullable()->after('hu_staff_verified_at');
+            $table->decimal('hu_latitude', 10, 8)->nullable()->after('hu_address');
+            $table->decimal('hu_longitude', 11, 8)->nullable()->after('hu_latitude');
+            $table->timestamp('hu_location_verified_at')->nullable()->after('hu_longitude');
         });
     }
 
@@ -24,8 +24,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn(['helper_verified_at', 'latitude', 'longitude', 'location_verified_at']);
+        Schema::table('h2u_users', function (Blueprint $table) {
+            $table->dropColumn(['hu_helper_verified_at', 'hu_latitude', 'hu_longitude', 'hu_location_verified_at']);
         });
     }
 };

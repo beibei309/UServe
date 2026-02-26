@@ -8,16 +8,16 @@ return new class extends Migration
 {
    public function up()
 {
-    Schema::table('student_services', function (Blueprint $table) {
+    Schema::table('h2u_student_services', function (Blueprint $table) {
         // specific column for weekly schedule
-        $table->json('operating_hours')->nullable(); 
+        $table->json('hss_operating_hours')->nullable();
     });
 }
 
 public function down()
 {
-    Schema::table('student_services', function (Blueprint $table) {
-        $table->dropColumn('operating_hours');
+    Schema::table('h2u_student_services', function (Blueprint $table) {
+        $table->dropColumn('hss_operating_hours');
     });
 }
 };

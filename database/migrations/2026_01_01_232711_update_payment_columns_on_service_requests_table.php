@@ -16,28 +16,28 @@ return new class extends Migration
 
         if ($driver === 'pgsql') {
             DB::transaction(function () {
-                DB::statement("ALTER TABLE service_requests DROP CONSTRAINT IF EXISTS service_requests_payment_status_check");
-                DB::statement("ALTER TABLE service_requests ALTER COLUMN payment_status TYPE VARCHAR(32)");
-                DB::statement("ALTER TABLE service_requests ALTER COLUMN payment_status SET DEFAULT 'unpaid'");
-                DB::statement("ALTER TABLE service_requests ADD CONSTRAINT service_requests_payment_status_check CHECK (payment_status IN ('unpaid','paid','verification_status'))");
+                DB::statement("ALTER TABLE h2u_service_requests DROP CONSTRAINT IF EXISTS h2u_service_requests_hsr_payment_status_check");
+                DB::statement("ALTER TABLE h2u_service_requests ALTER COLUMN hsr_payment_status TYPE VARCHAR(32)");
+                DB::statement("ALTER TABLE h2u_service_requests ALTER COLUMN hsr_payment_status SET DEFAULT 'unpaid'");
+                DB::statement("ALTER TABLE h2u_service_requests ADD CONSTRAINT h2u_service_requests_hsr_payment_status_check CHECK (hsr_payment_status IN ('unpaid','paid','verification_status'))");
             });
 
-            Schema::table('service_requests', function (Blueprint $table) {
-                $table->string('payment_proof')->nullable()->after('payment_status');
+            Schema::table('h2u_service_requests', function (Blueprint $table) {
+                $table->string('hsr_payment_proof')->nullable()->after('hsr_payment_status');
             });
         } elseif ($driver === 'mysql') {
-            Schema::table('service_requests', function (Blueprint $table) {
-                $table->enum('payment_status', ['unpaid', 'paid', 'verification_status'])
+            Schema::table('h2u_service_requests', function (Blueprint $table) {
+                $table->enum('hsr_payment_status', ['unpaid', 'paid', 'verification_status'])
                     ->default('unpaid')
-                    ->after('status')
+                    ->after('hsr_status')
                     ->change();
 
-                $table->string('payment_proof')->nullable()->after('payment_status');
+                $table->string('hsr_payment_proof')->nullable()->after('hsr_payment_status');
             });
         } else {
-            Schema::table('service_requests', function (Blueprint $table) {
-                $table->string('payment_status', 32)->default('unpaid')->change();
-                $table->string('payment_proof')->nullable();
+            Schema::table('h2u_service_requests', function (Blueprint $table) {
+                $table->string('hsr_payment_status', 32)->default('unpaid')->change();
+                $table->string('hsr_payment_proof')->nullable();
             });
         }
     }

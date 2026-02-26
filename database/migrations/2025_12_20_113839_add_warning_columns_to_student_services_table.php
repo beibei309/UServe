@@ -11,28 +11,28 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('student_services', function (Blueprint $table) {
-            if (!Schema::hasColumn('student_services', 'warning_count')) {
-                $table->integer('warning_count')->default(0)->after('status');
+        Schema::table('h2u_student_services', function (Blueprint $table) {
+            if (!Schema::hasColumn('h2u_student_services', 'hss_warning_count')) {
+                $table->integer('hss_warning_count')->default(0)->after('hss_status');
             }
 
-            if (!Schema::hasColumn('student_services', 'warning_reason')) {
-                $table->text('warning_reason')->nullable()->after('warning_count');
+            if (!Schema::hasColumn('h2u_student_services', 'hss_warning_reason')) {
+                $table->text('hss_warning_reason')->nullable()->after('hss_warning_count');
             }
         });
     }
 
     public function down(): void
     {
-        Schema::table('student_services', function (Blueprint $table) {
+        Schema::table('h2u_student_services', function (Blueprint $table) {
             $columnsToDrop = [];
 
-            if (Schema::hasColumn('student_services', 'warning_count')) {
-                $columnsToDrop[] = 'warning_count';
+            if (Schema::hasColumn('h2u_student_services', 'hss_warning_count')) {
+                $columnsToDrop[] = 'hss_warning_count';
             }
 
-            if (Schema::hasColumn('student_services', 'warning_reason')) {
-                $columnsToDrop[] = 'warning_reason';
+            if (Schema::hasColumn('h2u_student_services', 'hss_warning_reason')) {
+                $columnsToDrop[] = 'hss_warning_reason';
             }
 
             if ($columnsToDrop) {

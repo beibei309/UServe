@@ -11,16 +11,16 @@ return new class extends Migration
      */
     public function up()
 {
-    Schema::table('service_requests', function (Blueprint $table) {
-        // Tambah column started_at SELEPAS column accepted_at
-        $table->timestamp('started_at')->nullable()->after('accepted_at');
+    Schema::table('h2u_service_requests', function (Blueprint $table) {
+        // Tambah column hsr_started_at SELEPAS column hsr_accepted_at
+        $table->timestamp('hsr_started_at')->nullable()->after('hsr_accepted_at');
     });
 }
 
 public function down()
 {
-    Schema::table('service_requests', function (Blueprint $table) {
-        $table->dropColumn('started_at');
+    Schema::table('h2u_service_requests', function (Blueprint $table) {
+        $table->dropColumn('hsr_started_at');
     });
 }
 };

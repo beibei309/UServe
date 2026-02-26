@@ -12,33 +12,33 @@ return new class extends Migration {
 
         if ($driver === 'pgsql') {
             DB::transaction(function () {
-                DB::statement("ALTER TABLE service_requests DROP CONSTRAINT IF EXISTS service_requests_payment_status_check");
-                DB::statement("ALTER TABLE service_requests ALTER COLUMN payment_status TYPE VARCHAR(32)");
-                DB::statement("ALTER TABLE service_requests ALTER COLUMN payment_status SET DEFAULT 'unpaid'");
-                DB::statement("ALTER TABLE service_requests ADD CONSTRAINT service_requests_payment_status_check CHECK (payment_status IN ('unpaid','paid','verification_status','dispute'))");
+                DB::statement("ALTER TABLE h2u_service_requests DROP CONSTRAINT IF EXISTS h2u_service_requests_hsr_payment_status_check");
+                DB::statement("ALTER TABLE h2u_service_requests ALTER COLUMN hsr_payment_status TYPE VARCHAR(32)");
+                DB::statement("ALTER TABLE h2u_service_requests ALTER COLUMN hsr_payment_status SET DEFAULT 'unpaid'");
+                DB::statement("ALTER TABLE h2u_service_requests ADD CONSTRAINT h2u_service_requests_hsr_payment_status_check CHECK (hsr_payment_status IN ('unpaid','paid','verification_status','dispute'))");
             });
 
-            Schema::table('service_requests', function (Blueprint $table) {
-                $table->text('dispute_reason')->nullable()->after('payment_status');
+            Schema::table('h2u_service_requests', function (Blueprint $table) {
+                $table->text('hsr_dispute_reason')->nullable()->after('hsr_payment_status');
             });
         } elseif ($driver === 'mysql') {
-            Schema::table('service_requests', function (Blueprint $table) {
-                $table->enum('payment_status', [
+            Schema::table('h2u_service_requests', function (Blueprint $table) {
+                $table->enum('hsr_payment_status', [
                     'unpaid',
                     'paid',
                     'verification_status',
                     'dispute'
                 ])
                 ->default('unpaid')
-                ->after('status')
+                ->after('hsr_status')
                 ->change();
 
-                $table->text('dispute_reason')->nullable()->after('payment_status');
+                $table->text('hsr_dispute_reason')->nullable()->after('hsr_payment_status');
             });
         } else {
-            Schema::table('service_requests', function (Blueprint $table) {
-                $table->string('payment_status', 32)->default('unpaid')->change();
-                $table->text('dispute_reason')->nullable();
+            Schema::table('h2u_service_requests', function (Blueprint $table) {
+                $table->string('hsr_payment_status', 32)->default('unpaid')->change();
+                $table->text('hsr_dispute_reason')->nullable();
             });
         }
     }
@@ -48,38 +48,38 @@ return new class extends Migration {
         $driver = DB::getDriverName();
 
         if ($driver === 'pgsql') {
-            Schema::table('service_requests', function (Blueprint $table) {
-                if (Schema::hasColumn('service_requests', 'dispute_reason')) {
-                    $table->dropColumn('dispute_reason');
+            Schema::table('h2u_service_requests', function (Blueprint $table) {
+                if (Schema::hasColumn('h2u_service_requests', 'hsr_dispute_reason')) {
+                    $table->dropColumn('hsr_dispute_reason');
                 }
             });
 
             DB::transaction(function () {
-                DB::statement("ALTER TABLE service_requests DROP CONSTRAINT IF EXISTS service_requests_payment_status_check");
-                DB::statement("ALTER TABLE service_requests ADD CONSTRAINT service_requests_payment_status_check CHECK (payment_status IN ('unpaid','paid','verification_status'))");
-                DB::statement("ALTER TABLE service_requests ALTER COLUMN payment_status SET DEFAULT 'unpaid'");
+                DB::statement("ALTER TABLE h2u_service_requests DROP CONSTRAINT IF EXISTS h2u_service_requests_hsr_payment_status_check");
+                DB::statement("ALTER TABLE h2u_service_requests ADD CONSTRAINT h2u_service_requests_hsr_payment_status_check CHECK (hsr_payment_status IN ('unpaid','paid','verification_status'))");
+                DB::statement("ALTER TABLE h2u_service_requests ALTER COLUMN hsr_payment_status SET DEFAULT 'unpaid'");
             });
         } elseif ($driver === 'mysql') {
-            Schema::table('service_requests', function (Blueprint $table) {
-                $table->enum('payment_status', [
+            Schema::table('h2u_service_requests', function (Blueprint $table) {
+                $table->enum('hsr_payment_status', [
                     'unpaid',
                     'paid',
                     'verification_status'
                 ])
                 ->default('unpaid')
-                ->after('status')
+                ->after('hsr_status')
                 ->change();
 
-                if (Schema::hasColumn('service_requests', 'dispute_reason')) {
-                    $table->dropColumn('dispute_reason');
+                if (Schema::hasColumn('h2u_service_requests', 'hsr_dispute_reason')) {
+                    $table->dropColumn('hsr_dispute_reason');
                 }
             });
         } else {
-            Schema::table('service_requests', function (Blueprint $table) {
-                if (Schema::hasColumn('service_requests', 'dispute_reason')) {
-                    $table->dropColumn('dispute_reason');
+            Schema::table('h2u_service_requests', function (Blueprint $table) {
+                if (Schema::hasColumn('h2u_service_requests', 'hsr_dispute_reason')) {
+                    $table->dropColumn('hsr_dispute_reason');
                 }
-                $table->string('payment_status', 32)->default('unpaid')->change();
+                $table->string('hsr_payment_status', 32)->default('unpaid')->change();
             });
         }
     }

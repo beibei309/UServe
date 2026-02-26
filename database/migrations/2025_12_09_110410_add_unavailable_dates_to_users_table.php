@@ -11,16 +11,16 @@ return new class extends Migration
      */
      public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->date('unavailable_start_date')->nullable()->after('is_available');
-            $table->date('unavailable_end_date')->nullable()->after('unavailable_start_date');
+        Schema::table('h2u_users', function (Blueprint $table) {
+            $table->date('hu_unavailable_start_date')->nullable()->after('hu_is_available');
+            $table->date('hu_unavailable_end_date')->nullable()->after('hu_unavailable_start_date');
         });
     }
 
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn(['unavailable_start_date', 'unavailable_end_date']);
+        Schema::table('h2u_users', function (Blueprint $table) {
+            $table->dropColumn(['hu_unavailable_start_date', 'hu_unavailable_end_date']);
         });
     }
 };

@@ -8,32 +8,32 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (Schema::hasColumn('reviews', 'student_service_id')) {
+        if (Schema::hasColumn('h2u_reviews', 'hr_student_service_id')) {
             return;
         }
 
-        Schema::table('reviews', function (Blueprint $table) {
-            $table->foreignId('student_service_id')
+        Schema::table('h2u_reviews', function (Blueprint $table) {
+            $table->foreignId('hr_student_service_id')
                 ->nullable()
-                ->constrained('student_services')
+                ->constrained('h2u_student_services', 'hss_id')
                 ->cascadeOnDelete();
         });
     }
 
     public function down(): void
     {
-        if (!Schema::hasColumn('reviews', 'student_service_id')) {
+        if (!Schema::hasColumn('h2u_reviews', 'hr_student_service_id')) {
             return;
         }
 
-        Schema::table('reviews', function (Blueprint $table) {
+        Schema::table('h2u_reviews', function (Blueprint $table) {
             try {
-                $table->dropForeign(['student_service_id']);
+                $table->dropForeign(['hr_student_service_id']);
             } catch (\Throwable $e) {
                 // ignore
             }
 
-            $table->dropColumn('student_service_id');
+            $table->dropColumn('hr_student_service_id');
         });
     }
 };

@@ -11,32 +11,32 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('reviews', function (Blueprint $table) {
-            // Make conversation_id nullable since reviews can be for service_requests or service_applications
-            $table->foreignId('conversation_id')->nullable()->change();
-            
-            // Add service_request_id if not exists
-            if (!Schema::hasColumn('reviews', 'service_request_id')) {
-                $table->foreignId('service_request_id')->nullable()->after('conversation_id')->constrained('service_requests')->cascadeOnDelete();
+        Schema::table('h2u_reviews', function (Blueprint $table) {
+            // Make hr_conversation_id nullable since reviews can be for service_requests or service_applications
+            $table->foreignId('hr_conversation_id')->nullable()->change();
+
+            // Add hr_service_request_id if not exists
+            if (!Schema::hasColumn('h2u_reviews', 'hr_service_request_id')) {
+                $table->foreignId('hr_service_request_id')->nullable()->after('hr_conversation_id')->constrained('h2u_service_requests', 'hsr_id')->cascadeOnDelete();
             }
-            
-            // Add service_application_id if not exists
-            if (!Schema::hasColumn('reviews', 'service_application_id')) {
-                $table->foreignId('service_application_id')->nullable()->after('service_request_id')->constrained('service_applications')->cascadeOnDelete();
+
+            // Add hr_service_application_id if not exists
+            if (!Schema::hasColumn('h2u_reviews', 'hr_service_application_id')) {
+                $table->foreignId('hr_service_application_id')->nullable()->after('hr_service_request_id')->constrained('h2u_service_applications', 'hsa_id')->cascadeOnDelete();
             }
-            
-            // Add is_follow_up column if not exists
-            if (!Schema::hasColumn('reviews', 'is_follow_up')) {
-                $table->boolean('is_follow_up')->default(false)->after('comment');
+
+            // Add hr_is_follow_up column if not exists
+            if (!Schema::hasColumn('h2u_reviews', 'hr_is_follow_up')) {
+                $table->boolean('hr_is_follow_up')->default(false)->after('hr_comment');
             }
         });
-        
+
         // --- START UNIQUE CONSTRAINT FIXES ---
-        
+
         // 1. Try to drop the old default Laravel constraint
         try {
-            Schema::table('reviews', function (Blueprint $table) {
-                $table->dropUnique(['conversation_id', 'reviewer_id', 'reviewee_id']);
+            Schema::table('h2u_reviews', function (Blueprint $table) {
+                $table->dropUnique(['hr_conversation_id', 'hr_reviewer_id', 'hr_reviewee_id']);
             });
         } catch (\Exception $e) {
             // Ignore
@@ -44,26 +44,26 @@ return new class extends Migration
 
         // 2. Try to drop the exact conflicting constraint name from the database error
         try {
-            Schema::table('reviews', function (Blueprint $table) {
+            Schema::table('h2u_reviews', function (Blueprint $table) {
                 // Drop the exact name that caused the previous DUP KEY error
-                $table->dropUnique('reviews_conversation_id_reviewer_id_reviewee_id_unique');
+                $table->dropUnique('h2u_reviews_hr_conversation_id_hr_reviewer_id_hr_reviewee_id_unique');
             });
         } catch (\Exception $e) {
             // Ignore
         }
-        
+
         // 3. Add the new unique constraint
         try {
-            Schema::table('reviews', function (Blueprint $table) {
+            Schema::table('h2u_reviews', function (Blueprint $table) {
                 $table->unique(
-                    ['conversation_id', 'reviewer_id', 'reviewee_id', 'is_follow_up'], 
-                    'reviews_conversation_reviewer_reviewee_followup_unique'
+                    ['hr_conversation_id', 'hr_reviewer_id', 'hr_reviewee_id', 'hr_is_follow_up'],
+                    'h2u_reviews_conversation_reviewer_reviewee_followup_unique'
                 );
             });
         } catch (\Exception $e) {
             // Ignore
         }
-        
+
         // --- END UNIQUE CONSTRAINT FIXES ---
     }
 
@@ -73,7 +73,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // NO ACTION: The migrate:refresh command will drop the table anyway, 
+        // NO ACTION: The migrate:refresh command will drop the table anyway,
         // avoiding the SQL error during rollback.
     }
 };

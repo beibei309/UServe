@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->string('verification_note')->nullable()->after('verification_status');
+        Schema::table('h2u_users', function (Blueprint $table) {
+            $table->string('hu_verification_note')->nullable()->after('hu_verification_status');
         });
     }
 
@@ -21,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            //
+        Schema::table('h2u_users', function (Blueprint $table) {
+            $table->dropColumn('hu_verification_note');
         });
     }
 };

@@ -10,11 +10,11 @@ return new class extends Migration {
 
         // Allow custom service requests without a linked student_service
         if ($driver === 'pgsql') {
-            DB::statement('ALTER TABLE service_requests ALTER COLUMN student_service_id DROP NOT NULL');
+            DB::statement('ALTER TABLE h2u_service_requests ALTER COLUMN hsr_student_service_id DROP NOT NULL');
         } elseif ($driver === 'mysql') {
-            DB::statement('ALTER TABLE service_requests MODIFY student_service_id BIGINT UNSIGNED NULL');
+            DB::statement('ALTER TABLE h2u_service_requests MODIFY hsr_student_service_id BIGINT UNSIGNED NULL');
         } else {
-            DB::statement('ALTER TABLE service_requests ALTER COLUMN student_service_id DROP NOT NULL');
+            DB::statement('ALTER TABLE h2u_service_requests ALTER COLUMN hsr_student_service_id DROP NOT NULL');
         }
     }
 
@@ -24,11 +24,11 @@ return new class extends Migration {
 
         // Revert to NOT NULL (will fail if NULLs exist, used only for local dev rollback)
         if ($driver === 'pgsql') {
-            DB::statement('ALTER TABLE service_requests ALTER COLUMN student_service_id SET NOT NULL');
+            DB::statement('ALTER TABLE h2u_service_requests ALTER COLUMN hsr_student_service_id SET NOT NULL');
         } elseif ($driver === 'mysql') {
-            DB::statement('ALTER TABLE service_requests MODIFY student_service_id BIGINT UNSIGNED NOT NULL');
+            DB::statement('ALTER TABLE h2u_service_requests MODIFY hsr_student_service_id BIGINT UNSIGNED NOT NULL');
         } else {
-            DB::statement('ALTER TABLE service_requests ALTER COLUMN student_service_id SET NOT NULL');
+            DB::statement('ALTER TABLE h2u_service_requests ALTER COLUMN hsr_student_service_id SET NOT NULL');
         }
     }
 };

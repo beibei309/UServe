@@ -8,16 +8,16 @@ return new class extends Migration {
     
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->string('otp_code', 6)->nullable();
-            $table->boolean('is_verified')->default(false);
+        Schema::table('h2u_users', function (Blueprint $table) {
+            $table->string('hu_otp_code', 6)->nullable();
+            $table->boolean('hu_is_verified')->default(false);
         });
     }
 
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn(['otp_code', 'is_verified']);
+        Schema::table('h2u_users', function (Blueprint $table) {
+            $table->dropColumn(['hu_otp_code', 'hu_is_verified']);
         });
     }
 };

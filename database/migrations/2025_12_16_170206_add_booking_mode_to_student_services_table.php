@@ -11,18 +11,18 @@ return new class extends Migration
      */
    public function up()
 {
-    Schema::table('student_services', function (Blueprint $table) {
+    Schema::table('h2u_student_services', function (Blueprint $table) {
         // 'session' = Time based (Tutoring)
         // 'task' = Task based (Ironing, Repairs)
         // 'project' = Deadline based (Design)
-        $table->string('booking_mode')->default('session')->after('category_id');
+        $table->string('hss_booking_mode')->default('session')->after('hss_category_id');
     });
 }
 
 public function down()
 {
-    Schema::table('student_services', function (Blueprint $table) {
-        $table->dropColumn('booking_mode');
+    Schema::table('h2u_student_services', function (Blueprint $table) {
+        $table->dropColumn('hss_booking_mode');
     });
 }
 };

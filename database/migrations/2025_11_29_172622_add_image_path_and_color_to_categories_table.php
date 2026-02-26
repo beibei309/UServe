@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up()
     {
-    Schema::table('categories', function (Blueprint $table) {
-        if (!Schema::hasColumn('categories', 'image_path')) {
+    Schema::table('h2u_categories', function (Blueprint $table) {
+        if (!Schema::hasColumn('h2u_categories', 'image_path')) {
             $table->string('image_path')->nullable();
         }
-        if (!Schema::hasColumn('categories', 'color')) {
+        if (!Schema::hasColumn('h2u_categories', 'color')) {
             $table->string('color')->nullable();
         }
     });
@@ -27,7 +27,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('categories', function (Blueprint $table) {
+        Schema::table('h2u_categories', function (Blueprint $table) {
         $table->dropColumn(['image_path', 'color']);
         });
     }

@@ -12,10 +12,10 @@ return new class extends Migration
         $driver = Schema::getConnection()->getDriverName();
 
         if ($driver === 'pgsql') {
-            DB::statement('ALTER TABLE reviews ALTER COLUMN conversation_id DROP NOT NULL');
+            DB::statement('ALTER TABLE h2u_reviews ALTER COLUMN hr_conversation_id DROP NOT NULL');
         } else {
-            Schema::table('reviews', function (Blueprint $table) {
-                $table->foreignId('conversation_id')->nullable()->change();
+            Schema::table('h2u_reviews', function (Blueprint $table) {
+                $table->foreignId('hr_conversation_id')->nullable()->change();
             });
         }
     }
@@ -25,10 +25,10 @@ return new class extends Migration
         $driver = Schema::getConnection()->getDriverName();
 
         if ($driver === 'pgsql') {
-            DB::statement('ALTER TABLE reviews ALTER COLUMN conversation_id SET NOT NULL');
+            DB::statement('ALTER TABLE h2u_reviews ALTER COLUMN hr_conversation_id SET NOT NULL');
         } else {
-            Schema::table('reviews', function (Blueprint $table) {
-                $table->foreignId('conversation_id')->nullable(false)->change();
+            Schema::table('h2u_reviews', function (Blueprint $table) {
+                $table->foreignId('hr_conversation_id')->nullable(false)->change();
             });
         }
     }

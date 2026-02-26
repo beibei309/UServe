@@ -11,8 +11,8 @@ return new class extends Migration
      */
    public function up()
 {
-    Schema::table('users', function (Blueprint $table) {
-        $table->integer('reports_count')->default(0); // Counts how many times they were reported
+    Schema::table('h2u_users', function (Blueprint $table) {
+        $table->integer('hu_reports_count')->default(0); // Counts how many times they were reported
     });
 }
 
@@ -21,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            //
+        Schema::table('h2u_users', function (Blueprint $table) {
+            $table->dropColumn('hu_reports_count');
         });
     }
 };

@@ -11,16 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
+        Schema::table('h2u_users', function (Blueprint $table) {
             // Only add columns if they don't exist
-            if (!Schema::hasColumn('users', 'bio')) {
-                $table->text('bio')->nullable()->after('blacklist_reason');
+            if (!Schema::hasColumn('h2u_users', 'hu_bio')) {
+                $table->text('hu_bio')->nullable()->after('hu_blacklist_reason');
             }
-            if (!Schema::hasColumn('users', 'faculty')) {
-                $table->string('faculty')->nullable()->after('bio');
+            if (!Schema::hasColumn('h2u_users', 'hu_faculty')) {
+                $table->string('hu_faculty')->nullable()->after('hu_bio');
             }
-            if (!Schema::hasColumn('users', 'course')) {
-                $table->string('course')->nullable()->after('faculty');
+            if (!Schema::hasColumn('h2u_users', 'hu_course')) {
+                $table->string('hu_course')->nullable()->after('hu_faculty');
             }
         });
     }
@@ -30,8 +30,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn(['bio', 'faculty', 'course']);
+        Schema::table('h2u_users', function (Blueprint $table) {
+            $table->dropColumn(['hu_bio', 'hu_faculty', 'hu_course']);
         });
     }
 };

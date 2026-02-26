@@ -11,9 +11,9 @@ return new class extends Migration
      */
    public function up()
 {
-    Schema::table('student_services', function (Blueprint $table) {
+    Schema::table('h2u_student_services', function (Blueprint $table) {
         // Change the column to allow NULL
-        $table->integer('session_duration')->nullable()->change();
+        $table->integer('hss_session_duration')->nullable()->change();
     });
 }
 

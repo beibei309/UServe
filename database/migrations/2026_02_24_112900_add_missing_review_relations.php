@@ -8,25 +8,25 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('reviews', function (Blueprint $table) {
-            if (!Schema::hasColumn('reviews', 'service_request_id')) {
-                $table->foreignId('service_request_id')
+        Schema::table('h2u_reviews', function (Blueprint $table) {
+            if (!Schema::hasColumn('h2u_reviews', 'hr_service_request_id')) {
+                $table->foreignId('hr_service_request_id')
                     ->nullable()
-                    ->constrained('service_requests')
+                    ->constrained('h2u_service_requests', 'hsr_id')
                     ->nullOnDelete();
             }
 
-            if (!Schema::hasColumn('reviews', 'service_application_id')) {
-                $table->foreignId('service_application_id')
+            if (!Schema::hasColumn('h2u_reviews', 'hr_service_application_id')) {
+                $table->foreignId('hr_service_application_id')
                     ->nullable()
-                    ->constrained('service_applications')
+                    ->constrained('h2u_service_applications', 'hsa_id')
                     ->nullOnDelete();
             }
 
-            if (!Schema::hasColumn('reviews', 'student_service_id')) {
-                $table->foreignId('student_service_id')
+            if (!Schema::hasColumn('h2u_reviews', 'hr_student_service_id')) {
+                $table->foreignId('hr_student_service_id')
                     ->nullable()
-                    ->constrained('student_services')
+                    ->constrained('h2u_student_services', 'hss_id')
                     ->nullOnDelete();
             }
         });
@@ -34,17 +34,17 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::table('reviews', function (Blueprint $table) {
-            if (Schema::hasColumn('reviews', 'service_request_id')) {
-                $table->dropConstrainedForeignId('service_request_id');
+        Schema::table('h2u_reviews', function (Blueprint $table) {
+            if (Schema::hasColumn('h2u_reviews', 'hr_service_request_id')) {
+                $table->dropConstrainedForeignId('hr_service_request_id');
             }
 
-            if (Schema::hasColumn('reviews', 'service_application_id')) {
-                $table->dropConstrainedForeignId('service_application_id');
+            if (Schema::hasColumn('h2u_reviews', 'hr_service_application_id')) {
+                $table->dropConstrainedForeignId('hr_service_application_id');
             }
 
-            if (Schema::hasColumn('reviews', 'student_service_id')) {
-                $table->dropConstrainedForeignId('student_service_id');
+            if (Schema::hasColumn('h2u_reviews', 'hr_student_service_id')) {
+                $table->dropConstrainedForeignId('hr_student_service_id');
             }
         });
     }

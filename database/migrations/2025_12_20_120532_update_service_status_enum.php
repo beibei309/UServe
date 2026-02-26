@@ -16,15 +16,15 @@ return new class extends Migration
 
         if ($driver === 'pgsql') {
             DB::transaction(function () {
-                DB::statement("ALTER TABLE student_services ALTER COLUMN approval_status TYPE VARCHAR(20)");
-                DB::statement("ALTER TABLE student_services ALTER COLUMN approval_status SET DEFAULT 'pending'");
-                DB::statement("ALTER TABLE student_services DROP CONSTRAINT IF EXISTS student_services_approval_status_check");
-                DB::statement("ALTER TABLE student_services ADD CONSTRAINT student_services_approval_status_check CHECK (approval_status IN ('pending','approved','rejected','suspended'))");
+                DB::statement("ALTER TABLE h2u_student_services ALTER COLUMN hss_approval_status TYPE VARCHAR(20)");
+                DB::statement("ALTER TABLE h2u_student_services ALTER COLUMN hss_approval_status SET DEFAULT 'pending'");
+                DB::statement("ALTER TABLE h2u_student_services DROP CONSTRAINT IF EXISTS h2u_student_services_hss_approval_status_check");
+                DB::statement("ALTER TABLE h2u_student_services ADD CONSTRAINT h2u_student_services_hss_approval_status_check CHECK (hss_approval_status IN ('pending','approved','rejected','suspended'))");
             });
         } elseif ($driver === 'mysql') {
-            DB::statement("ALTER TABLE student_services MODIFY COLUMN approval_status ENUM('pending', 'approved', 'rejected', 'suspended') DEFAULT 'pending'");
+            DB::statement("ALTER TABLE h2u_student_services MODIFY COLUMN hss_approval_status ENUM('pending', 'approved', 'rejected', 'suspended') DEFAULT 'pending'");
         } else {
-            DB::statement("ALTER TABLE student_services ALTER COLUMN approval_status SET DEFAULT 'pending'");
+            DB::statement("ALTER TABLE h2u_student_services ALTER COLUMN hss_approval_status SET DEFAULT 'pending'");
         }
     }
 
@@ -38,13 +38,13 @@ return new class extends Migration
         if ($driver === 'pgsql') {
             DB::transaction(function () {
                 DB::statement("ALTER TABLE student_services DROP CONSTRAINT IF EXISTS student_services_approval_status_check");
-                DB::statement("ALTER TABLE student_services ADD CONSTRAINT student_services_approval_status_check CHECK (approval_status IN ('pending','approved','rejected'))");
-                DB::statement("ALTER TABLE student_services ALTER COLUMN approval_status SET DEFAULT 'pending'");
+                DB::statement("ALTER TABLE h2u_student_services ADD CONSTRAINT h2u_student_services_hss_approval_status_check CHECK (hss_approval_status IN ('pending','approved','rejected'))");
+                DB::statement("ALTER TABLE h2u_student_services ALTER COLUMN hss_approval_status SET DEFAULT 'pending'");
             });
         } elseif ($driver === 'mysql') {
-            DB::statement("ALTER TABLE student_services MODIFY COLUMN approval_status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending'");
+            DB::statement("ALTER TABLE h2u_student_services MODIFY COLUMN hss_approval_status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending'");
         } else {
-            DB::statement("ALTER TABLE student_services ALTER COLUMN approval_status SET DEFAULT 'pending'");
+            DB::statement("ALTER TABLE h2u_student_services ALTER COLUMN hss_approval_status SET DEFAULT 'pending'");
         }
     }
 };

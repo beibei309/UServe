@@ -12,10 +12,10 @@ return new class extends Migration
         $driver = Schema::getConnection()->getDriverName();
 
         if ($driver === 'pgsql') {
-            DB::statement('ALTER TABLE student_statuses ALTER COLUMN semester DROP NOT NULL');
+            DB::statement('ALTER TABLE h2u_student_statuses ALTER COLUMN hss_semester DROP NOT NULL');
         } else {
-            Schema::table('student_statuses', function (Blueprint $table) {
-                $table->string('semester')->nullable()->change();
+            Schema::table('h2u_student_statuses', function (Blueprint $table) {
+                $table->string('hss_semester')->nullable()->change();
             });
         }
     }
@@ -25,10 +25,10 @@ return new class extends Migration
         $driver = Schema::getConnection()->getDriverName();
 
         if ($driver === 'pgsql') {
-            DB::statement('ALTER TABLE student_statuses ALTER COLUMN semester SET NOT NULL');
+            DB::statement('ALTER TABLE h2u_student_statuses ALTER COLUMN hss_semester SET NOT NULL');
         } else {
-            Schema::table('student_statuses', function (Blueprint $table) {
-                $table->string('semester')->nullable(false)->change();
+            Schema::table('h2u_student_statuses', function (Blueprint $table) {
+                $table->string('hss_semester')->nullable(false)->change();
             });
         }
     }

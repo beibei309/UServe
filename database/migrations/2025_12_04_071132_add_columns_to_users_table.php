@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
         {
-        Schema::table('users', function (Blueprint $table) {
+        Schema::table('h2u_users', function (Blueprint $table) {
             // Add new columns
-            $table->text('address')->nullable(); 
-            $table->text('skills')->nullable(); 
+            $table->text('address')->nullable();
+            $table->text('skills')->nullable();
         });
     }
 
@@ -24,7 +24,7 @@ return new class extends Migration
      */
     public function down(): void
    {
-        Schema::table('users', function (Blueprint $table) {
+        Schema::table('h2u_users', function (Blueprint $table) {
             // Drop the columns if rolling back
             $table->dropColumn(['address', 'skills']);
         });

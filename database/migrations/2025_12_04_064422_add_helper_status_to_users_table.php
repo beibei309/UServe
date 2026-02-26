@@ -11,14 +11,14 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('users', function (Blueprint $table) {
+        Schema::table('h2u_users', function (Blueprint $table) {
             $table->boolean('helper_status')->default(false); // Or 'pending', 'active', etc.
         });
     }
 
     public function down()
     {
-        Schema::table('users', function (Blueprint $table) {
+        Schema::table('h2u_users', function (Blueprint $table) {
             $table->dropColumn('helper_status');
         });
     }

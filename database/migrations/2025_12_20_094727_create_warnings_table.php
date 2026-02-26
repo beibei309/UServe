@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up()
 {
-    Schema::create('warnings', function (Blueprint $table) {
-        $table->id();
-        $table->foreignId('user_id')->constrained()->onDelete('cascade'); // Student
-        $table->foreignId('service_id')->constrained('student_services')->onDelete('cascade'); // Service
-        $table->text('reason'); // Mesej warning
+    Schema::create('h2u_warnings', function (Blueprint $table) {
+        $table->bigIncrements('hw_id');
+        $table->foreignId('hw_user_id')->constrained('h2u_users', 'hu_id')->onDelete('cascade'); // Student
+        $table->foreignId('hw_service_id')->constrained('h2u_student_services', 'hss_id')->onDelete('cascade'); // Service
+        $table->text('hw_reason'); // Mesej warning
         $table->timestamps();
     });
 }
@@ -25,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('warnings');
+        Schema::dropIfExists('h2u_warnings');
     }
 };

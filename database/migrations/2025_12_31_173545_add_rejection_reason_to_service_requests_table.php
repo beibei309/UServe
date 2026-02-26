@@ -11,15 +11,15 @@ return new class extends Migration
      */
     public function up()
 {
-    Schema::table('service_requests', function (Blueprint $table) {
-        $table->text('rejection_reason')->nullable()->after('status');
+    Schema::table('h2u_service_requests', function (Blueprint $table) {
+        $table->text('hsr_rejection_reason')->nullable()->after('hsr_status');
     });
 }
 
 public function down()
 {
-    Schema::table('service_requests', function (Blueprint $table) {
-        $table->dropColumn('rejection_reason');
+    Schema::table('h2u_service_requests', function (Blueprint $table) {
+        $table->dropColumn('hsr_rejection_reason');
     });
 }
 };

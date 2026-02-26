@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
   {
-    Schema::table('student_services', function (Blueprint $table) {
-        $table->enum('approval_status', ['pending', 'approved', 'rejected'])->default('pending')->after('is_active');
+    Schema::table('h2u_student_services', function (Blueprint $table) {
+        $table->enum('hss_approval_status', ['pending', 'approved', 'rejected'])->default('pending')->after('hss_is_active');
     });
 }
 
@@ -21,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
    {
-    Schema::table('student_services', function (Blueprint $table) {
-        $table->dropColumn('approval_status');
+    Schema::table('h2u_student_services', function (Blueprint $table) {
+        $table->dropColumn('hss_approval_status');
     });
 }
 };

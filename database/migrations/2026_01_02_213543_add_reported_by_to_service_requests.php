@@ -11,16 +11,16 @@ return new class extends Migration
      */
    public function up()
 {
-    Schema::table('service_requests', function (Blueprint $table) {
+    Schema::table('h2u_service_requests', function (Blueprint $table) {
         // We make it nullable so existing rows don't break
-        $table->unsignedBigInteger('reported_by')->nullable()->after('dispute_reason');
+        $table->unsignedBigInteger('hsr_reported_by')->nullable()->after('hsr_dispute_reason');
     });
 }
 
 public function down()
 {
-    Schema::table('service_requests', function (Blueprint $table) {
-        $table->dropColumn('reported_by');
+    Schema::table('h2u_service_requests', function (Blueprint $table) {
+        $table->dropColumn('hsr_reported_by');
     });
 }
 };

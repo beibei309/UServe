@@ -7,18 +7,20 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::table('service_applications', function (Blueprint $table) {
-            $table->foreignId('service_id')->nullable()->constrained('student_services')->nullOnDelete()->after('user_id');
-            $table->foreignId('conversation_id')->nullable()->constrained('conversations')->nullOnDelete()->after('service_id');
+        Schema::table('h2u_service_applications', function (Blueprint $table) {
+            $table->unsignedBigInteger('hsa_service_id')->nullable()->after('hsa_user_id');
+            $table->foreign('hsa_service_id')->references('hss_id')->on('h2u_student_services')->nullOnDelete();
+            $table->unsignedBigInteger('hsa_conversation_id')->nullable()->after('hsa_service_id');
+            $table->foreign('hsa_conversation_id')->references('hc_id')->on('h2u_conversations')->nullOnDelete();
         });
     }
 
     public function down(): void
     {
-        Schema::table('service_applications', function (Blueprint $table) {
-            $table->dropForeign(['service_id']);
-            $table->dropForeign(['conversation_id']);
-            $table->dropColumn(['service_id', 'conversation_id']);
+        Schema::table('h2u_service_applications', function (Blueprint $table) {
+            $table->dropForeign(['hsa_service_id']);
+            $table->dropForeign(['hsa_conversation_id']);
+            $table->dropColumn(['hsa_service_id', 'hsa_conversation_id']);
         });
     }
 };

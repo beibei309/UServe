@@ -11,15 +11,15 @@ return new class extends Migration
      */
    public function up()
     {
-        Schema::table('service_requests', function (Blueprint $table) {
+        Schema::table('h2u_service_requests', function (Blueprint $table) {
             // Ensure these columns exist
-            // payment_status: 'unpaid', 'paid', 'unpaid_problem'
-            if (!Schema::hasColumn('service_requests', 'payment_status')) {
-                $table->string('payment_status')->default('unpaid'); 
+            // hsr_payment_status: 'unpaid', 'paid', 'unpaid_problem'
+            if (!Schema::hasColumn('h2u_service_requests', 'hsr_payment_status')) {
+                $table->string('hsr_payment_status')->default('unpaid');
             }
-            
+
             // Ensure status includes 'awaiting_payment'
-            // You might need to change your database column type if it's a strict ENUM, 
+            // You might need to change your database column type if it's a strict ENUM,
             // otherwise a string column is fine.
         });
     }
@@ -29,8 +29,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('service_requests', function (Blueprint $table) {
-            //
+        Schema::table('h2u_service_requests', function (Blueprint $table) {
+            $table->dropColumn('hsr_payment_status');
         });
     }
 };

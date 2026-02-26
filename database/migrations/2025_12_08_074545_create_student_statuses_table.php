@@ -11,25 +11,25 @@ return new class extends Migration
      */
     public function up()
     {
-    Schema::create('student_statuses', function (Blueprint $table) {
-    $table->id();
-    $table->unsignedBigInteger('student_id');   // FK to users table
-    $table->string('matric_no')->nullable();    // (optional)
-    $table->string('semester');                 // e.g. "Semester 1 2025"
-    $table->string('status');                   // Active / Inactive / Deferred
-    $table->date('effective_date');             // When this status starts
-    $table->timestamps();
+    Schema::create('h2u_student_statuses', function (Blueprint $table) {
+        $table->bigIncrements('hss_id');
+        $table->unsignedBigInteger('hss_student_id');   // FK to h2u_users table
+        $table->string('hss_matric_no')->nullable();    // (optional)
+        $table->string('hss_semester');                 // e.g. "Semester 1 2025"
+        $table->string('hss_status');                   // Active / Inactive / Deferred
+        $table->date('hss_effective_date');             // When this status starts
+        $table->timestamps();
 
-    // Foreign key: when user deleted → remove status
-            $table->foreign('student_id')
-                  ->references('id')
-                  ->on('users')
-                  ->onDelete('cascade');
-        });
+        // Foreign key: when user deleted → remove status
+        $table->foreign('hss_student_id')
+              ->references('hu_id')
+              ->on('h2u_users')
+              ->onDelete('cascade');
+    });
     }
 
     public function down()
     {
-        Schema::dropIfExists('student_statuses');
+        Schema::dropIfExists('h2u_student_statuses');
     }
 };

@@ -11,16 +11,16 @@ return new class extends Migration
      */
    public function up()
 {
-    Schema::table('student_services', function (Blueprint $table) {
+    Schema::table('h2u_student_services', function (Blueprint $table) {
         // Default 60 mins jika tiada setting
-        $table->integer('session_duration')->default(60)->after('operating_hours'); 
+        $table->integer('hss_session_duration')->default(60)->after('hss_operating_hours');
     });
 }
 
 public function down()
 {
-    Schema::table('student_services', function (Blueprint $table) {
-        $table->dropColumn('session_duration');
+    Schema::table('h2u_student_services', function (Blueprint $table) {
+        $table->dropColumn('hss_session_duration');
     });
 }
 };

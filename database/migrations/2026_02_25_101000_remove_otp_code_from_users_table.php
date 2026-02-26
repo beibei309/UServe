@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            if (Schema::hasColumn('users', 'otp_code')) {
-                $table->dropColumn('otp_code');
+        Schema::table('h2u_users', function (Blueprint $table) {
+            if (Schema::hasColumn('h2u_users', 'hu_otp_code')) {
+                $table->dropColumn('hu_otp_code');
             }
         });
     }
@@ -23,8 +23,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->string('otp_code', 6)->nullable()->after('email');
+        Schema::table('h2u_users', function (Blueprint $table) {
+            $table->string('hu_otp_code', 6)->nullable()->after('hu_email');
         });
     }
 };

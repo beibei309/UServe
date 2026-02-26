@@ -8,15 +8,15 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('student_services', function (Blueprint $table) {
-            $table->string('image_path')->nullable()->after('title'); // or after any column you like
+        Schema::table('h2u_student_services', function (Blueprint $table) {
+            $table->string('hss_image_path')->nullable()->after('hss_title'); // or after any column you like
         });
     }
 
     public function down(): void
     {
-        Schema::table('student_services', function (Blueprint $table) {
-            $table->dropColumn('image_path');
+        Schema::table('h2u_student_services', function (Blueprint $table) {
+            $table->dropColumn('hss_image_path');
         });
     }
 };

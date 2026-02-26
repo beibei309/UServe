@@ -12,15 +12,17 @@ return new class extends Migration
     public function up(): void
     {
         // Check if table already exists (from SQL import)
-        if (!Schema::hasTable('favorites')) {
-            Schema::create('favorites', function (Blueprint $table) {
-                $table->id();
-                $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
-                $table->foreignId('favorited_user_id')->constrained('users')->cascadeOnDelete();
+        if (!Schema::hasTable('h2u_favorites')) {
+            Schema::create('h2u_favorites', function (Blueprint $table) {
+                $table->bigIncrements('hf_id');
+                $table->unsignedBigInteger('hf_user_id');
+                $table->foreign('hf_user_id')->references('hu_id')->on('h2u_users')->cascadeOnDelete();
+                $table->unsignedBigInteger('hf_favorited_user_id');
+                $table->foreign('hf_favorited_user_id')->references('hu_id')->on('h2u_users')->cascadeOnDelete();
                 $table->timestamps();
 
                 // Ensure a user can't favorite the same user multiple times
-                $table->unique(['user_id', 'favorited_user_id']);
+                $table->unique(['hf_user_id', 'hf_favorited_user_id']);
             });
         }
     }
@@ -30,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('favorites');
+        Schema::dropIfExists('h2u_favorites');
     }
 };

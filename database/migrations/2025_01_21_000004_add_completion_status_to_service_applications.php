@@ -7,24 +7,24 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::table('service_applications', function (Blueprint $table) {
-            $table->boolean('customer_completed')->default(false)->after('status');
-            $table->boolean('provider_completed')->default(false)->after('customer_completed');
-            $table->timestamp('customer_completed_at')->nullable()->after('provider_completed');
-            $table->timestamp('provider_completed_at')->nullable()->after('customer_completed_at');
-            $table->timestamp('fully_completed_at')->nullable()->after('provider_completed_at');
+        Schema::table('h2u_service_applications', function (Blueprint $table) {
+            $table->boolean('hsa_customer_completed')->default(false)->after('hsa_status');
+            $table->boolean('hsa_provider_completed')->default(false)->after('hsa_customer_completed');
+            $table->timestamp('hsa_customer_completed_at')->nullable()->after('hsa_provider_completed');
+            $table->timestamp('hsa_provider_completed_at')->nullable()->after('hsa_customer_completed_at');
+            $table->timestamp('hsa_fully_completed_at')->nullable()->after('hsa_provider_completed_at');
         });
     }
 
     public function down(): void
     {
-        Schema::table('service_applications', function (Blueprint $table) {
+        Schema::table('h2u_service_applications', function (Blueprint $table) {
             $table->dropColumn([
-                'customer_completed',
-                'provider_completed', 
-                'customer_completed_at',
-                'provider_completed_at',
-                'fully_completed_at'
+                'hsa_customer_completed',
+                'hsa_provider_completed',
+                'hsa_customer_completed_at',
+                'hsa_provider_completed_at',
+                'hsa_fully_completed_at'
             ]);
         });
     }
