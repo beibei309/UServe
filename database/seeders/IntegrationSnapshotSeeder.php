@@ -6,6 +6,7 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+<<<<<<< HEAD
 use Illuminate\Support\Facades\Schema;
 
 class IntegrationSnapshotSeeder extends Seeder
@@ -101,6 +102,13 @@ class IntegrationSnapshotSeeder extends Seeder
             return;
         }
 
+=======
+
+class IntegrationSnapshotSeeder extends Seeder
+{
+    private function upsertBy(string $table, array $match, array $values): void
+    {
+>>>>>>> aaa8c3c (Refactor tables and columns name)
         $query = DB::table($table)->where($match);
 
         if ($query->exists()) {
@@ -427,6 +435,10 @@ class IntegrationSnapshotSeeder extends Seeder
                     'bio' => $user['bio'],
                     'faculty' => $user['faculty'],
                     'course' => $user['course'],
+<<<<<<< HEAD
+=======
+                    'is_verified' => false,
+>>>>>>> aaa8c3c (Refactor tables and columns name)
                     'helper_status' => false,
                     'address' => $user['address'],
                     'latitude' => $user['latitude'],
@@ -444,8 +456,13 @@ class IntegrationSnapshotSeeder extends Seeder
             );
         }
 
+<<<<<<< HEAD
         $userIds = DB::table('h2u_users')->whereIn('hu_email', array_column($users, 'email'))->pluck('hu_id', 'hu_email');
         $categoryIds = DB::table('h2u_categories')->pluck('hc_id', 'hc_slug');
+=======
+        $userIds = DB::table('users')->whereIn('email', array_column($users, 'email'))->pluck('id', 'email');
+        $categoryIds = DB::table('categories')->pluck('id', 'slug');
+>>>>>>> aaa8c3c (Refactor tables and columns name)
 
         $services = [
             [
@@ -552,9 +569,15 @@ class IntegrationSnapshotSeeder extends Seeder
             );
         }
 
+<<<<<<< HEAD
         $serviceIds = DB::table('h2u_student_services')
             ->whereIn('hss_title', array_column($services, 'title'))
             ->pluck('hss_id', 'hss_title');
+=======
+        $serviceIds = DB::table('student_services')
+            ->whereIn('title', array_column($services, 'title'))
+            ->pluck('id', 'title');
+>>>>>>> aaa8c3c (Refactor tables and columns name)
 
         $reviews = [
             [
