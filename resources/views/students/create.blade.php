@@ -26,7 +26,7 @@
                         <div class="relative group">
                             <div class="w-28 h-28 rounded-full overflow-hidden border-4 border-white shadow-lg bg-gray-100">
                                 <img id="profile-photo-preview" 
-                                     src="{{ auth()->user()->profile_photo_path ? asset(auth()->user()->profile_photo_path) : 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->name) }}" 
+                                      src="{{ auth()->user()->hu_profile_photo_path ? asset(auth()->user()->hu_profile_photo_path) : 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->hu_name) }}" 
                                      alt="Profile Photo" 
                                      class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
                             </div>
@@ -49,7 +49,7 @@
                         <div class="relative">
                             <textarea id="bio" name="bio" rows="4" 
                                 class="w-full rounded-xl border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition-colors py-3 px-4 text-gray-800 placeholder-gray-400"
-                                placeholder="Hi, I'm a computer science student passionate about web design...">{{ old('bio', auth()->user()->bio) }}</textarea>
+                                placeholder="Hi, I'm a computer science student passionate about web design...">{{ old('bio', auth()->user()->hu_bio) }}</textarea>
                             <div class="absolute bottom-3 right-3 text-xs text-gray-400 pointer-events-none">Tell us your story</div>
                         </div>
                         @error('bio')
@@ -68,16 +68,16 @@
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Faculty</label>
                                 <select name="faculty" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm bg-white">
                                     <option value="">Select Faculty</option>
-                                    <option value="Fakulti Komputeran & Meta-Teknologi" {{ old('faculty', auth()->user()->faculty) == 'Fakulti Komputeran & Meta-Teknologi' ? 'selected' : '' }}>Fakulti Komputeran & Meta-Teknologi</option>
-                                    <option value="Fakulti Pengurusan & Ekonomi" {{ old('faculty', auth()->user()->faculty) == 'Fakulti Pengurusan & Ekonomi' ? 'selected' : '' }}>Fakulti Pengurusan & Ekonomi</option>
-                                    <option value="Fakulti Seni, Kelestarian & Industri Kreatif" {{ old('faculty', auth()->user()->faculty) == 'Fakulti Seni, Kelestarian & Industri Kreatif' ? 'selected' : '' }}>Fakulti Seni, Kelestarian & Industri Kreatif</option>
-                                    <option value="Fakulti Sains Kemanusiaan" {{ old('faculty', auth()->user()->faculty) == 'Fakulti Sains Kemanusiaan' ? 'selected' : '' }}>Fakulti Sains Kemanusiaan</option>
-                                    <option value="Fakulti Sains & Matematik" {{ old('faculty', auth()->user()->faculty) == 'Fakulti Sains & Matematik' ? 'selected' : '' }}>Fakulti Sains & Matematik</option>
-                                    <option value="Fakulti Bahasa & Komunikasi" {{ old('faculty', auth()->user()->faculty) == 'Fakulti Bahasa & Komunikasi' ? 'selected' : '' }}>Fakulti Bahasa & Komunikasi</option>
-                                    <option value="Fakulti Pembangunan Manusia" {{ old('faculty', auth()->user()->faculty) == 'Fakulti Pembangunan Manusia' ? 'selected' : '' }}>Fakulti Pembangunan Manusia</option>
-                                    <option value="Fakulti Muzik & Seni Persembahan" {{ old('faculty', auth()->user()->faculty) == 'Fakulti Muzik & Seni Persembahan' ? 'selected' : '' }}>Fakulti Muzik & Seni Persembahan</option>
-                                    <option value="Fakulti Sains Sukan & Kejurulatihan" {{ old('faculty', auth()->user()->faculty) == 'Fakulti Sains Sukan & Kejurulatihan' ? 'selected' : '' }}>Fakulti Sains Sukan & Kejurulatihan</option>
-                                    <option value="Fakulti Teknikal & Vokasional" {{ old('faculty', auth()->user()->faculty) == 'Fakulti Teknikal & Vokasional' ? 'selected' : '' }}>Fakulti Teknikal & Vokasional</option>
+                                    <option value="Fakulti Komputeran & Meta-Teknologi" {{ old('faculty', auth()->user()->hu_faculty) == 'Fakulti Komputeran & Meta-Teknologi' ? 'selected' : '' }}>Fakulti Komputeran & Meta-Teknologi</option>
+                                    <option value="Fakulti Pengurusan & Ekonomi" {{ old('faculty', auth()->user()->hu_faculty) == 'Fakulti Pengurusan & Ekonomi' ? 'selected' : '' }}>Fakulti Pengurusan & Ekonomi</option>
+                                    <option value="Fakulti Seni, Kelestarian & Industri Kreatif" {{ old('faculty', auth()->user()->hu_faculty) == 'Fakulti Seni, Kelestarian & Industri Kreatif' ? 'selected' : '' }}>Fakulti Seni, Kelestarian & Industri Kreatif</option>
+                                    <option value="Fakulti Sains Kemanusiaan" {{ old('faculty', auth()->user()->hu_faculty) == 'Fakulti Sains Kemanusiaan' ? 'selected' : '' }}>Fakulti Sains Kemanusiaan</option>
+                                    <option value="Fakulti Sains & Matematik" {{ old('faculty', auth()->user()->hu_faculty) == 'Fakulti Sains & Matematik' ? 'selected' : '' }}>Fakulti Sains & Matematik</option>
+                                    <option value="Fakulti Bahasa & Komunikasi" {{ old('faculty', auth()->user()->hu_faculty) == 'Fakulti Bahasa & Komunikasi' ? 'selected' : '' }}>Fakulti Bahasa & Komunikasi</option>
+                                    <option value="Fakulti Pembangunan Manusia" {{ old('faculty', auth()->user()->hu_faculty) == 'Fakulti Pembangunan Manusia' ? 'selected' : '' }}>Fakulti Pembangunan Manusia</option>
+                                    <option value="Fakulti Muzik & Seni Persembahan" {{ old('faculty', auth()->user()->hu_faculty) == 'Fakulti Muzik & Seni Persembahan' ? 'selected' : '' }}>Fakulti Muzik & Seni Persembahan</option>
+                                    <option value="Fakulti Sains Sukan & Kejurulatihan" {{ old('faculty', auth()->user()->hu_faculty) == 'Fakulti Sains Sukan & Kejurulatihan' ? 'selected' : '' }}>Fakulti Sains Sukan & Kejurulatihan</option>
+                                    <option value="Fakulti Teknikal & Vokasional" {{ old('faculty', auth()->user()->hu_faculty) == 'Fakulti Teknikal & Vokasional' ? 'selected' : '' }}>Fakulti Teknikal & Vokasional</option>
                                 </select>
                                 @error('faculty')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -88,7 +88,7 @@
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Course / Program</label>
                                 <input type="text" name="course" 
                                     class="w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm  text-gray-700"
-                                    value="{{ old('course', auth()->user()->course) }}" />
+                                    value="{{ old('course', auth()->user()->hu_course) }}" />
                                 @error('course')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
@@ -106,7 +106,7 @@
                             <input type="text" name="skills" 
                                 class="w-full rounded-xl border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-3 px-4 text-gray-700"
                                 placeholder="e.g. Graphic Design, Tutoring" 
-                                value="{{ old('skills', auth()->user()->skills) }}" />
+                                value="{{ old('skills', auth()->user()->hu_skills) }}" />
                             @error('skills')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
@@ -123,7 +123,7 @@
                             <div>
                                 <textarea id="work_experience_message" name="work_experience_message" rows="3" 
                                     class="w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
-                                    placeholder="Briefly describe your past work experience...">{{ old('work_experience_message', auth()->user()->work_experience_message ?? '') }}</textarea>
+                                    placeholder="Briefly describe your past work experience...">{{ old('work_experience_message', auth()->user()->hu_work_experience_message ?? '') }}</textarea>
                                 @error('work_experience_message')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror

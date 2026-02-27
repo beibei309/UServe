@@ -10,7 +10,7 @@ class SuperAdminController extends Controller
 {
     public function adminsIndex()
 {
-    $admins = \App\Models\Admin::orderBy('role')->get();
+        $admins = \App\Models\Admin::orderBy('ha_role')->get();
 
     return view('admin.admins.index', compact('admins'));
 }
@@ -29,16 +29,16 @@ public function store(Request $request)
 
     $request->validate([
         'name' => 'required',
-        'email' => 'required|email|unique:admins,email',
+        'email' => 'required|email|unique:h2u_admins,ha_email',
         'password' => 'required|min:6',
         'role' => 'required'
     ]);
 
     \App\Models\Admin::create([
-        'name' => $request->name,
-        'email' => $request->email,
-        'password' => bcrypt($request->password),
-        'role' => $request->role,
+        'ha_name' => $request->name,
+        'ha_email' => $request->email,
+        'ha_password' => bcrypt($request->password),
+        'ha_role' => $request->role,
     ]);
 
     return redirect()->route('admin.super.admins.index')
@@ -58,18 +58,18 @@ public function update(Request $request, $id)
 
     $request->validate([
         'name' => 'required',
-        'email' => 'required|email|unique:admins,email,' . $id,
+        'email' => 'required|email|unique:h2u_admins,ha_email,' . $id . ',ha_id',
         'role' => 'required'
     ]);
 
     $admin->update([
-        'name' => $request->name,
-        'email' => $request->email,
-        'role' => $request->role,
+        'ha_name' => $request->name,
+        'ha_email' => $request->email,
+        'ha_role' => $request->role,
     ]);
 
     if ($request->password) {
-        $admin->update(['password' => bcrypt($request->password)]);
+        $admin->update(['ha_password' => bcrypt($request->password)]);
     }
 
     return redirect()->route('admin.super.admins.index')
@@ -79,10 +79,6 @@ public function update(Request $request, $id)
 public function destroy($id)
 {
     if (Admin::count() <= 1) {
-    return back()->with('error', 'At least 1 admin account is required.');
-}
-
-if (Admin::count() <= 1) {
     return back()->with('error', 'At least 1 admin account is required.');
 }
 

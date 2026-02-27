@@ -16,59 +16,62 @@ class SearchController extends Controller
         $availableOnly = $request->boolean('available_only', false);
 
         $query = StudentService::query()
-            ->where('is_active', true)
+            ->where('hss_is_active', true)
             ->with(['category', 'student' => function ($q) {
-                $q->select(['id', 'name', 'role', 'is_available']);
+                $q->select(['hu_id', 'hu_name', 'hu_role', 'hu_is_available', 'hu_trust_badge', 'hu_average_rating']);
             }]);
 
         if ($q) {
             $query->where(function ($sub) use ($q) {
-                $sub->where('title', 'like', "%$q%")
-                    ->orWhere('description', 'like', "%$q%");
+                $sub->where('hss_title', 'like', "%$q%")
+                    ->orWhere('hss_description', 'like', "%$q%");
             });
         }
 
         if ($categoryId) {
-            $query->where('category_id', $categoryId);
+            $query->where('hss_category_id', $categoryId);
         }
 
         if ($availableOnly) {
             $query->whereHas('student', function ($sub) {
-                $sub->where('is_available', true);
+                $sub->where('hu_is_available', true);
             });
         }
 
         if ($minRating) {
             // Filter by average rating of the student
             $query->whereRaw('(
-                select avg(rating)
-                from reviews r
-                where r.reviewee_id = student_services.user_id
+                select avg(hr_rating)
+                from h2u_reviews r
+                where r.hr_reviewee_id = h2u_student_services.hss_user_id
             ) >= ?', [$minRating]);
         }
 
-        $query->orderByDesc('id');
+        $query->orderByDesc('hss_id');
 
         $services = $query->get();
 
         $result = $services->map(function ($svc) {
             $student = $svc->student;
             return [
-                'id' => $svc->id,
-                'title' => $svc->title,
-                'description' => $svc->description,
-                'suggested_price' => $svc->suggested_price,
+                'id' => $svc->hss_id,
+                'title' => $svc->hss_title,
+                'description' => $svc->hss_description,
+                'suggested_price' => $svc->hss_suggested_price,
                 'category' => $svc->category,
                 'student' => [
-                    'id' => $student->id,
-                    'name' => $student->name,
-                    'badge' => $student->trust_badge,
-                    'is_available' => (bool) $student->is_available,
-                    'average_rating' => $student->average_rating,
+                    'id' => $student->hu_id,
+                    'name' => $student->hu_name,
+                    'badge' => $student->hu_trust_badge,
+                    'is_available' => (bool) $student->hu_is_available,
+                    'average_rating' => $student->hu_average_rating,
                 ],
             ];
         });
 
-        return response()->json(['services' => $result], 200);
+        return response()->json([
+            'success' => true,
+            'services' => $result,
+        ], 200);
     }
 }

@@ -28,17 +28,17 @@
 
         @if($selectedStudentId)
             @php
-                $selectedStudent = $students->firstWhere('id', $selectedStudentId);
+                $selectedStudent = $students->firstWhere('hu_id', $selectedStudentId);
             @endphp
 
             {{-- AUTO-SELECTED STUDENT --}}
             <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
                 <p class="text-sm text-gray-600 mb-1">Selected Student</p>
                 <p class="font-semibold text-gray-900">
-                    {{ $selectedStudent->name }}
+                    {{ $selectedStudent->hu_name }}
                 </p>
                 <p class="text-xs text-gray-500">
-                    {{ $selectedStudent->student_id ?? 'No Matric' }}
+                    {{ $selectedStudent->hu_student_id ?? 'No Matric' }}
                 </p>
             </div>
 
@@ -54,16 +54,16 @@
                             <label class="flex items-center justify-between px-4 py-3 cursor-pointer">
                                 <div>
                                     <span class="block text-gray-900 font-medium text-sm">
-                                        {{ $student->name }}
+                                        {{ $student->hu_name }}
                                     </span>
                                     <span class="block text-gray-500 text-xs">
-                                        {{ $student->student_id ?? 'No Matric' }}
+                                        {{ $student->hu_student_id ?? 'No Matric' }}
                                     </span>
                                 </div>
 
                                 <input type="radio"
                                        name="student_id"
-                                       value="{{ $student->id }}"
+                                       value="{{ $student->hu_id }}"
                                        required
                                        class="form-radio text-blue-600 h-4 w-4">
                             </label>

@@ -1,23 +1,23 @@
 @auth
     @php
         $user = auth()->user();
-        $isRestricted = $user->is_blocked || $user->is_suspended || $user->is_blacklisted;
+        $isRestricted = $user->hu_is_blocked || $user->hu_is_suspended || $user->hu_is_blacklisted;
         $isCommunityUnverified =
-            $user->role === 'community' &&
-            $user->verification_status !== 'approved' &&
+            $user->hu_role === 'community' &&
+            $user->hu_verification_status !== 'approved' &&
             !$isRestricted &&
             $user->hasVerifiedEmail();
 
         $isOnCommunityOnboarding = request()->routeIs('onboarding.community.*');
-        $isPending = $user->verification_status === 'pending';
-        $hasFiles = !empty($user->verification_document_path) && !empty($user->selfie_media_path);
+        $isPending = $user->hu_verification_status === 'pending';
+        $hasFiles = !empty($user->hu_verification_document_path) && !empty($user->hu_selfie_media_path);
         $reviewInProgress = $isPending && $hasFiles;
 
         $title = $reviewInProgress ? 'Verification in Progress' : 'Verification Required';
         $message = $reviewInProgress
             ? 'Your submitted document and selfie are currently being reviewed by the admin team.'
             : 'To keep the platform safe, please complete your community verification before continuing.';
-        $reason = $user->verification_note ?: ($reviewInProgress
+        $reason = $user->hu_verification_note ?: ($reviewInProgress
             ? 'Status: Pending admin review.'
             : 'Proof of residency and selfie are required.');
     @endphp

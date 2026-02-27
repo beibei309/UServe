@@ -6,10 +6,10 @@ use Illuminate\Support\Facades\Hash;
 
 test('non helper users are redirected from seller dashboard route', function () {
     $user = User::factory()->create([
-        'role' => 'student',
-        'email_verified_at' => now(),
-        'verification_status' => 'approved',
-        'helper_verified_at' => null,
+        'hu_role' => 'student',
+        'hu_email_verified_at' => now(),
+        'hu_verification_status' => 'approved',
+        'hu_helper_verified_at' => null,
     ]);
 
     $response = $this->actingAs($user)->get(route('students.index'));
@@ -21,9 +21,9 @@ test('non helper users are redirected from seller dashboard route', function () 
 
 test('unverified community users cannot perform protected post actions', function () {
     $user = User::factory()->create([
-        'role' => 'community',
-        'email_verified_at' => now(),
-        'verification_status' => 'pending',
+        'hu_role' => 'community',
+        'hu_email_verified_at' => now(),
+        'hu_verification_status' => 'pending',
     ]);
 
     $response = $this->actingAs($user)
@@ -37,10 +37,10 @@ test('unverified community users cannot perform protected post actions', functio
 
 test('admin cannot access superadmin routes', function () {
     $admin = Admin::create([
-        'name' => 'Normal Admin',
-        'email' => 'admin@example.com',
-        'password' => Hash::make('password'),
-        'role' => 'admin',
+        'ha_name' => 'Normal Admin',
+        'ha_email' => 'admin@example.com',
+        'ha_password' => Hash::make('password'),
+        'ha_role' => 'admin',
     ]);
 
     $response = $this->actingAs($admin, 'admin')->get(route('admin.super.admins.index'));
@@ -52,10 +52,10 @@ test('admin cannot access superadmin routes', function () {
 
 test('superadmin can access superadmin routes', function () {
     $superadmin = Admin::create([
-        'name' => 'Super Admin',
-        'email' => 'superadmin@example.com',
-        'password' => Hash::make('password'),
-        'role' => 'superadmin',
+        'ha_name' => 'Super Admin',
+        'ha_email' => 'superadmin@example.com',
+        'ha_password' => Hash::make('password'),
+        'ha_role' => 'superadmin',
     ]);
 
     $response = $this->actingAs($superadmin, 'admin')->get(route('admin.super.admins.index'));

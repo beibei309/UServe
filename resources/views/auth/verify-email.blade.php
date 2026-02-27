@@ -95,7 +95,7 @@
 
             <!-- Description -->
             <p class="text-center text-slate-600 mb-6 leading-relaxed">
-                Thanks for signing up! We've sent a verification link to <span class="font-semibold text-indigo-600">{{ auth()->user()->email }}</span>. Please check your inbox and click the link to activate your account.
+                Thanks for signing up! We've sent a verification link to <span class="font-semibold text-indigo-600">{{ auth()->user()->hu_email }}</span>. Please check your inbox and click the link to activate your account.
             </p>
 
             <!-- Success Message -->

@@ -19,13 +19,13 @@
                 <div class="h-32 bg-gradient-to-r from-indigo-500 to-purple-600"></div>
                 <div class="px-8 pb-8 relative">
                     <div class="absolute -top-16 left-8">
-                        @if ($user->profile_photo_path)
-                            <img src="{{ asset($user->profile_photo_path) }}"
+                        @if ($user->hu_profile_photo_path)
+                            <img src="{{ asset($user->hu_profile_photo_path) }}"
                                 class="w-32 h-32 rounded-full border-4 border-white shadow-md object-cover bg-white">
                         @else
                             <div
                                 class="w-32 h-32 rounded-full border-4 border-white shadow-md bg-indigo-600 flex items-center justify-center text-white text-4xl font-black">
-                                {{ substr($user->name, 0, 1) }}
+                                {{ substr($user->hu_name, 0, 1) }}
                             </div>
                         @endif
                     </div>
@@ -33,11 +33,11 @@
                     <div class="pt-20 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
                         {{-- Left Side: User Info --}}
                         <div>
-                            <h1 class="text-3xl font-black text-slate-900">{{ $user->name }}</h1>
+                            <h1 class="text-3xl font-black text-slate-900">{{ $user->hu_name }}</h1>
                             <p class="text-slate-500 font-medium mt-1">
-                                Member since {{ $user->created_at->format('F Y') }}
+                                Member since {{ $user->hu_created_at->format('F Y') }}
                             </p>
-                            @if ($user->role === 'student')
+                            @if ($user->hu_role === 'student')
                                 <span
                                     class="inline-flex mt-2 items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-100 text-indigo-700">
                                     Student
@@ -102,15 +102,15 @@
                                     {{-- Reviewer Avatar --}}
                                     <div class="flex-shrink-0">
                                         {{-- Check if reviewer exists AND has a photo --}}
-                                        @if ($review->reviewer && $review->reviewer->profile_photo_path)
-                                            <img src="{{ asset($review->reviewer->profile_photo_path) }}"
+                                        @if ($review->reviewer && $review->reviewer->hu_profile_photo_path)
+                                            <img src="{{ asset($review->reviewer->hu_profile_photo_path) }}"
                                                 class="w-10 h-10 rounded-full object-cover border border-slate-200"
-                                                alt="{{ $review->reviewer->name }}">
+                                                alt="{{ $review->reviewer->hu_name }}">
                                         @else
                                             {{-- Fallback: Show Initials if no photo --}}
                                             <div
                                                 class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold">
-                                                {{ substr($review->reviewer->name ?? 'A', 0, 1) }}
+                                                {{ substr($review->reviewer->hu_name ?? 'A', 0, 1) }}
                                             </div>
                                         @endif
                                     </div>
@@ -118,20 +118,20 @@
                                     <div class="flex-1">
                                         <div class="flex justify-between items-start mb-1">
                                             <h4 class="font-bold text-slate-900">
-                                                <a href="{{ route('students.profile', $review->reviewer->id) }}"
+                                                <a href="{{ route('students.profile', $review->reviewer->hu_id) }}"
                                                     class="hover:text-indigo-600 transition-colors hover:underline decoration-indigo-300 decoration-2">
-                                                    {{ $review->reviewer->name ?? 'Anonymous' }}
+                                                    {{ $review->reviewer->hu_name ?? 'Anonymous' }}
                                                 </a>
                                             </h4>
                                             <span
-                                                class="text-xs text-slate-400">{{ $review->created_at->diffForHumans() }}</span>
+                                                class="text-xs text-slate-400">{{ optional($review->hr_created_at)->diffForHumans() ?? 'Recently' }}</span>
                                         </div>
 
                                         <div class="flex items-center gap-2 mb-3">
                                             {{-- 1. Star Rating --}}
                                             <div class="flex text-yellow-400 text-xs">
                                                 @for ($i = 1; $i <= 5; $i++)
-                                                    <i class="{{ $i <= $review->rating ? 'fas' : 'far' }} fa-star"></i>
+                                                    <i class="{{ $i <= $review->hr_rating ? 'fas' : 'far' }} fa-star"></i>
                                                 @endfor
                                             </div>
 
@@ -142,21 +142,21 @@
                                             </span>
                                         </div>
 
-                                        @if ($review->comment)
+                                        @if ($review->hr_comment)
                                             <p class="text-slate-600 text-sm leading-relaxed mb-3">
-                                                "{{ $review->comment }}"
+                                                "{{ $review->hr_comment }}"
                                             </p>
                                         @endif
 
                                         {{-- Context: Which service was this for? --}}
                                         @if ($review->studentService)
-                                            <a href="{{ route('services.details', $review->studentService->id) }}"
+                                            <a href="{{ route('services.details', $review->studentService->hss_id) }}"
                                                 class="inline-flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-lg hover:bg-slate-200 transition-colors group">
                                                 <i
                                                     class="fas fa-handshake text-xs text-slate-400 group-hover:text-slate-600"></i>
                                                 <span
                                                     class="text-xs font-bold text-slate-600 group-hover:text-slate-800">
-                                                    Transacted: {{ Str::limit($review->studentService->title, 40) }}
+                                                    Transacted: {{ Str::limit($review->studentService->hss_title, 40) }}
                                                 </span>
                                             </a>
                                         @endif

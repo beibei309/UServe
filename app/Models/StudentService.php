@@ -11,49 +11,58 @@ class StudentService extends Model
 {
     use HasFactory;
 
+    protected $table = 'h2u_student_services';
+    protected $primaryKey = 'hss_id';
+
     protected $fillable = [
-        'user_id',
-        'category_id',
-        'title',
-        'image_path',
-        'description',
-        'status',
-        'is_active',
-        'unavailable_dates',
-        'operating_hours',
-        'session_duration',
-        'blocked_slots',
+        'hss_user_id',
+        'hss_category_id',
+        'hss_title',
+        'hss_image_path',
+        'hss_description',
+        'hss_status',
+        'hss_is_active',
+        'hss_unavailable_dates',
+        'hss_operating_hours',
+        'hss_session_duration',
+        'hss_blocked_slots',
+        'hss_booking_mode',
+        'hss_approval_status',
+        'hss_warning_count',
+        'hss_warning_reason',
+        'hss_suggested_price',
+        'hss_price_range',
         // Basic package
-        'basic_duration',
-        'basic_frequency',
-        'basic_price',
-        'basic_description',
+        'hss_basic_duration',
+        'hss_basic_frequency',
+        'hss_basic_price',
+        'hss_basic_description',
         // Standard package
-        'standard_duration',
-        'standard_frequency',
-        'standard_price',
-        'standard_description',
+        'hss_standard_duration',
+        'hss_standard_frequency',
+        'hss_standard_price',
+        'hss_standard_description',
         // Premium package
-        'premium_duration',
-        'premium_frequency',
-        'premium_price',
-        'premium_description',
+        'hss_premium_duration',
+        'hss_premium_frequency',
+        'hss_premium_price',
+        'hss_premium_description',
     ];
 
     protected $casts = [
-        'operating_hours' => 'array', 
-        'unavailable_dates' => 'array',
-        'blocked_slots' => 'array',
+        'hss_operating_hours' => 'array', 
+        'hss_unavailable_dates' => 'array',
+        'hss_blocked_slots' => 'array',
     ];
 
     protected $attributes = [
-        'status' => 'available',
-        'is_active' => true,
+        'hss_status' => 'available',
+        'hss_is_active' => true,
     ];
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'hss_user_id', 'hu_id');
     }
 
     /** Backward compatibility alias */
@@ -61,14 +70,13 @@ class StudentService extends Model
 
     public function category()
     {
-        return $this->belongsTo(Category::class);
+        return $this->belongsTo(Category::class, 'hss_category_id', 'hc_id');
     }
 
 
     public function reviews()
 {
-    // Pastikan 'student_service_id' wujud dalam table reviews
-    return $this->hasMany(Review::class, 'student_service_id');
+    return $this->hasMany(Review::class, 'hr_student_service_id', 'hss_id');
 }
 
 
@@ -77,7 +85,7 @@ class StudentService extends Model
      */
     public function isAvailable()
     {
-        return $this->status === 'available' && $this->is_active;
+        return $this->hss_status === 'available' && $this->hss_is_active;
     }
 
     /**
@@ -85,7 +93,7 @@ class StudentService extends Model
      */
     public function markAsBusy()
     {
-        $this->update(['status' => 'busy']);
+        $this->update(['hss_status' => 'busy']);
     }
 
     /**
@@ -93,21 +101,23 @@ class StudentService extends Model
      */
     public function markAsAvailable()
     {
-        $this->update(['status' => 'available']);
+        $this->update(['hss_status' => 'available']);
     }
     
     public function orders()
     {
-        return $this->hasMany(\App\Models\ServiceRequest::class, 'student_service_id');
+        return $this->hasMany(\App\Models\ServiceRequest::class, 'hsr_student_service_id', 'hss_id');
     }
 
 public function favoritedBy()
 {
     return $this->belongsToMany(
         \App\Models\User::class,
-        'favorites',
-        'service_id',
-        'user_id'
+        'h2u_favorites',
+        'hf_service_id',
+        'hf_user_id',
+        'hss_id',
+        'hu_id'
     );
 }
 
@@ -118,9 +128,9 @@ public function getIsFavouritedAttribute()
         return false;
     }
 
-    return DB::table('favorites')
-        ->where('user_id', Auth::id())
-        ->where('service_id', $this->id)
+    return DB::table('h2u_favorites')
+        ->where('hf_user_id', Auth::id())
+        ->where('hf_service_id', $this->hss_id)
         ->exists();
 }
 

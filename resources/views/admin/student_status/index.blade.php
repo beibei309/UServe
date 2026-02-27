@@ -80,28 +80,28 @@
 
                         {{-- NAME --}}
                         <td class="py-4 px-6 font-medium text-gray-900">
-                            {{ $student->name }}
+                            {{ $student->hu_name }}
                         </td>
 
                         {{-- MATRIC NO --}}
                         <td class="py-4 px-6 text-gray-500">
-                            {{ $student->student_id ?? '-' }}
+                            {{ $student->hu_student_id ?? '-' }}
                         </td>
 
                         {{-- SEMESTER --}}
                         <td class="py-4 px-6 text-gray-600">
-                            @if ($student->studentStatus && $student->studentStatus->status === 'Graduated')
+                            @if ($student->studentStatus && $student->studentStatus->hss_status === 'Graduated')
                                 <span class="text-gray-400 italic">-</span>
                             @else
-                                {{ $student->studentStatus->semester ?? '-' }}
+                                {{ $student->studentStatus->hss_semester ?? '-' }}
                             @endif
                         </td>
 
                         {{-- GRADUATION DATE --}}
                         <td class="py-4 px-6 text-gray-600">
-                            @if ($student->studentStatus && $student->studentStatus->graduation_date)
+                            @if ($student->studentStatus && $student->studentStatus->hss_graduation_date)
                                 {{-- Use the format you prefer here. If you want the EST label, replace this part with the code from previous steps --}}
-                                {{ \Carbon\Carbon::parse($student->studentStatus->graduation_date)->format('d M Y') }}
+                                {{ \Carbon\Carbon::parse($student->studentStatus->hss_graduation_date)->format('d M Y') }}
                             @else
                                 <span class="text-gray-400 italic">-</span>
                             @endif
@@ -109,7 +109,7 @@
 
                         {{-- STATUS BADGE --}}
                         <td class="py-4 px-6">
-                            @php $status = strtolower($student->studentStatus->status ?? ''); @endphp
+                            @php $status = strtolower($student->studentStatus->hss_status ?? ''); @endphp
 
                             @if ($status == 'active')
                                 <span
@@ -142,13 +142,13 @@
             
             {{-- 1. REMINDER BUTTON (LOGIC ADDED) --}}
             @php
-                $gradDate = \Carbon\Carbon::parse($student->studentStatus->graduation_date);
+                $gradDate = \Carbon\Carbon::parse($student->studentStatus->hss_graduation_date);
                 $now = now();
                 $threeMonthsLimit = now()->addMonths(3);
                 
                 // Show ONLY if: Date exists AND is in future AND is within next 3 months
-                $showReminder = !empty($student->studentStatus->graduation_date) 
-                                && $student->studentStatus->status !== 'Graduated'
+                $showReminder = !empty($student->studentStatus->hss_graduation_date) 
+                                && $student->studentStatus->hss_status !== 'Graduated'
                                 && $gradDate->gte($now) 
                                 && $gradDate->lte($threeMonthsLimit);
             @endphp
@@ -156,14 +156,14 @@
             @if ($showReminder)
                 {{-- Functional Form to Send Email --}}
                 {{-- Functional Form to Send Email --}}
-<form id="reminder-form-{{ $student->id }}" 
-      action="{{ route('admin.student_status.send_reminder', $student->id) }}" 
+<form id="reminder-form-{{ $student->hu_id }}" 
+    action="{{ route('admin.student_status.send_reminder', $student->hu_id) }}" 
       method="POST" 
       class="inline-block">
     @csrf
     
     <button type="button" 
-        onclick="confirmSendReminder({{ $student->id }}, '{{ addslashes($student->name) }}')"
+        onclick="confirmSendReminder({{ $student->hu_id }}, '{{ addslashes($student->hu_name) }}')"
         class="text-yellow-500 hover:text-yellow-700 p-1 rounded hover:bg-yellow-50 transition relative group"
         title="Send Graduation Reminder">
         
@@ -184,13 +184,13 @@
             @endif
 
             {{-- EDIT BUTTON --}}
-            <a href="{{ route('admin.student_status.edit', $student->studentStatus->id) }}"
+            <a href="{{ route('admin.student_status.edit', $student->studentStatus->hss_id) }}"
                 class="text-indigo-600 hover:text-indigo-900 font-medium text-sm">
                 Edit
             </a>
 
             {{-- DELETE BUTTON --}}
-            <form action="{{ route('admin.student_status.delete', $student->studentStatus->id) }}"
+            <form action="{{ route('admin.student_status.delete', $student->studentStatus->hss_id) }}"
                 method="POST" class="inline-block"
                 onsubmit="return confirm('Remove status record?');">
                 @csrf
@@ -201,7 +201,7 @@
             </form>
         @else
             {{-- ADD BUTTON --}}
-            <a href="{{ route('admin.student_status.create', ['student_id' => $student->id]) }}"
+            <a href="{{ route('admin.student_status.create', ['student_id' => $student->hu_id]) }}"
                 class="text-blue-600 hover:underline">
                 + Add Status
             </a>

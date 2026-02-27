@@ -74,7 +74,7 @@
                             <div class="flex justify-center">
                                 <div class="relative group cursor-pointer" onclick="document.getElementById('profile_photo_input').click()">
                                     <div class="w-40 h-40 rounded-full overflow-hidden border-4 border-slate-100 shadow-xl bg-slate-50 relative">
-                                        <img id="profile-preview" src="{{ auth()->user()->profile_photo_path ? asset(auth()->user()->profile_photo_path) : 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->name) }}" class="w-full h-full object-cover">
+                                        <img id="profile-preview" src="{{ auth()->user()->hu_profile_photo_path ? asset(auth()->user()->hu_profile_photo_path) : 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->hu_name) }}" class="w-full h-full object-cover">
                                         <div class="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><span class="text-white text-sm font-bold">Change</span></div>
                                     </div>
                                 </div>

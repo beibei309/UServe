@@ -352,5 +352,5 @@ Route::middleware(['auth:admin', 'prevent-back-history'])->prefix('admin')->grou
 // View Community Verification Document
 Route::get('/view-doc/{id}', function ($id) {
     $user = \App\Models\User::findOrFail($id);
-    return response()->file(storage_path('app/private/' . $user->verification_document_path));
+    return response()->file(storage_path('app/private/' . $user->hu_verification_document_path));
 })->name('view.doc')->middleware(['auth:admin']);

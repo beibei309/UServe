@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="csrf-token" content="{{ csrf_token() }}" />
-    <title>{{ $service->title ?? 'Service Page' }} - S2U</title>
+    <title>{{ $service->hss_title ?? 'Service Page' }} - S2U</title>
 
     {{-- Fonts & CSS --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -85,9 +85,9 @@
     @php
         $hasActiveRequest = false;
         if (auth()->check()) {
-            $hasActiveRequest = \App\Models\ServiceRequest::where('requester_id', auth()->id())
-                ->where('student_service_id', $service->id) // <--- FIXED: Checks specific service only
-                ->whereIn('status', ['pending', 'accepted', 'in_progress'])
+            $hasActiveRequest = \App\Models\ServiceRequest::where('hsr_requester_id', auth()->id())
+                ->where('hsr_student_service_id', $service->hss_id) // <--- FIXED: Checks specific service only
+                ->whereIn('hsr_status', ['pending', 'accepted', 'in_progress'])
                 ->exists();
         }
     @endphp
@@ -103,7 +103,7 @@
                     <li><i class="fa-solid fa-chevron-right text-gray-400 mx-2 text-xs"></i><a
                             href="{{ route('services.index') }}" class="hover:text-indigo-600">Find Services</a></li>
                     <li><i class="fa-solid fa-chevron-right text-gray-400 mx-2 text-xs"></i><span
-                            class="font-medium text-gray-800">{{ $service->title }}</span></li>
+                            class="font-medium text-gray-800">{{ $service->hss_title }}</span></li>
                 </ol>
             </nav>
         </div>
@@ -117,35 +117,35 @@
                 <div>
     {{-- TITLE --}}
     <h1 class="text-3xl md:text-4xl font-bold text-slate-900 leading-tight">
-        {{ $service->title }}
+        {{ $service->hss_title }}
     </h1>
 
     {{-- CATEGORY (Below Title) --}}
     @if ($service->category)
         <div class="mt-2">
-            <span
-                class="inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-semibold" style="color: {{ $service->category->color }}; background-color: {{ $service->category->color }}20; border: 1px solid {{ $service->category->color }};" >
+                <span
+                class="inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-semibold" style="color: {{ $service->category->hc_color }}; background-color: {{ $service->category->hc_color }}20; border: 1px solid {{ $service->category->hc_color }};" >
                 <svg class="h-3.5 w-3.5 text-current" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                 </svg>
 
-                {{ $service->category->name }}
+                {{ $service->category->hc_name }}
             </span>
         </div>
     @endif
 
     {{-- META INFO --}}
     <div class="flex flex-wrap items-center gap-4 text-sm mt-4">
-        <span class="font-semibold text-slate-900">{{ $service->user->name }}</span> |
+        <span class="font-semibold text-slate-900">{{ $service->user->hu_name }}</span> |
         <span class="text-slate-500">
             <i class="fa-solid fa-star text-yellow-400"></i>
-            {{ $service->rating ?? '0.0' }}
+            {{ $service->hss_rating ?? '0.0' }}
         </span>
 
         {{-- STATUS BADGE --}}
-        @if ($service->status === 'available')
+        @if ($service->hss_status === 'available')
             <span
                 class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold
                 bg-green-50 text-green-700 border border-green-200">
@@ -170,10 +170,10 @@
                     <div class="aspect-video h-[400px] w-full overflow-hidden bg-gray-100">
                         @php
                             $imageUrl = null;
-                            $defaultPlaceholder = 'https://ui-avatars.com/api/?name=' . urlencode($service->title ?? 'Service');
+                            $defaultPlaceholder = 'https://ui-avatars.com/api/?name=' . urlencode($service->hss_title ?? 'Service');
 
-                            if (!empty($service->image_path)) {
-                                $path = $service->image_path;
+                            if (!empty($service->hss_image_path)) {
+                                $path = $service->hss_image_path;
 
                                 if (Str::startsWith($path, ['http://', 'https://'])) {
                                     $imageUrl = $path;
@@ -191,7 +191,7 @@
 
                         @if ($imageUrl)
                             <img src="{{ $imageUrl }}"
-                                alt="{{ $service->name ?? 'Service Image' }}"
+                                alt="{{ $service->hss_title ?? 'Service Image' }}"
                                 class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                                 onerror="this.onerror=null; this.src='{{ $defaultPlaceholder }}';">
                         @else
@@ -213,7 +213,7 @@
 
                 <section class="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100">
                     <h2 class="text-xl font-bold text-slate-900 mb-4 border-b border-gray-100 pb-2">Description</h2>
-                    <div class="prose prose-slate max-w-none text-gray-600 rich-text">{!! $service->description !!}</div>
+                    <div class="prose prose-slate max-w-none text-gray-600 rich-text">{!! $service->hss_description !!}</div>
                 </section>
 
                 {{-- Helper Profile Section --}}
@@ -226,8 +226,8 @@
 
                             {{-- 1. WRAPPER FOR BLUR LOGIC --}}
                             <div class="relative">
-                                @if ($service->user->profile_photo_path)
-                                    <img src="{{ asset( $service->user->profile_photo_path) }}"
+                                @if ($service->user->hu_profile_photo_path)
+                                    <img src="{{ asset( $service->user->hu_profile_photo_path) }}"
                                         class="w-24 h-24 md:w-28 md:h-28 rounded-full object-cover border-4 border-white shadow-lg transition-all duration-300 
                         {{-- BLUR IF GUEST --}}
                         @guest blur-md brightness-90 @endguest">
@@ -236,7 +236,7 @@
                                         class="w-24 h-24 md:w-28 md:h-28 rounded-full bg-indigo-600 flex items-center justify-center text-3xl md:text-4xl text-white font-bold border-4 border-white shadow-lg 
                         {{-- BLUR IF GUEST --}}
                         @guest blur-md brightness-90 @endguest">
-                                        {{ strtoupper(substr($service->user->name, 0, 1)) }}
+                                        {{ strtoupper(substr($service->user->hu_name, 0, 1)) }}
                                     </div>
                                 @endif
 
@@ -251,7 +251,7 @@
                             </div>
 
                             {{-- Verified Badge (Only show if logged in, or keep visible but on top of blur) --}}
-                            @if ($service->user->trust_badge ?? false)
+                            @if ($service->user->hu_trust_badge ?? false)
                                 <div class="absolute bottom-1 right-1 bg-blue-500 text-white w-7 h-7 flex items-center justify-center rounded-full border-2 border-white shadow-sm z-20"
                                     title="Verified Student">
                                     <i class="fas fa-check text-xs"></i>
@@ -265,16 +265,16 @@
                                 <h3 class="text-xl font-bold text-slate-900 mb-1">
                                     {{-- Optional: Mask name for guests if you want extra privacy --}}
                                     @guest
-                                        {{ Str::mask($service->user->name, '*', 3) }}
+                                        {{ Str::mask($service->user->hu_name, '*', 3) }}
                                     @else
-                                        {{ $service->user->name }}
+                                        {{ $service->user->hu_name }}
                                     @endguest
                                 </h3>
                                 <div class="flex flex-wrap items-center justify-center md:justify-start gap-2 text-sm">
                                     <span
                                         class="inline-flex items-center px-2.5 py-0.5 rounded-full font-medium bg-indigo-50 text-indigo-700">
                                         <i class="fa-solid fa-graduation-cap mr-1.5 text-xs"></i>
-                                        {{ $service->user->faculty ?? 'Faculty of Computing' }}
+                                        {{ $service->user->hu_faculty ?? 'Faculty of Computing' }}
                                     </span>
                                     <span class="text-gray-400 hidden sm:inline">�</span>
                                     <span class="text-gray-500">Member since
@@ -287,7 +287,7 @@
                                 <i
                                     class="fa-solid fa-quote-left text-slate-200 text-2xl absolute top-3 left-3 -z-0"></i>
                                 <p class="text-gray-600 italic text-sm relative z-10 pl-6">
-                                    "{{ $service->user->bio ?? 'Hi! I am a dedicated student at UPSI looking to help the community. I ensure all tasks are completed with care and punctuality.' }}"
+                                    "{{ $service->user->hu_bio ?? 'Hi! I am a dedicated student at UPSI looking to help the community. I ensure all tasks are completed with care and punctuality.' }}"
                                 </p>
                             </div>
 
@@ -330,7 +330,7 @@
         @if ($reviews->count() > 0)
             <div class="flex items-center gap-2 bg-yellow-50 px-3 py-1 rounded-lg border border-yellow-100">
                 <i class="fas fa-star text-yellow-500"></i>
-                <span class="font-bold text-slate-800">{{ number_format($service->rating, 1) }}</span>
+                <span class="font-bold text-slate-800">{{ number_format($service->hss_rating ?? 0, 1) }}</span>
                 <span class="text-xs text-gray-500">/ 5.0</span>
             </div>
         @endif
@@ -347,10 +347,10 @@
                     {{-- Avatar Client --}}
                     <div class="flex-shrink-0">
                         <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 font-bold text-sm uppercase overflow-hidden">
-                            @if($review->reviewer->profile_photo_path)
-                                <img src="{{ asset( $review->reviewer->profile_photo_path) }}" class="w-full h-full object-cover">
+                            @if($review->reviewer->hu_profile_photo_path)
+                                <img src="{{ asset($review->reviewer->hu_profile_photo_path) }}" class="w-full h-full object-cover">
                             @else
-                                {{ substr($review->reviewer->name ?? 'U', 0, 1) }}
+                                {{ substr($review->reviewer->hu_name ?? 'U', 0, 1) }}
                             @endif
                         </div>
                     </div>
@@ -361,15 +361,15 @@
                                 {{-- Name --}}
                                 <span class="font-bold text-slate-900 text-sm">
                                     @auth
-                                        {{ $review->reviewer->name ?? 'User' }}
+                                        {{ $review->reviewer->hu_name ?? 'User' }}
                                     @else
-                                        {{ substr($review->reviewer->name ?? 'User', 0, 1) . '****' }}
+                                        {{ substr($review->reviewer->hu_name ?? 'User', 0, 1) . '****' }}
                                     @endauth
                                 </span>
 
                                 {{-- NEW: Role Badge (Student / Community) --}}
                                 @php
-                                    $reviewerRole = $review->reviewer->role ?? 'student';
+                                    $reviewerRole = $review->reviewer->hu_role ?? 'student';
                                 @endphp
                                 
                                 @if ($reviewerRole === 'student')
@@ -383,36 +383,36 @@
                                 @endif
                             </div>
 
-                            <span class="text-xs text-gray-400">{{ $review->created_at->diffForHumans() }}</span>
+                            <span class="text-xs text-gray-400">{{ optional($review->hr_created_at)->diffForHumans() ?? 'Recently' }}</span>
                         </div>
 
                         <div class="flex text-yellow-400 text-xs my-1">
                             @for ($i = 1; $i <= 5; $i++)
-                                <i class="{{ $i <= $review->rating ? 'fas' : 'far' }} fa-star"></i>
+                                <i class="{{ $i <= $review->hr_rating ? 'fas' : 'far' }} fa-star"></i>
                             @endfor
                         </div>
 
-                        <p class="text-gray-600 text-sm leading-relaxed">{{ $review->comment }}</p>
+                        <p class="text-gray-600 text-sm leading-relaxed">{{ $review->hr_comment }}</p>
                     </div>
                 </div>
 
                 {{-- 2. Helper Reply --}}
-                @if ($review->reply)
+                @if ($review->hr_reply)
                     <div class="mt-4 ml-2 pl-8 border-l-2 border-indigo-100 relative">
                         <div class="bg-slate-50 p-4 rounded-r-xl rounded-bl-xl">
                             <div class="flex items-center gap-2 mb-2">
                                 <span class="text-xs font-bold text-gray-700 flex items-center gap-1">
-                                    Reply from seller: {{ $service->user->name }}
-                                    @if ($service->user->trust_badge)
+                                    Reply from seller: {{ $service->user->hu_name }}
+                                    @if ($service->user->hu_trust_badge)
                                         <i class="fas fa-check-circle text-[10px] text-blue-500"></i>
                                     @endif
                                 </span>
-                                @if ($review->replied_at)
+                                @if ($review->hr_replied_at)
                                     <span class="text-[10px] text-gray-400">�
-                                        {{ \Carbon\Carbon::parse($review->replied_at)->diffForHumans() }}</span>
+                                        {{ \Carbon\Carbon::parse($review->hr_replied_at)->diffForHumans() }}</span>
                                 @endif
                             </div>
-                            <p class="text-sm text-gray-600 italic">"{{ $review->reply }}"</p>
+                            <p class="text-sm text-gray-600 italic">"{{ $review->hr_reply }}"</p>
                         </div>
                     </div>
                 @endif
@@ -462,7 +462,7 @@
                         class="bg-white rounded-2xl shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] border border-gray-100 overflow-hidden relative">
 
                         <div class="grid grid-cols-3 border-b border-gray-200 bg-gray-50">
-                            @if ($service->basic_price)
+                            @if ($service->hss_basic_price)
                                 <button @click="switchPackage('basic')"
                                     :class="currentPackage === 'basic' ?
                                         'border-b-2 border-teal-600 text-teal-600 font-bold bg-white' :
@@ -471,7 +471,7 @@
                                     Basic
                                 </button>
                             @endif
-                            @if ($service->standard_price)
+                            @if ($service->hss_standard_price)
                                 <button @click="switchPackage('standard')"
                                     :class="currentPackage === 'standard' ?
                                         'border-b-2 border-yellow-500 text-yellow-600 font-bold bg-white' :
@@ -480,7 +480,7 @@
                                     Standard
                                 </button>
                             @endif
-                            @if ($service->premium_price)
+                            @if ($service->hss_premium_price)
                                 <button @click="switchPackage('premium')"
                                     :class="currentPackage === 'premium' ?
                                         'border-b-2 border-red-600 text-red-600 font-bold bg-white' :
@@ -653,7 +653,7 @@
                                     <p class="text-xs text-center text-gray-400 mt-2">
                                         You already have a pending or active order for this service.
                                     </p>
-                                @elseif ($service->status === 'available')
+                                @elseif ($service->hss_status === 'available')
                                     <button @click="submitBooking()"
                                         :disabled="!selectedDate || (isSessionBased && !selectedTime)"
                                         class="group w-full py-4 rounded-xl font-bold text-white shadow-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:shadow-none disabled:bg-gray-300 disabled:cursor-not-allowed hover:-translate-y-1"
@@ -686,14 +686,14 @@
 
                         {{-- WhatsApp Button --}}
                         @php
-                            $rawPhone = $service->user->phone_number ?? ($service->user->phone ?? '');
+                            $rawPhone = $service->user->hu_phone_number ?? ($service->user->hu_phone ?? '');
                             $cleanPhone = preg_replace('/[^0-9]/', '', $rawPhone);
                             if (substr($cleanPhone, 0, 1) === '0') {
                                 $cleanPhone = '60' . substr($cleanPhone, 1);
                             }
                             $whatsappUrl =
                                 "https://wa.me/{$cleanPhone}?text=Hi, I am interested in your service: " .
-                                urlencode($service->title);
+                                urlencode($service->hss_title);
                         @endphp
 
                         @if (!empty($cleanPhone))
@@ -735,7 +735,7 @@
                                             'sat' => 'Saturday',
                                             'sun' => 'Sunday',
                                         ];
-                                        $schedule = $service->operating_hours ?? [];
+                                        $schedule = $service->hss_operating_hours ?? [];
                                     @endphp
                                     @foreach ($daysMap as $key => $dayName)
                                         @php
@@ -762,7 +762,7 @@
                         <div class="grid grid-cols-2 gap-3">
                             {{-- Share --}}
                             <button onclick="handleShare(this)"
-                                data-url="{{ route('student-services.show', $service->id) }}"
+                                data-url="{{ route('student-services.show', $service->hss_id) }}"
                                 class="flex items-center justify-center gap-2 py-2.5 rounded-xl border border-gray-200 text-gray-600 text-sm font-bold hover:bg-gray-50 hover:border-gray-300 transition-all">
                                 <i class="fa-solid fa-arrow-up-right-from-square"></i> Share
                             </button>
@@ -770,12 +770,12 @@
                             {{-- Save / Favourite --}}
                             @php $isFav = auth()->check() && $service->is_favourited; @endphp
                             <button
-                                onclick="handleFavourite({{ $service->id }}, {{ auth()->check() ? 'true' : 'false' }})"
+                                onclick="handleFavourite({{ $service->hss_id }}, {{ auth()->check() ? 'true' : 'false' }})"
                                 class="flex items-center justify-center gap-2 py-2.5 rounded-xl border border-gray-200 text-sm font-bold transition-all group
                     {{ $isFav ? 'bg-red-50 text-red-500 border-red-100' : 'text-gray-600 hover:bg-gray-50 hover:border-gray-300' }}">
-                                <i id="heart-{{ $service->id }}"
+                                <i id="heart-{{ $service->hss_id }}"
                                     class="{{ $isFav ? 'fas' : 'far' }} fa-heart transition-transform group-active:scale-90"></i>
-                                <span id="text-{{ $service->id }}">{{ $isFav ? 'Saved' : 'Save' }}</span>
+                                <span id="text-{{ $service->hss_id }}">{{ $isFav ? 'Saved' : 'Save' }}</span>
                             </button>
                         </div>
                     </div>
@@ -818,48 +818,48 @@
         function bookingSystem() {
             return {
                 hasActiveRequest: @json($hasActiveRequest),
-                isSessionBased: {{ $service->session_duration ? 'true' : 'false' }},
+                isSessionBased: {{ $service->hss_session_duration ? 'true' : 'false' }},
 
                 // --- DATA ---
                 holidays: @json(
-                    $service->unavailable_dates
-                        ? (is_array($service->unavailable_dates)
-                            ? $service->unavailable_dates
-                            : json_decode($service->unavailable_dates))
+                    $service->hss_unavailable_dates
+                        ? (is_array($service->hss_unavailable_dates)
+                            ? $service->hss_unavailable_dates
+                            : json_decode($service->hss_unavailable_dates))
                         : []
                 ),
-                schedule: @json($service->operating_hours ?? []),
+                schedule: @json($service->hss_operating_hours ?? []),
                 bookedSlots: @json($bookedAppointments ?? []),
                 manualBlocks: @json($manualBlocks ?? []),
 
                 packages: {
                     basic: {
-                        price: {{ $service->basic_price ?? 0 }},
-                        description: `{!! $service->basic_description ?? '' !!}`,
-                        duration: "{{ $service->basic_duration ?? '' }}",
-                        frequency: "{{ $service->basic_frequency ?? '' }}"
+                        price: {{ $service->hss_basic_price ?? 0 }},
+                        description: `{!! $service->hss_basic_description ?? '' !!}`,
+                        duration: "{{ $service->hss_basic_duration ?? '' }}",
+                        frequency: "{{ $service->hss_basic_frequency ?? '' }}"
                     },
                     standard: {
-                        price: {{ $service->standard_price ?? 0 }},
-                        description: `{!! $service->standard_description ?? '' !!}`,
-                        duration: "{{ $service->standard_duration ?? '' }}",
-                        frequency: "{{ $service->standard_frequency ?? '' }}"
+                        price: {{ $service->hss_standard_price ?? 0 }},
+                        description: `{!! $service->hss_standard_description ?? '' !!}`,
+                        duration: "{{ $service->hss_standard_duration ?? '' }}",
+                        frequency: "{{ $service->hss_standard_frequency ?? '' }}"
                     },
                     premium: {
-                        price: {{ $service->premium_price ?? 0 }},
-                        description: `{!! $service->premium_description ?? '' !!}`,
-                        duration: "{{ $service->premium_duration ?? '' }}",
-                        frequency: "{{ $service->premium_frequency ?? '' }}"
+                        price: {{ $service->hss_premium_price ?? 0 }},
+                        description: `{!! $service->hss_premium_description ?? '' !!}`,
+                        duration: "{{ $service->hss_premium_duration ?? '' }}",
+                        frequency: "{{ $service->hss_premium_frequency ?? '' }}"
                     }
                 },
 
-                currentPackage: '{{ $service->basic_price ? 'basic' : ($service->standard_price ? 'standard' : 'premium') }}',
+                currentPackage: '{{ $service->hss_basic_price ? 'basic' : ($service->hss_standard_price ? 'standard' : 'premium') }}',
                 selectedDuration: 1,
                 selectedDate: null,
                 selectedTime: null,
                 upcomingDays: [],
                 timeSlots: [],
-                sessionDuration: {{ $service->session_duration ?? 60 }},
+                sessionDuration: {{ $service->hss_session_duration ?? 60 }},
                 showFullCalendar: false,
                 calendarInstance: null,
 
@@ -1181,7 +1181,7 @@
                                             "X-CSRF-TOKEN": "{{ csrf_token() }}"
                                         },
                                         body: JSON.stringify({
-                                            student_service_id: {{ $service->id }},
+                                            student_service_id: {{ $service->hss_id }},
                                             selected_dates: this.selectedDate,
                                             start_time: sendStartTime,
                                             end_time: sendEndTime,

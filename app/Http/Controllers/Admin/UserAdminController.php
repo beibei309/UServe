@@ -15,33 +15,49 @@ class UserAdminController extends Controller
             'reason' => ['nullable', 'string']
         ]);
 
-        $user->is_blacklisted = true;
-        $user->blacklist_reason = $data['reason'] ?? 'Banned by admin';
+        $user->hu_is_blacklisted = true;
+        $user->hu_blacklist_reason = $data['reason'] ?? 'Banned by admin';
         $user->save();
 
-        return response()->json(['user' => $user]);
+        return response()->json([
+            'success' => true,
+            'message' => 'User banned successfully.',
+            'user' => $user,
+        ]);
     }
 
     public function unban(User $user): JsonResponse
     {
-        $user->is_blacklisted = false;
-        $user->blacklist_reason = null;
+        $user->hu_is_blacklisted = false;
+        $user->hu_blacklist_reason = null;
         $user->save();
 
-        return response()->json(['user' => $user]);
+        return response()->json([
+            'success' => true,
+            'message' => 'User unbanned successfully.',
+            'user' => $user,
+        ]);
     }
 
     public function suspend(User $user): JsonResponse
     {
-        $user->is_suspended = true;
+        $user->hu_is_suspended = true;
         $user->save();
-        return response()->json(['user' => $user]);
+        return response()->json([
+            'success' => true,
+            'message' => 'User suspended successfully.',
+            'user' => $user,
+        ]);
     }
 
     public function unsuspend(User $user): JsonResponse
     {
-        $user->is_suspended = false;
+        $user->hu_is_suspended = false;
         $user->save();
-        return response()->json(['user' => $user]);
+        return response()->json([
+            'success' => true,
+            'message' => 'User unsuspended successfully.',
+            'user' => $user,
+        ]);
     }
 }

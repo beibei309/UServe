@@ -15,10 +15,15 @@ class AdminAuthController extends Controller
 
     public function login(Request $request)
     {
-        $credentials = $request->validate([
+        $input = $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required', 'string'],
         ]);
+
+        $credentials = [
+            'ha_email' => $input['email'],
+            'password' => $input['password'],
+        ];
 
         if (Auth::guard('admin')->attempt($credentials)) {
             $request->session()->regenerate();

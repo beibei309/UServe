@@ -108,15 +108,15 @@
                  class="w-full h-full object-cover">
 
             {{-- ?? Existing profile image --}}
-            @if(auth()->user()->profile_photo_path)
+            @if(auth()->user()->hu_profile_photo_path)
                 <img x-show="!previewUrl"
-                     src="{{ asset(auth()->user()->profile_photo_path) }}"
+                     src="{{ asset(auth()->user()->hu_profile_photo_path) }}"
                      class="w-full h-full object-cover">
             @else
                 {{-- ?? Fallback letter avatar --}}
                 <div x-show="!previewUrl"
                      class="w-full h-full flex items-center justify-center bg-indigo-600 text-white text-4xl font-black">
-                    {{ substr(auth()->user()->name, 0, 1) }}
+                    {{ substr(auth()->user()->hu_name, 0, 1) }}
                 </div>
             @endif
 
@@ -156,40 +156,40 @@
                                 <div class="grid grid-cols-1 gap-8 sm:grid-cols-2">
                                     <div>
                                         <label class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Full Name</label>
-                                        <input type="text" name="name" value="{{ old('name', $user->name) }}" required 
+                                        <input type="text" name="name" value="{{ old('name', $user->hu_name) }}" required 
                                             class="block w-full rounded-2xl border-slate-200 bg-slate-50/50 py-3.5 px-4 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-semibold text-slate-700">
                                         @error('name') <p class="mt-2 text-xs text-rose-500 font-bold">{{ $message }}</p> @enderror
                                     </div>
 
                                     <div>
                                         <label class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Email Address</label>
-                                        <input type="email" name="email" value="{{ old('email', $user->email) }}" required
+                                        <input type="email" name="email" value="{{ old('email', $user->hu_email) }}" required
                                             class="block w-full rounded-2xl border-slate-200 bg-slate-50/50 py-3.5 px-4 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-semibold text-slate-700">
                                         @error('email') <p class="mt-2 text-xs text-rose-500 font-bold">{{ $message }}</p> @enderror
                                     </div>
 
                                     <div>
                                         <label class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Phone Number</label>
-                                        <input type="text" name="phone" value="{{ old('phone', $user->phone) }}" placeholder="+60..."
+                                        <input type="text" name="phone" value="{{ old('phone', $user->hu_phone) }}" placeholder="+60..."
                                             class="block w-full rounded-2xl border-slate-200 bg-slate-50/50 py-3.5 px-4 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-semibold text-slate-700">
                                     </div>
 
-                                    @if($user->role === 'student')
+                                    @if($user->hu_role === 'student')
                                     <div>
                                         <label class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Student ID</label>
-                                        <input type="text" value="{{ $user->student_id }}" readonly
+                                        <input type="text" value="{{ $user->hu_student_id }}" readonly
                                             class="block w-full rounded-2xl border-slate-200 bg-slate-100 py-3.5 px-4 text-slate-400 font-bold cursor-not-allowed">
                                     </div>
 
                                     <div class="sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-8">
                                         <div>
                                             <label class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Faculty</label>
-                                            <input type="text" name="faculty" value="{{ old('faculty', $user->faculty) }}"
+                                            <input type="text" name="faculty" value="{{ old('faculty', $user->hu_faculty) }}"
                                                 class="block w-full rounded-2xl border-slate-200 bg-slate-50/50 py-3.5 px-4 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-semibold text-slate-700">
                                         </div>
                                         <div>
                                             <label class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Course / Program</label>
-                                            <input type="text" name="course" value="{{ old('course', $user->course) }}"
+                                            <input type="text" name="course" value="{{ old('course', $user->hu_course) }}"
                                                 class="block w-full rounded-2xl border-slate-200 bg-slate-50/50 py-3.5 px-4 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-semibold text-slate-700">
                                         </div>
                                     </div>
@@ -252,9 +252,9 @@
                                     <div class="flex items-start gap-4 md:gap-6">
                                         {{-- Avatar --}}
                                         <div class="flex-shrink-0">
-                                            @if($review->reviewer && $review->reviewer->profile_photo_path)
+                                            @if($review->reviewer && $review->reviewer->hu_profile_photo_path)
                                                 @php
-                                                    $reviewerPhoto = $review->reviewer->profile_photo_path;
+                                                    $reviewerPhoto = $review->reviewer->hu_profile_photo_path;
                                                     if (\Illuminate\Support\Str::startsWith($reviewerPhoto, ['http://', 'https://'])) {
                                                         $reviewerPhotoUrl = $reviewerPhoto;
                                                     } elseif (\Illuminate\Support\Str::startsWith($reviewerPhoto, 'storage/')) {
@@ -267,7 +267,7 @@
                                                      class="w-12 h-12 md:w-14 md:h-14 rounded-full object-cover shadow-sm border-2 border-white ring-1 ring-slate-100">
                                             @else
                                                 <div class="w-12 h-12 md:w-14 md:h-14 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-black text-lg shadow-sm border-2 border-white ring-1 ring-slate-100">
-                                                    {{ substr($review->reviewer->name ?? 'User', 0, 1) }}
+                                                    {{ substr($review->reviewer->hu_name ?? 'User', 0, 1) }}
                                                 </div>
                                             @endif
                                         </div>
@@ -276,24 +276,24 @@
                                         <div class="flex-1 min-w-0">
                                             <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-2">
                                                 <h4 class="text-base font-bold text-slate-900 truncate">
-                                                    {{ $review->reviewer->name ?? 'Deleted User' }}
+                                                    {{ $review->reviewer->hu_name ?? 'Deleted User' }}
                                                 </h4>
                                                 <span class="text-xs font-medium text-slate-400 mt-1 sm:mt-0">
-                                                    {{ $review->created_at->diffForHumans() }}
+                                                    {{ optional($review->hr_created_at)->diffForHumans() ?? 'Recently' }}
                                                 </span>
                                             </div>
 
                                             {{-- Stars --}}
                                             <div class="flex text-yellow-400 text-xs mb-3">
                                                 @for($i=1; $i<=5; $i++)
-                                                    <i class="{{ $i <= $review->rating ? 'fas' : 'far' }} fa-star"></i>
+                                                    <i class="{{ $i <= $review->hr_rating ? 'fas' : 'far' }} fa-star"></i>
                                                 @endfor
                                             </div>
 
                                             {{-- Comment --}}
-                                            @if($review->comment)
+                                            @if($review->hr_comment)
                                                 <p class="text-slate-600 text-sm leading-relaxed mb-3">
-                                                    {{ $review->comment }}
+                                                    {{ $review->hr_comment }}
                                                 </p>
                                             @else
                                                 <p class="text-slate-400 text-sm italic mb-3">No written review provided.</p>
@@ -307,18 +307,18 @@
                                                     </div>
                                                     <div class="flex flex-col">
                                                         <span class="text-[10px] text-slate-400 uppercase font-bold tracking-wider leading-none">You bought</span>
-                                                        <span class="text-xs font-bold text-slate-700 leading-none mt-1">{{ Str::limit($review->studentService->title, 100) }}</span>
+                                                        <span class="text-xs font-bold text-slate-700 leading-none mt-1">{{ Str::limit($review->studentService->hss_title, 100) }}</span>
                                                     </div>
                                                 </div>
                                             @endif
 
                                             {{-- Reply Section --}}
-                                            @if($review->reply)
+                                            @if($review->hr_reply)
                                                 <div class="mt-4 bg-indigo-50/50 border border-indigo-100 rounded-xl p-4 ml-0 md:ml-4">
                                                     <p class="text-xs font-bold text-indigo-900 mb-1 flex items-center gap-1">
                                                         <i class="fas fa-reply fa-rotate-180"></i> Your Reply:
                                                     </p>
-                                                    <p class="text-sm text-indigo-800/80 italic">"{{ $review->reply }}"</p>
+                                                    <p class="text-sm text-indigo-800/80 italic">"{{ $review->hr_reply }}"</p>
                                                 </div>
                                             @endif
                                         </div>

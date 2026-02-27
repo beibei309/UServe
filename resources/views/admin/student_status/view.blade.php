@@ -11,13 +11,13 @@
 
     <div class="space-y-4">
 
-        <p><strong>Name:</strong> {{ $status->student->name }}</p>
-        <p><strong>Matric No:</strong> {{ $status->student->student_id }}</p>
-        <p><strong>Semester:</strong> {{ $status->semester }}</p>
+        <p><strong>Name:</strong> {{ $status->student->hu_name }}</p>
+        <p><strong>Matric No:</strong> {{ $status->student->hu_student_id }}</p>
+        <p><strong>Semester:</strong> {{ $status->hss_semester }}</p>
 
         <p>
             <strong>Status:</strong>
-            @if($status->status == 'active')
+            @if($status->hss_status == 'active')
                 <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full">Active</span>
             @else
                 <span class="px-3 py-1 bg-red-100 text-red-700 rounded-full">Inactive</span>

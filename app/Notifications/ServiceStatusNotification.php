@@ -32,14 +32,14 @@ class ServiceStatusNotification extends Notification
     public function toDatabase($notifiable)
     {
         $messages = [
-            'approved' => "Your service '{$this->service->title}' has been approved.",
-            'rejected' => "Your service '{$this->service->title}' has been rejected.",
-            'warning'  => "Warning received for '{$this->service->title}': {$this->reason}",
-            'blocked'  => "Your service '{$this->service->title}' has been blocked due to multiple warnings."
+            'approved' => "Your service '{$this->service->hss_title}' has been approved.",
+            'rejected' => "Your service '{$this->service->hss_title}' has been rejected.",
+            'warning'  => "Warning received for '{$this->service->hss_title}': {$this->reason}",
+            'blocked'  => "Your service '{$this->service->hss_title}' has been blocked due to multiple warnings."
         ];
 
         return [
-            'service_id' => $this->service->id,
+            'service_id' => $this->service->hss_id,
             'title'      => ucfirst($this->type) . ' Update',
             'message'    => $messages[$this->type] ?? 'Status updated',
             'url' => url('/'),

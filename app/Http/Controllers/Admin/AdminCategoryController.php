@@ -23,18 +23,27 @@ class AdminCategoryController extends Controller
     {
         $data = $request->validate([
             'name' => 'required|string|max:255',
-            'slug' => 'required|string|max:255|unique:categories',
+            'slug' => 'required|string|max:255|unique:h2u_categories,hc_slug',
             'description' => 'nullable|string',
             'icon' => 'nullable|string',
             'color' => 'nullable|string|max:7',
             'is_active' => 'required|boolean',
         ]);
 
+        $payload = [
+            'hc_name' => $data['name'],
+            'hc_slug' => $data['slug'],
+            'hc_description' => $data['description'] ?? null,
+            'hc_icon' => $data['icon'] ?? null,
+            'hc_color' => $data['color'] ?? null,
+            'hc_is_active' => $data['is_active'],
+        ];
+
         if ($request->hasFile('image_path')) {
-            $data['image_path'] = $request->file('image_path')->store('categories', 'public');
+            $payload['hc_image_path'] = $request->file('image_path')->store('categories', 'public');
         }
 
-        Category::create($data);
+        Category::create($payload);
         return redirect()->route('admin.categories.index')->with('success', 'Category created successfully.');
     }
 
@@ -47,18 +56,27 @@ class AdminCategoryController extends Controller
     {
         $data = $request->validate([
             'name' => 'required|string|max:255',
-            'slug' => 'required|string|max:255|unique:categories,slug,' . $category->id,
+            'slug' => 'required|string|max:255|unique:h2u_categories,hc_slug,' . $category->hc_id . ',hc_id',
             'description' => 'nullable|string',
             'icon' => 'nullable|string',
             'color' => 'nullable|string|max:7',
             'is_active' => 'required|boolean',
         ]);
 
+        $payload = [
+            'hc_name' => $data['name'],
+            'hc_slug' => $data['slug'],
+            'hc_description' => $data['description'] ?? null,
+            'hc_icon' => $data['icon'] ?? null,
+            'hc_color' => $data['color'] ?? null,
+            'hc_is_active' => $data['is_active'],
+        ];
+
         if ($request->hasFile('image_path')) {
-            $data['image_path'] = $request->file('image_path')->store('categories', 'public');
+            $payload['hc_image_path'] = $request->file('image_path')->store('categories', 'public');
         }
 
-        $category->update($data);
+        $category->update($payload);
         return redirect()->route('admin.categories.index')->with('success', 'Category updated successfully.');
     }
 

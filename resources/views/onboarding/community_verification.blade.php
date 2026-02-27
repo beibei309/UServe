@@ -15,7 +15,7 @@
                 </div>
             @endif
 
-            @if(auth()->user()->verification_status === 'pending' && auth()->user()->verification_document_path)
+            @if(auth()->user()->hu_verification_status === 'pending' && auth()->user()->hu_verification_document_path)
                 <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-6 mb-8 text-center">
                     <div class="w-16 h-16 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center mx-auto mb-4">
                         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -29,21 +29,21 @@
                         </form>
                     </div>
                 </div>
-            @elseif(auth()->user()->verification_status === 'rejected')
+            @elseif(auth()->user()->hu_verification_status === 'rejected')
                 <div class="bg-red-50 border border-red-200 rounded-xl p-6 mb-8 text-center">
                     <h3 class="font-bold text-red-800 text-lg">Verification Rejected</h3>
                     <p class="text-red-600 mt-1">Please re-submit valid documents matching your profile.</p>
                 </div>
             @endif
 
-            @if(auth()->user()->verification_status !== 'pending' || !auth()->user()->verification_document_path || auth()->user()->verification_status === 'rejected')
+            @if(auth()->user()->hu_verification_status !== 'pending' || !auth()->user()->hu_verification_document_path || auth()->user()->hu_verification_status === 'rejected')
             <div class="space-y-8 max-w-3xl mx-auto">
 
-                <div id="step1" class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden {{ auth()->user()->location_verified_at ? 'opacity-70 pointer-events-none' : '' }}">
+                <div id="step1" class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden {{ auth()->user()->hu_location_verified_at ? 'opacity-70 pointer-events-none' : '' }}">
                     <div class="p-6 sm:p-8">
                         <div class="flex items-center gap-4 mb-6">
-                            <div class="w-10 h-10 rounded-full {{ auth()->user()->location_verified_at ? 'bg-green-100 text-green-600' : 'bg-indigo-100 text-indigo-600' }} flex items-center justify-center font-bold">
-                                {{ auth()->user()->location_verified_at ? '✓' : '1' }}
+                            <div class="w-10 h-10 rounded-full {{ auth()->user()->hu_location_verified_at ? 'bg-green-100 text-green-600' : 'bg-indigo-100 text-indigo-600' }} flex items-center justify-center font-bold">
+                                {{ auth()->user()->hu_location_verified_at ? '✓' : '1' }}
                             </div>
                             <div>
                                 <h2 class="text-xl font-bold text-slate-900">Verify Location</h2>
@@ -51,7 +51,7 @@
                             </div>
                         </div>
 
-                        @if(auth()->user()->location_verified_at)
+                        @if(auth()->user()->hu_location_verified_at)
                             <div class="bg-green-50 border border-green-100 text-green-700 p-4 rounded-xl flex items-center gap-3">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                                 <span class="font-bold">Location Verified</span>
@@ -68,7 +68,7 @@
                     </div>
                 </div>
 
-                <div id="step2" class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden {{ auth()->user()->location_verified_at ? '' : 'opacity-50 pointer-events-none' }}">
+                <div id="step2" class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden {{ auth()->user()->hu_location_verified_at ? '' : 'opacity-50 pointer-events-none' }}">
                     <div class="p-6 sm:p-8">
                         <div class="flex items-center gap-4 mb-6">
                             <div class="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold">2</div>
@@ -79,7 +79,7 @@
                             @csrf
                             <div class="flex justify-center">
                                 <div class="w-32 h-32 rounded-full overflow-hidden border-4 border-slate-100 shadow-lg bg-slate-50">
-                                    <img id="profile-preview" src="{{ auth()->user()->profile_photo_path ? asset( auth()->user()->profile_photo_path) : 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->name) }}" class="w-full h-full object-cover">
+                                    <img id="profile-preview" src="{{ auth()->user()->hu_profile_photo_path ? asset( auth()->user()->hu_profile_photo_path) : 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->hu_name) }}" class="w-full h-full object-cover">
                                 </div>
                             </div>
 
@@ -93,7 +93,7 @@
                     </div>
                 </div>
 
-                <div id="step3" class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden {{ auth()->user()->profile_photo_path ? '' : 'opacity-50 pointer-events-none' }}">
+                <div id="step3" class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden {{ auth()->user()->hu_profile_photo_path ? '' : 'opacity-50 pointer-events-none' }}">
                     <div class="p-6 sm:p-8">
                         <div class="flex items-center gap-4 mb-6">
                             <div class="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold">3</div>
@@ -128,11 +128,11 @@
                                 <button id="confirm_snapshot" class="hidden bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-full font-bold text-sm transition-all shadow-lg">Confirm & Upload</button>
                             </div>
                         </div>
-                        <p id="selfie_status" class="text-center text-sm font-medium text-green-600 mt-2 h-5">{{ auth()->user()->selfie_media_path ? 'Selfie Uploaded! ✅' : '' }}</p>
+                        <p id="selfie_status" class="text-center text-sm font-medium text-green-600 mt-2 h-5">{{ auth()->user()->hu_selfie_media_path ? 'Selfie Uploaded! ✅' : '' }}</p>
                     </div>
                 </div>
 
-                <div id="step4" class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden {{ auth()->user()->selfie_media_path ? '' : 'opacity-50 pointer-events-none' }}">
+                <div id="step4" class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden {{ auth()->user()->hu_selfie_media_path ? '' : 'opacity-50 pointer-events-none' }}">
                     <div class="p-6 sm:p-8">
                         <div class="flex items-center gap-4 mb-6">
                             <div class="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold">4</div>

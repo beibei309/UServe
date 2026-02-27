@@ -33,33 +33,33 @@
                     {{-- 1. ICON COLUMN --}}
                     <td class="px-6 py-4">
                         <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 text-lg">
-                            <i class="{{ $category->icon ? $category->icon : 'fa-solid fa-folder' }}"></i>
+                            <i class="{{ $category->hc_icon ? $category->hc_icon : 'fa-solid fa-folder' }}"></i>
                         </div>
                     </td>
 
                     {{-- 2. NAME COLUMN --}}
                     <td class="px-6 py-4">
-                        <div class="font-medium text-gray-900">{{ $category->name }}</div>
+                        <div class="font-medium text-gray-900">{{ $category->hc_name }}</div>
                         <div class="text-xs text-gray-500 bg-gray-100 inline-block px-2 py-0.5 rounded mt-1">
-                            /{{ $category->slug }}
+                            /{{ $category->hc_slug }}
                         </div>
                     </td>
 
                     {{-- 3. DESCRIPTION --}}
                     <td class="px-6 py-4">
-                        <p class="truncate max-w-xs">{{ $category->description ?? 'N/A' }}</p>
+                        <p class="truncate max-w-xs">{{ $category->hc_description ?? 'N/A' }}</p>
                     </td>
 
                     {{-- 4. COLOR --}}
                     <td class="px-6 py-4">
                         <div class="flex items-center gap-2">
-                            <span class="w-6 h-6 rounded-full border shadow-sm" style="background-color: {{ $category->color }};"></span>
+                            <span class="w-6 h-6 rounded-full border shadow-sm" style="background-color: {{ $category->hc_color }};"></span>
                         </div>
                     </td>
 
                     {{-- 5. STATUS --}}
                     <td class="px-6 py-4">
-                        @if($category->is_active)
+                        @if($category->hc_is_active)
                             <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-semibold">Active</span>
                         @else
                             <span class="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs font-semibold">Inactive</span>
@@ -78,7 +78,7 @@
                             {{-- SWEET ALERT DELETE FORM --}}
                             {{-- 1. Give the form a unique ID --}}
                             {{-- 2. Remove the standard onsubmit --}}
-                            <form id="delete-form-{{ $category->id }}" 
+                                <form id="delete-form-{{ $category->hc_id }}" 
                                   action="{{ route('admin.categories.destroy', $category) }}" 
                                   method="POST" 
                                   class="inline">
@@ -86,7 +86,7 @@
                                 @method('DELETE')
                                 {{-- 3. Change button type to 'button' and add onclick handler --}}
                                 <button type="button" 
-                                        onclick="confirmDelete({{ $category->id }})"
+                                        onclick="confirmDelete({{ $category->hc_id }})"
                                         class="text-red-600 hover:text-red-900 transition" 
                                         title="Delete">
                                     <i class="fa-solid fa-trash"></i>

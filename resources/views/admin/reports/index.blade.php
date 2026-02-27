@@ -14,14 +14,14 @@
                             <div class="border rounded-lg p-4">
                                 <div class="flex items-center justify-between">
                                     <div>
-                                        <div class="font-semibold">Reporter: {{ optional($report->reporter)->name }} | Target: {{ optional($report->target)->name }}</div>
-                                        <div class="text-sm text-gray-600">Reason: {{ $report->reason }}</div>
-                                        <div class="text-sm">Details: {{ $report->details }}</div>
+                                        <div class="font-semibold">Reporter: {{ optional($report->reporter)->hu_name }} | Target: {{ optional($report->target)->hu_name }}</div>
+                                        <div class="text-sm text-gray-600">Reason: {{ $report->hrp_reason }}</div>
+                                        <div class="text-sm">Details: {{ $report->hrp_details }}</div>
                                     </div>
-                                    <div class="text-sm">Status: {{ $report->status }}</div>
+                                    <div class="text-sm">Status: {{ $report->hrp_status }}</div>
                                 </div>
                                 <div class="mt-3">
-                                    <form method="POST" action="{{ url('/admin/reports/'.$report->id.'/resolve') }}" class="flex items-center gap-2">
+                                    <form method="POST" action="{{ url('/admin/reports/'.$report->hrp_id.'/resolve') }}" class="flex items-center gap-2">
                                         @csrf
                                         <select name="status" class="rounded border-gray-300 text-sm">
                                             <option value="warning">Warning</option>

@@ -45,15 +45,15 @@
                         class="tab-content grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 {{ $status !== 'all' ? 'hidden' : '' }}">
 
                         @php
-                            $filtered = $status === 'all' ? $services : $services->where('approval_status', $status);
+                            $filtered = $status === 'all' ? $services : $services->where('hss_approval_status', $status);
                         @endphp
 
                         @foreach ($filtered as $service)
                             <div class="group relative rounded-2xl shadow-sm transition-all duration-300 border border-gray-100 flex flex-col overflow-hidden
-                                 {{ strtolower($service->approval_status) == 'suspended' ? 'opacity-80 pointer-events-none' : 'bg-white hover:shadow-lg' }}"
-                                data-service-id="{{ $service->id }}">
+                                 {{ strtolower($service->hss_approval_status) == 'suspended' ? 'opacity-80 pointer-events-none' : 'bg-white hover:shadow-lg' }}"
+                                data-service-id="{{ $service->hss_id }}">
 
-                                @if (strtolower($service->approval_status) == 'suspended')
+                                @if (strtolower($service->hss_approval_status) == 'suspended')
                                     <div
                                         class="absolute inset-0 bg-black/70 flex flex-col items-center justify-center text-center z-20">
                                         <div class="text-white text-xl font-extrabold tracking-widest uppercase mb-2">
@@ -69,12 +69,12 @@
 
 
                                 {{-- Hidden Data for Modal --}}
-                                <div class="hidden" id="data-desc-{{ $service->id }}">{!! $service->description !!}</div>
-                                <div class="hidden" id="data-pkg-basic-desc-{{ $service->id }}">{!! $service->basic_description !!}
+                                <div class="hidden" id="data-desc-{{ $service->hss_id }}">{!! $service->hss_description !!}</div>
+                                <div class="hidden" id="data-pkg-basic-desc-{{ $service->hss_id }}">{!! $service->hss_basic_description !!}
                                 </div>
-                                <div class="hidden" id="data-pkg-standard-desc-{{ $service->id }}">{!! $service->standard_description !!}
+                                <div class="hidden" id="data-pkg-standard-desc-{{ $service->hss_id }}">{!! $service->hss_standard_description !!}
                                 </div>
-                                <div class="hidden" id="data-pkg-premium-desc-{{ $service->id }}">{!! $service->premium_description !!}
+                                <div class="hidden" id="data-pkg-premium-desc-{{ $service->hss_id }}">{!! $service->hss_premium_description !!}
                                 </div>
 
                                 {{-- Card Image & Overlays --}}
@@ -82,8 +82,8 @@
                                     @php
                                         $imageUrl = 'https://via.placeholder.com/400x300?text=Service+Image';
 
-                                        if (!empty($service->image_path)) {
-                                            $path = $service->image_path;
+                                        if (!empty($service->hss_image_path)) {
+                                            $path = $service->hss_image_path;
 
                                             if (Str::startsWith($path, ['http://', 'https://'])) {
                                                 $imageUrl = $path;
@@ -103,15 +103,15 @@
                                         onerror="this.src='https://via.placeholder.com/400x300?text=Service+Image'">
 
                                     {{-- 🟢 UPDATE: Only show badge if NOT approved --}}
-                                    @if (strtolower($service->approval_status) !== 'approved')
+                                    @if (strtolower($service->hss_approval_status) !== 'approved')
                                         <div class="absolute top-3 right-3">
                                             @php
-                                                $badgeClass = match (strtolower($service->approval_status)) {
+                                                $badgeClass = match (strtolower($service->hss_approval_status)) {
                                                     'pending' => 'bg-amber-500 text-white',
                                                     'rejected' => 'bg-red-500 text-white',
                                                     default => 'bg-gray-500 text-white',
                                                 };
-                                                $icon = match (strtolower($service->approval_status)) {
+                                                $icon = match (strtolower($service->hss_approval_status)) {
                                                     'pending' => '<i class="fa-solid fa-clock mr-1"></i>',
                                                     'rejected' => '<i class="fa-solid fa-circle-xmark mr-1"></i>',
                                                     default => '',
@@ -119,7 +119,7 @@
                                             @endphp
                                             <span
                                                 class="backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider shadow-sm {{ $badgeClass }}">
-                                                {!! $icon !!} {{ $service->approval_status }}
+                                                {!! $icon !!} {{ $service->hss_approval_status }}
                                             </span>
                                         </div>
                                     @endif
@@ -133,11 +133,11 @@
                                             <span
                                                 class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide shadow-sm border"
                                                 style="
-                background: {{ $service->category->color ?? '#E5E7EB' }};
+                background: {{ $service->category->hc_color ?? '#E5E7EB' }};
                 color: white;
                 border-color: rgba(0,0,0,0.1);
             ">
-                                                {{ $service->category->name }}
+                                                {{ $service->category->hc_name }}
                                             </span>
                                         @endif
                                     </div>
@@ -146,7 +146,7 @@
                                     {{-- Title --}}
                                     <h3
                                         class="text-lg font-bold text-gray-900 mb-3 line-clamp-2 leading-tight group-hover:text-indigo-600 transition-colors">
-                                        {{ $service->title }}
+                                        {{ $service->hss_title }}
                                     </h3>
 
                                     {{-- 🟢 UPDATE: Booking Status as Solid Bubble --}}
@@ -154,7 +154,7 @@
                                         <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Service
                                             Status</span>
 
-                                        @if ($service->status === 'available')
+                                        @if ($service->hss_status === 'available')
                                             {{-- Available Bubble --}}
                                             <span
                                                 class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500 text-white shadow-sm">
@@ -171,13 +171,13 @@
 
                                     {{-- Price Summary --}}
                                     <div class="mb-4">
-                                        @if ($service->basic_price)
+                                        @if ($service->hss_basic_price)
                                             <p class="text-xs text-gray-400 font-medium uppercase mb-0.5">Starts from</p>
                                             <div class="flex items-baseline gap-1">
                                                 <span class="text-xl font-extrabold text-gray-900">RM
-                                                    {{ number_format($service->basic_price) }}</span>
+                                                    {{ number_format($service->hss_basic_price) }}</span>
                                                 <span class="text-xs text-gray-500 font-medium">/
-                                                    {{ $service->basic_frequency }}</span>
+                                                    {{ $service->hss_basic_frequency }}</span>
                                             </div>
                                         @else
                                             <span class="text-sm italic text-gray-400">Price not set</span>
@@ -186,7 +186,7 @@
 
                                     {{-- Action Buttons --}}
                                     <div class="mt-auto grid grid-cols-2 gap-3">
-                                        <button onclick="editService({{ $service->id }})"
+                                        <button onclick="editService({{ $service->hss_id }})"
                                             class="flex items-center justify-center px-4 py-2.5 bg-gray-50 text-gray-700 text-sm font-semibold rounded-xl hover:bg-gray-100 hover:text-gray-900 transition-all border border-gray-200">
                                             Edit / Status
                                         </button>
@@ -196,7 +196,7 @@
                                         </button>
                                     </div>
                                     <div class="mt-3 text-center">
-                                        <button onclick="deleteService({{ $service->id }})"
+                                        <button onclick="deleteService({{ $service->hss_id }})"
                                             class="text-xs text-red-400 hover:text-red-600 hover:underline transition-colors font-medium">
                                             Delete Service
                                         </button>

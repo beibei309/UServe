@@ -11,14 +11,14 @@
         'sat' => ['enabled' => false, 'start' => '10:00', 'end' => '14:00'],
         'sun' => ['enabled' => false, 'start' => '10:00', 'end' => '14:00'],
     ];
-    $scheduleData = $service->operating_hours ?? $defaultSchedule;
+    $scheduleData = $service->hss_operating_hours ?? $defaultSchedule;
     foreach ($defaultSchedule as $key => $val) {
         if (!isset($scheduleData[$key])) {
             $scheduleData[$key] = $val;
         }
     }
 
-    $serviceImagePath = $service->image_path ?? null;
+    $serviceImagePath = $service->hss_image_path ?? null;
     if ($serviceImagePath) {
         if (filter_var($serviceImagePath, FILTER_VALIDATE_URL)) {
             $serviceImageUrl = $serviceImagePath;
@@ -118,7 +118,7 @@
             <div class="flex items-center justify-between mb-8">
                 <div>
                     <h1 class="text-3xl font-bold text-gray-900">Edit Service</h1>
-                    <p class="text-gray-600 mt-1">Update details for <strong>{{ $service->title }}</strong></p>
+                    <p class="text-gray-600 mt-1">Update details for <strong>{{ $service->hss_title }}</strong></p>
                 </div>
                 <a href="{{ route('services.manage') }}"
                     class="text-gray-600 hover:text-gray-900 font-medium flex items-center">
@@ -169,7 +169,7 @@
                 class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden relative">
                 @csrf
                 @method('PUT') {{-- IMPORTANT: Method Spoofing for Edit --}}
-                <input type="hidden" name="service_id" value="{{ $service->id }}">
+                <input type="hidden" name="service_id" value="{{ $service->hss_id }}">
 
                 <div id="overview" class="tab-section p-8">
                     <div class="mb-6">
@@ -181,7 +181,7 @@
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-1">Service Title <span
                                     class="text-red-500">*</span></label>
-                            <input type="text" id="title" name="title" value="{{ $service->title }}"
+                            <input type="text" id="title" name="title" value="{{ $service->hss_title }}"
                                 class="w-full rounded-lg border-gray-300 focus:ring-indigo-500 focus:border-indigo-500">
                         </div>
 
@@ -191,8 +191,8 @@
                             <select id="category_id" name="category_id"
                                 class="w-full rounded-lg border-gray-300 focus:ring-indigo-500 focus:border-indigo-500">
                                 @foreach ($categories as $category)
-                                    <option value="{{ $category->id }}"
-                                        {{ $service->category_id == $category->id ? 'selected' : '' }}>{{ $category->name }}
+                                    <option value="{{ $category->hc_id }}"
+                                        {{ $service->hss_category_id == $category->hc_id ? 'selected' : '' }}>{{ $category->hc_name }}
                                     </option>
                                 @endforeach
                             </select>
@@ -244,31 +244,31 @@
                                 <label class="text-xs font-bold text-gray-500 uppercase">Suggested Price From (RM) <span
                                         class="text-red-500">*</span></label>
                                 <input type="number" id="basic_price" name="packages[0][price]"
-                                    value="{{ $service->basic_price }}"
+                                    value="{{ $service->hss_basic_price }}"
                                     class="w-full mt-1 border-gray-300 rounded-md focus:ring-gray-500 focus:border-gray-500">
                             </div>
                              <div><label class="text-xs font-bold text-gray-600 uppercase">Duration</label><input
-                                        type="text" name="packages[0][duration]" value="{{ $service->basic_duration }}" placeholder="e.g. 2 Hours"
+                                        type="text" name="packages[0][duration]" value="{{ $service->hss_basic_duration }}" placeholder="e.g. 2 Hours"
                                         class="w-full mt-1 border-gray-200 rounded-md"></div>
                             <div>
                                 <label class="text-xs font-bold text-gray-500 uppercase">Frequency</label>
-                                <input type="text" name="packages[0][frequency]" value="{{ $service->basic_frequency }}" placeholder="e.g. per session"
+                                <input type="text" name="packages[0][frequency]" value="{{ $service->hss_basic_frequency }}" placeholder="e.g. per session"
                                     class="w-full mt-1 border-gray-300 rounded-md">
                             </div>
                         </div>
                         <div>
                             <label class="text-xs font-bold text-gray-500 uppercase mb-1 block">What's included?</label>
                             <div class="bg-white rounded-md border border-gray-300 overflow-hidden">
-                                <div id="editor-basic" class="h-24">{!! $service->basic_description !!}</div>
+                                <div id="editor-basic" class="h-24">{!! $service->hss_basic_description !!}</div>
                             </div>
                             <input type="hidden" name="packages[0][description]" id="input-basic"
-                                value="{{ $service->basic_description }}">
+                                value="{{ $service->hss_basic_description }}">
                         </div>
                     </div>
 
                     <div class="flex items-center mb-6 bg-indigo-50 p-4 rounded-lg border border-indigo-100">
                         <input type="checkbox" id="offer_packages" name="offer_packages"
-                            {{ $service->standard_price || $service->premium_price ? 'checked' : '' }}
+                            {{ $service->hss_standard_price || $service->hss_premium_price ? 'checked' : '' }}
                             class="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded cursor-pointer">
                         <label for="offer_packages"
                             class="ml-3 block text-sm font-medium text-indigo-900 cursor-pointer select-none">
@@ -277,28 +277,28 @@
                     </div>
 
                     <div id="extraPackages"
-                        class="{{ $service->standard_price || $service->premium_price ? '' : 'hidden' }} space-y-6">
+                        class="{{ $service->hss_standard_price || $service->hss_premium_price ? '' : 'hidden' }} space-y-6">
                         <div class="border border-blue-200 rounded-xl p-6 bg-blue-50/50">
                             <h3 class="text-lg font-bold text-blue-800 mb-4 flex items-center"><span
                                     class="w-3 h-3 bg-blue-600 rounded-full mr-2"></span> Standard Package</h3>
                             <input type="hidden" name="packages[1][package_type]" value="standard">
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                                 <div><label class="text-xs font-bold text-blue-600 uppercase">Price</label><input
-                                        type="number" name="packages[1][price]" value="{{ $service->standard_price }}"
+                                        type="number" name="packages[1][price]" value="{{ $service->hss_standard_price }}"
                                         class="w-full mt-1 border-blue-200 rounded-md"></div>
                                 <div><label class="text-xs font-bold text-blue-600 uppercase">Duration</label><input
-                                        type="text" name="packages[1][duration]" value="{{ $service->standard_duration }}" placeholder="e.g. 2 Hours"
+                                        type="text" name="packages[1][duration]" value="{{ $service->hss_standard_duration }}" placeholder="e.g. 2 Hours"
                                         class="w-full mt-1 border-blue-200 rounded-md"></div>
                                 <div><label class="text-xs font-bold text-blue-600 uppercase">Frequency</label>
-                                    <input type="text" name="packages[1][frequency]" value="{{ $service->standard_frequency }}" placeholder="e.g. per session"
+                                    <input type="text" name="packages[1][frequency]" value="{{ $service->hss_standard_frequency }}" placeholder="e.g. per session"
                                     class="w-full mt-1 border-blue-300 rounded-md">
                                 </div>
                             </div>
                             <div class="bg-white rounded-md border border-blue-200 overflow-hidden">
-                                <div id="editor-standard" class="h-20">{!! $service->standard_description !!}</div>
+                                <div id="editor-standard" class="h-20">{!! $service->hss_standard_description !!}</div>
                             </div>
                             <input type="hidden" name="packages[1][description]" id="input-standard"
-                                value="{{ $service->standard_description }}">
+                                value="{{ $service->hss_standard_description }}">
                         </div>
 
                         <div class="border border-purple-200 rounded-xl p-6 bg-purple-50/50">
@@ -307,21 +307,21 @@
                             <input type="hidden" name="packages[2][package_type]" value="premium">
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                                 <div><label class="text-xs font-bold text-purple-600 uppercase">Price</label><input
-                                        type="number" name="packages[2][price]" value="{{ $service->premium_price }}"
+                                        type="number" name="packages[2][price]" value="{{ $service->hss_premium_price }}"
                                         class="w-full mt-1 border-purple-200 rounded-md"></div>
                                  <div><label class="text-xs font-bold text-purple-600 uppercase">Duration</label><input
-                                        type="text" name="packages[2][duration]" value="{{ $service->premium_duration }}" placeholder="e.g. 2 Hours"
+                                        type="text" name="packages[2][duration]" value="{{ $service->hss_premium_duration }}" placeholder="e.g. 2 Hours"
                                         class="w-full mt-1 border-purple-200 rounded-md"></div>
                                 <div><label class="text-xs font-bold text-purple-600 uppercase">Frequency</label>
-                                     <input type="text" name="packages[2][frequency]" value="{{ $service->premium_frequency }}" placeholder="e.g. per session"
+                                     <input type="text" name="packages[2][frequency]" value="{{ $service->hss_premium_frequency }}" placeholder="e.g. per session"
                                     class="w-full mt-1 border-purple-300 rounded-md">
                                 </div>
                             </div>
                             <div class="bg-white rounded-md border border-purple-200 overflow-hidden">
-                                <div id="editor-premium" class="h-20">{!! $service->premium_description !!}</div>
+                                <div id="editor-premium" class="h-20">{!! $service->hss_premium_description !!}</div>
                             </div>
                             <input type="hidden" name="packages[2][description]" id="input-premium"
-                                value="{{ $service->premium_description }}">
+                                value="{{ $service->hss_premium_description }}">
                         </div>
                     </div>
 
@@ -349,9 +349,9 @@
 
                     <div class="mb-4">
                         <div class="bg-white rounded-lg border border-gray-300 overflow-hidden">
-                            <div id="editor-main" class="h-64">{!! $service->description !!}</div>
+                            <div id="editor-main" class="h-64">{!! $service->hss_description !!}</div>
                         </div>
-                        <input type="hidden" name="description" id="input-main" value="{{ $service->description }}">
+                        <input type="hidden" name="description" id="input-main" value="{{ $service->hss_description }}">
                         <p class="text-xs text-gray-400 mt-2 text-right">Be descriptive and professional.</p>
                     </div>
 
@@ -425,7 +425,7 @@
                                                     class="w-full rounded-xl border-slate-200 shadow-sm py-3 px-4 text-sm font-bold bg-slate-50">
                                                     @foreach ([15, 20, 30, 45, 60, 90, 120] as $opt)
                                                         <option value="{{ $opt }}"
-                                                            {{ ($service->session_duration ?? 60) == $opt ? 'selected' : '' }}>
+                                                                {{ ($service->hss_session_duration ?? 60) == $opt ? 'selected' : '' }}>
                                                             {{ $opt }} Minutes</option>
                                                     @endforeach
                                                 </select>
@@ -591,7 +591,7 @@
                                 {{-- Kita tambah x-data di sini untuk kawal UI bila toggle ditekan --}}
                                 {{-- Pastikan tukar $service->is_active mengikut nama column DB anda (contoh: is_unavailable atau active status) --}}
                                 <div class="bg-white rounded-3xl shadow-sm border border-slate-100 p-6 sticky top-24"
-                                    x-data="{ isUnavailable: {{ $service->is_active ? 'false' : 'true' }} }">
+                                    x-data="{ isUnavailable: {{ $service->hss_is_active ? 'false' : 'true' }} }">
 
                                     {{-- 1. TOGGLE UNAVAILABLE (BARU) --}}
                                     <div class="flex items-center justify-between mb-6 pb-6 border-b border-slate-100">
@@ -605,7 +605,7 @@
                                             <input type="checkbox" name="is_unavailable" id="toggle-unavailable"
                                                 class="toggle-checkbox absolute block w-7 h-7 rounded-full bg-white border-4 appearance-none cursor-pointer border-slate-200 checked:right-0 checked:border-indigo-600 transition-all duration-300 shadow-sm"
                                                 x-model="isUnavailable" value="1" {{-- Jika DB guna is_active, logic ini mungkin terbalik --}}
-                                                {{ !$service->is_active ? 'checked' : '' }} />
+                                                {{ !$service->hss_is_active ? 'checked' : '' }} />
                                             <label for="toggle-unavailable"
                                                 class="toggle-label block overflow-hidden h-7 rounded-full bg-slate-200 cursor-pointer"></label>
                                         </div>
@@ -622,7 +622,7 @@
                                             <input id="unavailableDates" name="unavailable_dates"
                                                 class="w-full pl-10 px-4 py-3 border border-slate-200 rounded-xl bg-white focus:ring-indigo-500"
                                                 placeholder="Select dates..."
-                                                value="{{ $service->unavailable_dates ? implode(',', json_decode($service->unavailable_dates, true)) : '' }}">
+                                                value="{{ $service->hss_unavailable_dates ? implode(',', json_decode($service->hss_unavailable_dates, true)) : '' }}">
                                             <i class="fa-regular fa-calendar absolute left-3.5 top-3.5 text-slate-400"></i>
                                         </div>
 
@@ -718,8 +718,8 @@
         // --- 4. ALPINE SCHEDULE ---
         function scheduleHandler() {
             return {
-                isSessionBased: @json($service->session_duration !== null),
-                currentDuration: @json($service->session_duration ?? 60),
+                isSessionBased: @json($service->hss_session_duration !== null),
+                currentDuration: @json($service->hss_session_duration ?? 60),
 
                 // Data from Controller
                 schedule: @json($scheduleData),
@@ -882,7 +882,7 @@
                 dateFormat: "Y-m-d",
                 minDate: "today",
                 conjunction: ", ",
-                defaultDate: @json($service->unavailable_dates ?? []),
+                defaultDate: @json($service->hss_unavailable_dates ?? []),
                 locale: {
                     firstDayOfWeek: 1
                 }
@@ -996,7 +996,7 @@ async function submitForm() {
     });
 
     try {
-        const response = await fetch("{{ route('services.update', $service->id) }}", {
+        const response = await fetch("{{ route('services.update', $service->hss_id) }}", {
             method: 'POST', // POST is safer for file uploads
             headers: {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,

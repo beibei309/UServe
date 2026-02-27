@@ -13,39 +13,39 @@ class AdminDashboardController extends Controller
     public function index()
 {
     // TOTAL COUNTS
-    $totalStudents = User::where('role', 'student')->count();
-    $totalCommunityUsers = User::where('role', 'community')->count();
+        $totalStudents = User::where('hu_role', 'student')->count();
+        $totalCommunityUsers = User::where('hu_role', 'community')->count();
     $totalServices = StudentService::count();
-    $pendingRequests = ServiceRequest::where('status', 'pending')->count();
+        $pendingRequests = ServiceRequest::where('hsr_status', 'pending')->count();
 
     // ===============================
         // 🔔 ADMIN ACTION REQUIRED
         // ===============================
 
         // Pending student verification
-        $pendingStudents = User::where('role', 'student')
-            ->where('verification_status', 'pending')
+        $pendingStudents = User::where('hu_role', 'student')
+            ->where('hu_verification_status', 'pending')
             ->count();
 
         // Pending helper verification
-        $pendingHelpers = User::where('role', 'helper')
-            ->where('verification_status', 'pending')
+        $pendingHelpers = User::where('hu_role', 'helper')
+            ->where('hu_verification_status', 'pending')
             ->count();
 
         // Pending services approval
-        $pendingServices = StudentService::where('status', 'pending')->count();
+        $pendingServices = StudentService::where('hss_approval_status', 'pending')->count();
 
-        $studentsWithoutStatus = User::where('role', 'student')
-    ->whereNotIn('id', function ($query) {
-        $query->select('student_id')
-              ->from('student_statuses');
+        $studentsWithoutStatus = User::where('hu_role', 'student')
+    ->whereNotIn('hu_id', function ($query) {
+        $query->select('hss_student_id')
+              ->from('h2u_student_statuses');
     })
     ->count();
 
     /* ---------------------------------------------
      |  MONTHLY STUDENT REGISTRATIONS (Line Chart)
      --------------------------------------------- */
-    $studentData = User::where('role', 'student')
+    $studentData = User::where('hu_role', 'student')
         ->selectRaw('EXTRACT(MONTH FROM created_at) as month, COUNT(*) as total')
         ->groupBy('month')
         ->pluck('total', 'month');   // returns: [1 => 10, 2 => 14, ...]

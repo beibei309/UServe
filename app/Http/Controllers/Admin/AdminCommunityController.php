@@ -18,9 +18,9 @@ class AdminCommunityController extends Controller
     $status = $request->input('status');
     $ratingRange = $request->input('rating_range'); // 1. Get the range input
 
-    $communityUsers = User::where('role', 'community')
+    $communityUsers = User::where('hu_role', 'community')
         // Calculate average rating (creates 'reviews_received_avg_rating')
-        ->withAvg('reviewsReceived', 'rating')
+        ->withAvg('reviewsReceived as reviews_received_avg_rating', 'hr_rating')
         ->withCount('reviewsReceived')
         ->with(['reviewsReceived' => function($query) {
             $query->latest()->limit(10)->with('reviewer'); 
@@ -29,17 +29,17 @@ class AdminCommunityController extends Controller
         // Search Logic
         ->when($search, function ($query, $search) {
             $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhere('phone', 'like', "%{$search}%");
+                $q->where('hu_name', 'like', "%{$search}%")
+                  ->orWhere('hu_email', 'like', "%{$search}%")
+                  ->orWhere('hu_phone', 'like', "%{$search}%");
             });
         })
 
         // Status Logic
-        ->when($status === 'active', fn($q) => $q->where('is_blacklisted', 0)->where('is_suspended', 0))
+        ->when($status === 'active', fn($q) => $q->where('hu_is_blacklisted', 0)->where('hu_is_suspended', 0))
             ->when($status === 'suspended', fn($q) => $q->where(function($sub) {
-                $sub->where('is_blacklisted', 1)
-                    ->orWhere('is_suspended', 1);
+                $sub->where('hu_is_blacklisted', 1)
+                    ->orWhere('hu_is_suspended', 1);
             }))
 
         // 2. ADDED: Rating Range Logic
@@ -76,11 +76,11 @@ class AdminCommunityController extends Controller
 
     // Stats
    $stats = [
-            'total' => User::where('role', 'community')->count(),
-            'approved' => User::where('role', 'community')->where('verification_status', 'approved')->count(),
-            'pending' => User::where('role', 'community')->where('verification_status', 'pending')->count(),
-            'blacklisted' => User::where('role', 'community')
-                                 ->where(fn($q) => $q->where('is_blacklisted', 1)->orWhere('is_suspended', 1))
+            'total' => User::where('hu_role', 'community')->count(),
+            'approved' => User::where('hu_role', 'community')->where('hu_verification_status', 'approved')->count(),
+            'pending' => User::where('hu_role', 'community')->where('hu_verification_status', 'pending')->count(),
+            'blacklisted' => User::where('hu_role', 'community')
+                                 ->where(fn($q) => $q->where('hu_is_blacklisted', 1)->orWhere('hu_is_suspended', 1))
                                  ->count(),
         ];
 
@@ -90,48 +90,48 @@ class AdminCommunityController extends Controller
 
 public function view($id)
 {
-    $user = User::where('role', 'community')->findOrFail($id);
+    $user = User::where('hu_role', 'community')->findOrFail($id);
     return view('admin.community.view', compact('user'));
 }
 
 public function edit($id)
 {
-    $user = User::where('role', 'community')->findOrFail($id);
+    $user = User::where('hu_role', 'community')->findOrFail($id);
     return view('admin.community.edit', compact('user'));
 }
 
 public function update(Request $request, $id)
 {
-    $user = User::where('role', 'community')->findOrFail($id);
+    $user = User::where('hu_role', 'community')->findOrFail($id);
 
     // 🔒 Prevent reverting approved users back to pending
     if (
-        $user->verification_status === 'approved' &&
+        $user->hu_verification_status === 'approved' &&
         $request->verification_status === 'pending'
     ) {
         return back()->with('error', 'Verified users cannot be reverted to pending.');
     }
 
     // Basic info
-    $user->name  = $request->name;
-    $user->email = $request->email;
-    $user->phone = $request->phone;
-    $user->bio   = $request->bio;
+    $user->hu_name  = $request->name;
+    $user->hu_email = $request->email;
+    $user->hu_phone = $request->phone;
+    $user->hu_bio   = $request->bio;
 
     // Now it is SAFE to update verification status
-    $user->verification_status = $request->verification_status;
+    $user->hu_verification_status = $request->verification_status;
 
     // Upload new profile photo
     if ($request->hasFile('profile_photo')) {
 
         // Delete old photo if exists (support both legacy and current paths)
-        if ($user->profile_photo_path) {
-            if (Storage::disk('public')->exists($user->profile_photo_path)) {
-                Storage::disk('public')->delete($user->profile_photo_path);
+        if ($user->hu_profile_photo_path) {
+            if (Storage::disk('public')->exists($user->hu_profile_photo_path)) {
+                Storage::disk('public')->delete($user->hu_profile_photo_path);
             }
 
-            if (file_exists(public_path($user->profile_photo_path))) {
-                unlink(public_path($user->profile_photo_path));
+            if (file_exists(public_path($user->hu_profile_photo_path))) {
+                unlink(public_path($user->hu_profile_photo_path));
             }
         }
 
@@ -148,25 +148,25 @@ public function update(Request $request, $id)
             return back()->withErrors(['profile_photo' => 'Profile photo upload failed. Please try again.']);
         }
 
-        $user->profile_photo_path = 'profile-photos/' . $filename;
+        $user->hu_profile_photo_path = 'profile-photos/' . $filename;
     }
 
     // Blacklist / Unblacklist
    if ($request->remove_blacklist) {
-            $user->is_blacklisted = 0;
-            $user->is_suspended = 0; // Sync suspended
-            $user->blacklist_reason = null;
+            $user->hu_is_blacklisted = 0;
+            $user->hu_is_suspended = 0; // Sync suspended
+            $user->hu_blacklist_reason = null;
         } 
         elseif ($request->blacklist_reason) {
-            $user->is_blacklisted = 1;
-            $user->is_suspended = 1; // Sync suspended
-            $user->blacklist_reason = $request->blacklist_reason;
+            $user->hu_is_blacklisted = 1;
+            $user->hu_is_suspended = 1; // Sync suspended
+            $user->hu_blacklist_reason = $request->blacklist_reason;
         }
 
     $user->save();
 
     return redirect()
-        ->route('admin.community.view', $user->id)
+        ->route('admin.community.view', $user->hu_id)
         ->with('success', 'User updated successfully!');
 }
 
@@ -177,14 +177,14 @@ public function blacklist(Request $request, $id)
         'blacklist_reason' => 'required|string|max:255'
     ]);
 
-    $user = User::where('role', 'community')->findOrFail($id);
+    $user = User::where('hu_role', 'community')->findOrFail($id);
 
-    $user->is_blacklisted = 1;
-        $user->is_suspended = 1; 
-        $user->blacklist_reason = $request->blacklist_reason;
+    $user->hu_is_blacklisted = 1;
+        $user->hu_is_suspended = 1; 
+        $user->hu_blacklist_reason = $request->blacklist_reason;
         $user->save();
 
-    Mail::to($user->email)->send(new UserBlacklisted($user, $request->blacklist_reason));
+    Mail::to($user->hu_email)->send(new UserBlacklisted($user, $request->blacklist_reason));
 
     return redirect()->route('admin.community.index')
                      ->with('success', 'User has been blacklisted.');
@@ -192,14 +192,14 @@ public function blacklist(Request $request, $id)
 
 public function unblacklist($id)
 {
-    $user = User::where('role', 'community')->findOrFail($id);
+    $user = User::where('hu_role', 'community')->findOrFail($id);
 
-    $user->is_blacklisted = 0;
-        $user->is_suspended = 0; 
-        $user->blacklist_reason = null;
+    $user->hu_is_blacklisted = 0;
+        $user->hu_is_suspended = 0; 
+        $user->hu_blacklist_reason = null;
         $user->save();
 
-    Mail::to($user->email)->send(new UserUnblacklisted($user));
+    Mail::to($user->hu_email)->send(new UserUnblacklisted($user));
 
     return redirect()->route('admin.community.index')
                      ->with('success', 'Blacklist removed.');
@@ -207,16 +207,16 @@ public function unblacklist($id)
 
 public function delete($id)
 {
-    $user = User::where('role', 'community')->findOrFail($id);
+    $user = User::where('hu_role', 'community')->findOrFail($id);
 
     // Optional: delete profile photo (support both legacy and current paths)
-    if ($user->profile_photo_path) {
-        if (Storage::disk('public')->exists($user->profile_photo_path)) {
-            Storage::disk('public')->delete($user->profile_photo_path);
+    if ($user->hu_profile_photo_path) {
+        if (Storage::disk('public')->exists($user->hu_profile_photo_path)) {
+            Storage::disk('public')->delete($user->hu_profile_photo_path);
         }
 
-        if (file_exists(public_path($user->profile_photo_path))) {
-            unlink(public_path($user->profile_photo_path));
+        if (file_exists(public_path($user->hu_profile_photo_path))) {
+            unlink(public_path($user->hu_profile_photo_path));
         }
     }
 
@@ -232,22 +232,22 @@ public function export(Request $request)
     $query = User::query();
 
     // Only community users
-    $query->where('role', 'community');
+    $query->where('hu_role', 'community');
 
     // Apply filters
     if ($request->filled('search')) {
         $query->where(function ($q) use ($request) {
-            $q->where('name', 'like', '%'.$request->search.'%')
-              ->orWhere('email', 'like', '%'.$request->search.'%')
-              ->orWhere('phone', 'like', '%'.$request->search.'%');
+                        $q->where('hu_name', 'like', '%'.$request->search.'%')
+                            ->orWhere('hu_email', 'like', '%'.$request->search.'%')
+                            ->orWhere('hu_phone', 'like', '%'.$request->search.'%');
         });
     }
 
     if ($request->filled('status')) {
         if ($request->status == 'active') {
-            $query->where('is_blacklisted', false);
+            $query->where('hu_is_blacklisted', false);
         } elseif ($request->status == 'blacklisted') {
-            $query->where('is_blacklisted', true);
+            $query->where('hu_is_blacklisted', true);
         }
     }
 
@@ -256,13 +256,13 @@ public function export(Request $request)
     // Prepare CSV
     $csvData = $users->map(function ($user) {
             // [UPDATED] Check both for Status string
-            $isBlacklisted = $user->is_blacklisted || $user->is_suspended;
+            $isBlacklisted = $user->hu_is_blacklisted || $user->hu_is_suspended;
             
             return [
-                'Name' => $user->name,
-                'Email' => $user->email,
-                'Phone' => $user->phone,
-                'Status' => $isBlacklisted ? 'Blacklisted/Suspended' : ($user->verification_status == 'approved' ? 'Verified' : 'Not Verified'),
+                'Name' => $user->hu_name,
+                'Email' => $user->hu_email,
+                'Phone' => $user->hu_phone,
+                'Status' => $isBlacklisted ? 'Blacklisted/Suspended' : ($user->hu_verification_status == 'approved' ? 'Verified' : 'Not Verified'),
             ];
         });
 

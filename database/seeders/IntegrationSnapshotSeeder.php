@@ -6,9 +6,111 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 
 class IntegrationSnapshotSeeder extends Seeder
 {
+    private function prefixedTable(string $table): string
+    {
+        return match ($table) {
+            'users' => 'h2u_users',
+            'categories' => 'h2u_categories',
+            'student_services' => 'h2u_student_services',
+            'reviews' => 'h2u_reviews',
+            'student_statuses' => 'h2u_student_statuses',
+            'faqs' => 'h2u_faqs',
+            default => $table,
+        };
+    }
+
+    private function mapColumns(string $table, array $data): array
+    {
+        $map = match ($table) {
+            'h2u_categories' => [
+                'id' => 'hc_id', 'name' => 'hc_name', 'slug' => 'hc_slug', 'description' => 'hc_description',
+                'image_path' => 'hc_image_path', 'icon' => 'hc_icon', 'color' => 'hc_color', 'is_active' => 'hc_is_active',
+            ],
+            'h2u_users' => [
+                'id' => 'hu_id', 'name' => 'hu_name', 'email' => 'hu_email', 'email_verified_at' => 'hu_email_verified_at',
+                'password' => 'hu_password', 'remember_token' => 'remember_token', 'role' => 'hu_role',
+                'phone' => 'hu_phone', 'student_id' => 'hu_student_id', 'profile_photo_path' => 'hu_profile_photo_path',
+                'selfie_media_path' => 'hu_selfie_media_path', 'public_verified_at' => 'hu_public_verified_at',
+                'verification_status' => 'hu_verification_status', 'staff_email' => 'hu_staff_email',
+                'reports_count' => 'hu_reports_count', 'verification_note' => 'hu_verification_note',
+                'verification_document_path' => 'hu_verification_document_path', 'staff_verified_at' => 'hu_staff_verified_at',
+                'is_available' => 'hu_is_available', 'unavailable_start_date' => 'hu_unavailable_start_date',
+                'unavailable_end_date' => 'hu_unavailable_end_date', 'is_suspended' => 'hu_is_suspended',
+                'is_blacklisted' => 'hu_is_blacklisted', 'is_blocked' => 'hu_is_blocked',
+                'warning_count' => 'hu_warning_count', 'blacklist_reason' => 'hu_blacklist_reason',
+                'bio' => 'hu_bio', 'faculty' => 'hu_faculty', 'course' => 'hu_course', 'latitude' => 'hu_latitude',
+                'longitude' => 'hu_longitude', 'location_verified_at' => 'hu_location_verified_at',
+                'work_experience_message' => 'hu_work_experience_message', 'work_experience_file' => 'hu_work_experience_file',
+                'helper_verified_at' => 'hu_helper_verified_at',
+            ],
+            'h2u_student_services' => [
+                'id' => 'hss_id', 'user_id' => 'hss_user_id', 'category_id' => 'hss_category_id', 'title' => 'hss_title',
+                'image_path' => 'hss_image_path', 'description' => 'hss_description', 'status' => 'hss_status',
+                'is_active' => 'hss_is_active', 'unavailable_dates' => 'hss_unavailable_dates',
+                'operating_hours' => 'hss_operating_hours', 'session_duration' => 'hss_session_duration',
+                'blocked_slots' => 'hss_blocked_slots', 'booking_mode' => 'hss_booking_mode',
+                'approval_status' => 'hss_approval_status', 'warning_count' => 'hss_warning_count',
+                'warning_reason' => 'hss_warning_reason', 'suggested_price' => 'hss_suggested_price',
+                'basic_duration' => 'hss_basic_duration', 'basic_frequency' => 'hss_basic_frequency',
+                'basic_price' => 'hss_basic_price', 'basic_description' => 'hss_basic_description',
+                'standard_duration' => 'hss_standard_duration', 'standard_frequency' => 'hss_standard_frequency',
+                'standard_price' => 'hss_standard_price', 'standard_description' => 'hss_standard_description',
+                'premium_duration' => 'hss_premium_duration', 'premium_frequency' => 'hss_premium_frequency',
+                'premium_price' => 'hss_premium_price', 'premium_description' => 'hss_premium_description',
+            ],
+            'h2u_reviews' => [
+                'id' => 'hr_id', 'service_request_id' => 'hr_service_request_id', 'student_service_id' => 'hr_student_service_id',
+                'reviewer_id' => 'hr_reviewer_id', 'reviewee_id' => 'hr_reviewee_id', 'rating' => 'hr_rating',
+                'reply' => 'hr_reply', 'replied_at' => 'hr_replied_at', 'comment' => 'hr_comment',
+            ],
+            'h2u_student_statuses' => [
+                'id' => 'hss_id', 'student_id' => 'hss_student_id', 'matric_no' => 'hss_matric_no',
+                'semester' => 'hss_semester', 'status' => 'hss_status', 'effective_date' => 'hss_effective_date',
+                'graduation_date' => 'hss_graduation_date',
+            ],
+            'h2u_faqs' => [
+                'id' => 'hfq_id', 'category' => 'hfq_category', 'question' => 'hfq_question',
+                'answer' => 'hfq_answer', 'is_active' => 'hfq_is_active', 'display_order' => 'hfq_display_order',
+            ],
+            default => [],
+        };
+
+        $mapped = [];
+        foreach ($data as $key => $value) {
+            $mapped[$map[$key] ?? $key] = $value;
+        }
+
+        return $mapped;
+    }
+
+    private function upsertBy(string $table, array $match, array $values): void
+    {
+        $table = $this->prefixedTable($table);
+        $match = $this->mapColumns($table, $match);
+        $values = $this->mapColumns($table, $values);
+
+        $existingColumns = Schema::getColumnListing($table);
+        $match = array_intersect_key($match, array_flip($existingColumns));
+        $values = array_intersect_key($values, array_flip($existingColumns));
+
+        if (empty($match)) {
+            return;
+        }
+
+        $query = DB::table($table)->where($match);
+
+        if ($query->exists()) {
+            $query->update($values);
+            return;
+        }
+
+        DB::table($table)->insert(array_merge($match, $values));
+    }
+
     public function run(): void
     {
         $now = now();
@@ -23,7 +125,7 @@ class IntegrationSnapshotSeeder extends Seeder
         ];
 
         foreach ($categories as $category) {
-            DB::table('categories')->updateOrInsert(
+            $this->upsertBy('categories',
                 ['slug' => $category['slug']],
                 array_merge($category, ['updated_at' => $now, 'created_at' => $now])
             );
@@ -297,7 +399,7 @@ class IntegrationSnapshotSeeder extends Seeder
         ];
         
         foreach ($users as $user) {
-            DB::table('users')->updateOrInsert(
+            $this->upsertBy('users',
                 ['email' => $user['email']],
                 [
                     'name' => $user['name'],
@@ -325,7 +427,6 @@ class IntegrationSnapshotSeeder extends Seeder
                     'bio' => $user['bio'],
                     'faculty' => $user['faculty'],
                     'course' => $user['course'],
-                    'is_verified' => false,
                     'helper_status' => false,
                     'address' => $user['address'],
                     'latitude' => $user['latitude'],
@@ -343,8 +444,8 @@ class IntegrationSnapshotSeeder extends Seeder
             );
         }
 
-        $userIds = DB::table('users')->whereIn('email', array_column($users, 'email'))->pluck('id', 'email');
-        $categoryIds = DB::table('categories')->pluck('id', 'slug');
+        $userIds = DB::table('h2u_users')->whereIn('hu_email', array_column($users, 'email'))->pluck('hu_id', 'hu_email');
+        $categoryIds = DB::table('h2u_categories')->pluck('hc_id', 'hc_slug');
 
         $services = [
             [
@@ -416,7 +517,7 @@ class IntegrationSnapshotSeeder extends Seeder
                 continue;
             }
 
-            DB::table('student_services')->updateOrInsert(
+            $this->upsertBy('student_services',
                 ['user_id' => $userId, 'title' => $service['title']],
                 [
                     'category_id' => $categoryId,
@@ -451,9 +552,9 @@ class IntegrationSnapshotSeeder extends Seeder
             );
         }
 
-        $serviceIds = DB::table('student_services')
-            ->whereIn('title', array_column($services, 'title'))
-            ->pluck('id', 'title');
+        $serviceIds = DB::table('h2u_student_services')
+            ->whereIn('hss_title', array_column($services, 'title'))
+            ->pluck('hss_id', 'hss_title');
 
         $reviews = [
             [
@@ -481,7 +582,7 @@ class IntegrationSnapshotSeeder extends Seeder
                 continue;
             }
 
-            DB::table('reviews')->updateOrInsert(
+            $this->upsertBy('reviews',
                 [
                     'reviewer_id' => $reviewerId,
                     'reviewee_id' => $revieweeId,
@@ -511,7 +612,7 @@ class IntegrationSnapshotSeeder extends Seeder
                 continue;
             }
 
-            DB::table('student_statuses')->updateOrInsert(
+            $this->upsertBy('student_statuses',
                 ['student_id' => $studentId],
                 [
                     'matric_no' => $status['matric_no'],
@@ -531,7 +632,7 @@ class IntegrationSnapshotSeeder extends Seeder
         ];
 
         foreach ($faqs as $faq) {
-            DB::table('faqs')->updateOrInsert(
+            $this->upsertBy('faqs',
                 ['question' => $faq['question']],
                 array_merge($faq, ['updated_at' => $now, 'created_at' => $now])
             );

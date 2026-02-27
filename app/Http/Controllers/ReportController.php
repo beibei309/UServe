@@ -13,28 +13,40 @@ class ReportController extends Controller
     {
         $user = $request->user();
         if (!$user) {
-            return response()->json(['error' => 'Authentication required.'], 401);
+            return response()->json([
+                'success' => false,
+                'message' => 'Authentication required.',
+                'error' => 'Authentication required.',
+            ], 401);
         }
 
         $data = $request->validate([
-            'target_user_id' => ['required', 'exists:users,id'],
+            'target_user_id' => ['required', 'exists:h2u_users,hu_id'],
             'reason' => ['required', 'string', 'max:255'],
             'details' => ['nullable', 'string'],
         ]);
 
         // Prevent self-report
-        if ((int) $data['target_user_id'] === (int) $user->id) {
-            return response()->json(['error' => 'You cannot report yourself.'], 422);
+        if ((int) $data['target_user_id'] === (int) $user->hu_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You cannot report yourself.',
+                'error' => 'You cannot report yourself.',
+            ], 422);
         }
 
         $report = Report::create([
-            'reporter_id' => $user->id,
-            'target_user_id' => $data['target_user_id'],
-            'reason' => $data['reason'],
-            'details' => $data['details'] ?? null,
-            'status' => 'open',
+            'hrp_reporter_id' => $user->hu_id,
+            'hrp_target_user_id' => $data['target_user_id'],
+            'hrp_reason' => $data['reason'],
+            'hrp_details' => $data['details'] ?? null,
+            'hrp_status' => 'open',
         ]);
 
-        return response()->json(['report' => $report], 201);
+        return response()->json([
+            'success' => true,
+            'message' => 'Report submitted successfully.',
+            'report' => $report,
+        ], 201);
     }
 }

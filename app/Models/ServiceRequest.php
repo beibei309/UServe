@@ -9,40 +9,43 @@ class ServiceRequest extends Model
 {
     use HasFactory;
 
+    protected $table = 'h2u_service_requests';
+    protected $primaryKey = 'hsr_id';
+
     protected $fillable = [
-        'student_service_id',
-        'requester_id',
-        'provider_id',
-        'selected_dates',
-        'selected_time',
-        'start_time',
-        'end_time',
-        'selected_package',
-        'message',
-        'offered_price',
-        'status',
-        'payment_status',
-        'payment_proof',
-        'dispute_reason',
-        'reported_by',
-        'rejection_reason',
-        'accepted_at',
-        'started_at',
-        'finished_at',
-        'completed_at'
+        'hsr_student_service_id',
+        'hsr_requester_id',
+        'hsr_provider_id',
+        'hsr_selected_dates',
+        'hsr_selected_time',
+        'hsr_start_time',
+        'hsr_end_time',
+        'hsr_selected_package',
+        'hsr_message',
+        'hsr_offered_price',
+        'hsr_status',
+        'hsr_payment_status',
+        'hsr_payment_proof',
+        'hsr_dispute_reason',
+        'hsr_reported_by',
+        'hsr_rejection_reason',
+        'hsr_accepted_at',
+        'hsr_started_at',
+        'hsr_finished_at',
+        'hsr_completed_at'
     ];
 
     protected $casts = [
-        'offered_price' => 'decimal:2',
-        'accepted_at' => 'datetime',
-        'started_at' => 'datetime',
-        'finished_at' => 'datetime',
-        'completed_at' => 'datetime',
-        'selected_time' => 'string',        
+        'hsr_offered_price' => 'decimal:2',
+        'hsr_accepted_at' => 'datetime',
+        'hsr_started_at' => 'datetime',
+        'hsr_finished_at' => 'datetime',
+        'hsr_completed_at' => 'datetime',
+        'hsr_selected_time' => 'string',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
-        'selected_dates' => 'array', 
-        'selected_package' => 'array',
+        'hsr_selected_dates' => 'array',
+        'hsr_selected_package' => 'array',
     ];
 
     /**
@@ -50,7 +53,7 @@ class ServiceRequest extends Model
      */
     public function studentService()
     {
-        return $this->belongsTo(StudentService::class);
+        return $this->belongsTo(StudentService::class, 'hsr_student_service_id', 'hss_id');
     }
 
     /**
@@ -58,7 +61,7 @@ class ServiceRequest extends Model
      */
     public function requester()
     {
-        return $this->belongsTo(User::class, 'requester_id');
+        return $this->belongsTo(User::class, 'hsr_requester_id', 'hu_id');
     }
 
     /**
@@ -66,23 +69,23 @@ class ServiceRequest extends Model
      */
     public function provider()
     {
-        return $this->belongsTo(User::class, 'provider_id');
+        return $this->belongsTo(User::class, 'hsr_provider_id', 'hu_id');
     }
 
     public function receivedReviews()
     {
         return $this->hasMany(Review::class)
-                    ->where('reviewee_id', $this->provider_id);
+                    ->where('hr_reviewee_id', $this->hsr_provider_id);
     }
     public function reviews()
     {
-        return $this->hasMany(Review::class);
+        return $this->hasMany(Review::class, 'hr_service_request_id', 'hsr_id');
     }
 
     public function getAverageRatingAttribute()
     {
         // We use 'receivedReviews' so we don't accidentally count reviews YOU wrote.
-        return $this->receivedReviews()->avg('rating') ?? 0;
+        return $this->receivedReviews()->avg('hr_rating') ?? 0;
     }
 
     public function getReviewCountAttribute()
@@ -92,32 +95,32 @@ class ServiceRequest extends Model
 
         public function review()
     {
-        return $this->hasOne(Review::class, 'service_request_id');
+            return $this->hasOne(Review::class, 'hr_service_request_id', 'hsr_id');
     }
 
     public function reviewForHelper()
     {
-        return $this->hasOne(Review::class, 'service_request_id')
-            ->where('reviewee_id', $this->provider_id);
+            return $this->hasOne(Review::class, 'hr_service_request_id', 'hsr_id')
+            ->where('hr_reviewee_id', $this->hsr_provider_id);
     }
 
     public function reviewByHelper()
     {
-        return $this->hasOne(Review::class, 'service_request_id')
-            ->where('reviewer_id', $this->provider_id);
+            return $this->hasOne(Review::class, 'hr_service_request_id', 'hsr_id')
+            ->where('hr_reviewer_id', $this->hsr_provider_id);
     }
 
 
     public function reviewForClient()
     {
-        return $this->hasOne(Review::class, 'service_request_id')
-            ->where('reviewee_id', $this->requester_id);
+        return $this->hasOne(Review::class, 'hr_service_request_id', 'hsr_id')
+            ->where('hr_reviewee_id', $this->hsr_requester_id);
     }
 
     public function reviewByClient()
     {
-        return $this->hasOne(Review::class, 'service_request_id')
-            ->where('reviewer_id', $this->requester_id);
+        return $this->hasOne(Review::class, 'hr_service_request_id', 'hsr_id')
+            ->where('hr_reviewer_id', $this->hsr_requester_id);
     }
 
     /**
@@ -125,7 +128,7 @@ class ServiceRequest extends Model
      */
     public function scopePending($query)
     {
-        return $query->where('status', 'pending');
+        return $query->where('hsr_status', 'pending');
     }
 
     /**
@@ -133,7 +136,7 @@ class ServiceRequest extends Model
      */
     public function scopeAccepted($query)
     {
-        return $query->where('status', 'accepted');
+        return $query->where('hsr_status', 'accepted');
     }
 
     /**
@@ -141,7 +144,7 @@ class ServiceRequest extends Model
      */
     public function scopeCompleted($query)
     {
-        return $query->where('status', 'completed');
+        return $query->where('hsr_status', 'completed');
     }
 
     /**
@@ -149,7 +152,7 @@ class ServiceRequest extends Model
      */
     public function isPending()
     {
-        return $this->status === 'pending';
+        return $this->hsr_status === 'pending';
     }
 
     /**
@@ -157,7 +160,7 @@ class ServiceRequest extends Model
      */
     public function isAccepted()
     {
-        return $this->status === 'accepted';
+        return $this->hsr_status === 'accepted';
     }
 
     /**
@@ -165,22 +168,22 @@ class ServiceRequest extends Model
      */
     public function isInProgress()
     {
-        return $this->status === 'in_progress';
+        return $this->hsr_status === 'in_progress';
     }
 
     public function isWorkFinished()
     {
-        return $this->status === 'waiting_payment';
+        return $this->hsr_status === 'waiting_payment';
     }
 
     public function isPaid()
     {
-        return $this->payment_status === 'paid';
+        return $this->hsr_payment_status === 'paid';
     }
 
     public function isPaymentPending()
     {
-        return $this->payment_status === 'verification_status';
+        return $this->hsr_payment_status === 'verification_status';
     }
 
      public function PaidApproved()
@@ -192,7 +195,7 @@ class ServiceRequest extends Model
     public function isPaidApproved()
     {
         // Preferred named helper
-        return $this->payment_status === 'paid';
+        return $this->hsr_payment_status === 'paid';
     }
 
     /**
@@ -200,7 +203,7 @@ class ServiceRequest extends Model
      */
     public function isCompleted()
     {
-        return $this->status === 'completed';
+        return $this->hsr_status === 'completed';
     }
 
     /**
@@ -209,8 +212,8 @@ class ServiceRequest extends Model
     public function accept()
     {
         $this->update([
-            'status' => 'accepted',
-            'accepted_at' => now()
+            'hsr_status' => 'accepted',
+            'hsr_accepted_at' => now()
         ]);
     }
 
@@ -219,7 +222,7 @@ class ServiceRequest extends Model
      */
     public function reject()
     {
-        $this->update(['status' => 'rejected']);
+        $this->update(['hsr_status' => 'rejected']);
     }
 
     /**
@@ -227,7 +230,7 @@ class ServiceRequest extends Model
      */
     public function markInProgress()
     {
-        $this->update(['status' => 'in_progress']);
+        $this->update(['hsr_status' => 'in_progress']);
     }
 
     /**
@@ -236,8 +239,8 @@ class ServiceRequest extends Model
     public function markCompleted()
     {
         $this->update([
-            'status' => 'completed',
-            'completed_at' => now()
+            'hsr_status' => 'completed',
+            'hsr_completed_at' => now()
         ]);
     }
 
@@ -246,7 +249,7 @@ class ServiceRequest extends Model
      */
     public function hasUserReviewed($userId)
     {
-        return $this->reviews()->where('reviewer_id', $userId)->exists();
+        return $this->reviews()->where('hr_reviewer_id', $userId)->exists();
     }
 
     /**
@@ -254,8 +257,8 @@ class ServiceRequest extends Model
      */
     public function bothPartiesReviewed()
     {
-        $requesterReviewed = $this->reviews()->where('reviewer_id', $this->requester_id)->exists();
-        $providerReviewed = $this->reviews()->where('reviewer_id', $this->provider_id)->exists();
+        $requesterReviewed = $this->reviews()->where('hr_reviewer_id', $this->hsr_requester_id)->exists();
+        $providerReviewed = $this->reviews()->where('hr_reviewer_id', $this->hsr_provider_id)->exists();
         
         return $requesterReviewed && $providerReviewed;
     }
@@ -274,7 +277,7 @@ class ServiceRequest extends Model
             'cancelled' => 'bg-gray-100 text-gray-800'
         ];
 
-        return $colors[$this->status] ?? 'bg-gray-100 text-gray-800';
+        return $colors[$this->hsr_status] ?? 'bg-gray-100 text-gray-800';
     }
 
     /**
@@ -291,6 +294,6 @@ class ServiceRequest extends Model
             'cancelled' => 'Cancelled'
         ];
 
-        return $statuses[$this->status] ?? ucfirst($this->status);
+        return $statuses[$this->hsr_status] ?? ucfirst((string) $this->hsr_status);
     }
 }

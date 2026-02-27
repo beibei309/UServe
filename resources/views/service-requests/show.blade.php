@@ -41,13 +41,13 @@
             </div>
 
             @php
-                $isRequester = auth()->id() === $serviceRequest->requester_id;
-                $isProvider = auth()->id() === $serviceRequest->provider_id;
+                $isRequester = auth()->id() === $serviceRequest->hsr_requester_id;
+                $isProvider = auth()->id() === $serviceRequest->hsr_provider_id;
                 $service = $serviceRequest->studentService;
 
                 // --- 1. Check Suspension Status ---
-                $providerBanned = $serviceRequest->provider->is_suspended == 1 || $serviceRequest->provider->is_blacklisted == 1;
-                $buyerBanned = $serviceRequest->requester->is_suspended == 1 || $serviceRequest->requester->is_blacklisted == 1;
+                $providerBanned = $serviceRequest->provider->hu_is_suspended == 1 || $serviceRequest->provider->hu_is_blacklisted == 1;
+                $buyerBanned = $serviceRequest->requester->hu_is_suspended == 1 || $serviceRequest->requester->hu_is_blacklisted == 1;
                 $isSuspended = $providerBanned || $buyerBanned;
 
                 // --- 2. Determine Colors (Using Inline Styles to guarantee visibility) ---
@@ -57,7 +57,7 @@
                     $headerStyle = 'background: linear-gradient(to right, #ef4444, #b91c1c);'; // Red-500 to Red-700
                     $statusDot = 'bg-red-400';
                 } else {
-                    switch($serviceRequest->status) {
+                    switch($serviceRequest->hsr_status) {
                         case 'in_progress':
                         case 'accepted':
                             // Blue
@@ -98,10 +98,10 @@
                     <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                         <div>
                             <span class="inline-block px-3 py-1 mb-3 text-xs font-bold tracking-wider uppercase bg-white/20 rounded-full">
-                                Request #{{ $serviceRequest->id }}
+                                Request #{{ $serviceRequest->hsr_id }}
                             </span>
                             <h1 class="text-3xl font-extrabold tracking-tight text-white">
-                                {{ optional($service)->title ?? 'Custom Request' }}
+                                {{ optional($service)->hss_title ?? 'Custom Request' }}
                             </h1>
                             <p class="mt-2 text-indigo-100 flex items-center gap-2">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -121,7 +121,7 @@
                                 @if($isSuspended)
                                     Suspended / Blocked
                                 @else
-                                    {{ str_replace('_', ' ', $serviceRequest->status) }}
+                                    {{ str_replace('_', ' ', $serviceRequest->hsr_status) }}
                                 @endif
                             </div>
                         </div>
@@ -150,15 +150,15 @@
                                     <div>
                                         <label class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Package Selected</label>
                                         <p class="text-lg font-medium text-gray-900 mt-1">
-                                            {{ ucfirst(trim($serviceRequest->selected_package, '"') ?? 'Custom') }}
+                                            {{ ucfirst(trim($serviceRequest->hsr_selected_package, '"') ?? 'Custom') }}
                                         </p>
                                     </div>
 
                                     <div>
                                         <label class="text-xs font-semibold text-gray-400 uppercase tracking-wide">From</label>
                                         <p class="text-lg font-bold text-green-600 mt-1">
-                                            @if ($serviceRequest->offered_price)
-                                                RM {{ number_format($serviceRequest->offered_price, 2) }}
+                                            @if ($serviceRequest->hsr_offered_price)
+                                                RM {{ number_format($serviceRequest->hsr_offered_price, 2) }}
                                             @else
                                                 <span class="text-gray-400 italic">Not specified</span>
                                             @endif
@@ -168,8 +168,8 @@
                                     <div class="sm:col-span-2">
                                         <label class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Requested Dates</label>
                                         <div class="flex flex-col gap-1 mt-1 text-gray-800 font-medium">
-                                            @if (is_array($serviceRequest->selected_dates))
-                                                @foreach ($serviceRequest->selected_dates as $date)
+                                            @if (is_array($serviceRequest->hsr_selected_dates))
+                                                @foreach ($serviceRequest->hsr_selected_dates as $date)
                                                     <div class="flex items-center gap-2">
                                                         <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -178,13 +178,13 @@
                                                         {{ \Carbon\Carbon::parse($date)->format('l, F j, Y') }}
                                                     </div>
                                                 @endforeach
-                                            @elseif($serviceRequest->selected_dates)
+                                            @elseif($serviceRequest->hsr_selected_dates)
                                                 <div class="flex items-center gap-2">
                                                     <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                             d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                                     </svg>
-                                                    {{ \Carbon\Carbon::parse($serviceRequest->selected_dates)->format('l, F j, Y') }}
+                                                    {{ \Carbon\Carbon::parse($serviceRequest->hsr_selected_dates)->format('l, F j, Y') }}
                                                 </div>
                                             @else
                                                 <span class="text-gray-400 italic">No dates selected</span>
@@ -192,7 +192,7 @@
                                         </div>
                                     </div>
 
-                                    @if ($serviceRequest->status === 'rejected' && $serviceRequest->rejection_reason)
+                                    @if ($serviceRequest->hsr_status === 'rejected' && $serviceRequest->hsr_rejection_reason)
                                         <div class="sm:col-span-2">
                                             <label class="text-xs font-semibold text-red-500 uppercase tracking-wide">
                                                 Rejection Reason
@@ -205,42 +205,42 @@
                                                     </svg>
                                                     <div>
                                                         <p class="font-bold text-sm">Request Rejected</p>
-                                                        <p class="text-sm mt-1">"{{ $serviceRequest->rejection_reason }}"</p>
+                                                        <p class="text-sm mt-1">"{{ $serviceRequest->hsr_rejection_reason }}"</p>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                     @endif
 
-                                    @if ($serviceRequest->message)
+                                    @if ($serviceRequest->hsr_message)
                                         <div class="sm:col-span-2">
                                             <label class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Message from Buyer</label>
                                             <div class="mt-2 p-4 bg-white rounded-lg border border-gray-200 text-gray-600">
-                                                {{ $serviceRequest->message }}
+                                                {{ $serviceRequest->hsr_message }}
                                             </div>
                                         </div>
                                     @endif
                                     
-                                    @if ($serviceRequest->status == 'completed')
+                                    @if ($serviceRequest->hsr_status == 'completed')
                                         <div class="sm:col-span-2 mt-4">
                                             <label class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Job Timeline</label>
                                             <div class="mt-2 grid grid-cols-1 sm:grid-cols-3 gap-4">
                                                 <div class="p-3 bg-blue-50 rounded-lg border border-blue-100">
                                                     <span class="block text-xs text-blue-400 uppercase font-bold">Accepted</span>
                                                     <span class="font-medium text-gray-700 text-sm">
-                                                        {{ $serviceRequest->accepted_at ? $serviceRequest->accepted_at->format('d M, h:i A') : '-' }}
+                                                        {{ $serviceRequest->hsr_accepted_at ? $serviceRequest->hsr_accepted_at->format('d M, h:i A') : '-' }}
                                                     </span>
                                                 </div>
                                                 <div class="p-3 bg-yellow-50 rounded-lg border border-yellow-100">
                                                     <span class="block text-xs text-yellow-500 uppercase font-bold">Started Work</span>
                                                     <span class="font-medium text-gray-700 text-sm">
-                                                        {{ $serviceRequest->started_at ? $serviceRequest->started_at->format('d M, h:i A') : '-' }}
+                                                        {{ $serviceRequest->hsr_started_at ? $serviceRequest->hsr_started_at->format('d M, h:i A') : '-' }}
                                                     </span>
                                                 </div>
                                                 <div class="p-3 bg-green-50 rounded-lg border border-green-100">
                                                     <span class="block text-xs text-green-500 uppercase font-bold">Finished</span>
                                                     <span class="font-medium text-gray-700 text-sm">
-                                                        {{ $serviceRequest->finished_at ? $serviceRequest->finished_at->format('d M, h:i A') : '-' }}
+                                                        {{ $serviceRequest->hsr_finished_at ? $serviceRequest->hsr_finished_at->format('d M, h:i A') : '-' }}
                                                     </span>
                                                 </div>
                                             </div>
@@ -252,10 +252,10 @@
                             @if ($service)
                                 @php
                                     $imageUrl = null;
-                                    $defaultPlaceholder = 'https://ui-avatars.com/api/?name=' . urlencode($service->title ?? 'Service');
+                                    $defaultPlaceholder = 'https://ui-avatars.com/api/?name=' . urlencode($service->hss_title ?? 'Service');
 
-                                    if (!empty($service->image_path)) {
-                                        $path = $service->image_path;
+                                    if (!empty($service->hss_image_path)) {
+                                        $path = $service->hss_image_path;
 
                                         if (Str::startsWith($path, ['http://', 'https://'])) {
                                             $imageUrl = $path;
@@ -296,16 +296,16 @@
                                                 @endif
                                             </div>
                                             <div>
-                                                <h4 class="font-bold text-gray-500">{{ $service->title }}</h4>
+                                                <h4 class="font-bold text-gray-500">{{ $service->hss_title }}</h4>
                                                 <span class="inline-flex mt-1 items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-200 text-gray-600">
-                                                    {{ optional($service->category)->name }}
+                                                    {{ optional($service->category)->hc_name }}
                                                 </span>
-                                                <p class="text-sm text-gray-400 mt-2 line-clamp-2">{{ strip_tags($service->description) }}</p>
+                                                <p class="text-sm text-gray-400 mt-2 line-clamp-2">{{ strip_tags($service->hss_description) }}</p>
                                             </div>
                                         </div>
                                     @else
                                         {{-- ACTIVE: Clickable Link --}}
-                                        <a href="{{ route('services.details', $service->id) }}" class="block bg-white rounded-xl border border-gray-200 p-5 flex gap-4 items-start hover:shadow-md transition-all hover:border-indigo-300 group">
+                                        <a href="{{ route('services.details', $service->hss_id) }}" class="block bg-white rounded-xl border border-gray-200 p-5 flex gap-4 items-start hover:shadow-md transition-all hover:border-indigo-300 group">
                                             <div class="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
                                                 @if ($imageUrl)
                                                     <img src="{{ $imageUrl }}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='{{ $defaultPlaceholder }}';">
@@ -316,11 +316,11 @@
                                                 @endif
                                             </div>
                                             <div>
-                                                <h4 class="font-bold text-gray-900 group-hover:text-indigo-600 transition-colors">{{ $service->title }}</h4>
+                                                <h4 class="font-bold text-gray-900 group-hover:text-indigo-600 transition-colors">{{ $service->hss_title }}</h4>
                                                 <span class="inline-flex mt-1 items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-50 text-indigo-700">
-                                                    {{ optional($service->category)->name }}
+                                                    {{ optional($service->category)->hc_name }}
                                                 </span>
-                                                <p class="text-sm text-gray-500 mt-2 line-clamp-2">{{ strip_tags($service->description) }}</p>
+                                                <p class="text-sm text-gray-500 mt-2 line-clamp-2">{{ strip_tags($service->hss_description) }}</p>
                                             </div>
                                         </a>
                                     @endif
@@ -339,10 +339,10 @@
                                     @if($providerBanned)
                                         <div class="flex items-center gap-3 p-2 -ml-2 rounded-lg bg-gray-50 border border-gray-100 opacity-75 cursor-not-allowed">
                                             <div class="relative">
-                                                <img src="{{ $serviceRequest->provider->profile_photo_path ? asset($serviceRequest->provider->profile_photo_path) : 'https://ui-avatars.com/api/?name=' . urlencode($serviceRequest->provider->name) }}" class="w-10 h-10 rounded-full border border-gray-200 grayscale">
+                                                <img src="{{ $serviceRequest->provider->hu_profile_photo_path ? asset($serviceRequest->provider->hu_profile_photo_path) : 'https://ui-avatars.com/api/?name=' . urlencode($serviceRequest->provider->hu_name) }}" class="w-10 h-10 rounded-full border border-gray-200 grayscale">
                                             </div>
                                             <div>
-                                                <p class="text-sm font-bold text-gray-500 line-through">{{ $serviceRequest->provider->name }}</p>
+                                                <p class="text-sm font-bold text-gray-500 line-through">{{ $serviceRequest->provider->hu_name }}</p>
                                                 <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
                                                     <svg class="mr-1 h-3 w-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M13.477 14.89A6 6 0 015.11 6.524l8.367 8.368zm1.414-1.414L6.524 6.524a6 6 0 018.367 8.367zM18 10a8 8 0 11-16 0 8 8 0 0116 0z" clip-rule="evenodd"/></svg>
                                                     Seller Suspended
@@ -350,13 +350,13 @@
                                             </div>
                                         </div>
                                     @else
-                                        <a href="{{ route('students.profile', $serviceRequest->provider->id) }}" class="flex items-center gap-3 p-2 -ml-2 rounded-lg hover:bg-gray-50 transition-colors group">
-                                            <img src="{{ $serviceRequest->provider->profile_photo_path ? asset($serviceRequest->provider->profile_photo_path) : 'https://ui-avatars.com/api/?name=' . urlencode($serviceRequest->provider->name) }}" class="w-10 h-10 rounded-full border border-gray-200 group-hover:border-indigo-200">
+                                        <a href="{{ route('students.profile', $serviceRequest->provider->hu_id) }}" class="flex items-center gap-3 p-2 -ml-2 rounded-lg hover:bg-gray-50 transition-colors group">
+                                            <img src="{{ $serviceRequest->provider->hu_profile_photo_path ? asset($serviceRequest->provider->hu_profile_photo_path) : 'https://ui-avatars.com/api/?name=' . urlencode($serviceRequest->provider->hu_name) }}" class="w-10 h-10 rounded-full border border-gray-200 group-hover:border-indigo-200">
                                             <div>
-                                                <p class="text-sm font-bold text-gray-900 group-hover:text-indigo-600 transition-colors">{{ $serviceRequest->provider->name }} <span class="text-gray-300 text-[10px] ml-1">↗</span></p>
+                                                <p class="text-sm font-bold text-gray-900 group-hover:text-indigo-600 transition-colors">{{ $serviceRequest->provider->hu_name }} <span class="text-gray-300 text-[10px] ml-1">↗</span></p>
                                                 <div class="flex items-center text-xs text-yellow-500">
                                                     <svg class="w-3 h-3 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
-                                                    <span class="ml-1 text-gray-600">{{ number_format(\App\Models\Review::where('reviewee_id', $serviceRequest->provider->id)->avg('rating') ?? 0, 1) }}</span>
+                                                    <span class="ml-1 text-gray-600">{{ number_format(\App\Models\Review::where('hr_reviewee_id', $serviceRequest->provider->hu_id)->avg('hr_rating') ?? 0, 1) }}</span>
                                                 </div>
                                             </div>
                                         </a>
@@ -369,10 +369,10 @@
                                     @if($buyerBanned)
                                         <div class="flex items-center gap-3 p-2 -ml-2 rounded-lg bg-gray-50 border border-gray-100 opacity-75 cursor-not-allowed">
                                             <div class="relative">
-                                                <img src="{{ $serviceRequest->requester->profile_photo_path ? asset($serviceRequest->requester->profile_photo_path) : 'https://ui-avatars.com/api/?name=' . urlencode($serviceRequest->requester->name) }}" class="w-10 h-10 rounded-full border border-gray-200 grayscale">
+                                                <img src="{{ $serviceRequest->requester->hu_profile_photo_path ? asset($serviceRequest->requester->hu_profile_photo_path) : 'https://ui-avatars.com/api/?name=' . urlencode($serviceRequest->requester->hu_name) }}" class="w-10 h-10 rounded-full border border-gray-200 grayscale">
                                             </div>
                                             <div>
-                                                <p class="text-sm font-bold text-gray-500 line-through">{{ $serviceRequest->requester->name }}</p>
+                                                <p class="text-sm font-bold text-gray-500 line-through">{{ $serviceRequest->requester->hu_name }}</p>
                                                 <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
                                                     <svg class="mr-1 h-3 w-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M13.477 14.89A6 6 0 015.11 6.524l8.367 8.368zm1.414-1.414L6.524 6.524a6 6 0 018.367 8.367zM18 10a8 8 0 11-16 0 8 8 0 0116 0z" clip-rule="evenodd"/></svg>
                                                     User Suspended
@@ -380,13 +380,13 @@
                                             </div>
                                         </div>
                                     @else
-                                        <a href="{{ route('profile.public', $serviceRequest->requester->id) }}" class="flex items-center gap-3 p-2 -ml-2 rounded-lg hover:bg-gray-50 transition-colors group">
-                                            <img src="{{ $serviceRequest->requester->profile_photo_path ? asset($serviceRequest->requester->profile_photo_path) : 'https://ui-avatars.com/api/?name=' . urlencode($serviceRequest->requester->name) }}" class="w-10 h-10 rounded-full border border-gray-200 group-hover:border-blue-200">
+                                        <a href="{{ route('profile.public', $serviceRequest->requester->hu_id) }}" class="flex items-center gap-3 p-2 -ml-2 rounded-lg hover:bg-gray-50 transition-colors group">
+                                            <img src="{{ $serviceRequest->requester->hu_profile_photo_path ? asset($serviceRequest->requester->hu_profile_photo_path) : 'https://ui-avatars.com/api/?name=' . urlencode($serviceRequest->requester->hu_name) }}" class="w-10 h-10 rounded-full border border-gray-200 group-hover:border-blue-200">
                                             <div>
-                                                <p class="text-sm font-bold text-gray-900 group-hover:text-blue-600 transition-colors">{{ $serviceRequest->requester->name }} <span class="text-gray-300 text-[10px] ml-1">↗</span></p>
+                                                <p class="text-sm font-bold text-gray-900 group-hover:text-blue-600 transition-colors">{{ $serviceRequest->requester->hu_name }} <span class="text-gray-300 text-[10px] ml-1">↗</span></p>
                                                 <div class="flex items-center text-xs text-yellow-500">
                                                     <svg class="w-3 h-3 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
-                                                    <span class="ml-1 text-gray-600">{{ number_format(\App\Models\Review::where('reviewee_id', $serviceRequest->requester->id)->avg('rating') ?? 0, 1) }}</span>
+                                                    <span class="ml-1 text-gray-600">{{ number_format(\App\Models\Review::where('hr_reviewee_id', $serviceRequest->requester->hu_id)->avg('hr_rating') ?? 0, 1) }}</span>
                                                 </div>
                                             </div>
                                         </a>
@@ -398,7 +398,7 @@
                                 <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-4">Available Actions</h3>
                                 <div class="space-y-3">
                                     @php
-                                        $contactPhone = $isProvider ? $serviceRequest->requester->phone : $serviceRequest->provider->phone;
+                                        $contactPhone = $isProvider ? $serviceRequest->requester->hu_phone : $serviceRequest->provider->hu_phone;
                                     @endphp
                                     
                                     {{-- If users are suspended, disable actions --}}
@@ -417,26 +417,26 @@
                                         @endif
 
                                         @if ($isProvider && $serviceRequest->isPending())
-                                            <button onclick="updateRequestStatus({{ $serviceRequest->id }}, 'accept')" class="w-full py-2.5 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 shadow-sm transition">Accept Request</button>
-                                            <button onclick="updateRequestStatus({{ $serviceRequest->id }}, 'reject')" class="w-full py-2.5 bg-white border border-red-200 text-red-600 rounded-lg font-semibold hover:bg-red-50 transition">Reject Request</button>
+                                            <button onclick="updateRequestStatus({{ $serviceRequest->hsr_id }}, 'accept')" class="w-full py-2.5 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 shadow-sm transition">Accept Request</button>
+                                            <button onclick="updateRequestStatus({{ $serviceRequest->hsr_id }}, 'reject')" class="w-full py-2.5 bg-white border border-red-200 text-red-600 rounded-lg font-semibold hover:bg-red-50 transition">Reject Request</button>
                                         @endif
 
                                         @if ($isProvider && $serviceRequest->isAccepted())
-                                            <button onclick="updateRequestStatus({{ $serviceRequest->id }}, 'in-progress')" class="w-full py-2.5 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 shadow-sm transition">Start Work</button>
+                                            <button onclick="updateRequestStatus({{ $serviceRequest->hsr_id }}, 'in-progress')" class="w-full py-2.5 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 shadow-sm transition">Start Work</button>
                                         @endif
 
                                         @if ($isProvider && $serviceRequest->isInProgress())
-                                            <button onclick="updateRequestStatus({{ $serviceRequest->id }}, 'complete')" class="w-full py-2.5 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 shadow-sm transition">Mark as Completed</button>
+                                            <button onclick="updateRequestStatus({{ $serviceRequest->hsr_id }}, 'complete')" class="w-full py-2.5 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 shadow-sm transition">Mark as Completed</button>
                                         @endif
 
-                                        @if ($isRequester && $serviceRequest->status === 'pending')
-                                            <button onclick="updateRequestStatus({{ $serviceRequest->id }}, 'cancel')" class="w-full py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition">Cancel Request</button>
-                                        @elseif ($isRequester && ($serviceRequest->status === 'in_progress' || $serviceRequest->status === 'accepted'))
+                                        @if ($isRequester && $serviceRequest->hsr_status === 'pending')
+                                            <button onclick="updateRequestStatus({{ $serviceRequest->hsr_id }}, 'cancel')" class="w-full py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition">Cancel Request</button>
+                                        @elseif ($isRequester && ($serviceRequest->hsr_status === 'in_progress' || $serviceRequest->hsr_status === 'accepted'))
                                             <button disabled class="w-full py-2.5 bg-gray-100 border border-gray-200 text-gray-400 rounded-lg font-semibold cursor-not-allowed flex items-center justify-center gap-2"><i class="fa-solid fa-play"></i> Work Started</button>
                                         @endif
 
-                                        @if ($isRequester && $serviceRequest->isCompleted() && !$serviceRequest->reviews()->where('reviewer_id', auth()->id())->exists())
-                                            <button onclick="openReviewModal({{ $serviceRequest->id }}, '')" class="w-full py-2.5 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 shadow-sm transition">Leave a Review</button>
+                                        @if ($isRequester && $serviceRequest->isCompleted() && !$serviceRequest->reviews()->where('hr_reviewer_id', auth()->id())->exists())
+                                            <button onclick="openReviewModal({{ $serviceRequest->hsr_id }}, '')" class="w-full py-2.5 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 shadow-sm transition">Leave a Review</button>
                                         @endif
                                     @endif
                                 </div>
@@ -454,21 +454,21 @@
                                         <div class="flex justify-between items-start">
                                             <div class="flex items-center gap-3">
                                                 <div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold">
-                                                    {{ substr($review->reviewer->name, 0, 1) }}
+                                                    {{ substr($review->reviewer->hu_name, 0, 1) }}
                                                 </div>
                                                 <div>
-                                                    <p class="font-bold text-sm text-gray-900">{{ $review->reviewer->name }}</p>
+                                                    <p class="font-bold text-sm text-gray-900">{{ $review->reviewer->hu_name }}</p>
                                                     <div class="flex text-yellow-400 text-xs">
                                                         @for ($i = 1; $i <= 5; $i++)
-                                                            <span>{{ $i <= $review->rating ? '★' : '☆' }}</span>
+                                                            <span>{{ $i <= $review->hr_rating ? '★' : '☆' }}</span>
                                                         @endfor
                                                     </div>
                                                 </div>
                                             </div>
-                                            <span class="text-xs text-gray-400">{{ $review->created_at->diffForHumans() }}</span>
+                                            <span class="text-xs text-gray-400">{{ optional($review->hr_created_at)->diffForHumans() ?? 'Recently' }}</span>
                                         </div>
-                                        @if ($review->comment)
-                                            <p class="mt-3 text-gray-600 text-sm leading-relaxed">{{ $review->comment }}</p>
+                                        @if ($review->hr_comment)
+                                            <p class="mt-3 text-gray-600 text-sm leading-relaxed">{{ $review->hr_comment }}</p>
                                         @endif
                                     </div>
                                 @endforeach

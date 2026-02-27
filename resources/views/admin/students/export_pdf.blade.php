@@ -23,11 +23,11 @@
         <tbody>
             @foreach($students as $student)
                 <tr>
-                    <td>{{ $student->name }}</td>
-                    <td>{{ $student->email }}</td>
-                    <td>{{ $student->phone }}</td>
-                    <td>{{ $student->student_id }}</td>
-                    <td>{{ $student->is_suspended ? 'Banned' : ($student->verification_status == 'approved' ? 'Verified' : 'Not Verified') }}</td>
+                    <td>{{ $student->hu_name }}</td>
+                    <td>{{ $student->hu_email }}</td>
+                    <td>{{ $student->hu_phone }}</td>
+                    <td>{{ $student->hu_student_id }}</td>
+                    <td>{{ $student->hu_is_suspended ? 'Banned' : ($student->hu_verification_status == 'approved' ? 'Verified' : 'Not Verified') }}</td>
                 </tr>
             @endforeach
         </tbody>

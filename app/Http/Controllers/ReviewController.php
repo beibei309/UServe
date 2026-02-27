@@ -14,7 +14,7 @@ class ReviewController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'service_request_id' => 'required|exists:service_requests,id',
+            'service_request_id' => 'required|exists:h2u_service_requests,hsr_id',
             'rating' => 'required|integer|min:1|max:5',
             'comment' => 'nullable|string|max:1000',
         ]);
@@ -25,41 +25,53 @@ class ReviewController extends Controller
         // --- SERVICE REQUEST LOGIC ---
         $serviceRequest = ServiceRequest::findOrFail($request->service_request_id);
         
-        if ($serviceRequest->requester_id != Auth::id() && $serviceRequest->provider_id != Auth::id()) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+        if ($serviceRequest->hsr_requester_id != Auth::id() && $serviceRequest->hsr_provider_id != Auth::id()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized',
+                'error' => 'Unauthorized',
+            ], 403);
         }
         
         if (!$serviceRequest->isCompleted()) {
-            return response()->json(['error' => 'Service request must be completed before reviewing'], 400);
+            return response()->json([
+                'success' => false,
+                'message' => 'Service request must be completed before reviewing',
+                'error' => 'Service request must be completed before reviewing',
+            ], 400);
         }
         
         // Capture Service ID
-        $studentServiceId = $serviceRequest->student_service_id;
+        $studentServiceId = $serviceRequest->hsr_student_service_id;
 
         // Determine who is being reviewed
-        if ($serviceRequest->requester_id == Auth::id()) {
-            $revieweeId = $serviceRequest->provider_id;
+        if ($serviceRequest->hsr_requester_id == Auth::id()) {
+            $revieweeId = $serviceRequest->hsr_provider_id;
         } else {
-            $revieweeId = $serviceRequest->requester_id;
+            $revieweeId = $serviceRequest->hsr_requester_id;
         }
 
         // Check if user has already reviewed
-        $existingReview = Review::where('reviewer_id', Auth::id())
-            ->where('service_request_id', $request->service_request_id)
+        $existingReview = Review::where('hr_reviewer_id', Auth::id())
+            ->where('hr_service_request_id', $request->service_request_id)
             ->first();
 
         if ($existingReview) {
-            return response()->json(['error' => 'You have already reviewed this'], 400);
+            return response()->json([
+                'success' => false,
+                'message' => 'You have already reviewed this',
+                'error' => 'You have already reviewed this',
+            ], 400);
         }
 
         // Create Review
         $review = Review::create([
-            'service_request_id' => $request->service_request_id,
-            'student_service_id' => $studentServiceId, // Variable ini sekarang dah ada value
-            'reviewer_id' => Auth::id(),
-            'reviewee_id' => $revieweeId,
-            'rating' => $request->rating,
-            'comment' => $request->comment,
+            'hr_service_request_id' => $request->service_request_id,
+            'hr_student_service_id' => $studentServiceId, // Variable ini sekarang dah ada value
+            'hr_reviewer_id' => Auth::id(),
+            'hr_reviewee_id' => $revieweeId,
+            'hr_rating' => $request->rating,
+            'hr_comment' => $request->comment,
         ]);
 
         return response()->json([
@@ -78,13 +90,13 @@ class ReviewController extends Controller
     $review = Review::findOrFail($id);
 
         // Pastikan hanya helper yang berkaitan boleh reply
-        if ($review->reviewee_id != Auth::id()) {
+        if ($review->hr_reviewee_id != Auth::id()) {
             return back()->with('error', 'Unauthorized');
         }
 
         $review->update([
-            'reply' => $request->reply,
-            'replied_at' => now(),
+            'hr_reply' => $request->reply,
+            'hr_replied_at' => now(),
         ]);
 
         return back()->with('success', 'Reply submitted successfully!');

@@ -62,21 +62,21 @@
 
                         {{-- Image Section --}}
                         <div class="relative h-56 bg-slate-200 overflow-hidden block">
-                            <a href="{{ route('services.details', $service->id) }}">
-                                <img src="{{ $service->image_path ? asset('storage/' . $service->image_path) : 'https://via.placeholder.com/800x600?text=No+Image' }}"
+                            <a href="{{ route('services.details', $service->hss_id) }}">
+                                <img src="{{ $service->hss_image_path ? asset('storage/' . $service->hss_image_path) : 'https://via.placeholder.com/800x600?text=No+Image' }}"
                                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
                             </a>
 
                             {{-- Category Badge --}}
                             @if ($service->category)
                                 <span class="absolute top-4 left-4 bg-white/95 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold shadow-sm"
-                                    style="color: {{ $service->category->color }}">
-                                    {{ $service->category->name }}
+                                    style="color: {{ $service->category->hc_color }}">
+                                    {{ $service->category->hc_name }}
                                 </span>
                             @endif
 
                             {{-- REMOVE BUTTON (Integrated into new design) --}}
-                            <button onclick="confirmRemove({{ $service->id }}, this)"
+                            <button onclick="confirmRemove({{ $service->hss_id }}, this)"
                                 class="absolute top-4 right-4 bg-white/95 text-red-500 w-8 h-8 rounded-full flex items-center justify-center shadow-md hover:bg-red-500 hover:text-white transition-all transform active:scale-90"
                                 title="Remove from favorites">
                                 <i class="fa-solid fa-heart"></i>
@@ -87,13 +87,13 @@
                         <div class="p-5 flex flex-col flex-1">
                             {{-- User Info & Rating Row --}}
                             <div class="flex items-center gap-3 mb-3">
-                                <img src="{{ $service->user->profile_photo_path ? asset('storage/' . $service->user->profile_photo_path) : 'https://ui-avatars.com/api/?name=' . urlencode($service->user->name) }}"
+                                <img src="{{ $service->user->hu_profile_photo_path ? asset('storage/' . $service->user->hu_profile_photo_path) : 'https://ui-avatars.com/api/?name=' . urlencode($service->user->hu_name) }}"
                                     class="w-8 h-8 rounded-full object-cover border border-slate-100">
                                 
                                 <div class="flex flex-col">
                                     <span class="text-xs font-bold text-slate-900 flex items-center gap-1">
-                                        {{ Str::limit($service->user->name, 15) }}
-                                        @if ($service->user->trust_badge)
+                                        {{ Str::limit($service->user->hu_name, 15) }}
+                                        @if ($service->user->hu_trust_badge)
                                             <i class="fas fa-check-circle text-blue-500 text-[10px]"></i>
                                         @endif
                                     </span>
@@ -113,15 +113,15 @@
                             </div>
 
                             {{-- Title --}}
-                            <a href="{{ route('services.details', $service->id) }}" class="block mb-2">
+                            <a href="{{ route('services.details', $service->hss_id) }}" class="block mb-2">
                                 <h3 class="text-lg font-bold text-slate-900 group-hover:text-indigo-600 transition-colors line-clamp-2 leading-tight">
-                                    {{ $service->title }}
+                                    {{ $service->hss_title }}
                                 </h3>
                             </a>
 
                             {{-- Description --}}
                             <div class="text-sm text-slate-500 line-clamp-2 mb-4">
-                                {{ Str::limit(strip_tags($service->description), 80) }}
+                                {{ Str::limit(strip_tags($service->hss_description), 80) }}
                             </div>
 
                             {{-- Footer: Price & Button --}}
@@ -129,10 +129,10 @@
                                 <div>
                                     <span class="text-xs text-slate-400 font-medium uppercase">Starting at</span>
                                     <div class="text-lg font-bold text-slate-900">
-                                        RM{{ number_format($service->basic_price, 0) }}
+                                        RM{{ number_format($service->hss_basic_price, 0) }}
                                     </div>
                                 </div>
-                                <a href="{{ route('services.details', $service->id) }}"
+                                <a href="{{ route('services.details', $service->hss_id) }}"
                                     class="px-4 py-2 bg-slate-900 hover:bg-indigo-600 text-white text-sm font-semibold rounded-lg transition-colors shadow-md">
                                     View Details
                                 </a>

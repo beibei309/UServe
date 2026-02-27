@@ -13,8 +13,8 @@ class ReportAdminController extends Controller
     public function index()
     {
         $reports = Report::query()
-            ->where('status', 'open')
-            ->with(['reporter:id,name', 'target:id,name,is_blacklisted'])
+            ->where('hrp_status', 'open')
+            ->with(['reporter:hu_id,hu_name', 'target:hu_id,hu_name,hu_is_blacklisted'])
             ->orderBy('created_at', 'desc')
             ->paginate(15);
 
@@ -29,21 +29,23 @@ class ReportAdminController extends Controller
         ]);
 
         $report->update([
-            'status' => $data['status'],
-            'action_taken' => $data['action_taken'] ?? null,
-            'resolved_at' => now(),
+            'hrp_status' => $data['status'],
+            'hrp_action_taken' => $data['action_taken'] ?? null,
+            'hrp_resolved_at' => now(),
         ]);
 
         // If banned, set target user's blacklist
         if ($data['status'] === 'banned') {
-            $user = User::find($report->target_user_id);
-            if ($user) {
-                $user->is_blacklisted = true;
-                $user->blacklist_reason = $data['action_taken'] ?? 'Banned via report resolution';
-                $user->save();
-            }
+            User::where('hu_id', $report->hrp_target_user_id)->update([
+                'hu_is_blacklisted' => true,
+                'hu_blacklist_reason' => $data['action_taken'] ?? 'Banned via report resolution',
+            ]);
         }
 
-        return response()->json(['report' => $report]);
+        return response()->json([
+            'success' => true,
+            'message' => 'Report resolved successfully.',
+            'report' => $report,
+        ]);
     }
 }

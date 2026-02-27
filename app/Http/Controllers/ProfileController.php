@@ -19,13 +19,13 @@ class ProfileController extends Controller
     public function showPublic(User $user)
     {
         
-        $reviews = Review::where('reviewee_id', $user->id)
+        $reviews = Review::where('hr_reviewee_id', $user->hu_id)
             ->with(['reviewer', 'studentService'])
             ->latest()
             ->get();
 
         $totalReviews = $reviews->count();
-        $averageRating = $totalReviews > 0 ? $reviews->avg('rating') : 0;
+        $averageRating = $totalReviews > 0 ? $reviews->avg('hr_rating') : 0;
 
         return view('profile.show-public', compact('user', 'reviews', 'totalReviews', 'averageRating'));
     }
@@ -35,14 +35,14 @@ class ProfileController extends Controller
         $user = $request->user();
 
         // 1. Fetch reviews received by this user
-        $reviews = Review::where('reviewee_id', $user->id)
+        $reviews = Review::where('hr_reviewee_id', $user->hu_id)
                             ->with(['reviewer', 'studentService']) // Load relations
                             ->latest()
                             ->get();
 
         // 2. Calculate Statistics
         $totalReviews = $reviews->count();
-        $averageRating = $totalReviews > 0 ? $reviews->avg('rating') : 0;
+        $averageRating = $totalReviews > 0 ? $reviews->avg('hr_rating') : 0;
 
         // 3. Pass data to view
         return view('profile.edit', [
@@ -60,28 +60,26 @@ class ProfileController extends Controller
     {
         $user = $request->user();
         $validated = $request->validated();
-        
-        // Fill the user with validated data
-        $user->fill($validated);
+        $user->fill($this->mapLegacyUserPayload($validated));
 
         // If email changed, reset verification
-        if ($user->isDirty('email')) {
-            $user->email_verified_at = null;
+        if ($user->isDirty('hu_email')) {
+            $user->hu_email_verified_at = null;
         }
 
         // If staff email changed, reset staff verification
-        if ($user->isDirty('staff_email') && $user->staff_email) {
-            $user->staff_verified_at = null;
+        if ($user->isDirty('hu_staff_email') && $user->hu_staff_email) {
+            $user->hu_staff_verified_at = null;
             // TODO: Send verification email to staff_email
-            session()->flash('staff-verification-sent', 'A verification email has been sent to ' . $user->staff_email);
+            session()->flash('staff-verification-sent', 'A verification email has been sent to ' . $user->hu_staff_email);
         }
 
         // Handle profile photo upload
         if ($request->hasFile('profile_photo')) {
 
     // Delete old image
-    if ($user->profile_photo_path && file_exists(public_path($user->profile_photo_path))) {
-        unlink(public_path($user->profile_photo_path));
+    if ($user->hu_profile_photo_path && file_exists(public_path($user->hu_profile_photo_path))) {
+        unlink(public_path($user->hu_profile_photo_path));
     }
 
     $file = $request->file('profile_photo');
@@ -100,7 +98,7 @@ class ProfileController extends Controller
     }
 
     // Save path to DB
-    $user->profile_photo_path = 'profile-photos/' . $filename;
+    $user->hu_profile_photo_path = 'profile-photos/' . $filename;
 }
 
         $user->save();
@@ -133,6 +131,32 @@ class ProfileController extends Controller
 {
     return view('students.create'); // Return the view where the student can fill their profile
 }
+
+        private function mapLegacyUserPayload(array $validated): array
+        {
+            $map = [
+                'name' => 'hu_name',
+                'email' => 'hu_email',
+                'phone' => 'hu_phone',
+                'staff_email' => 'hu_staff_email',
+                'bio' => 'hu_bio',
+                'faculty' => 'hu_faculty',
+                'course' => 'hu_course',
+                'address' => 'address',
+                'skills' => 'skills',
+                'latitude' => 'hu_latitude',
+                'longitude' => 'hu_longitude',
+                'work_experience_message' => 'hu_work_experience_message',
+            ];
+
+            $result = [];
+            foreach ($validated as $key => $value) {
+                $target = $map[$key] ?? $key;
+                $result[$target] = $value;
+            }
+
+            return $result;
+        }
 
 
 

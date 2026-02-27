@@ -20,23 +20,23 @@ class AdminRequestController extends Controller
     if ($request->has('search') && $request->search != '') {
         $search = $request->search;
         $query->whereHas('requester', function($q) use ($search) {
-            $q->where('name', 'like', "%$search%");
+            $q->where('hu_name', 'like', "%$search%");
         })->orWhereHas('provider', function($q) use ($search) {
-            $q->where('name', 'like', "%$search%");
+            $q->where('hu_name', 'like', "%$search%");
         })->orWhereHas('studentService', function($q) use ($search) {
-            $q->where('title', 'like', "%$search%");
+            $q->where('hss_title', 'like', "%$search%");
         });
     }
 
     // 2. Status Filter
     if ($request->has('status') && $request->status != '') {
-        $query->where('status', $request->status);
+        $query->where('hsr_status', $request->status);
     }
 
     // 3. Category Filter
     if ($request->has('category') && $request->category != '') {
         $query->whereHas('studentService', function($q) use ($request) {
-            $q->where('category_id', $request->category);
+            $q->where('hss_category_id', $request->category);
         });
     }
 
@@ -59,38 +59,38 @@ public function resolveDispute(Request $request, $id)
     $note = $request->input('admin_note'); // This is the message written in the modal
 
     if ($action === 'dismiss') {
-        $serviceRequest->update(['status' => 'cancelled']); 
+        $serviceRequest->update(['hsr_status' => 'cancelled']); 
         return redirect()->back()->with('success', 'Dispute dismissed.');
     }
 
     $user = User::findOrFail($targetUserId);
 
     if ($action === 'warn') {
-        $user->increment('warning_count');
+        $user->increment('hu_warning_count');
         
         // Email
-        Mail::to($user->email)->send(new AccountWarnedMail($user, $note));
+        Mail::to($user->hu_email)->send(new AccountWarnedMail($user, $note));
         
         // In-App Notification (Assuming AdminWarningNotification exists)
-        $user->notify(new \App\Notifications\AdminWarningNotification($user->warning_count, $note));
+        $user->notify(new \App\Notifications\AdminWarningNotification($user->hu_warning_count, $note));
 
         // RESUME the request (instead of cancelling)
-        $serviceRequest->update(['status' => 'waiting_payment']);
+        $serviceRequest->update(['hsr_status' => 'waiting_payment']);
 
         $message = "User warned. Request resumed to Waiting Payment.";
 
     } elseif ($action === 'ban') {
        
-        if ($user->role === 'community') {
-            $user->update(['is_blacklisted' => 1, 'blacklist_reason' => $note]);
-            Mail::to($user->email)->send(new \App\Mail\UserBlacklisted($user, $note)); // Ensure fully qualified or imported
+        if ($user->hu_role === 'community') {
+            $user->update(['hu_is_blacklisted' => 1, 'hu_blacklist_reason' => $note]);
+            Mail::to($user->hu_email)->send(new \App\Mail\UserBlacklisted($user, $note)); // Ensure fully qualified or imported
         } else {
-            $user->update(['is_suspended' => 1, 'blacklist_reason' => $note]);
-            Mail::to($user->email)->send(new AccountBannedMail($user, $note));
+            $user->update(['hu_is_suspended' => 1, 'hu_blacklist_reason' => $note]);
+            Mail::to($user->hu_email)->send(new AccountBannedMail($user, $note));
         }
         
         // Cancel the request if banned
-        $serviceRequest->update(['status' => 'cancelled']);
+        $serviceRequest->update(['hsr_status' => 'cancelled']);
         
         $message = "User has been banned. Request cancelled.";
     }
@@ -105,26 +105,26 @@ public function resolveDispute(Request $request, $id)
     // Apply search filter
     if ($request->filled('search')) {
         $search = $request->search;
-        $query->whereHas('requester', fn($q) => $q->where('name', 'like', "%{$search}%"))
-              ->orWhereHas('studentService', fn($q) => $q->where('title', 'like', "%{$search}%"));
+          $query->whereHas('requester', fn($q) => $q->where('hu_name', 'like', "%{$search}%"))
+              ->orWhereHas('studentService', fn($q) => $q->where('hss_title', 'like', "%{$search}%"));
     }
 
     // Apply status filter
     if ($request->filled('status')) {
         $status = $request->status;
-        $query->where('status', $status);
+        $query->where('hsr_status', $status);
     }
 
     $requests = $query->get();
 
     $csvData = $requests->map(function ($r) {
         return [
-            'Requester' => $r->requester->name,
-            'Service' => $r->studentService->title,
-            'Provider' => $r->provider->name,
+            'Requester' => $r->requester->hu_name,
+            'Service' => $r->studentService->hss_title,
+            'Provider' => $r->provider->hu_name,
             'Request Date' => $r->created_at->format('d/m/Y'),
-            'Price' => number_format($r->studentService->suggested_price, 2),
-            'Status' => $r->status,
+            'Price' => number_format((float) $r->studentService->hss_suggested_price, 2),
+            'Status' => $r->hsr_status,
         ];
     });
 

@@ -15,7 +15,10 @@ class EmailVerificationNotificationController extends Controller
     {
         if ($request->user()->hasVerifiedEmail()) {
             if ($request->expectsJson()) {
-                return response()->json(['message' => 'Email already verified'], 200);
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Email already verified',
+                ], 200);
             }
             return redirect()->intended(route('dashboard', absolute: false));
         }

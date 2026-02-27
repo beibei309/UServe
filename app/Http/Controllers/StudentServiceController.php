@@ -26,44 +26,44 @@ class StudentServiceController extends Controller
 
     $query = StudentService::with(['student', 'category'])
         ->withCount(['reviews' => function ($query) {
-            $query->whereColumn('reviews.reviewee_id', 'student_services.user_id');
+            $query->whereColumn('h2u_reviews.hr_reviewee_id', 'h2u_student_services.hss_user_id');
         }])
-        ->withAvg(['reviews' => function ($query) {
-            $query->whereColumn('reviews.reviewee_id', 'student_services.user_id');
-        }], 'rating')
-        ->where('approval_status', 'approved')
+        ->withAvg(['reviews as reviews_avg_rating' => function ($query) {
+            $query->whereColumn('h2u_reviews.hr_reviewee_id', 'h2u_student_services.hss_user_id');
+        }], 'hr_rating')
+        ->where('hss_approval_status', 'approved')
         // START MODIFICATION
         ->whereHas('student', function ($q) {
-            $q->where('role', 'helper')
-              ->where('is_suspended', 0)     // Exclude suspended users
-              ->where('is_blacklisted', 0);  // Exclude blacklisted  users
+            $q->where('hu_role', 'helper')
+              ->where('hu_is_suspended', 0)     // Exclude suspended users
+              ->where('hu_is_blacklisted', 0);  // Exclude blacklisted  users
         });
 
     if ($currentUserId) {
-        $query->where('user_id', '!=', $currentUserId);
+        $query->where('hss_user_id', '!=', $currentUserId);
     }
 
     
     if ($available_only === '1') {
         // Jika user nak cari yang Available sahaja
-        $query->where('status', 'available');
+        $query->where('hss_status', 'available');
     } elseif ($available_only === '0') {
         // Jika user nak cari yang Busy (Unavailable) sahaja
-        $query->where('status', 'unavailable');
+        $query->where('hss_status', 'unavailable');
     }
     // Jika $available_only null/kosong, ia akan tunjuk KEDUA-DUA (Available & Busy)
 
     // --- 4. Search filter ---
     if ($q) {
         $query->where(function ($sub) use ($q) {
-            $sub->where('title', 'like', "%$q%")
-                ->orWhere('description', 'like', "%$q%");
+            $sub->where('hss_title', 'like', "%$q%")
+                ->orWhere('hss_description', 'like', "%$q%");
         });
     }
 
     // --- 5. Category filter ---
     if ($category_id) {
-        $query->where('category_id', $category_id);
+        $query->where('hss_category_id', $category_id);
     }
 
     // --- 6. Sorting ---
@@ -72,9 +72,9 @@ class StudentServiceController extends Controller
     } elseif ($sort == 'oldest') {
         $query->orderBy('created_at', 'asc');
     } elseif ($sort == 'price_low') {
-        $query->orderBy('basic_price', 'asc'); 
+        $query->orderBy('hss_basic_price', 'asc'); 
     } elseif ($sort == 'price_high') {
-        $query->orderBy('basic_price', 'desc');
+        $query->orderBy('hss_basic_price', 'desc');
     }
 
     $services = $query->paginate(5);
@@ -90,23 +90,22 @@ class StudentServiceController extends Controller
   public function edit(StudentService $service)
 {
         $user = Auth::user();
-    if (!$user || $user->id != $service->user_id) {
+    if (!$user || $user->hu_id != $service->hss_user_id) {
         abort(403, 'You may only edit your own services.');
     }
 
     $categories = \App\Models\Category::all();
 
-    $bookedSlots = \App\Models\ServiceRequest::where('student_service_id', $service->id)
-        ->whereIn('status', ['accepted', 'approved', 'in_progress']) 
+    $bookedSlots = \App\Models\ServiceRequest::where('hsr_student_service_id', $service->hss_id)
+        ->whereIn('hsr_status', ['accepted', 'approved', 'in_progress']) 
         ->get()
         ->map(function ($appointment) {
             // 1. Define $date
-            $date = $appointment->selected_dates instanceof \Carbon\Carbon 
-                ? $appointment->selected_dates->format('Y-m-d') 
-                : $appointment->selected_dates;
+            $rawDate = $appointment->hsr_selected_dates;
+            $date = is_array($rawDate) ? ($rawDate[0] ?? null) : $rawDate;
             
             // 2. Define $time (Take first 5 chars: "14:00:00" -> "14:00")
-            $time = substr($appointment->start_time, 0, 5);
+            $time = substr((string) $appointment->hsr_start_time, 0, 5);
             
             // 3. Return combined string
             return $date . ' ' . $time;
@@ -119,14 +118,18 @@ public function update(Request $request, StudentService $service): JsonResponse
 {
     // 1. Authorization
     $user = $request->user();
-   if (!$user || $user->id != $service->user_id) {
-        return response()->json(['error' => 'You may only update your own services.'], 403);
+   if (!$user || $user->hu_id != $service->hss_user_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You may only update your own services.',
+                'error' => 'You may only update your own services.',
+            ], 403);
     }
 
     // 2. Validation
     $validated = $request->validate([
         'title' => 'required|string|max:255',
-        'category_id' => 'required|exists:categories,id',
+        'category_id' => 'required|exists:h2u_categories,hc_id',
         'image' => 'nullable|image|max:2048',
         'template_image' => 'nullable|string',
         'description' => 'nullable|string',
@@ -151,8 +154,8 @@ public function update(Request $request, StudentService $service): JsonResponse
    if ($request->hasFile('image')) {
 
     // Delete old image if exists
-    if ($service->image_path && file_exists(public_path($service->image_path))) {
-        unlink(public_path($service->image_path));
+    if ($service->hss_image_path && file_exists(public_path($service->hss_image_path))) {
+        unlink(public_path($service->hss_image_path));
     }
 
     $file = $request->file('image');
@@ -166,59 +169,59 @@ public function update(Request $request, StudentService $service): JsonResponse
     // Move new file
     $file->move(public_path('storage/services'), $filename);
 
-    $service->image_path = 'storage/services/' . $filename;
+    $service->hss_image_path = 'storage/services/' . $filename;
 
-} elseif ($request->filled('template_image') && !$service->image_path) {
+} elseif ($request->filled('template_image') && !$service->hss_image_path) {
 
-    $service->image_path = $request->input('template_image');
+    $service->hss_image_path = $request->input('template_image');
 }
 
 
     if ($request->filled('blocked_slots')) {
         // Decode the JSON string coming from frontend and re-encode to ensure valid JSON
-        $service->blocked_slots = json_decode($request->blocked_slots);
+        $service->hss_blocked_slots = json_decode($request->blocked_slots, true);
     } else {
-        $service->blocked_slots = [];
+        $service->hss_blocked_slots = [];
     }
 
 $isUnavailable = $request->has('is_unavailable'); // Check checkbox status
 
     if ($isUnavailable) {
         // Jika checkbox "Unavailable" ditanda
-        $service->is_active = false;      // 0
-        $service->status = 'unavailable'; // Set text column
+        $service->hss_is_active = false;      // 0
+        $service->hss_status = 'unavailable'; // Set text column
     } else {
         // Jika checkbox "Unavailable" TIDAK ditanda (Available)
-        $service->is_active = true;       // 1
-        $service->status = 'available';   // Set text column
+        $service->hss_is_active = true;       // 1
+        $service->hss_status = 'available';   // Set text column
     }
     // 4. Update Basic Info
-    $service->title = $validated['title'];
-    $service->category_id = $validated['category_id'];
-    $service->description = $validated['description'] ?? '';
+    $service->hss_title = $validated['title'];
+    $service->hss_category_id = $validated['category_id'];
+    $service->hss_description = $validated['description'] ?? '';
 
     // 5. Handle Packages (Same as before)
     $packages = $request->input('packages', []);
-    $service->basic_duration    = $packages[0]['duration'] ?? null;
-    $service->basic_frequency   = $packages[0]['frequency'] ?? null;
-    $service->basic_price       = $packages[0]['price'] ?? null;
-    $service->basic_description = $packages[0]['description'] ?? null;
+    $service->hss_basic_duration    = $packages[0]['duration'] ?? null;
+    $service->hss_basic_frequency   = $packages[0]['frequency'] ?? null;
+    $service->hss_basic_price       = $packages[0]['price'] ?? null;
+    $service->hss_basic_description = $packages[0]['description'] ?? null;
 
     if ($request->has('offer_packages')) {
-        $service->standard_duration    = $packages[1]['duration'] ?? null;
-        $service->standard_frequency   = $packages[1]['frequency'] ?? null;
-        $service->standard_price       = $packages[1]['price'] ?? null;
-        $service->standard_description = $packages[1]['description'] ?? null;
+        $service->hss_standard_duration    = $packages[1]['duration'] ?? null;
+        $service->hss_standard_frequency   = $packages[1]['frequency'] ?? null;
+        $service->hss_standard_price       = $packages[1]['price'] ?? null;
+        $service->hss_standard_description = $packages[1]['description'] ?? null;
 
-        $service->premium_duration     = $packages[2]['duration'] ?? null;
-        $service->premium_frequency    = $packages[2]['frequency'] ?? null;
-        $service->premium_price        = $packages[2]['price'] ?? null;
-        $service->premium_description  = $packages[2]['description'] ?? null;
+        $service->hss_premium_duration     = $packages[2]['duration'] ?? null;
+        $service->hss_premium_frequency    = $packages[2]['frequency'] ?? null;
+        $service->hss_premium_price        = $packages[2]['price'] ?? null;
+        $service->hss_premium_description  = $packages[2]['description'] ?? null;
     } else {
-        $service->standard_duration = null; $service->standard_frequency = null;
-        $service->standard_price = null;    $service->standard_description = null;
-        $service->premium_duration = null;  $service->premium_frequency = null;
-        $service->premium_price = null;     $service->premium_description = null;
+        $service->hss_standard_duration = null; $service->hss_standard_frequency = null;
+        $service->hss_standard_price = null;    $service->hss_standard_description = null;
+        $service->hss_premium_duration = null;  $service->hss_premium_frequency = null;
+        $service->hss_premium_price = null;     $service->hss_premium_description = null;
     }
 
     // 6. Handle Weekly Schedule (Same as before)
@@ -234,23 +237,23 @@ $isUnavailable = $request->has('is_unavailable'); // Check checkbox status
             'end'     => $dayData['end'] ?? '17:00',
         ];
     }
-    $service->operating_hours = $cleanSchedule; 
+    $service->hss_operating_hours = $cleanSchedule; 
 
     // 7. Handle Block Dates 🟢 FIXED: Added json_encode
     $rawDates = $request->input('unavailable_dates');
     if ($rawDates) {
         $datesArray = array_values(array_filter(array_map('trim', explode(',', $rawDates))));
         // 🟢 FIX: You must encode the array to JSON before saving
-        $service->unavailable_dates = json_encode($datesArray); 
+        $service->hss_unavailable_dates = $datesArray; 
     } else {
-        $service->unavailable_dates = json_encode([]);
+        $service->hss_unavailable_dates = [];
     }
 
     // 8. Session Duration 🟢 Logic is correct here
     if ($request->input('is_session_based') == '1') {
-        $service->session_duration = $request->input('session_duration', 60);
+        $service->hss_session_duration = $request->input('session_duration', 60);
     } else {
-        $service->session_duration = null;
+        $service->hss_session_duration = null;
     }
 
     // 9. Save & Return
@@ -267,40 +270,56 @@ $isUnavailable = $request->has('is_unavailable'); // Check checkbox status
     public function destroy(Request $request, StudentService $service): JsonResponse
     {
         $user = $request->user();
-        if (!$user || $user->id != $service->user_id) {
-            return response()->json(['error' => 'You may only delete your own services.'], 403);
+        if (!$user || $user->hu_id != $service->hss_user_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You may only delete your own services.',
+                'error' => 'You may only delete your own services.',
+            ], 403);
         }
 
         // Hard delete
         $service->delete();
 
-        return response()->json(['service' => $service], 200);
+        return response()->json([
+            'success' => true,
+            'message' => 'Service deleted successfully.',
+            'service' => $service,
+        ], 200);
     }
 
     public function storefront(User $user): JsonResponse
     {
-        if ($user->role !== 'helper') {
-            return response()->json(['error' => 'User is not a student.'], 422);
+        if ($user->hu_role !== 'helper') {
+            return response()->json([
+                'success' => false,
+                'message' => 'User is not a helper.',
+                'error' => 'User is not a helper.',
+            ], 422);
         }
 
-	if ($user->is_suspended == 1 || $user->is_blacklisted  == 1) {
-        return response()->json(['error' => 'This user is currently unavailable.'], 404);
+	if ($user->hu_is_suspended == 1 || $user->hu_is_blacklisted  == 1) {
+        return response()->json([
+            'success' => false,
+            'message' => 'This user is currently unavailable.',
+            'error' => 'This user is currently unavailable.',
+        ], 404);
     }
 
         $services = StudentService::query()
-            ->where('user_id', $user->id)
-            ->where('is_active', true)
+            ->where('hss_user_id', $user->hu_id)
+            ->where('hss_is_active', true)
             ->with('category')
             ->orderByDesc('created_at')
             ->get();
 
         return response()->json([
             'student' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'badge' => $user->trust_badge,
-                'is_available' => $user->is_available,
-                'average_rating' => $user->average_rating,
+                'id' => $user->hu_id,
+                'name' => $user->hu_name,
+                'badge' => $user->hu_trust_badge,
+                'is_available' => $user->hu_is_available,
+                'average_rating' => $user->hu_average_rating,
             ],
             'services' => $services,
         ], 200);
@@ -309,7 +328,7 @@ $isUnavailable = $request->has('is_unavailable'); // Check checkbox status
     public function create(Request $request)
     {
         $user = $request->user();
-        if (!$user || $user->role !== 'helper') {
+        if (!$user || $user->hu_role !== 'helper') {
             abort(403, 'Only students can create services.');
         }
 
@@ -324,7 +343,7 @@ $isUnavailable = $request->has('is_unavailable'); // Check checkbox status
     $user = $request->user();
 
     // 1. Authorization
-    if (!$user || $user->role !== 'helper') {
+    if (!$user || $user->hu_role !== 'helper') {
         abort(403, 'Only helpers can create services.');
     }
 
@@ -333,21 +352,25 @@ $isUnavailable = $request->has('is_unavailable'); // Check checkbox status
 
     if ($serviceId) {
         $service = StudentService::findOrFail($serviceId);
-        if ($service->user_id != $user->id) {
-            return response()->json(['error' => 'You may only edit your own services.'], 403);
+        if ($service->hss_user_id != $user->hu_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You may only edit your own services.',
+                'error' => 'You may only edit your own services.',
+            ], 403);
         }
     } else {
         $service = new StudentService();
-        $service->user_id = $user->id;
-        $service->approval_status = 'pending';
-        $service->status = 'available';
-        $service->is_active = true;
+        $service->hss_user_id = $user->hu_id;
+        $service->hss_approval_status = 'pending';
+        $service->hss_status = 'available';
+        $service->hss_is_active = true;
     }
 
     // 3. Validation
     $rules = [
         'title' => 'required|string|max:255',
-        'category_id' => 'required|exists:categories,id',
+        'category_id' => 'required|exists:h2u_categories,hc_id',
         'image' => 'nullable|image|max:10240',
         'template_image' => 'nullable|string',
         'description' => 'required|string',
@@ -373,9 +396,9 @@ $isUnavailable = $request->has('is_unavailable'); // Check checkbox status
     $validated = $request->validate($rules);
 
     // 4. Save Overview
-    $service->title = $validated['title'];
-    $service->category_id = $validated['category_id'];
-    $service->description = $validated['description'];
+    $service->hss_title = $validated['title'];
+    $service->hss_category_id = $validated['category_id'];
+    $service->hss_description = $validated['description'];
 
     // 5. Image
     if ($request->hasFile('image')) {
@@ -392,40 +415,40 @@ $isUnavailable = $request->has('is_unavailable'); // Check checkbox status
     $file->move(public_path('storage/services'), $filename);
 
     // Save path in DB
-    $service->image_path = 'storage/services/' . $filename;
+    $service->hss_image_path = 'storage/services/' . $filename;
 
 } elseif ($request->filled('template_image')) {
 
-    $service->image_path = $request->input('template_image');
+    $service->hss_image_path = $request->input('template_image');
 }
 
     // 6. Availability (Block Dates)
     $dates = $request->input('unavailable_dates');
     if ($dates) {
         $dateArray = array_map('trim', explode(',', $dates));
-        $service->unavailable_dates = json_encode(array_values($dateArray));
+        $service->hss_unavailable_dates = array_values($dateArray);
     } else {
-        $service->unavailable_dates = json_encode([]);
+        $service->hss_unavailable_dates = [];
     }
 
     // 7. Packages
     $packages = $request->input('packages', []);
-    $service->basic_price       = $packages[0]['price'] ?? 0;
-    $service->basic_duration    = $packages[0]['duration'] ?? null;
-    $service->basic_frequency   = $packages[0]['frequency'] ?? null;
-    $service->basic_description = $packages[0]['description'] ?? null;
+    $service->hss_basic_price       = $packages[0]['price'] ?? 0;
+    $service->hss_basic_duration    = $packages[0]['duration'] ?? null;
+    $service->hss_basic_frequency   = $packages[0]['frequency'] ?? null;
+    $service->hss_basic_description = $packages[0]['description'] ?? null;
 
     if (!empty($packages[1]['price'])) {
-        $service->standard_price       = $packages[1]['price'];
-        $service->standard_duration    = $packages[1]['duration'] ?? null;
-        $service->standard_frequency   = $packages[1]['frequency'] ?? null;
-        $service->standard_description = $packages[1]['description'] ?? null;
+        $service->hss_standard_price       = $packages[1]['price'];
+        $service->hss_standard_duration    = $packages[1]['duration'] ?? null;
+        $service->hss_standard_frequency   = $packages[1]['frequency'] ?? null;
+        $service->hss_standard_description = $packages[1]['description'] ?? null;
     }
     if (!empty($packages[2]['price'])) {
-        $service->premium_price       = $packages[2]['price'];
-        $service->premium_duration    = $packages[2]['duration'] ?? null;
-        $service->premium_frequency   = $packages[2]['frequency'] ?? null;
-        $service->premium_description = $packages[2]['description'] ?? null;
+        $service->hss_premium_price       = $packages[2]['price'];
+        $service->hss_premium_duration    = $packages[2]['duration'] ?? null;
+        $service->hss_premium_frequency   = $packages[2]['frequency'] ?? null;
+        $service->hss_premium_description = $packages[2]['description'] ?? null;
     }
 
     // 🟢 8. Handle Weekly Schedule (THIS WAS MISSING)
@@ -441,14 +464,14 @@ $isUnavailable = $request->has('is_unavailable'); // Check checkbox status
             'end'     => $dayData['end'] ?? '17:00',
         ];
     }
-    $service->operating_hours = $cleanSchedule; // Laravel casts this to JSON automatically if model is set up
+    $service->hss_operating_hours = $cleanSchedule; // Laravel casts this to JSON automatically if model is set up
 
     // 9. Session Duration Logic
     // If user selected "One-off Task", this sets duration to NULL.
     if ($request->input('is_session_based') == '1') {
-        $service->session_duration = $request->input('session_duration', 60);
+        $service->hss_session_duration = $request->input('session_duration', 60);
     } else {
-        $service->session_duration = null;
+        $service->hss_session_duration = null;
     }
 
     // 10. Save
@@ -465,22 +488,22 @@ $isUnavailable = $request->has('is_unavailable'); // Check checkbox status
 {
     $user = $request->user();
 
-    if (!$user || $user->role !== 'helper') {
+    if (!$user || $user->hu_role !== 'helper') {
         abort(403, 'Only student helpers can manage services.');
     }
 
     $query = StudentService::query()
-        ->where('user_id', $user->id)
+        ->where('hss_user_id', $user->hu_id)
         ->with('category');
 
     // Filter Search (Nama Service)
     if ($request->filled('search')) {
-        $query->where('name', 'like', '%' . $request->search . '%');
+        $query->where('hss_title', 'like', '%' . $request->search . '%');
     }
 
     // Filter Category (Hanya yang ada dalam senarai student service user ini)
     if ($request->filled('category')) {
-        $query->where('category_id', $request->category);
+        $query->where('hss_category_id', $request->category);
     }
 
     $services = $query->orderByDesc('created_at')->get();
@@ -490,7 +513,7 @@ $isUnavailable = $request->has('is_unavailable'); // Check checkbox status
         ->with('category')
         ->get()
         ->pluck('category')
-        ->unique('id')
+        ->unique('hc_id')
         ->filter();
 
     return view('services.manage', compact('services', 'categories'));
@@ -499,83 +522,90 @@ $isUnavailable = $request->has('is_unavailable'); // Check checkbox status
     public function approve(StudentService $service)
     {
         $user = Auth::user();
-        if ($user->role !== 'admin') {
+        if ($user->hu_role !== 'admin') {
             abort(403, 'You are not authorized to approve services.');
         }
 
-        $service->approval_status = 'approved';
+        $service->hss_approval_status = 'approved';
         $service->save();
 
-        return response()->json(['success' => 'Service approved.']);
+        return response()->json([
+            'success' => true,
+            'message' => 'Service approved.',
+        ]);
     }
 
     public function reject(StudentService $service)
     {
         $user = Auth::user();
-        if ($user->role !== 'admin') {
+        if ($user->hu_role !== 'admin') {
             abort(403, 'You are not authorized to reject services.');
         }
 
-        $service->approval_status = 'rejected';
+        $service->hss_approval_status = 'rejected';
         $service->save();
 
-        return response()->json(['success' => 'Service rejected.']);
+        return response()->json([
+            'success' => true,
+            'message' => 'Service rejected.',
+        ]);
     }
 
     public function details(Request $request, $id)
     {
         $service = StudentService::with(['user', 'category', 'orders'])->findOrFail($id);
-	if ($service->user->is_suspended == 1 || $service->user->is_blacklisted == 1) {
+	if ($service->user->hu_is_suspended == 1 || $service->user->hu_is_blacklisted == 1) {
         // Return 404 Not Found so no info is displayed
         abort(404); 
     }
         $viewer = $request->user(); 
 
         // Fetch orders for this service (Stats logic)
-        $orders = ServiceRequest::where('student_service_id', $service->id)
-                    ->whereIn('status', ['completed', 'accepted'])
+        $orders = ServiceRequest::where('hsr_student_service_id', $service->hss_id)
+                ->whereIn('hsr_status', ['completed', 'accepted'])
                     ->get();
 
-        $service->min_price = $orders->min('offered_price') ?? 0;
-        $service->max_price = $orders->max('offered_price') ?? 0;
+        $service->min_price = $orders->min('hsr_offered_price') ?? 0;
+        $service->max_price = $orders->max('hsr_offered_price') ?? 0;
 
         // Completed orders count
         $service->completed_orders = $service->orders()
-            ->whereIn('status', ['completed', 'accepted'])
+            ->whereIn('hsr_status', ['completed', 'accepted'])
             ->count();
 
         // Fetch Reviews
-       $reviews = Review::where('student_service_id', $service->id)
-            ->where('reviewee_id', $service->user_id)
+       $reviews = Review::where('hr_student_service_id', $service->hss_id)
+            ->where('hr_reviewee_id', $service->hss_user_id)
             ->with('reviewer') 
             ->latest()
             ->get();
 
-        $service->rating = $reviews->count() > 0 ? round($reviews->avg('rating'), 1) : 0;
+        $service->hss_rating = $reviews->count() > 0 ? round($reviews->avg('hr_rating'), 1) : 0;
 
         // Optional: calculate average delivery time
         $service->avg_days = $orders->avg(function($order) {
-            return \Carbon\Carbon::parse($order->selected_dates)->diffInDays(now());
+            $rawDate = $order->hsr_selected_dates;
+            $date = is_array($rawDate) ? ($rawDate[0] ?? now()->toDateString()) : $rawDate;
+            return \Carbon\Carbon::parse($date)->diffInDays(now());
         }) ?? 0;
 
-        $manualBlocks = $service->blocked_slots;
+        $manualBlocks = $service->hss_blocked_slots;
         if (is_string($manualBlocks)) {
             $manualBlocks = json_decode($manualBlocks, true);
         }
         // Fallback if null
         $manualBlocks = $manualBlocks ?? [];
         
-        $bookedAppointments = ServiceRequest::where('student_service_id', $service->id)
-        ->whereIn('status', ['pending', 'accepted', 'in_progress', 'approved']) // statuses that block the calendar
+        $bookedAppointments = ServiceRequest::where('hsr_student_service_id', $service->hss_id)
+        ->whereIn('hsr_status', ['pending', 'accepted', 'in_progress', 'approved']) // statuses that block the calendar
         ->get()
         ->map(function ($appointment) {
+            $rawDate = $appointment->hsr_selected_dates;
             return [
                 // Ensure date is Y-m-d string
-                'date'       => $appointment->selected_dates instanceof \Carbon\Carbon 
-                                ? $appointment->selected_dates->format('Y-m-d') 
-                                : $appointment->selected_dates, 
-                'start_time' => substr($appointment->start_time, 0, 5), // Format HH:MM
-                'end_time'   => substr($appointment->end_time, 0, 5),   // Format HH:MM
+                'date'       => is_array($rawDate) ? ($rawDate[0] ?? null) : $rawDate,
+                'start_time' => substr((string) $appointment->hsr_start_time, 0, 5), // Format HH:MM
+                'end_time'   => substr((string) $appointment->hsr_end_time, 0, 5),   // Format HH:MM
             ];
         });
 

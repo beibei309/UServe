@@ -24,9 +24,9 @@
 
             {{-- IMAGE --}}
             <div class="rounded-lg overflow-hidden border bg-gray-100 h-64">
-                @if ($service->image_path)
+                @if ($service->hss_image_path)
                     @php
-                        $path = $service->image_path;
+                        $path = $service->hss_image_path;
                         // 1. Check if external URL
                         if (Str::startsWith($path, ['http://', 'https://'])) {
                             $imageUrl = $path;
@@ -41,7 +41,7 @@
                         }
                     @endphp
                     <img src="{{ $imageUrl }}" 
-                         alt="{{ $service->title }}"
+                        alt="{{ $service->hss_title }}"
                          class="w-full h-full object-cover">
                 @else
                     <div class="flex items-center justify-center h-full text-gray-400">
@@ -53,26 +53,26 @@
             {{-- DETAILS --}}
             <div>
                 <h2 class="text-xl font-bold text-gray-900 mb-1">
-                    {{ $service->title }}
+                    {{ $service->hss_title }}
                 </h2>
 
                 {{-- Category --}}
                 <div class="mb-2">
                     @if($service->category)
                         <span class="px-3 py-1 text-xs text-white rounded-full"
-                              style="background: {{ $service->category->color }}">
-                            {{ $service->category->name }}
+                                                            style="background: {{ $service->category->hc_color }}">
+                                                        {{ $service->category->hc_name }}
                         </span>
                     @endif
                 </div>
 
                 {{-- Status --}}
                 <div class="mb-3">
-                    @if ($service->approval_status === 'approved')
+                    @if ($service->hss_approval_status === 'approved')
                         <span class="badge-green">Approved</span>
-                    @elseif($service->approval_status === 'rejected')
+                    @elseif($service->hss_approval_status === 'rejected')
                         <span class="badge-red">Rejected</span>
-                    @elseif($service->approval_status === 'suspended')
+                    @elseif($service->hss_approval_status === 'suspended')
                         <span class="badge-dark">Suspended</span>
                     @else
                         <span class="badge-yellow">Pending</span>
@@ -81,7 +81,7 @@
 
                 {{-- Provider --}}
                 <p class="text-sm text-gray-600">
-                    <strong>Provider:</strong> {{ $service->user->name ?? 'Unknown' }}
+                    <strong>Provider:</strong> {{ $service->user->hu_name ?? 'Unknown' }}
                 </p>
 
                 {{-- Rating --}}
@@ -103,7 +103,7 @@
         <div class="mt-6">
             <h3 class="font-bold text-gray-800 mb-2">Description</h3>
             <div class="bg-gray-50 border rounded p-3 text-sm text-gray-700">
-                {!! $service->description !!}
+                {!! $service->hss_description !!}
             </div>
         </div>
 
@@ -114,34 +114,34 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
 
                 {{-- BASIC --}}
-                @if($service->basic_price)
+                @if($service->hss_basic_price)
                 <div class="p-4 bg-blue-50 border rounded">
                     <p class="text-xs font-bold text-blue-700 uppercase">Basic</p>
-                    <p class="text-lg font-bold">RM {{ $service->basic_price }}</p>
+                    <p class="text-lg font-bold">RM {{ $service->hss_basic_price }}</p>
                     <p class="text-xs text-gray-600">
-                        {{ $service->basic_description ?? 'No description' }}
+                        {{ $service->hss_basic_description ?? 'No description' }}
                     </p>
                 </div>
                 @endif
 
                 {{-- STANDARD --}}
-                @if($service->standard_price)
+                @if($service->hss_standard_price)
                 <div class="p-4 bg-yellow-50 border rounded">
                     <p class="text-xs font-bold text-yellow-700 uppercase">Standard</p>
-                    <p class="text-lg font-bold">RM {{ $service->standard_price }}</p>
+                    <p class="text-lg font-bold">RM {{ $service->hss_standard_price }}</p>
                     <p class="text-xs text-gray-600">
-                        {{ $service->standard_description ?? 'No description' }}
+                        {{ $service->hss_standard_description ?? 'No description' }}
                     </p>
                 </div>
                 @endif
 
                 {{-- PREMIUM --}}
-                @if($service->premium_price)
+                @if($service->hss_premium_price)
                 <div class="p-4 bg-purple-50 border rounded">
                     <p class="text-xs font-bold text-purple-700 uppercase">Premium</p>
-                    <p class="text-lg font-bold">RM {{ $service->premium_price }}</p>
+                    <p class="text-lg font-bold">RM {{ $service->hss_premium_price }}</p>
                     <p class="text-xs text-gray-600">
-                        {{ $service->premium_description ?? 'No description' }}
+                        {{ $service->hss_premium_description ?? 'No description' }}
                     </p>
                 </div>
                 @endif

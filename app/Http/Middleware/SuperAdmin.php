@@ -12,7 +12,7 @@ class SuperAdmin
         $admin = Auth::guard('admin')->user();
 
         // Check if logged-in admin is superadmin
-        if (!$admin || $admin->role !== 'superadmin') {
+        if (!$admin || $admin->ha_role !== 'superadmin') {
             if ($request->expectsJson()) {
                 return response()->json([
                     'message' => 'Access denied — Superadmin only.',

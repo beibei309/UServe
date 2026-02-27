@@ -24,53 +24,53 @@ public function index(Request $request)
     $query = StudentService::with(['category', 'user']) 
         ->withCount(['reviews' => function ($query) {
             // Count reviews where the person reviewed is the service owner
-            $query->whereColumn('reviews.reviewee_id', 'student_services.user_id');
+            $query->whereColumn('h2u_reviews.hr_reviewee_id', 'h2u_student_services.hss_user_id');
         }])
-        ->withAvg(['reviews' => function ($query) {
+        ->withAvg(['reviews as reviews_avg_rating' => function ($query) {
             // Calculate average rating where the person reviewed is the service owner
-            $query->whereColumn('reviews.reviewee_id', 'student_services.user_id');
-        }], 'rating')
-        ->where('approval_status', 'approved');
+            $query->whereColumn('h2u_reviews.hr_reviewee_id', 'h2u_student_services.hss_user_id');
+        }], 'hr_rating')
+        ->where('hss_approval_status', 'approved');
 
     // --- 3. Apply Filters ---
     
     if ($currentUserId) {
-        $query->where('user_id', '!=', $currentUserId);
+        $query->where('hss_user_id', '!=', $currentUserId);
     }
 
     if ($q) {
         $query->where(function ($sub) use ($q) {
-            $sub->where('title', 'like', "%{$q}%")
-                ->orWhere('description', 'like', "%{$q}%");
+            $sub->where('hss_title', 'like', "%{$q}%")
+                ->orWhere('hss_description', 'like', "%{$q}%");
         });
     }
 
     if ($category_id) {
-        $query->where('category_id', $category_id);
+        $query->where('hss_category_id', $category_id);
     }
 
     if ($available === '1') {
-        $query->where('status', 'available');
+        $query->where('hss_status', 'available');
     } elseif ($available === '0') { // Optional: Allows you to specifically see unavailable ones via URL ?available=0
-        $query->where('status', 'unavailable');
+        $query->where('hss_status', 'unavailable');
     }
 
     $services = $query->latest()->take(6)->get();
 
     // ... (Keep the rest of your code for $categories and $topStudents same as before) ...
     $categories = Category::withCount(['services' => function ($q) {
-        $q->where('approval_status', 'approved');
+        $q->where('hss_approval_status', 'approved');
     }])->get();
 
-    $topStudents = User::where('role', 'helper')
+    $topStudents = User::where('hu_role', 'helper')
         ->when($currentUserId, function ($query) use ($currentUserId) {
-            return $query->where('id', '!=', $currentUserId);
+            return $query->where('hu_id', '!=', $currentUserId);
         })
         ->whereHas('services', function ($q) {
-            $q->where('approval_status', 'approved');
+            $q->where('hss_approval_status', 'approved');
         })
         ->withCount('reviewsReceived') 
-        ->withAvg('reviewsReceived', 'rating') 
+        ->withAvg('reviewsReceived as reviews_received_avg_rating', 'hr_rating') 
         ->orderByDesc('reviews_received_avg_rating') 
         ->take(10)
         ->get();
@@ -85,22 +85,22 @@ public function index(Request $request)
         $availableOnly = $request->boolean('available_only', true);
         $query = StudentService::query()
             ->with(['category', 'user']) // Use 'user' relation standard
-            ->withAvg('reviews', 'rating') // Use Service specific rating
-            ->where('approval_status', 'approved');
+            ->withAvg('reviews as reviews_avg_rating', 'hr_rating') // Use Service specific rating
+            ->where('hss_approval_status', 'approved');
 
         if ($q) {
             $query->where(function ($sub) use ($q) {
-                $sub->where('title', 'like', "%$q%")
-                    ->orWhere('description', 'like', "%$q%");
+                $sub->where('hss_title', 'like', "%$q%")
+                    ->orWhere('hss_description', 'like', "%$q%");
             });
         }
 
         if ($categoryId) {
-            $query->where('category_id', $categoryId);
+            $query->where('hss_category_id', $categoryId);
         }
 
         if ($availableOnly) {
-            $query->where('status', 'available');
+            $query->where('hss_status', 'available');
         }
 
         // Filter by Service Rating (Not user rating)
@@ -112,21 +112,24 @@ public function index(Request $request)
 
         $result = $services->map(function ($svc) {
             return [
-                'id' => $svc->id,
-                'title' => $svc->title,
-                'description' => $svc->description,
-                'basic_price' => $svc->basic_price,
+                'id' => $svc->hss_id,
+                'title' => $svc->hss_title,
+                'description' => $svc->hss_description,
+                'basic_price' => $svc->hss_basic_price,
                 'category' => $svc->category,
                 'rating' => round($svc->reviews_avg_rating, 1), // Service Rating
                 'student' => [
-                    'id' => $svc->user->id,
-                    'name' => $svc->user->name,
-                    'badge' => $svc->user->trust_badge,
+                    'id' => $svc->user->hu_id,
+                    'name' => $svc->user->hu_name,
+                    'badge' => $svc->user->hu_trust_badge,
                 ],
             ];
         });
 
-        return response()->json(['services' => $result], 200);
+        return response()->json([
+            'success' => true,
+            'services' => $result,
+        ], 200);
     }
 
     public function switchMode(Request $request)
@@ -134,7 +137,7 @@ public function index(Request $request)
         $user = Auth::user();
 
         // Only helpers can switch modes
-        if ($user->role !== 'helper') {
+        if ($user->hu_role !== 'helper') {
             return back()->with('error', 'Unauthorized action.');
         }
 

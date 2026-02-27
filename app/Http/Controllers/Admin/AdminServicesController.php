@@ -31,30 +31,30 @@ class AdminServicesController extends Controller
 
 
     $services = StudentService::with(['user', 'category'])
-        ->withAvg('reviews', 'rating')
+        ->withAvg('reviews as reviews_avg_rating', 'hr_rating')
         ->withCount('reviews')
-        ->when($status, fn($q) => $q->where('approval_status', $status))
+        ->when($status, fn($q) => $q->where('hss_approval_status', $status))
         ->when($rating, function ($q, $rating) {
         [$min, $max] = explode('-', $rating);
         $q->havingBetween('reviews_avg_rating', [(float) $min, (float) $max]);
     })
         ->when($search, function ($query, $search) {
             $query->where(function ($q) use ($search) {
-                $q->where('title', 'like', "%{$search}%")
-                    ->orWhere('description', 'like', "%{$search}%")
+                $q->where('hss_title', 'like', "%{$search}%")
+                    ->orWhere('hss_description', 'like', "%{$search}%")
                     ->orWhereHas('user', function ($u) use ($search) {
-                        $u->where('name', 'like', "%{$search}%");
+                        $u->where('hu_name', 'like', "%{$search}%");
                     });
             });
         })
-        ->when($categoryId, fn($q) => $q->where('category_id', $categoryId))
-        ->when($studentId, fn($q) => $q->where('user_id', $studentId))
+        ->when($categoryId, fn($q) => $q->where('hss_category_id', $categoryId))
+        ->when($studentId, fn($q) => $q->where('hss_user_id', $studentId))
         ->latest()
         ->paginate(10)
         ->withQueryString();
 
-    $categories = Category::orderBy('name')->get();
-    $students   = User::where('role', 'helper')->orderBy('name')->get();
+    $categories = Category::orderBy('hc_name')->get();
+    $students   = User::where('hu_role', 'helper')->orderBy('hu_name')->get();
 
     return view('admin.services.index', compact(
         'services',
@@ -67,11 +67,11 @@ class AdminServicesController extends Controller
     // Approve a service
     public function approve(StudentService $service)
     {
-        $service->approval_status = 'approved';
+        $service->hss_approval_status = 'approved';
         $service->save();
 
-        if ($service->user && $service->user->email) {
-            Mail::to($service->user->email)->send(new ServiceApprovedMail($service));
+        if ($service->user && $service->user->hu_email) {
+            Mail::to($service->user->hu_email)->send(new ServiceApprovedMail($service));
         }
 
         // 2. Send Database Notification
@@ -91,13 +91,13 @@ class AdminServicesController extends Controller
     ]);
 
     // 2. Update status AND reason
-    $service->approval_status = 'rejected';
-    $service->reject_reason = $request->input('reject_reason');
+    $service->hss_approval_status = 'rejected';
+    $service->hss_warning_reason = $request->input('reject_reason');
     $service->save();
 
     // 3. Send Email (Now $service contains the reject_reason)
-    if ($service->user && $service->user->email) {
-        Mail::to($service->user->email)->send(new ServiceRejectedMail($service));
+    if ($service->user && $service->user->hu_email) {
+        Mail::to($service->user->hu_email)->send(new ServiceRejectedMail($service));
     }
 
     // 4. Send Database Notification
@@ -129,8 +129,8 @@ class AdminServicesController extends Controller
     $student = $service->user;
 
     // 3. Update Warning
-    $service->warning_count = $service->warning_count + 1;
-    $service->warning_reason = $request->reason;
+    $service->hss_warning_count = $service->hss_warning_count + 1;
+    $service->hss_warning_reason = $request->reason;
 
     // ❌ REMOVE AUTO SUSPEND
     // if ($service->warning_count >= 3) {
@@ -142,34 +142,34 @@ class AdminServicesController extends Controller
     // 4. Hantar Email
     try {
         $emailData = [
-            'student_name' => $student->name,
-            'service_name' => $service->title,
+            'student_name' => $student->hu_name,
+            'service_name' => $service->hss_title,
             'reason'       => $request->reason,
-            'count'        => $service->warning_count
+            'count'        => $service->hss_warning_count
         ];
 
-        Mail::to($student->email)->send(new WarningMail($emailData));
+        Mail::to($student->hu_email)->send(new WarningMail($emailData));
 
     } catch (\Exception $e) {
         Log::error('Email warning gagal dihantar: ' . $e->getMessage());
     }
 
     // 5. Response UI
-    if ($service->warning_count >= 3) {
+    if ($service->hss_warning_count >= 3) {
         return back()->with('warning', 'Student telah mencapai 3/3 warning. Sila suspend jika perlu.');
     }
 
-    return back()->with('success', 'Warning berjaya dihantar. Jumlah warning: ' . $service->warning_count);
+    return back()->with('success', 'Warning berjaya dihantar. Jumlah warning: ' . $service->hss_warning_count);
 }
 
 public function suspend(StudentService $service)
 {
-    $service->approval_status = 'suspended';
+    $service->hss_approval_status = 'suspended';
     $service->save();
 
     // Hantar Email
-    if ($service->user && $service->user->email) {
-        Mail::to($service->user->email)->send(new ServiceSuspendedMail($service));
+    if ($service->user && $service->user->hu_email) {
+        Mail::to($service->user->hu_email)->send(new ServiceSuspendedMail($service));
     }
 
     return back()->with('error', 'Service has been suspended and email notification sent.');
@@ -180,7 +180,7 @@ public function suspend(StudentService $service)
     {
         $service = StudentService::with('user')->findOrFail($id);
 
-        $reviews = Review::where('student_service_id', $id)
+        $reviews = Review::where('hr_student_service_id', $id)
             ->with('reviewer')
             ->latest()
             ->paginate(10);
@@ -191,7 +191,7 @@ public function suspend(StudentService $service)
     public function show($id)
     {
         $service = StudentService::with(['user', 'category'])
-            ->withAvg('reviews', 'rating')
+            ->withAvg('reviews as reviews_avg_rating', 'hr_rating')
             ->withCount('reviews')
             ->findOrFail($id);
 
@@ -201,8 +201,8 @@ public function suspend(StudentService $service)
     // UNBLOCK Service
     public function unblock(StudentService $service)
     {
-        $service->approval_status = 'approved';
-        $service->warning_count = 0; // optional kalau nak reset warning
+        $service->hss_approval_status = 'approved';
+        $service->hss_warning_count = 0; // optional kalau nak reset warning
         $service->save();
 
         // Notify user (optional kalau nak)

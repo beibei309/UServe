@@ -26,7 +26,7 @@ class CheckUserStatus
                 'logout',
             ];
 
-            if (empty($user->email_verified_at) && !$request->routeIs($emailVerificationRoutes)) {
+            if (empty($user->hu_email_verified_at) && !$request->routeIs($emailVerificationRoutes)) {
                 if ($wantsJson) {
                     return response()->json([
                         'message' => 'Please verify your email first.',
@@ -49,14 +49,14 @@ class CheckUserStatus
                 'onboarding.community.submit_doc',
             ];
 
-            if ($request->routeIs($studentOnboardingRoutes) && $user->role !== 'student') {
+            if ($request->routeIs($studentOnboardingRoutes) && $user->hu_role !== 'student') {
                 if ($wantsJson) {
                     return response()->json([
                         'message' => 'Only student accounts can access helper onboarding.',
                     ], 403);
                 }
 
-                if ($user->role === 'community') {
+                if ($user->hu_role === 'community') {
                     return redirect()
                         ->route('onboarding.community.verify')
                         ->with('info', 'Community users must use community verification flow.');
@@ -65,14 +65,14 @@ class CheckUserStatus
                 return redirect()->route('dashboard');
             }
 
-            if ($request->routeIs($communityOnboardingRoutes) && $user->role !== 'community') {
+            if ($request->routeIs($communityOnboardingRoutes) && $user->hu_role !== 'community') {
                 if ($wantsJson) {
                     return response()->json([
                         'message' => 'Only community accounts can access community onboarding.',
                     ], 403);
                 }
 
-                if ($user->role === 'student') {
+                if ($user->hu_role === 'student') {
                     return redirect()
                         ->route('onboarding.students')
                         ->with('info', 'Student users must use helper onboarding flow.');
@@ -81,7 +81,7 @@ class CheckUserStatus
                 return redirect()->route('dashboard');
             }
 
-            if ($user->is_blocked || $user->is_blacklisted || $user->is_suspended) {
+            if ($user->hu_is_blocked || $user->hu_is_blacklisted || $user->hu_is_suspended) {
                 // Allow viewing pages (GET/HEAD) so the restriction modal can appear immediately
                 // on the page the user clicked. Still block any state-changing actions.
                 if (!$request->routeIs('logout') && !in_array($request->method(), ['GET', 'HEAD'], true)) {
@@ -111,7 +111,7 @@ class CheckUserStatus
             ];
 
             if ($request->routeIs($sellerOnlyRoutes)) {
-                $isVerifiedHelper = $user->role === 'helper' && !empty($user->helper_verified_at);
+                $isVerifiedHelper = $user->hu_role === 'helper' && !empty($user->hu_helper_verified_at);
 
                 if (!$isVerifiedHelper) {
                     if ($wantsJson) {
@@ -126,7 +126,7 @@ class CheckUserStatus
                 }
             }
 
-            if ($user->role === 'community' && $user->verification_status !== 'approved') {
+            if ($user->hu_role === 'community' && $user->hu_verification_status !== 'approved') {
                 $allowedActionRoutes = [
                     'onboarding.community.verify',
                     'onboarding.community.upload_photo',
@@ -139,7 +139,7 @@ class CheckUserStatus
                     'logout',
                 ];
 
-                if (!empty($user->email_verified_at)) {
+                if (!empty($user->hu_email_verified_at)) {
                     if (!in_array($request->method(), ['GET', 'HEAD'], true) && !$request->routeIs($allowedActionRoutes)) {
                         if ($wantsJson) {
                             return response()->json([

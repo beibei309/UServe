@@ -101,7 +101,7 @@
                         <select id="category_id" name="category_id" class="w-full rounded-lg border-gray-300 focus:ring-indigo-500 focus:border-indigo-500">
                             <option value="">Select a category</option>
                             @foreach ($categories as $category)
-                                <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                <option value="{{ $category->hc_id }}">{{ $category->hc_name }}</option>
                             @endforeach
                         </select>
                     </div>

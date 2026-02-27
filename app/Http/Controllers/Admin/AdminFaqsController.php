@@ -10,10 +10,10 @@ class AdminFaqsController extends Controller
 {
     public function index()
     {
-        $faqs = Faq::orderBy('category')
-            ->orderBy('display_order')
+        $faqs = Faq::orderBy('hfq_category')
+            ->orderBy('hfq_display_order')
             ->get()
-            ->groupBy('category');
+            ->groupBy('hfq_category');
 
         return view('admin.faqs.index', compact('faqs'));
     }
@@ -33,11 +33,11 @@ class AdminFaqsController extends Controller
         ]);
 
         Faq::create([
-            'category' => $request->category,
-            'question' => $request->question,
-            'answer' => $request->answer,
-            'display_order' => $request->display_order ?? 0,
-            'is_active' => true,
+            'hfq_category' => $request->category,
+            'hfq_question' => $request->question,
+            'hfq_answer' => $request->answer,
+            'hfq_display_order' => $request->display_order ?? 0,
+            'hfq_is_active' => true,
         ]);
 
         return redirect()->route('admin.faqs.index')->with('success', 'FAQ added');
@@ -57,9 +57,12 @@ class AdminFaqsController extends Controller
             'display_order' => 'nullable|integer',
         ]);
 
-        $faq->update($request->only([
-            'category', 'question', 'answer', 'display_order'
-        ]));
+        $faq->update([
+            'hfq_category' => $request->category,
+            'hfq_question' => $request->question,
+            'hfq_answer' => $request->answer,
+            'hfq_display_order' => $request->display_order ?? 0,
+        ]);
 
         return redirect()->route('admin.faqs.index')->with('success', 'FAQ updated');
     }
@@ -72,7 +75,7 @@ class AdminFaqsController extends Controller
     public function toggle(Faq $faq)
     {
         $faq->update([
-            'is_active' => !$faq->is_active
+            'hfq_is_active' => !$faq->hfq_is_active
         ]);
 
         return back();

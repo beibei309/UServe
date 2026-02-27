@@ -18,13 +18,13 @@ class VerificationController extends Controller
     $user = Auth::user();
     
     // 1. Redirect if already helper
-    if ($user->role === 'helper') {
+    if ($user->hu_role === 'helper') {
         return redirect()->route('dashboard')->with('info', 'You are already a verified helper!');
     }
     
     // 2. Fetch Real Student Status from DB
-    $studentStatus = DB::table('student_statuses')
-                        ->where('student_id', $user->id)
+    $studentStatus = DB::table('h2u_student_statuses')
+                        ->where('hss_student_id', $user->hu_id)
                         ->latest()
                         ->first();
 
@@ -33,18 +33,18 @@ class VerificationController extends Controller
     $statusMessage = 'Checking...';
     $statusColor = 'gray';
     $reason = '';
-    $matricNo = $user->student_id ?? 'N/A'; // Fallback if no matric no
+    $matricNo = $user->hu_student_id ?? 'N/A'; // Fallback if no matric no
     $gradDateDisplay = 'N/A';
 
     // 4. Run Eligibility Logic
     if ($studentStatus) {
-        $matricNo = $studentStatus->matric_no;
+        $matricNo = $studentStatus->hss_matric_no;
         $today = \Carbon\Carbon::now();
-        $gradDate = $studentStatus->graduation_date ? \Carbon\Carbon::parse($studentStatus->graduation_date) : null;
+        $gradDate = $studentStatus->hss_graduation_date ? \Carbon\Carbon::parse($studentStatus->hss_graduation_date) : null;
         $gradDateDisplay = $gradDate ? $gradDate->format('d M Y') : 'Not Set';
         
         // Rule A: Status must be Active (case-insensitive)
-        $isActive = strtolower($studentStatus->status) === 'active';
+        $isActive = strtolower($studentStatus->hss_status) === 'active';
         
         // Rule B: Graduation must be > 3 months away
         $isNotGraduatingSoon = true;
@@ -60,9 +60,9 @@ class VerificationController extends Controller
 
         if (!$isActive) {
             $isEligible = false;
-            $statusMessage = 'Inactive (' . $studentStatus->status . ')';
+            $statusMessage = 'Inactive (' . $studentStatus->hss_status . ')';
             $statusColor = 'red';
-            $reason = 'Your student status is currently set to ' . $studentStatus->status . '. Please contact admin.';
+            $reason = 'Your student status is currently set to ' . $studentStatus->hss_status . '. Please contact admin.';
         } elseif (!$isNotGraduatingSoon) {
             $isEligible = false;
             $statusMessage = 'Graduating Soon';
@@ -106,8 +106,8 @@ class VerificationController extends Controller
         if ($request->hasFile('profile_photo')) {
 
             // 1. Delete old image if it exists
-            if ($user->profile_photo_path && file_exists(public_path($user->profile_photo_path))) {
-                unlink(public_path($user->profile_photo_path));
+            if ($user->hu_profile_photo_path && file_exists(public_path($user->hu_profile_photo_path))) {
+                unlink(public_path($user->hu_profile_photo_path));
             }
 
             $file = $request->file('profile_photo');
@@ -122,7 +122,7 @@ class VerificationController extends Controller
             $file->move(public_path('profile-photos'), $filename);
 
             // 4. Save relative path to DB
-            $user->profile_photo_path = 'profile-photos/' . $filename;
+            $user->hu_profile_photo_path = 'profile-photos/' . $filename;
             
             // Only save if the move was successful
             $user->save();
@@ -163,7 +163,7 @@ class VerificationController extends Controller
                  throw new \Exception('Base64 decode failed');
             }
 
-            $imageName = 'helper_selfie_' . $user->id . '_' . time() . '.jpg';
+            $imageName = 'helper_selfie_' . $user->hu_id . '_' . time() . '.jpg';
             
             \Illuminate\Support\Facades\Log::info('Saving helper selfie to: uploads/verification/' . $imageName);
             
@@ -175,15 +175,15 @@ class VerificationController extends Controller
             }
 
             // Update user with selfie path
-            $user->selfie_media_path = 'uploads/verification/' . $imageName;
+            $user->hu_selfie_media_path = 'uploads/verification/' . $imageName;
             
             // Convert student to helper role
-            $user->role = 'helper';
-            $user->helper_verified_at = now();
+            $user->hu_role = 'helper';
+            $user->hu_helper_verified_at = now();
             
             $user->save();
 
-            \Illuminate\Support\Facades\Log::info('Student converted to helper. User ID: ' . $user->id);
+            \Illuminate\Support\Facades\Log::info('Student converted to helper. User ID: ' . $user->hu_id);
 
             return response()->json([
                 'success' => true, 
@@ -230,14 +230,14 @@ class VerificationController extends Controller
         $user = Auth::user();
         
         $user->update([
-            'latitude' => $request->latitude,
-            'longitude' => $request->longitude,
+            'hu_latitude' => $request->latitude,
+            'hu_longitude' => $request->longitude,
             'address' => $request->address,
-            'location_verified_at' => now()
+            'hu_location_verified_at' => now()
         ]);
 
         \Illuminate\Support\Facades\Log::info('Auto-detected location verified and saved (Muallim District)', [
-            'user_id' => $user->id,
+            'user_id' => $user->hu_id,
             'latitude' => $request->latitude,
             'longitude' => $request->longitude,
             'distance_km' => round($distanceKm, 2),
@@ -289,7 +289,7 @@ class VerificationController extends Controller
                  throw new \Exception('Base64 decode failed');
             }
 
-            $imageName = 'selfie_' . $user->id . '_' . time() . '.jpg';
+            $imageName = 'selfie_' . $user->hu_id . '_' . time() . '.jpg';
             
             \Illuminate\Support\Facades\Log::info('Saving selfie to: uploads/verification/' . $imageName);
             
@@ -300,9 +300,9 @@ class VerificationController extends Controller
                 throw new \Exception('Failed to verify file existence after write.');
             }
 
-            $user->selfie_media_path = 'uploads/verification/' . $imageName;
+            $user->hu_selfie_media_path = 'uploads/verification/' . $imageName;
             // Save the challenge note (e.g. "Peace Sign")
-            $user->verification_note = $request->input('verification_note');
+            $user->hu_verification_note = $request->input('verification_note');
             $user->save();
 
             return response()->json(['success' => true, 'message' => 'Selfie verified & uploaded!']);
@@ -325,7 +325,7 @@ class VerificationController extends Controller
 
         if ($request->hasFile('verification_document')) {
             $file = $request->file('verification_document');
-            $filename = 'verify_' . $user->id . '_' . $file->hashName();
+            $filename = 'verify_' . $user->hu_id . '_' . $file->hashName();
             
             // Store in storage/app/private/verification_docs (local disk)
             $path = $file->storeAs('verification_docs', $filename, 'local');
@@ -335,8 +335,8 @@ class VerificationController extends Controller
             }
 
             // Update User
-            $user->verification_document_path = $path;
-            $user->verification_status = 'approved'; 
+            $user->hu_verification_document_path = $path;
+            $user->hu_verification_status = 'approved'; 
             $user->save();
 
 	return redirect()->back()->with('success', 'Verification Successfully!');        }

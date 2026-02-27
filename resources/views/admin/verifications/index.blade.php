@@ -22,16 +22,16 @@
                             <!-- USER INFO -->
                             <td class="py-3 px-4">
                                 <div>
-                                    <p class="font-semibold text-gray-900 text-sm">{{ $user->name }}</p>
-                                    <p class="text-xs text-gray-500">{{ $user->email }}</p>
-                                    <p class="text-xs text-gray-500">{{ $user->phone ?? '-' }}</p>
+                                    <p class="font-semibold text-gray-900 text-sm">{{ $user->hu_name }}</p>
+                                    <p class="text-xs text-gray-500">{{ $user->hu_email }}</p>
+                                    <p class="text-xs text-gray-500">{{ $user->hu_phone ?? '-' }}</p>
                                 </div>
                             </td>
 
                             <!-- PROFILE PHOTO -->
                             <td class="py-3 px-4">
-                                @if($user->profile_photo_path)
-                                    <img src="{{ asset('storage/' . $user->profile_photo_path) }}" 
+                                @if($user->hu_profile_photo_path)
+                                    <img src="{{ asset('storage/' . $user->hu_profile_photo_path) }}" 
                                          class="w-16 h-16 rounded-full object-cover border shadow-sm" 
                                          alt="Profile">
                                 @else
@@ -41,15 +41,15 @@
 
                             <!-- LIVE SELFIE -->
                             <td class="py-3 px-4">
-                                @if($user->selfie_media_path)
+                                @if($user->hu_selfie_media_path)
                                     <div class="flex flex-col items-start gap-1">
-                                        <button onclick="openSelfieModal({{ $user->id }})" 
+                                        <button onclick="openSelfieModal({{ $user->hu_id }})" 
                                                 class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-full text-indigo-700 bg-indigo-100 hover:bg-indigo-200">
                                             View Selfie
                                         </button>
-                                        @if($user->verification_note)
+                                        @if($user->hu_verification_note)
                                             <span class="text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
-                                                {{ $user->verification_note }}
+                                                {{ $user->hu_verification_note }}
                                             </span>
                                         @endif
                                     </div>
@@ -60,8 +60,8 @@
 
                             <!-- DOCUMENT -->
                             <td class="py-3 px-4">
-                                @if($user->verification_document_path)
-                                    <button onclick="openDocumentModal({{ $user->id }})" 
+                                @if($user->hu_verification_document_path)
+                                    <button onclick="openDocumentModal({{ $user->hu_id }})" 
                                             class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-full text-blue-700 bg-blue-100 hover:bg-blue-200">
                                         View Document
                                     </button>
@@ -73,14 +73,14 @@
                             <!-- ACTIONS -->
                             <td class="py-3 px-4">
                                 <div class="flex gap-2">
-                                    <form action="{{ route('admin.verifications.approve', $user->id) }}" method="POST">
+                                    <form action="{{ route('admin.verifications.approve', $user->hu_id) }}" method="POST">
                                         @csrf
                                         <button class="px-3 py-1.5 bg-green-600 text-white text-xs rounded hover:bg-green-700">
                                             Approve
                                         </button>
                                     </form>
 
-                                    <form action="{{ route('admin.verifications.reject', $user->id) }}" method="POST">
+                                    <form action="{{ route('admin.verifications.reject', $user->hu_id) }}" method="POST">
                                         @csrf
                                         <button class="px-3 py-1.5 bg-red-600 text-white text-xs rounded hover:bg-red-700">
                                             Reject

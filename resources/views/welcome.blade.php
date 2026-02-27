@@ -146,18 +146,18 @@
                 <div id="scrollContainer"
                     class="flex gap-6 overflow-x-auto hide-scroll-bar pb-20 snap-x snap-mandatory">
                     @foreach ($categories ?? [] as $category)
-                        <a href="{{ route('services.index', ['category_id' => $category->id]) }}"
+                        <a href="{{ route('services.index', ['category_id' => $category->hc_id]) }}"
                             class="snap-center shrink-0 w-64 p-6 rounded-2xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col items-center text-center group cursor-pointer"
-                            style="background-color: {{ $category->color }}; border: 1px solid {{ $category->color }};">
+                            style="background-color: {{ $category->hc_color }}; border: 1px solid {{ $category->hc_color }};">
 
                             <div
                                 class="w-16 h-16 rounded-full flex items-center justify-center mb-4 transition-transform group-hover:scale-110 bg-white">
-                                <i class="{{ $category->icon ?? 'fa fa-folder' }} text-3xl"
-                                    style="color: {{ $category->color }};"></i>
+                                <i class="{{ $category->hc_icon ?? 'fa fa-folder' }} text-3xl"
+                                    style="color: {{ $category->hc_color }};"></i>
                             </div>
 
-                            <h3 class="text-lg font-bold text-white mb-2">{{ $category->name }}</h3>
-                            <p class="text-sm text-gray-200 line-clamp-2">{{ $category->description }}</p>
+                            <h3 class="text-lg font-bold text-white mb-2">{{ $category->hc_name }}</h3>
+                            <p class="text-sm text-gray-200 line-clamp-2">{{ $category->hc_description }}</p>
                         </a>
                     @endforeach
                 </div>

@@ -27,8 +27,8 @@ class DatabaseSeeder extends Seeder
         DB::transaction(function () {
             $this->resetTables();
 
-            $this->studentServiceHasPriceRange = Schema::hasColumn('student_services', 'price_range');
-            $this->reviewsHasServiceRequestId = Schema::hasColumn('reviews', 'service_request_id');
+            $this->studentServiceHasPriceRange = Schema::hasColumn('h2u_student_services', 'hss_price_range');
+            $this->reviewsHasServiceRequestId = Schema::hasColumn('h2u_reviews', 'hr_service_request_id');
 
             $this->call([
                 AboutSeeder::class,
@@ -59,14 +59,14 @@ class DatabaseSeeder extends Seeder
     private function seedCommunityUser(): User
     {
         return User::create([
-            'name' => 'Community User',
-            'email' => 'community@example.com',
-            'password' => Hash::make('password'),
-            'role' => 'community',
-            'phone' => '0123456789',
-            'verification_status' => 'approved',
-            'public_verified_at' => now(),
-            'is_available' => true,
+            'hu_name' => 'Community User',
+            'hu_email' => 'community@example.com',
+            'hu_password' => Hash::make('password'),
+            'hu_role' => 'community',
+            'hu_phone' => '0123456789',
+            'hu_verification_status' => 'approved',
+            'hu_public_verified_at' => now(),
+            'hu_is_available' => true,
         ]);
     }
 
@@ -74,12 +74,12 @@ class DatabaseSeeder extends Seeder
     {
         return collect($this->categoryDefinitions())->mapWithKeys(function ($categoryData) {
             $category = Category::create([
-                'name' => $categoryData['name'],
-                'slug' => Str::slug($categoryData['name']),
-                'description' => $categoryData['description'],
-                'image_path' => $categoryData['image_path'],
-                'color' => $categoryData['color'],
-                'is_active' => $categoryData['is_active'],
+                'hc_name' => $categoryData['name'],
+                'hc_slug' => Str::slug($categoryData['name']),
+                'hc_description' => $categoryData['description'],
+                'hc_image_path' => $categoryData['image_path'],
+                'hc_color' => $categoryData['color'],
+                'hc_is_active' => $categoryData['is_active'],
             ]);
 
             return [$categoryData['name'] => $category];
@@ -91,17 +91,17 @@ class DatabaseSeeder extends Seeder
         return collect($this->helperProfiles())
             ->flatMap(function ($profile) use ($categories) {
                 $helper = User::create([
-                    'name' => $profile['name'],
-                    'email' => $profile['email'],
-                    'password' => Hash::make('password'),
-                    'role' => 'helper',
-                    'phone' => '0123456789',
-                    'student_id' => $profile['student_id'],
-                    'staff_email' => $profile['email'],
-                    'verification_status' => 'approved',
-                    'staff_verified_at' => now(),
-                    'public_verified_at' => now(),
-                    'is_available' => true,
+                    'hu_name' => $profile['name'],
+                    'hu_email' => $profile['email'],
+                    'hu_password' => Hash::make('password'),
+                    'hu_role' => 'helper',
+                    'hu_phone' => '0123456789',
+                    'hu_student_id' => $profile['student_id'],
+                    'hu_staff_email' => $profile['email'],
+                    'hu_verification_status' => 'approved',
+                    'hu_staff_verified_at' => now(),
+                    'hu_public_verified_at' => now(),
+                    'hu_is_available' => true,
                 ]);
 
                 return collect($profile['services'])->map(function ($serviceData) use ($helper, $categories) {
@@ -109,33 +109,33 @@ class DatabaseSeeder extends Seeder
                     $packages = $serviceData['packages'];
 
                     $payload = [
-                        'user_id' => $helper->id,
-                        'category_id' => $category?->id,
-                        'title' => $serviceData['title'],
-                        'image_path' => $serviceData['image_path'],
-                        'description' => $serviceData['description'],
-                        'suggested_price' => $packages['standard']['price'],
-                        'status' => 'available',
-                        'is_active' => true,
-                        'approval_status' => 'approved',
-                        'warning_count' => 0,
-                        'warning_reason' => null,
-                        'basic_duration' => $packages['basic']['duration'],
-                        'basic_frequency' => $packages['basic']['frequency'],
-                        'basic_price' => $packages['basic']['price'],
-                        'basic_description' => $packages['basic']['description'],
-                        'standard_duration' => $packages['standard']['duration'],
-                        'standard_frequency' => $packages['standard']['frequency'],
-                        'standard_price' => $packages['standard']['price'],
-                        'standard_description' => $packages['standard']['description'],
-                        'premium_duration' => $packages['premium']['duration'],
-                        'premium_frequency' => $packages['premium']['frequency'],
-                        'premium_price' => $packages['premium']['price'],
-                        'premium_description' => $packages['premium']['description'],
+                        'hss_user_id' => $helper->hu_id,
+                        'hss_category_id' => $category?->hc_id,
+                        'hss_title' => $serviceData['title'],
+                        'hss_image_path' => $serviceData['image_path'],
+                        'hss_description' => $serviceData['description'],
+                        'hss_suggested_price' => $packages['standard']['price'],
+                        'hss_status' => 'available',
+                        'hss_is_active' => true,
+                        'hss_approval_status' => 'approved',
+                        'hss_warning_count' => 0,
+                        'hss_warning_reason' => null,
+                        'hss_basic_duration' => $packages['basic']['duration'],
+                        'hss_basic_frequency' => $packages['basic']['frequency'],
+                        'hss_basic_price' => $packages['basic']['price'],
+                        'hss_basic_description' => $packages['basic']['description'],
+                        'hss_standard_duration' => $packages['standard']['duration'],
+                        'hss_standard_frequency' => $packages['standard']['frequency'],
+                        'hss_standard_price' => $packages['standard']['price'],
+                        'hss_standard_description' => $packages['standard']['description'],
+                        'hss_premium_duration' => $packages['premium']['duration'],
+                        'hss_premium_frequency' => $packages['premium']['frequency'],
+                        'hss_premium_price' => $packages['premium']['price'],
+                        'hss_premium_description' => $packages['premium']['description'],
                     ];
 
                     if ($this->studentServiceHasPriceRange) {
-                        $payload['price_range'] = $this->formatPriceRange($packages);
+                        $payload['hss_price_range'] = $this->formatPriceRange($packages);
                     }
 
                     return StudentService::create($payload);
@@ -158,37 +158,37 @@ class DatabaseSeeder extends Seeder
             };
 
             $request = ServiceRequest::create([
-                'student_service_id' => $service->id,
-                'requester_id' => $requester->id,
-                'provider_id' => $service->user_id,
-                'status' => $status,
-                'message' => 'Hi, I need help with this service!',
-                'offered_price' => $service->suggested_price,
-                'payment_status' => $status === 'completed' ? 'paid' : 'unpaid',
-                'selected_dates' => now()->addDays($index + 1)->toDateString(),
-                'start_time' => '10:00:00',
-                'end_time' => '12:00:00',
-                'selected_package' => json_encode([
+                'hsr_student_service_id' => $service->hss_id,
+                'hsr_requester_id' => $requester->hu_id,
+                'hsr_provider_id' => $service->hss_user_id,
+                'hsr_status' => $status,
+                'hsr_message' => 'Hi, I need help with this service!',
+                'hsr_offered_price' => $service->hss_suggested_price,
+                'hsr_payment_status' => $status === 'completed' ? 'paid' : 'unpaid',
+                'hsr_selected_dates' => now()->addDays($index + 1)->toDateString(),
+                'hsr_start_time' => '10:00:00',
+                'hsr_end_time' => '12:00:00',
+                'hsr_selected_package' => [
                     'tier' => 'standard',
-                    'price' => $service->standard_price,
-                ]),
-                'accepted_at' => $status !== 'pending' ? now()->subDays(2) : null,
-                'started_at' => in_array($status, ['in_progress', 'completed'], true) ? now()->subDay() : null,
-                'finished_at' => $status === 'completed' ? now()->subDay() : null,
-                'completed_at' => $status === 'completed' ? now()->subDay() : null,
+                    'price' => $service->hss_standard_price,
+                ],
+                'hsr_accepted_at' => $status !== 'pending' ? now()->subDays(2) : null,
+                'hsr_started_at' => in_array($status, ['in_progress', 'completed'], true) ? now()->subDay() : null,
+                'hsr_finished_at' => $status === 'completed' ? now()->subDay() : null,
+                'hsr_completed_at' => $status === 'completed' ? now()->subDay() : null,
             ]);
 
             if ($status === 'completed') {
                 $reviewPayload = [
-                    'reviewer_id' => $requester->id,
-                    'reviewee_id' => $service->user_id,
-                    'student_service_id' => $service->id,
-                    'rating' => 5,
-                    'comment' => 'Excellent service, highly recommended!'
+                    'hr_reviewer_id' => $requester->hu_id,
+                    'hr_reviewee_id' => $service->hss_user_id,
+                    'hr_student_service_id' => $service->hss_id,
+                    'hr_rating' => 5,
+                    'hr_comment' => 'Excellent service, highly recommended!'
                 ];
 
                 if ($this->reviewsHasServiceRequestId) {
-                    $reviewPayload['service_request_id'] = $request->id;
+                    $reviewPayload['hr_service_request_id'] = $request->hsr_id;
                 }
 
                 Review::create($reviewPayload);

@@ -63,57 +63,57 @@ class StudentsController extends Controller
         if ($interval === 'day') {
             // sales = sum price for completed on that date
             $sales[] = ServiceRequest::whereDate('created_at', $p)
-                        ->where('provider_id', $user->id)
-                        ->where('status', 'completed')
-                        ->sum('offered_price'); // or 'price' as your column
+                        ->where('hsr_provider_id', $user->hu_id)
+                        ->where('hsr_status', 'completed')
+                        ->sum('hsr_offered_price'); // or 'price' as your column
 
             $cancelled[] = ServiceRequest::whereDate('created_at', $p)
-                        ->where('provider_id', $user->id)
-                        ->where('status', 'cancelled')
-                        ->sum('offered_price');
+                        ->where('hsr_provider_id', $user->hu_id)
+                        ->where('hsr_status', 'cancelled')
+                        ->sum('hsr_offered_price');
 
             $completedDaily[] = ServiceRequest::whereDate('created_at', $p)
-                        ->where('provider_id', $user->id)
-                        ->where('status', 'completed')
+                        ->where('hsr_provider_id', $user->hu_id)
+                        ->where('hsr_status', 'completed')
                         ->count();
 
             $newOrders[] = ServiceRequest::whereDate('created_at', $p)
-                        ->where('provider_id', $user->id)
-                        ->where('status', 'pending')
+                        ->where('hsr_provider_id', $user->hu_id)
+                        ->where('hsr_status', 'pending')
                         ->count();
         } else { // month aggregation
             $sales[] = ServiceRequest::whereYear('created_at', substr($p,0,4))
                         ->whereMonth('created_at', substr($p,5,2))
-                        ->where('provider_id', $user->id)
-                        ->where('status', 'completed')
-                        ->sum('offered_price');
+                        ->where('hsr_provider_id', $user->hu_id)
+                        ->where('hsr_status', 'completed')
+                        ->sum('hsr_offered_price');
 
             $cancelled[] = ServiceRequest::whereYear('created_at', substr($p,0,4))
                         ->whereMonth('created_at', substr($p,5,2))
-                        ->where('provider_id', $user->id)
-                        ->where('status', 'cancelled')
-                        ->sum('offered_price');
+                        ->where('hsr_provider_id', $user->hu_id)
+                        ->where('hsr_status', 'cancelled')
+                        ->sum('hsr_offered_price');
 
             $completedDaily[] = ServiceRequest::whereYear('created_at', substr($p,0,4))
                         ->whereMonth('created_at', substr($p,5,2))
-                        ->where('provider_id', $user->id)
-                        ->where('status', 'completed')
+                        ->where('hsr_provider_id', $user->hu_id)
+                        ->where('hsr_status', 'completed')
                         ->count();
 
             $newOrders[] = ServiceRequest::whereYear('created_at', substr($p,0,4))
                         ->whereMonth('created_at', substr($p,5,2))
-                        ->where('provider_id', $user->id)
-                        ->where('status', 'pending')
+                        ->where('hsr_provider_id', $user->hu_id)
+                        ->where('hsr_status', 'pending')
                         ->count();
         }
     }
 
     // Other small stats you already had
-    $averageRating = $user->reviewsReceived()->avg('rating');
+    $averageRating = $user->reviewsReceived()->avg('hr_rating');
     $averageRating = $averageRating ? round($averageRating, 1) : '-';
 
-    $completedOrders = ServiceRequest::where('provider_id', $user->id)
-                        ->where('status', 'completed')
+    $completedOrders = ServiceRequest::where('hsr_provider_id', $user->hu_id)
+                        ->where('hsr_status', 'completed')
                         ->count();
 
     return view('students.index', compact(
@@ -146,8 +146,8 @@ class StudentsController extends Controller
 
         // Profile photo upload (normalized with app convention: public/profile-photos)
         if ($request->hasFile('profile_photo')) {
-            if ($user->profile_photo_path && file_exists(public_path($user->profile_photo_path))) {
-                unlink(public_path($user->profile_photo_path));
+            if ($user->hu_profile_photo_path && file_exists(public_path($user->hu_profile_photo_path))) {
+                unlink(public_path($user->hu_profile_photo_path));
             }
 
             $file = $request->file('profile_photo');
@@ -158,15 +158,15 @@ class StudentsController extends Controller
             }
 
             $file->move(public_path('profile-photos'), $filename);
-            $user->profile_photo_path = 'profile-photos/' . $filename;
+            $user->hu_profile_photo_path = 'profile-photos/' . $filename;
         }
 
         // Update basic fields
-        $user->faculty = $validated['faculty'] ?? $user->faculty;
-        $user->course = $validated['course'] ?? $user->course;
-        $user->bio = $validated['bio'] ?? $user->bio;
+        $user->hu_faculty = $validated['faculty'] ?? $user->hu_faculty;
+        $user->hu_course = $validated['course'] ?? $user->hu_course;
+        $user->hu_bio = $validated['bio'] ?? $user->hu_bio;
         $user->skills = $validated['skills'] ?? $user->skills;
-        $user->work_experience_message = $validated['work_experience_message'] ?? $user->work_experience_message;
+        $user->hu_work_experience_message = $validated['work_experience_message'] ?? $user->hu_work_experience_message;
 
         // Handle work experience file
         if ($request->hasFile('work_experience_file')) {
@@ -175,7 +175,7 @@ class StudentsController extends Controller
             $storedPath = Storage::disk('public')->putFileAs('uploads/work_experience', $file, $filename);
 
             if ($storedPath && Storage::disk('public')->exists($storedPath)) {
-                $user->work_experience_file = $storedPath;
+                $user->hu_work_experience_file = $storedPath;
             } else {
                 return back()
                     ->withInput()
@@ -184,7 +184,7 @@ class StudentsController extends Controller
         }
 
         // **Mark user as helper**
-        $user->role = 'helper'; // or $user->status = 'helper', depending on your DB column
+        $user->hu_role = 'helper'; // or $user->status = 'helper', depending on your DB column
         $user->save();
 
         return redirect()->route('students.create')
@@ -217,12 +217,12 @@ class StudentsController extends Controller
     ]);
 
     // 2. Update Basic Information
-    $user->name = $validated['name'];
-    $user->faculty = $validated['faculty'] ?? $user->faculty;
-    $user->course = $validated['course'] ?? $user->course;
-    $user->bio = $validated['bio'];
+    $user->hu_name = $validated['name'];
+    $user->hu_faculty = $validated['faculty'] ?? $user->hu_faculty;
+    $user->hu_course = $validated['course'] ?? $user->hu_course;
+    $user->hu_bio = $validated['bio'];
     $user->skills = $validated['skills'];
-    $user->work_experience_message = $validated['work_experience_message'] ?? null;
+    $user->hu_work_experience_message = $validated['work_experience_message'] ?? null;
 
     // 3. Handle Work Experience File Upload
     if ($request->hasFile('work_experience_file')) {
@@ -230,10 +230,10 @@ class StudentsController extends Controller
         $filename = $file->hashName();
 
         // Delete old file (new + legacy paths)
-        if ($user->work_experience_file) {
-            Storage::disk('public')->delete($user->work_experience_file);
+        if ($user->hu_work_experience_file) {
+            Storage::disk('public')->delete($user->hu_work_experience_file);
 
-            $legacyPath = public_path('storage/' . $user->work_experience_file);
+            $legacyPath = public_path('storage/' . $user->hu_work_experience_file);
             if (file_exists($legacyPath)) {
                 unlink($legacyPath);
             }
@@ -247,14 +247,14 @@ class StudentsController extends Controller
                 ->withErrors(['work_experience_file' => 'Resume upload failed. Please try again.']);
         }
 
-        $user->work_experience_file = $storedPath;
+        $user->hu_work_experience_file = $storedPath;
     }
 
     // 4. Handle Profile Photo Upload
     if ($request->hasFile('profile_photo_path')) {
         
-        if ($user->profile_photo_path && file_exists(public_path($user->profile_photo_path))) {
-            unlink(public_path($user->profile_photo_path));
+        if ($user->hu_profile_photo_path && file_exists(public_path($user->hu_profile_photo_path))) {
+            unlink(public_path($user->hu_profile_photo_path));
         }
 
         $file = $request->file('profile_photo_path');
@@ -266,13 +266,13 @@ class StudentsController extends Controller
 
         $file->move(public_path('profile-photos'), $filename);
 
-        $user->profile_photo_path = 'profile-photos/' . $filename;
+        $user->hu_profile_photo_path = 'profile-photos/' . $filename;
     }
 
     $user->save();
 
     return redirect()
-        ->route('students.index', $user->id)
+        ->route('students.index', $user->hu_id)
         ->with('success', 'Profile updated successfully!');
 }
 
@@ -280,9 +280,9 @@ public function deleteWorkExperienceFile()
 {
     $user = Auth::user();
 
-    if ($user->work_experience_file) {
+    if ($user->hu_work_experience_file) {
         // Define the path exactly how you defined it in the update method
-        $filePath = public_path('storage/' . $user->work_experience_file);
+        $filePath = public_path('storage/' . $user->hu_work_experience_file);
 
         // 1. Delete the physical file if it exists
         if (file_exists($filePath)) {
@@ -290,7 +290,7 @@ public function deleteWorkExperienceFile()
         }
 
         // 2. Remove the path from the database
-        $user->work_experience_file = null;
+        $user->hu_work_experience_file = null;
         $user->save();
 
         return back()->with('success', 'File deleted successfully.');
@@ -312,9 +312,9 @@ public function deleteWorkExperienceFile()
         // AMBIL SERVIS: Tukar 'is_available' kepada 'is_active'
         $services = $user->student_services()
                         ->withCount('reviews')
-                        ->withAvg('reviews', 'rating') 
-                        ->where('is_active', true) // <--- PASTIKAN GUNA NAMA COLUMN YANG BETUL (is_active)
-                        ->where('approval_status', 'approved')
+                        ->withAvg('reviews as reviews_avg_rating', 'hr_rating') 
+                        ->where('hss_is_active', true) // <--- PASTIKAN GUNA NAMA COLUMN YANG BETUL (is_active)
+                        ->where('hss_approval_status', 'approved')
                         ->latest()
                         ->get();
 

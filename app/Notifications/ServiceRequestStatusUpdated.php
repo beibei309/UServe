@@ -47,11 +47,11 @@ class ServiceRequestStatusUpdated extends Notification
         switch ($this->status) {
             case 'accepted':
                 $title = 'Request Accepted';
-                $message = 'Your service request has been accepted by ' . $this->serviceRequest->provider->name;
+                $message = 'Your service request has been accepted by ' . $this->serviceRequest->provider->hu_name;
                 break;
             case 'rejected':
                 $title = 'Request Rejected';
-                $message = 'Your service request was rejected by ' . $this->serviceRequest->provider->name;
+                $message = 'Your service request was rejected by ' . $this->serviceRequest->provider->hu_name;
                 break;
             case 'in_progress':
                 $title = 'Service Started';
@@ -68,9 +68,9 @@ class ServiceRequestStatusUpdated extends Notification
         return [
             'title' => $title,
             'message' => $message,
-            'service_name' => $this->serviceRequest->studentService->title,
-            'request_id' => $this->serviceRequest->id,
-            'action_url' => route('service-requests.show', $this->serviceRequest->id),
+            'service_name' => $this->serviceRequest->studentService->hss_title,
+            'request_id' => $this->serviceRequest->hsr_id,
+            'action_url' => route('service-requests.show', $this->serviceRequest->hsr_id),
             'status' => $this->status,
             'type' => 'status_update'
         ];
@@ -84,9 +84,13 @@ class ServiceRequestStatusUpdated extends Notification
      */
     public function toMail($notifiable)
     {
-        $serviceTitle = $this->serviceRequest->studentService->title;
-        $providerName = $this->serviceRequest->provider->name;
-        $formattedDate = \Carbon\Carbon::parse($this->serviceRequest->selected_dates)->format('d M Y');
+        $serviceTitle = $this->serviceRequest->studentService->hss_title;
+        $providerName = $this->serviceRequest->provider->hu_name;
+        $rawDate = $this->serviceRequest->hsr_selected_dates;
+        $date = is_array($rawDate) ? ($rawDate[0] ?? null) : $rawDate;
+        $formattedDate = $date
+            ? \Carbon\Carbon::parse($date)->format('d M Y')
+            : '-';
         
         // Tetapkan Subject, Intro Message, dan Next Step mengikut status
         switch ($this->status) {
@@ -134,17 +138,17 @@ class ServiceRequestStatusUpdated extends Notification
 
         return (new MailMessage)
             ->subject($subject)
-            ->greeting('Hi ' . $notifiable->name . ',')
+            ->greeting('Hi ' . $notifiable->hu_name . ',')
             ->line($intro)
             
             // Paparkan kotak detail ringkas
             ->line('__Request Details:__')
             ->line('Date: ' . $formattedDate)
             ->line('Seller: ' . $providerName)
-            ->line('Price: RM' . number_format($this->serviceRequest->offered_price, 2))
+            ->line('Price: RM' . number_format((float) $this->serviceRequest->hsr_offered_price, 2))
             
             ->line($instruction)
-            ->action('View Request & Chat', route('service-requests.show', $this->serviceRequest->id))
+            ->action('View Request & Chat', route('service-requests.show', $this->serviceRequest->hsr_id))
             ->line('Thank you for using S2U - UPSI Connect.')
             ->salutation('Regards, The S2U Team');
     }

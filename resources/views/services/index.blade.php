@@ -136,9 +136,9 @@
 
                             {{-- Dynamic Categories --}}
                             @foreach ($categories as $cat)
-                                @php $isActive = ($category_id == $cat->id); @endphp
+                                @php $isActive = ($category_id == $cat->hc_id); @endphp
 
-                                <a href="?category_id={{ $cat->id }}"
+                                <a href="?category_id={{ $cat->hc_id }}"
                                     class="group flex items-center justify-between px-4 py-3 rounded-2xl text-sm font-bold transition-all duration-300
                     {{ $isActive ? 'bg-white shadow-lg shadow-slate-100 ring-1 ring-slate-100' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900' }}">
 
@@ -147,15 +147,15 @@
                                         <span
                                             class="w-9 h-9 flex items-center justify-center rounded-xl transition-all duration-300 border shadow-sm"
                                             style="
-                                background-color: {{ $isActive ? $cat->color : $cat->color . '10' }}; 
-                                border-color: {{ $cat->color . '30' }};
-                                color: {{ $isActive ? '#FFFFFF' : $cat->color }};
+                                background-color: {{ $isActive ? $cat->hc_color : $cat->hc_color . '10' }}; 
+                                border-color: {{ $cat->hc_color . '30' }};
+                                color: {{ $isActive ? '#FFFFFF' : $cat->hc_color }};
                             ">
-                                            <i class="{{ $cat->icon ?? 'fa-solid fa-folder' }} text-sm"></i>
+                                            <i class="{{ $cat->hc_icon ?? 'fa-solid fa-folder' }} text-sm"></i>
                                         </span>
 
                                         <span class="transition-colors {{ $isActive ? 'text-slate-900' : '' }}">
-                                            {{ $cat->name }}
+                                            {{ $cat->hc_name }}
                                         </span>
                                     </div>
 
@@ -288,45 +288,45 @@
                                     <div
                                         class="md:w-72 h-64 md:h-auto flex-shrink-0 relative rounded-[1.5rem] overflow-hidden bg-slate-50">
                                       @php
-    if (!empty($service->image_path)) {
-        if (\Illuminate\Support\Str::startsWith($service->image_path, ['http://', 'https://'])) {
+    if (!empty($service->hss_image_path)) {
+        if (\Illuminate\Support\Str::startsWith($service->hss_image_path, ['http://', 'https://'])) {
             // External image
-            $imageUrl = $service->image_path;
+            $imageUrl = $service->hss_image_path;
         } else {
             // Local image
-            if (\Illuminate\Support\Str::startsWith($service->image_path, 'storage/')) {
-                $imageUrl = asset($service->image_path);
+            if (\Illuminate\Support\Str::startsWith($service->hss_image_path, 'storage/')) {
+                $imageUrl = asset($service->hss_image_path);
             } else {
-                $imageUrl = asset('storage/' . $service->image_path);
+                $imageUrl = asset('storage/' . $service->hss_image_path);
             }
         }
     } else {
         // Fallback
-        $imageUrl = 'https://ui-avatars.com/api/?name=' . urlencode($service->title ?? 'Service');
+        $imageUrl = 'https://ui-avatars.com/api/?name=' . urlencode($service->hss_title ?? 'Service');
     }
 @endphp
 
                                    <img src="{{ $imageUrl }}"
-     alt="{{ $service->title }}"
+    alt="{{ $service->hss_title }}"
      class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
-     onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name={{ urlencode($service->title ?? 'Service') }}';">
+    onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name={{ urlencode($service->hss_title ?? 'Service') }}';">
 
                                         {{-- Category Badge --}}
                                         @if ($service->category)
                                             <div class="absolute top-4 left-4">
                                                 <span
                                                     class="backdrop-blur-md bg-white/80 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-sm"
-                                                    style="color: {{ $service->category->color }}">
-                                                    {{ $service->category->name }}
+                                                    style="color: {{ $service->category->hc_color }}">
+                                                    {{ $service->category->hc_name }}
                                                 </span>
                                             </div>
                                         @endif
 
                                         {{-- Price Tag (Mobile Only) --}}
-                                        @if ($service->basic_price)
+                                        @if ($service->hss_basic_price)
                                             <div
                                                 class="md:hidden absolute bottom-4 right-4 bg-slate-900/90 backdrop-blur text-white px-4 py-2 rounded-2xl text-sm font-bold shadow-lg">
-                                                RM{{ number_format($service->basic_price, 0) }}
+                                                RM{{ number_format($service->hss_basic_price, 0) }}
                                             </div>
                                         @endif
                                     </div>
@@ -342,13 +342,13 @@
                                                 </span>
                                                 <span class="w-1 h-1 rounded-full bg-slate-200"></span>
                                                 <span
-                                                    class="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-tighter border {{ $service->status === 'available' ? 'text-emerald-600 bg-emerald-50 border-emerald-100' : 'text-rose-500 bg-rose-50 border-rose-100' }}">
-                                                    {{ $service->status }}
+                                                    class="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-tighter border {{ $service->hss_status === 'available' ? 'text-emerald-600 bg-emerald-50 border-emerald-100' : 'text-rose-500 bg-rose-50 border-rose-100' }}">
+                                                    {{ $service->hss_status }}
                                                 </span>
                                             </div>
 
                                             <button type="button" onclick="handleShare(this)"
-                                                data-url="{{ route('services.details', $service->id) }}"
+                                                data-url="{{ route('services.details', $service->hss_id) }}"
                                                 class="w-10 h-10 flex items-center justify-center rounded-2xl bg-slate-50 text-slate-400 hover:bg-indigo-600 hover:text-white transition-all duration-300 shadow-sm"
                                                 title="Share Service">
                                                 <i class="fas fa-share-alt"></i>
@@ -357,8 +357,8 @@
 
                                         <h2
                                             class="text-2xl font-black text-slate-900 mb-3 leading-tight group-hover:text-indigo-600 transition-colors duration-300">
-                                            <a href="{{ route('services.details', $service->id) }}">
-                                                {{ $service->title }}
+                                            <a href="{{ route('services.details', $service->hss_id) }}">
+                                                {{ $service->hss_title }}
                                             </a>
                                         </h2>
 
@@ -377,7 +377,7 @@
                                         </div>
 
                                         <div class="text-slate-500 text-sm line-clamp-2 leading-relaxed mb-6 flex-1">
-                                            {!! strip_tags($service->description) !!}
+                                            {!! strip_tags($service->hss_description) !!}
                                         </div>
 
                                         <div class="flex items-center justify-between border-t border-slate-50 pt-6">
@@ -386,7 +386,7 @@
                                                 class="flex items-center gap-3 group/user overflow-hidden max-w-[200px]">
                                                 <div class="relative flex-shrink-0">
 
-                                                    <img src="{{ $service->user->profile_photo_path ? asset( $service->user->profile_photo_path) : 'https://ui-avatars.com/api/?name=' . urlencode($service->user->name) . '&background=random' }}"
+                                                    <img src="{{ $service->user->hu_profile_photo_path ? asset( $service->user->hu_profile_photo_path) : 'https://ui-avatars.com/api/?name=' . urlencode($service->user->hu_name) . '&background=random' }}"
                                                         class="w-12 h-12 rounded-2xl object-cover border-2 border-white shadow-md group-hover/user:ring-2 group-hover/user:ring-indigo-500 transition-all duration-300 @guest blur-sm @endguest">
 
                                                     @guest
@@ -396,7 +396,7 @@
                                                         </div>
                                                     @endguest
 
-                                                    @if ($service->user->trust_badge)
+                                                    @if ($service->user->hu_trust_badge)
                                                         <div
                                                             class="absolute -top-1 -right-1 bg-blue-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-[8px] border-2 border-white shadow-sm">
                                                             <i class="fas fa-check"></i>
@@ -410,10 +410,10 @@
 
                                                         @auth
                                                             {{-- Logged in: Show Full Name --}}
-                                                            {{ $service->user->name }}
+                                                            {{ $service->user->hu_name }}
                                                         @else
                                                             {{-- Guest: Show 1st letter + stars (e.g. "Ali" -> "A****") --}}
-                                                            {{ Str::limit($service->user->name, 1, '****') }}
+                                                            {{ Str::limit($service->user->hu_name, 1, '****') }}
                                                         @endauth
 
                                                     </span>
@@ -425,19 +425,19 @@
                                             </a>
 
                                             <div class="flex items-center gap-6">
-                                                @if ($service->basic_price)
+                                                @if ($service->hss_basic_price)
                                                     <div class="text-right hidden sm:block">
                                                         <p
                                                             class="text-[10px] text-slate-400 font-black uppercase tracking-tighter">
                                                             Starts at</p>
                                                         <p class="text-xl font-black text-slate-900">
                                                             <span class="text-sm font-bold text-indigo-600">RM
-                                                            </span>{{ number_format($service->basic_price, 2) }}
+                                                            </span>{{ number_format($service->hss_basic_price, 2) }}
                                                         </p>
                                                     </div>
                                                 @endif
 
-                                                <a href="{{ route('services.details', $service->id) }}"
+                                                <a href="{{ route('services.details', $service->hss_id) }}"
                                                     class="bg-white text-slate-700 border border-slate-200 hover:bg-indigo-600 hover:text-white hover:border-indigo-600 px-7 py-3 rounded-2xl text-sm font-bold transition-all duration-300 shadow-sm hover:shadow-indigo-200 hover:-translate-y-1 flex items-center justify-center">
                                                     View Details
                                                 </a>

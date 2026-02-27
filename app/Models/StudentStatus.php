@@ -9,21 +9,21 @@ class StudentStatus extends Model
 {
     use HasFactory;
 
-    protected $table = 'student_statuses';
+    protected $table = 'h2u_student_statuses';
+    protected $primaryKey = 'hss_id';
 
     protected $fillable = [
-        'student_id',
-        'matric_no',
-        'semester',
-        'status',
-        'effective_date',
-        'graduation_date',
+        'hss_student_id',
+        'hss_matric_no',
+        'hss_semester',
+        'hss_status',
+        'hss_effective_date',
+        'hss_graduation_date',
     ];
 
     // RELATIONSHIP (Make sure this appears only ONCE)
     public function student()
     {
-        // This links 'student_id' in this table to the 'id' in the 'users' table
-        return $this->belongsTo(User::class, 'student_id');
+        return $this->belongsTo(User::class, 'hss_student_id', 'hu_id');
     }
 }

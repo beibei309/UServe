@@ -24,42 +24,42 @@ class AdminStudentController extends Controller
     $status  = $request->input('status'); // student | helper | banned | null
     $faculty = $request->input('faculty');
 
-    $students = User::whereIn('role', ['student', 'helper'])
+    $students = User::whereIn('hu_role', ['student', 'helper'])
         ->with('studentStatus')
 
         // SEARCH
         ->when($search, function ($query) use ($search) {
             $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhere('phone', 'like', "%{$search}%")
-                  ->orWhere('student_id', 'like', "%{$search}%")
-                  ->orWhere('skills', 'like', "%{$search}%");
+                $q->where('hu_name', 'like', "%{$search}%")
+                                    ->orWhere('hu_email', 'like', "%{$search}%")
+                                    ->orWhere('hu_phone', 'like', "%{$search}%")
+                                    ->orWhere('hu_student_id', 'like', "%{$search}%")
+                                    ->orWhere('hu_skills', 'like', "%{$search}%");
             });
         })
 
         // STATUS FILTERS
         ->when($status === 'banned', function ($query) {
-            $query->where('is_suspended', 1);
+            $query->where('hu_is_suspended', 1);
         })
 
         ->when($status === 'student', function ($query) {
-            $query->where('role', 'student')
-                  ->where('is_suspended', 0);
+            $query->where('hu_role', 'student')
+                ->where('hu_is_suspended', 0);
         })
 
         ->when($status === 'helper' || $status === 'helpers', function ($query) {
-            $query->where('role', 'helper')
-                  ->where('is_suspended', 0);
+            $query->where('hu_role', 'helper')
+                ->where('hu_is_suspended', 0);
         })
 
         // FACULTY FILTER
         ->when($faculty, function ($query) use ($faculty) {
-            $query->where('faculty', $faculty);
+            $query->where('hu_faculty', $faculty);
         })
 
         // DEFAULT SORT
-        ->orderBy('name', 'asc')
+        ->orderBy('hu_name', 'asc')
         ->paginate(10);
 
     // Preserve filters in pagination
@@ -73,7 +73,7 @@ class AdminStudentController extends Controller
     public function view($id)
 {
     $student = User::with('studentStatus')
-        ->whereIn('role', ['student', 'helper'])
+        ->whereIn('hu_role', ['student', 'helper'])
         ->findOrFail($id);
 
     return view('admin.students.view', compact('student'));
@@ -83,7 +83,7 @@ class AdminStudentController extends Controller
     // show EDIT STUDENT page
     public function edit($id)
 {
-    $student = User::whereIn('role', ['student', 'helper'])
+        $student = User::whereIn('hu_role', ['student', 'helper'])
         ->findOrFail($id);
 
     return view('admin.students.edit', compact('student'));
@@ -93,7 +93,7 @@ class AdminStudentController extends Controller
     public function update(Request $request, $id)
 {
     // Only allow student OR helper
-    $student = User::whereIn('role', ['student', 'helper'])->findOrFail($id);
+    $student = User::whereIn('hu_role', ['student', 'helper'])->findOrFail($id);
 
     // VALIDATION
     $request->validate([
@@ -112,17 +112,17 @@ class AdminStudentController extends Controller
 
     // UPDATE DATA
     $student->update([
-        'name' => $request->name,
-        'email' => $request->email,
-        'phone' => $request->phone,
-        'student_id' => $request->student_id,
-        'faculty' => $request->faculty,
-        'course' => $request->course,
-        'verification_status' => $request->verification_status,
+        'hu_name' => $request->name,
+        'hu_email' => $request->email,
+        'hu_phone' => $request->phone,
+        'hu_student_id' => $request->student_id,
+        'hu_faculty' => $request->faculty,
+        'hu_course' => $request->course,
+        'hu_verification_status' => $request->verification_status,
 
         // Helper fields
-        'skills' => $request->skills,
-        'work_experience_message' => $request->work_experience_message,
+        'hu_skills' => $request->skills,
+        'hu_work_experience_message' => $request->work_experience_message,
     ]);
 
     return redirect()
@@ -133,9 +133,9 @@ class AdminStudentController extends Controller
     // DELETE STUDENT
     public function destroy($id)
 {
-    $student = User::whereIn('role', ['student', 'helper'])->findOrFail($id);
+    $student = User::whereIn('hu_role', ['student', 'helper'])->findOrFail($id);
 
-    if ($student->role === 'helper' && !$student->is_suspended) {
+    if ($student->hu_role === 'helper' && !$student->hu_is_suspended) {
         return redirect()
             ->route('admin.students.index')
             ->with('error', 'Active helper cannot be deleted. Please ban the account first.');
@@ -145,8 +145,8 @@ class AdminStudentController extends Controller
         $student->studentStatus->delete();
     }
 
-    if ($student->profile_photo_path) {
-        \Illuminate\Support\Facades\Storage::delete($student->profile_photo_path);
+    if ($student->hu_profile_photo_path) {
+        \Illuminate\Support\Facades\Storage::delete($student->hu_profile_photo_path);
     }
 
     $student->delete();
@@ -162,7 +162,7 @@ class AdminStudentController extends Controller
     public function ban(Request $request, $id)
 {
     // Only student or helper can be banned
-    $student = User::whereIn('role', ['student', 'helper'])->findOrFail($id);
+    $student = User::whereIn('hu_role', ['student', 'helper'])->findOrFail($id);
 
     // Validate reason
     $request->validate([
@@ -171,11 +171,11 @@ class AdminStudentController extends Controller
 
     // Ban user
     $student->update([
-        'is_suspended' => 1,
-        'blacklist_reason' => $request->blacklist_reason,
+        'hu_is_suspended' => 1,
+        'hu_blacklist_reason' => $request->blacklist_reason,
     ]);
 
-    Mail::to($student->email)->send(new AccountBannedMail($student, $request->blacklist_reason));
+    Mail::to($student->hu_email)->send(new AccountBannedMail($student, $request->blacklist_reason));
 
     return redirect()->route('admin.students.index')
         ->with('success', 'User banned and email notification sent.');
@@ -186,13 +186,13 @@ class AdminStudentController extends Controller
     public function unban($id)
 {
     $student = User::with('studentStatus')
-        ->whereIn('role', ['student', 'helper'])
+            ->whereIn('hu_role', ['student', 'helper'])
         ->findOrFail($id);
 
     // ❌ Prevent unbanning graduated users
     if (
         $student->studentStatus &&
-        $student->studentStatus->status === 'Graduated'
+        $student->studentStatus->hss_status === 'Graduated'
     ) {
         return redirect()
             ->route('admin.students.index')
@@ -201,11 +201,11 @@ class AdminStudentController extends Controller
 
     // Unban user
     $student->update([
-        'is_suspended' => 0,
-        'blacklist_reason' => null,
+        'hu_is_suspended' => 0,
+        'hu_blacklist_reason' => null,
     ]);
 
-    Mail::to($student->email)->send(new AccountUnbannedMail($student));
+    Mail::to($student->hu_email)->send(new AccountUnbannedMail($student));
 
     return redirect()->route('admin.students.index')
         ->with('success', 'User unbanned and email notification sent.');
@@ -216,11 +216,11 @@ public function showSelfie($id)
 {
     $student = User::findOrFail($id);
     
-    if (!$student->selfie_media_path || !Storage::disk('local')->exists($student->selfie_media_path)) {
+    if (!$student->hu_selfie_media_path || !Storage::disk('local')->exists($student->hu_selfie_media_path)) {
         abort(404, 'Selfie not found.');
     }
     
-    return Storage::disk('local')->response($student->selfie_media_path);
+    return response()->file(Storage::disk('local')->path($student->hu_selfie_media_path));
 }
 
 // Revoke helper status
@@ -228,17 +228,17 @@ public function revokeHelper($id)
 {
     $student = User::findOrFail($id);
     
-    if ($student->role !== 'helper') {
+    if ($student->hu_role !== 'helper') {
         return redirect()->back()->with('error', 'User is not a seller.');
     }
 
    
-    StudentService::where('user_id', $id)->delete();
+    StudentService::where('hss_user_id', $id)->delete();
     
     // 2. Revoke the role
     $student->update([
-        'role' => 'student',
-        'helper_verified_at' => null
+        'hu_role' => 'student',
+        'hu_helper_verified_at' => null
     ]);
     
     return redirect()->back()->with('success', 'Seller status revoked and all associated services have been deleted.');
@@ -248,29 +248,29 @@ public function export(Request $request)
 {
     $format = $request->get('format', 'csv');
 
-    $query = User::whereIn('role', ['student', 'helper']);
+    $query = User::whereIn('hu_role', ['student', 'helper']);
 
     // SEARCH
     if ($request->filled('search')) {
         $query->where(function($q) use ($request) {
-            $q->where('name', 'like', '%'.$request->search.'%')
-              ->orWhere('email', 'like', '%'.$request->search.'%')
-              ->orWhere('phone', 'like', '%'.$request->search.'%')
-              ->orWhere('student_id', 'like', '%'.$request->search.'%')
-              ->orWhere('skills', 'like', '%'.$request->search.'%');
+                        $q->where('hu_name', 'like', '%'.$request->search.'%')
+                            ->orWhere('hu_email', 'like', '%'.$request->search.'%')
+                            ->orWhere('hu_phone', 'like', '%'.$request->search.'%')
+                            ->orWhere('hu_student_id', 'like', '%'.$request->search.'%')
+              ->orWhere('hu_skills', 'like', '%'.$request->search.'%');
         });
     }
 
     // STATUS FILTER
     if ($request->filled('status')) {
         if ($request->status == 'active') {
-            $query->where('is_suspended', 0);
+            $query->where('hu_is_suspended', 0);
         } elseif ($request->status == 'banned') {
-            $query->where('is_suspended', 1);
+            $query->where('hu_is_suspended', 1);
         } elseif ($request->status == 'student') {
-            $query->where('role', 'student')->where('is_suspended', 0);
+            $query->where('hu_role', 'student')->where('hu_is_suspended', 0);
         } elseif ($request->status == 'helper') {
-            $query->where('role', 'helper')->where('is_suspended', 0);
+            $query->where('hu_role', 'helper')->where('hu_is_suspended', 0);
         }
     }
 
@@ -282,11 +282,11 @@ public function export(Request $request)
     } else {
         $csvData = $students->map(function ($student) {
             return [
-                'Name' => $student->name,
-                'Email' => $student->email,
-                'Phone' => $student->phone,
-                'Student ID' => $student->student_id,
-                'Status' => $student->is_suspended ? 'Banned' : ($student->verification_status == 'approved' ? 'Verified' : 'Not Verified'),
+                'Name' => $student->hu_name,
+                'Email' => $student->hu_email,
+                'Phone' => $student->hu_phone,
+                'Student ID' => $student->hu_student_id,
+                'Status' => $student->hu_is_suspended ? 'Banned' : ($student->hu_verification_status == 'approved' ? 'Verified' : 'Not Verified'),
             ];
         });
 

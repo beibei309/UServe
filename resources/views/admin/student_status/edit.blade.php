@@ -11,7 +11,7 @@
         </a>
     </div>
 
-    <form action="{{ route('admin.student_status.update', $status->id) }}" method="POST">
+    <form action="{{ route('admin.student_status.update', $status->hss_id) }}" method="POST">
         @csrf
         @method('PUT')
 
@@ -24,17 +24,17 @@
                     
                     <div class="mb-4">
                         <label class="block text-xs text-gray-500 uppercase font-bold">Full Name</label>
-                        <p class="text-gray-900 font-medium text-lg">{{ $status->student->name }}</p>
+                        <p class="text-gray-900 font-medium text-lg">{{ $status->student->hu_name }}</p>
                     </div>
 
                     <div class="mb-4">
                         <label class="block text-xs text-gray-500 uppercase font-bold">Matric No</label>
-                        <p class="text-gray-900 font-mono">{{ $status->student->student_id ?? 'N/A' }}</p>
+                        <p class="text-gray-900 font-mono">{{ $status->student->hu_student_id ?? 'N/A' }}</p>
                     </div>
 
                     <div>
                         <label class="block text-xs text-gray-500 uppercase font-bold">Email</label>
-                        <p class="text-gray-600 text-sm break-all">{{ $status->student->email }}</p>
+                        <p class="text-gray-600 text-sm break-all">{{ $status->student->hu_email }}</p>
                     </div>
 
                     <div class="mt-4 pt-4 border-t border-blue-200">
@@ -61,11 +61,11 @@
                                     class="w-full border-gray-300 rounded-md shadow-sm p-2.5 focus:ring-blue-500 focus:border-blue-500 bg-white" 
                                     required>
                                 <option value="" disabled>-- Select Academic Status --</option>
-                                <option value="Active" {{ old('status', $status->status) == 'Active' ? 'selected' : '' }}>Active</option>
-                                <option value="Probation" {{ old('status', $status->status) == 'Probation' ? 'selected' : '' }}>Probation</option>
-                                <option value="Deferred" {{ old('status', $status->status) == 'Deferred' ? 'selected' : '' }}>Deferred</option>
-                                <option value="Graduated" {{ old('status', $status->status) == 'Graduated' ? 'selected' : '' }}>Graduated</option>
-                                <option value="Dismissed" {{ old('status', $status->status) == 'Dismissed' ? 'selected' : '' }}>Dismissed</option>
+                                <option value="Active" {{ old('status', $status->hss_status) == 'Active' ? 'selected' : '' }}>Active</option>
+                                <option value="Probation" {{ old('status', $status->hss_status) == 'Probation' ? 'selected' : '' }}>Probation</option>
+                                <option value="Deferred" {{ old('status', $status->hss_status) == 'Deferred' ? 'selected' : '' }}>Deferred</option>
+                                <option value="Graduated" {{ old('status', $status->hss_status) == 'Graduated' ? 'selected' : '' }}>Graduated</option>
+                                <option value="Dismissed" {{ old('status', $status->hss_status) == 'Dismissed' ? 'selected' : '' }}>Dismissed</option>
                             </select>
                             @error('status') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                         </div>
@@ -80,11 +80,11 @@
                                 @for ($i = 1; $i <= 12; $i++)
                                     @php $val = "Semester $i"; @endphp
                                     <option value="{{ $val }}" 
-                                        {{ old('semester', $status->semester) == $val ? 'selected' : '' }}>
+                                        {{ old('semester', $status->hss_semester) == $val ? 'selected' : '' }}>
                                         {{ $val }}
                                     </option>
                                 @endfor
-                                <option value="Extended" {{ old('semester', $status->semester) == 'Extended' ? 'selected' : '' }}>Extended</option>
+                                <option value="Extended" {{ old('semester', $status->hss_semester) == 'Extended' ? 'selected' : '' }}>Extended</option>
                             </select>
                             @error('semester') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                         </div>
@@ -103,7 +103,7 @@
                             <input type="date" 
                                    name="graduation_date" 
                                    {{-- Pull date from DB --}}
-                                   value="{{ old('graduation_date', $status->graduation_date) }}"
+                                   value="{{ old('graduation_date', $status->hss_graduation_date) }}"
                                    class="w-full border-gray-300 rounded-md shadow-sm p-2.5 focus:ring-blue-500 focus:border-blue-500 text-gray-700">
                             
                             @error('graduation_date') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror

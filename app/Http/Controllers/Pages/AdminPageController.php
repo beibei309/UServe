@@ -19,8 +19,8 @@ class AdminPageController extends Controller
         }
 
         $pending = User::query()
-            ->where('role', 'community')
-            ->where('verification_status', 'pending')
+            ->where('hu_role', 'community')
+            ->where('hu_verification_status', 'pending')
             ->orderBy('created_at')
             ->paginate(20);
 
@@ -32,12 +32,12 @@ class AdminPageController extends Controller
     public function reports()
     {
         $user = Auth::user();
-        if (!$user || !in_array($user->role, ['staff', 'admin'])) {
+        if (!$user || !in_array($user->hu_role, ['staff', 'admin'])) {
             abort(Response::HTTP_FORBIDDEN);
         }
 
         $reports = Report::query()
-            ->where('status', 'open')
+            ->where('hrp_status', 'open')
             ->with(['reporter', 'target'])
             ->orderByDesc('created_at')
             ->paginate(20);

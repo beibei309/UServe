@@ -18,20 +18,20 @@
                     use Illuminate\Support\Facades\Storage;
                 @endphp
 
-                <img   src="{{ asset($student->profile_photo_path) }}" 
-    alt="{{ $student->name }}"                    class="w-32 h-32 rounded-full object-cover border-4 border-gray-100 shadow-sm" />
+                <img   src="{{ asset($student->hu_profile_photo_path) }}" 
+    alt="{{ $student->hu_name }}"                    class="w-32 h-32 rounded-full object-cover border-4 border-gray-100 shadow-sm" />
             </div>
 
             <div class="flex-1">
 
                 <div class="flex justify-between items-start">
                     <div>
-                        <h1 class="text-3xl font-bold">{{ $student->name }}</h1>
-                        <p class="text-gray-500">{{ $student->email }}</p>
+                        <h1 class="text-3xl font-bold">{{ $student->hu_name }}</h1>
+                        <p class="text-gray-500">{{ $student->hu_email }}</p>
                     </div>
 
                     {{-- VERIFICATION --}}
-                    @if ($student->verification_status === 'approved')
+                    @if ($student->hu_verification_status === 'approved')
                         <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
                             Verified
                         </span>
@@ -46,11 +46,11 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6 text-sm">
 
                     <div class="space-y-2">
-                        <p><strong>Student ID:</strong> {{ $student->student_id ?? '-' }}</p>
-                        <p><strong>Phone:</strong> {{ $student->phone ?? '-' }}</p>
+                        <p><strong>Student ID:</strong> {{ $student->hu_student_id ?? '-' }}</p>
+                        <p><strong>Phone:</strong> {{ $student->hu_phone ?? '-' }}</p>
                         <p>
                             <strong>Role:</strong>
-                            @if ($student->role === 'helper')
+                            @if ($student->hu_role === 'helper')
                                 <span class="ml-2 px-2 py-0.5 bg-green-100 text-green-700 rounded text-xs font-bold">
                                     Seller
                                 </span>
@@ -63,8 +63,8 @@
                     </div>
 
                     <div class="space-y-2">
-                        <p><strong>Faculty:</strong> {{ $student->faculty ?? '-' }}</p>
-                        <p><strong>Course:</strong> {{ $student->course ?? '-' }}</p>
+                        <p><strong>Faculty:</strong> {{ $student->hu_faculty ?? '-' }}</p>
+                        <p><strong>Course:</strong> {{ $student->hu_course ?? '-' }}</p>
                         <p>
                             <strong>Graduation:</strong>
                             @if ($student->studentStatus && $student->studentStatus->graduation_date)
@@ -77,11 +77,11 @@
                 </div>
 
                 {{-- BANNED --}}
-                @if ($student->is_suspended)
+                @if ($student->hu_is_suspended)
                     <div class="mt-6 p-4 bg-red-50 border border-red-200 rounded">
                         <strong class="text-red-700">Student Banned</strong>
                         <p class="text-sm text-red-600 mt-1">
-                            Reason: {{ $student->blacklist_reason }}
+                            Reason: {{ $student->hu_blacklist_reason }}
                         </p>
                     </div>
                 @endif
@@ -89,20 +89,20 @@
 
             {{-- ACTIONS --}}
             <div class="flex flex-col gap-3">
-                <a href="{{ route('admin.students.edit', $student->id) }}"
+                <a href="{{ route('admin.students.edit', $student->hu_id) }}"
                     class="px-4 py-2 border rounded text-sm text-center">
                     Edit Profile
                 </a>
 
-                @if ($student->is_suspended)
-                    <form action="{{ route('admin.students.unban', $student->id) }}" method="POST">
+                @if ($student->hu_is_suspended)
+                    <form action="{{ route('admin.students.unban', $student->hu_id) }}" method="POST">
                         @csrf
                         <button class="px-4 py-2 bg-green-600 text-white rounded text-sm w-full">
                             Unban
                         </button>
                     </form>
                 @else
-                    <button onclick="openBanModal({{ $student->id }})"
+                    <button onclick="openBanModal({{ $student->hu_id }})"
                         class="px-4 py-2 bg-red-600 text-white rounded text-sm">
                         Ban
                     </button>
@@ -111,7 +111,7 @@
         </div>
 
         {{-- HELPER VERIFICATION INFO --}}
-       @if ($student->role === 'helper')
+       @if ($student->hu_role === 'helper')
     <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden mt-8">
         <div class="bg-emerald-600 px-6 py-3 flex items-center gap-3">
             <i class="fa-solid fa-circle-check text-white text-lg"></i>
@@ -160,13 +160,13 @@
 
                 <div class="lg:border-x lg:px-8 border-gray-100">
                     <label class="text-xs font-bold text-gray-400 uppercase tracking-widest block mb-3">Live Selfie Identity</label>
-                    @if ($student->selfie_media_path)
+                        @if ($student->hu_selfie_media_path)
                         <div class="relative group w-48 mx-auto lg:mx-0">
-                            <img src="{{ route('admin.verifications.selfie', $student->id) }}"
+                            <img src="{{ route('admin.verifications.selfie', $student->hu_id) }}"
                                  class="w-48 h-60 rounded-xl object-cover border-4 border-white shadow-md transition-transform group-hover:scale-[1.02]"
                                  alt="Live Selfie">
                             
-                            <button onclick="openSelfieModal('{{ route('admin.verifications.selfie', $student->id) }}')"
+                            <button onclick="openSelfieModal('{{ route('admin.verifications.selfie', $student->hu_id) }}')"
                                     class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all rounded-xl flex items-center justify-center">
                                 <span class="bg-white px-3 py-1 rounded-full text-xs font-bold shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
                                     Click to Enlarge
@@ -174,9 +174,9 @@
                             </button>
                         </div>
                         
-                        @if ($student->verification_note)
+                        @if ($student->hu_verification_note)
                             <div class="mt-3 p-2 bg-amber-50 border border-amber-100 rounded text-xs text-amber-800">
-                                <span class="font-bold">Challenge Note:</span> {{ $student->verification_note }}
+                                <span class="font-bold">Challenge Note:</span> {{ $student->hu_verification_note }}
                             </div>
                         @endif
                     @else
@@ -195,7 +195,7 @@
                             Revoking status will immediately disable all service listings and hide the seller profile from the S2U marketplace.
                         </p>
                         
-                        <form action="{{ route('admin.students.revoke_helper', $student->id) }}" method="POST">
+                        <form action="{{ route('admin.students.revoke_helper', $student->hu_id) }}" method="POST">
                             @csrf
                             <button type="submit" 
                                     onclick="return confirm('Revoke Seller Status? This user will become a normal student again.')"
@@ -268,7 +268,7 @@
 </script>
 
         {{-- HELPER PROFILE --}}
-        @if ($student->role === 'helper')
+        @if ($student->hu_role === 'helper')
             <div class="bg-white shadow-sm rounded-lg p-6 mt-6 border border-gray-200">
                 <div class="flex items-center gap-2 mb-4">
                     <h2 class="text-xl font-semibold">Helper Profile</h2>
@@ -326,8 +326,8 @@
         {{-- ABOUT --}}
         <div class="bg-white shadow-sm rounded-lg p-6 mt-6 border border-gray-200">
             <h2 class="text-xl font-semibold mb-3">About</h2>
-            @if ($student->bio)
-                <p class="text-gray-700 whitespace-pre-line">{{ $student->bio }}</p>
+            @if ($student->hu_bio)
+                <p class="text-gray-700 whitespace-pre-line">{{ $student->hu_bio }}</p>
             @else
                 <p class="text-gray-400 italic">No bio provided.</p>
             @endif
@@ -337,7 +337,7 @@
         <div class="bg-white shadow-sm rounded-lg p-6 mt-6 border border-gray-200">
             <h2 class="text-sm font-bold text-gray-500 uppercase mb-4">Student Information</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                <div><strong>ID:</strong> #{{ $student->id }}</div>
+                <div><strong>ID:</strong> #{{ $student->hu_id }}</div>
                 <div><strong>Registered:</strong> {{ $student->created_at->format('d M Y') }}</div>
                 <div><strong>Updated:</strong> {{ $student->updated_at->format('d M Y') }}</div>
             </div>

@@ -2,7 +2,6 @@
 
 namespace App\Events;
 
-use App\Models\Message;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
@@ -20,7 +19,7 @@ class MessageSent implements ShouldBroadcastNow
     /**
      * Create a new event instance.
      */
-    public function __construct(Message $message)
+    public function __construct($message)
     {
         $this->message = $message;
     }
@@ -51,6 +50,7 @@ class MessageSent implements ShouldBroadcastNow
     public function broadcastWith(): array
     {
         return [
+            'message_id' => $this->message->id,
             'id' => $this->message->id,
             'conversation_id' => $this->message->conversation_id,
             'sender_id' => $this->message->sender_id,
@@ -58,7 +58,7 @@ class MessageSent implements ShouldBroadcastNow
             'created_at' => $this->message->created_at->toISOString(),
             'sender' => [
                 'id' => $this->message->sender->id,
-                'name' => $this->message->sender->name,
+                'name' => $this->message->sender->hu_name,
                 'avatar' => $this->message->sender->avatar ?? null,
             ],
         ];

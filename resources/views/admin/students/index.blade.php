@@ -79,16 +79,16 @@
                             <td class="py-3 px-4">
                                 <div class="flex items-center gap-3">
                                     <img class="h-10 w-10 rounded-full border border-gray-200"
-                                        src="{{ $student->profile_photo_path ? asset($student->profile_photo_path) : 'https://ui-avatars.com/api/?name=' . urlencode($student->name) }}"
+                                        src="{{ $student->hu_profile_photo_path ? asset($student->hu_profile_photo_path) : 'https://ui-avatars.com/api/?name=' . urlencode($student->hu_name) }}"
                                         alt="Profile">
 
                                     <div>
-                                        <div class="font-medium text-gray-900">{{ $student->name }}</div>
-                                        @if ($student->role === 'helper')
+                                        <div class="font-medium text-gray-900">{{ $student->hu_name }}</div>
+                                        @if ($student->hu_role === 'helper')
                                             <span
                                                 class="text-xs px-2 py-0.5 rounded-full bg-blue-200 text-gray-700">Seller</span>
                                         @endif
-                                        @if ($student->role === 'student')
+                                        @if ($student->hu_role === 'student')
                                             <span
                                                 class="text-xs px-2 py-0.5 rounded-full bg-yellow-200 text-gray-700">Student</span>
                                         @endif
@@ -96,15 +96,15 @@
                                 </div>
                             </td>
 
-                            <td class="py-3 px-4 text-sm">{{ $student->email }}</td>
-                            <td class="py-3 px-4 text-sm">{{ $student->phone ?? '-' }}</td>
-                            <td class="py-3 px-4 text-sm">{{ $student->student_id ?? '-' }}</td>
+                            <td class="py-3 px-4 text-sm">{{ $student->hu_email }}</td>
+                            <td class="py-3 px-4 text-sm">{{ $student->hu_phone ?? '-' }}</td>
+                            <td class="py-3 px-4 text-sm">{{ $student->hu_student_id ?? '-' }}</td>
 
                             <td class="py-3 px-4">
-                                @if ($student->is_suspended)
+                                @if ($student->hu_is_suspended)
                                     <span class="px-3 py-1 text-xs bg-red-100 text-red-700 rounded-full">Suspended</span>
-                                @elseif ($student->verification_status === 'approved')
-                                    <span class="px-3 py-1 text-xs bg-green-100 text-green-700 rounded-full">Verified</span>
+                                @elseif ($student->hu_verification_status === 'approved')
+                                        <span class="px-3 py-1 text-xs bg-green-100 text-green-700 rounded-full">Verified</span>
                                 @else
                                     <span
                                         class="px-3 py-1 text-xs bg-yellow-100 text-yellow-700 rounded-full">Pending</span>
@@ -114,21 +114,21 @@
                             <td class="px-6 py-4 text-right">
                                 <div class="flex justify-end gap-3">
                                     {{-- VIEW --}}
-                                    <a href="{{ route('admin.students.view', $student->id) }}"
+                                    <a href="{{ route('admin.students.view', $student->hu_id) }}"
                                         class="text-indigo-600 hover:text-indigo-900 transition" title="View">
                                         <i class="fa-solid fa-eye"></i>
                                     </a>
 
                                     {{-- EDIT --}}
-                                    <a href="{{ route('admin.students.edit', $student->id) }}"
+                                    <a href="{{ route('admin.students.edit', $student->hu_id) }}"
                                         class="text-blue-600 hover:text-blue-900 transition" title="Edit">
                                         <i class="fa-solid fa-pen-to-square"></i>
                                     </a>
 
                                     {{-- BAN / UNBAN --}}
-                                    @if ($student->is_suspended)
+                                    @if ($student->hu_is_suspended)
                                         {{-- Tambah class 'unban-form' pada form dan 'unban-btn' pada button --}}
-                                        <form action="{{ route('admin.students.unban', $student->id) }}" method="POST"
+                                        <form action="{{ route('admin.students.unban', $student->hu_id) }}" method="POST"
                                             class="unban-form inline">
                                             @csrf
                                             <button type="button"
@@ -138,7 +138,7 @@
                                             </button>
                                         </form>
                                     @else
-                                        <button onclick="openBanModal({{ $student->id }})"
+                                        <button onclick="openBanModal({{ $student->hu_id }})"
                                             class="text-red-600 hover:text-red-900 transition" title="Ban">
                                             <i class="fa-solid fa-ban"></i>
                                         </button>

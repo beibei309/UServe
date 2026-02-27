@@ -92,7 +92,7 @@
             <div class="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center z-10">
                 <span
                     class="inline-block py-1 px-3 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-sm font-semibold mb-6">
-                    Welcome back, {{ Auth::user()->name }}!
+                    Welcome back, {{ Auth::user()->hu_name }}!
                 </span>
 
                 <h1 class="text-4xl md:text-5xl font-extrabold text-white tracking-tight mb-6 leading-tight">
@@ -151,22 +151,22 @@
 
                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-5">
                     @foreach ($categories as $category)
-                        <a href="{{ route('services.index', ['category_id' => $category->id]) }}"
+                        <a href="{{ route('services.index', ['category_id' => $category->hc_id]) }}"
                             class="group p-5 rounded-2xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 text-center flex flex-col items-center justify-center h-full"
-                            style="background-color: {{ $category->color }};">
+                            style="background-color: {{ $category->hc_color }};">
 
                             <div
                                 class="w-14 h-14 mb-4 rounded-full flex items-center justify-center bg-white shadow-sm transition-transform group-hover:scale-110">
 
 
-                                <i class="{{ $category->icon ?? 'fa-solid fa-folder' }} text-2xl"
-                                    style="color: {{ $category->color }};">
+                                <i class="{{ $category->hc_icon ?? 'fa-solid fa-folder' }} text-2xl"
+                                    style="color: {{ $category->hc_color }};">
                                 </i>
 
                             </div>
 
                             <span class="block text-sm font-bold text-white transition-colors group-hover:opacity-90">
-                                {{ $category->name }}
+                                {{ $category->hc_name }}
                             </span>
                         </a>
                     @endforeach
@@ -195,43 +195,43 @@
                            <a href="{{ route('services.details', $service) }}" class="relative h-56 bg-slate-200 overflow-hidden block">
     @php
         $imageUrl = '';
-        if (!empty($service->image_path)) {
-            if (\Illuminate\Support\Str::startsWith($service->image_path, ['http://', 'https://'])) {
+        if (!empty($service->hss_image_path)) {
+            if (\Illuminate\Support\Str::startsWith($service->hss_image_path, ['http://', 'https://'])) {
                 // External image
-                $imageUrl = $service->image_path;
+                $imageUrl = $service->hss_image_path;
             } else {
                 // Local image
-                if (\Illuminate\Support\Str::startsWith($service->image_path, 'storage/')) {
-                    $imageUrl = asset($service->image_path);
+                if (\Illuminate\Support\Str::startsWith($service->hss_image_path, 'storage/')) {
+                    $imageUrl = asset($service->hss_image_path);
                 } else {
-                    $imageUrl = asset('storage/' . $service->image_path);
+                    $imageUrl = asset('storage/' . $service->hss_image_path);
                 }
             }
         } else {
             // Fallback
-            $imageUrl = 'https://ui-avatars.com/api/?name=' . urlencode($service->title ?? 'Service');
+            $imageUrl = 'https://ui-avatars.com/api/?name=' . urlencode($service->hss_title ?? 'Service');
         }
     @endphp
 
     <img src="{{ $imageUrl }}" 
          class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-         alt="{{ $service->title ?? 'Service' }}">
+         alt="{{ $service->hss_title ?? 'Service' }}">
 
     @if ($service->category)
         <span class="absolute top-4 left-4 bg-white/95 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold shadow-sm"
-              style="color: {{ $service->category->color }}">
-            {{ $service->category->name }}
+                            style="color: {{ $service->category->hc_color }}">
+                        {{ $service->category->hc_name }}
         </span>
     @endif
 </a>
                             <div class="p-5 flex flex-col flex-1">
                                 <div class="flex items-center gap-3 mb-3">
-                                    <img src="{{ $service->user->profile_photo_path ? asset($service->user->profile_photo_path) : 'https://ui-avatars.com/api/?name=' . urlencode($service->user->name) }}"
+                                    <img src="{{ $service->user->hu_profile_photo_path ? asset($service->user->hu_profile_photo_path) : 'https://ui-avatars.com/api/?name=' . urlencode($service->user->hu_name) }}"
                                         class="w-8 h-8 rounded-full object-cover border border-slate-100">
                                     <div class="flex flex-col">
                                         <span class="text-xs font-bold text-slate-900 flex items-center gap-1">
-                                            {{ Str::limit($service->user->name, 15) }}
-                                            @if ($service->user->trust_badge)
+                                            {{ Str::limit($service->user->hu_name, 15) }}
+                                            @if ($service->user->hu_trust_badge)
                                                 <i class="fas fa-check-circle text-blue-500 text-[10px]"></i>
                                             @endif
                                         </span>
@@ -258,20 +258,20 @@
                                 <a href="{{ route('services.details', $service) }}" class="block mb-2">
                                     <h3
                                         class="text-lg font-bold text-slate-900 group-hover:text-indigo-600 transition-colors line-clamp-2 leading-tight">
-                                        {{ $service->title }}
+                                        {{ $service->hss_title }}
                                     </h3>
                                 </a>
 
                                 <div class="rich-text text-sm text-slate-500 line-clamp-2 mb-4">
-                                    {!! $service->description !!}
+                                    {!! $service->hss_description !!}
                                 </div>
                                 <div class="mt-auto pt-4 border-t border-slate-100 flex items-center justify-between">
                                     <div>
                                         <span class="text-xs text-slate-400 font-medium uppercase">Starting at</span>
                                         <div class="text-lg font-bold text-slate-900">
-                                            RM{{ number_format($service->basic_price, 0) }}</div>
+                                            RM{{ number_format($service->hss_basic_price, 0) }}</div>
                                     </div>
-                                    <a href="{{ route('services.details', $service->id) }}"
+                                    <a href="{{ route('services.details', $service->hss_id) }}"
                                         class="px-4 py-2 bg-slate-900 hover:bg-indigo-600 text-white text-sm font-semibold rounded-lg transition-colors shadow-md">
                                         View Details
                                     </a>
@@ -300,7 +300,7 @@
                 </div>
 
                 @php
-                    $availableHelpers = $topStudents->filter(fn($student) => $student->is_available);
+                    $availableHelpers = $topStudents->filter(fn($student) => $student->hu_is_available);
                 @endphp
 
                 <div class="flex gap-6 overflow-x-auto pb-8 hide-scroll snap-x snap-mandatory">
@@ -312,13 +312,13 @@
                                 <div class="relative mb-4">
                                     <div
                                         class="w-20 h-20 rounded-full overflow-hidden border-2 border-white shadow-md group-hover:scale-105 transition-transform">
-                                        @if ($student->profile_photo_path)
-                                            <img src="{{ asset($student->profile_photo_path) }}"
+                                        @if ($student->hu_profile_photo_path)
+                                            <img src="{{ asset($student->hu_profile_photo_path) }}"
                                                 class="w-full h-full object-cover">
                                         @else
                                             <div
                                                 class="w-full h-full bg-indigo-100 flex items-center justify-center text-indigo-600 text-2xl font-bold">
-                                                {{ substr($student->name, 0, 1) }}
+                                                {{ substr($student->hu_name, 0, 1) }}
                                             </div>
                                         @endif
                                     </div>
@@ -326,14 +326,14 @@
                                         title="Online"></div>
                                 </div>
 
-                                <h3 class="text-lg font-bold text-slate-900 truncate w-full mb-1">{{ $student->name }}
+                                <h3 class="text-lg font-bold text-slate-900 truncate w-full mb-1">{{ $student->hu_name }}
                                 </h3>
-                                <p class="text-xs text-slate-500 mb-3">{{ $student->faculty ?? 'Student Seller' }}</p>
+                                <p class="text-xs text-slate-500 mb-3">{{ $student->hu_faculty ?? 'Student Seller' }}</p>
 
                                 <div
                                     class="flex items-center justify-center gap-2 mb-4 bg-slate-50 px-3 py-1.5 rounded-full text-xs font-semibold text-slate-700">
                                     <i class="fas fa-star text-yellow-400"></i>
-                                    {{ number_format($student->average_rating ?? 0, 1) }}
+                                    {{ number_format($student->hu_average_rating ?? 0, 1) }}
                                     <span class="text-slate-300">|</span>
                                     {{ $student->reviewsReceived()->count() }} reviews
                                 </div>

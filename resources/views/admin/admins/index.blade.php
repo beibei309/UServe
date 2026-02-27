@@ -36,27 +36,27 @@
         <tbody>
             @foreach($admins as $admin)
             <tr class="border-b 
-                {{ $admin->role === 'superadmin' ? 'bg-blue-50' : '' }}">
+                {{ $admin->ha_role === 'superadmin' ? 'bg-blue-50' : '' }}">
 
                 <td class="py-3 font-medium">
-                    {{ $admin->name }}
-                    @if($admin->role === 'superadmin')
+                    {{ $admin->ha_name }}
+                    @if($admin->ha_role === 'superadmin')
                         <span class="ml-2 px-2 py-1 text-xs bg-blue-600 text-white rounded">Super Admin</span>
                     @endif
                 </td>
 
-                <td class="py-3">{{ $admin->email }}</td>
+                <td class="py-3">{{ $admin->ha_email }}</td>
 
-                <td class="py-3 capitalize">{{ $admin->role }}</td>
+                <td class="py-3 capitalize">{{ $admin->ha_role }}</td>
 
                 <td class="py-3 flex gap-3">
 
-                    <a href="{{ route('admin.super.admins.edit', $admin->id) }}"
+                          <a href="{{ route('admin.super.admins.edit', $admin->ha_id) }}"
                        class="text-blue-600 hover:underline">Edit</a>
 
                     {{-- ⭐ Bonus Tip 1: Prevent deleting the main superadmin --}}
-                    @if($admin->role !== 'superadmin')
-                    <form action="{{ route('admin.super.admins.delete', $admin->id) }}"
+                      @if($admin->ha_role !== 'superadmin')
+                      <form action="{{ route('admin.super.admins.delete', $admin->ha_id) }}"
                           method="POST"
                           onsubmit="return confirm('Delete admin account?');">
                         @csrf

@@ -6,12 +6,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class Faq extends Model
 {
+     protected $table = 'h2u_faqs';
+     protected $primaryKey = 'hfq_id';
+
      protected $fillable = [
-        'category',
-        'question',
-        'answer',
-        'is_active',
-        'display_order',
+        'hfq_category',
+        'hfq_question',
+        'hfq_answer',
+        'hfq_is_active',
+        'hfq_display_order',
     ];
 }
 

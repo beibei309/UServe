@@ -1,19 +1,19 @@
 @auth
     @php
         $user = auth()->user();
-        $isRestricted = $user->is_blocked || $user->is_suspended || $user->is_blacklisted;
-        $reason = $user->blacklist_reason ?: 'No specific reason provided.';
+        $isRestricted = $user->hu_is_blocked || $user->hu_is_suspended || $user->hu_is_blacklisted;
+        $reason = $user->hu_blacklist_reason ?: 'No specific reason provided.';
 
         $title = 'Account Restricted';
         $message = 'You cannot continue browsing at this time. Please contact support.';
 
-        if ($user->is_blacklisted) {
+        if ($user->hu_is_blacklisted) {
             $title = 'Account Blacklisted';
             $message = 'Your account has been permanently blacklisted. Please contact support for further assistance.';
-        } elseif ($user->is_suspended) {
+        } elseif ($user->hu_is_suspended) {
             $title = 'Account Suspended';
             $message = 'Your account has been suspended temporarily. Please contact support for details.';
-        } elseif ($user->is_blocked) {
+        } elseif ($user->hu_is_blocked) {
             $title = 'Account Blocked';
             $message = 'Your account has been blocked. Please contact support for assistance.';
         }

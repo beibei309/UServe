@@ -99,16 +99,16 @@
                     <tr class="border-b hover:bg-gray-50">
 
                         <td class="py-3 px-4 flex items-center gap-3">
-                            <img src="{{ $user->profile_photo_path ? asset($user->profile_photo_path) : asset('uploads/profile/default.png') }}"
+                            <img src="{{ $user->hu_profile_photo_path ? asset($user->hu_profile_photo_path) : asset('uploads/profile/default.png') }}"
                                 class="w-12 h-12 rounded-full object-cover border">
                             <div>
-                                <p class="font-semibold text-gray-900 text-sm">{{ $user->name }}</p>
-                                <p class="text-xs text-gray-500">{{ $user->email }}</p>
+                                <p class="font-semibold text-gray-900 text-sm">{{ $user->hu_name }}</p>
+                                <p class="text-xs text-gray-500">{{ $user->hu_email }}</p>
                             </div>
                         </td>
 
                         <td class="py-3 px-4 text-sm text-gray-700">
-                            {{ $user->phone ?? '-' }}
+                            {{ $user->hu_phone ?? '-' }}
                         </td>
 
                         <td class="py-3 px-4 text-sm">
@@ -136,12 +136,12 @@
 
                         <td class="py-3 px-4 text-sm">
                             {{-- Check if either flag is true --}}
-                            @if ($user->is_blacklisted || $user->is_suspended)
+                            @if ($user->hu_is_blacklisted || $user->hu_is_suspended)
                                 <span class="px-3 py-1 text-sm bg-red-200 text-red-800 rounded-full">Suspended</span>
-                                @if ($user->blacklist_reason)
-                                    <p class="text-xs text-red-700 mt-1">{{ $user->blacklist_reason }}</p>
+                                @if ($user->hu_blacklist_reason)
+                                    <p class="text-xs text-red-700 mt-1">{{ $user->hu_blacklist_reason }}</p>
                                 @endif
-                            @elseif($user->verification_status == 'approved')
+                            @elseif($user->hu_verification_status == 'approved')
                                 <span class="px-3 py-1 text-sm bg-green-100 text-green-700 rounded-full">
                                     Verified
                                 </span>
@@ -156,7 +156,7 @@
                             <div class="flex justify-center gap-3 items-center">
 
                                 {{-- BUTTON: View Reviews --}}
-                                <button onclick="openReviewsModal('reviews-modal-{{ $user->id }}')"
+                                <button onclick="openReviewsModal('reviews-modal-{{ $user->hu_id }}')"
                                     class="text-yellow-600 hover:text-yellow-800 transition relative group"
                                     title="Read Reviews">
                                     <i class="fa-solid fa-star-half-stroke"></i>
@@ -170,27 +170,27 @@
                                 </button>
 
                                 {{-- VIEW --}}
-                                <a href="{{ route('admin.community.view', $user->id) }}"
+                                <a href="{{ route('admin.community.view', $user->hu_id) }}"
                                     class="text-indigo-600 hover:text-indigo-900 transition" title="View">
                                     <i class="fa-solid fa-eye"></i>
                                 </a>
 
                                 {{-- EDIT --}}
-                                <a href="{{ route('admin.community.edit', $user->id) }}"
+                                <a href="{{ route('admin.community.edit', $user->hu_id) }}"
                                     class="text-blue-600 hover:text-blue-900 transition" title="Edit">
                                     <i class="fa-solid fa-pen-to-square"></i>
                                 </a>
 
                                 {{-- BLACKLIST / UNBLACKLIST --}}
-                                @if (!$user->is_blacklisted && !$user->is_suspended)
+                                @if (!$user->hu_is_blacklisted && !$user->hu_is_suspended)
     {{-- Show Blacklist Button if user is active --}}
-    <button onclick="openBlacklistModal({{ $user->id }})"
+    <button onclick="openBlacklistModal({{ $user->hu_id }})"
         class="text-red-600 hover:text-red-900 transition" title="Blacklist">
         <i class="fa-solid fa-ban"></i>
     </button>
 @else
     {{-- Show Unblacklist Button if user is Blacklisted OR Suspended --}}
-    <form action="{{ route('admin.community.unblacklist', $user->id) }}" method="POST"
+    <form action="{{ route('admin.community.unblacklist', $user->hu_id) }}" method="POST"
         class="inline unblacklist-form">
         @csrf
         <button type="button" onclick="confirmUnblacklist(this)"
@@ -201,11 +201,11 @@
 @endif
                             </div>
 
-                            <div id="reviews-modal-{{ $user->id }}" class="fixed inset-0 z-50 hidden text-left"
+                            <div id="reviews-modal-{{ $user->hu_id }}" class="fixed inset-0 z-50 hidden text-left"
                                 aria-labelledby="modal-title" role="dialog" aria-modal="true">
 
                                 <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity backdrop-blur-sm"
-                                    onclick="closeReviewsModal('reviews-modal-{{ $user->id }}')"></div>
+                                    onclick="closeReviewsModal('reviews-modal-{{ $user->hu_id }}')"></div>
 
                                 <div class="fixed inset-0 z-10 overflow-y-auto">
                                     <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
@@ -217,10 +217,10 @@
                                                 class="bg-gray-50 px-4 py-3 sm:px-6 flex justify-between items-center border-b">
                                                 <h3 class="text-lg font-semibold leading-6 text-gray-900"
                                                     id="modal-title">
-                                                    Reviews for <span class="text-blue-600">{{ $user->name }}</span>
+                                                    Reviews for <span class="text-blue-600">{{ $user->hu_name }}</span>
                                                 </h3>
                                                 <button type="button"
-                                                    onclick="closeReviewsModal('reviews-modal-{{ $user->id }}')"
+                                                    onclick="closeReviewsModal('reviews-modal-{{ $user->hu_id }}')"
                                                     class="text-gray-400 hover:text-gray-500">
                                                     <i class="fa-solid fa-xmark text-xl"></i>
                                                 </button>
@@ -238,47 +238,47 @@
 
                                                                 <div class="flex-shrink-0">
                                                                     <img class="h-10 w-10 rounded-full object-cover"
-                                                                        src="{{ $review->reviewer && $review->reviewer->profile_photo_path ? asset('storage/' . $review->reviewer->profile_photo_path) : asset('uploads/profile/default.png') }}"
+                                                                        src="{{ $review->reviewer && $review->reviewer->hu_profile_photo_path ? asset('storage/' . $review->reviewer->hu_profile_photo_path) : asset('uploads/profile/default.png') }}"
                                                                         alt="">
                                                                 </div>
 
                                                                 <div class="flex-1">
                                                                     <div class="flex items-center justify-between mb-1">
                                                                         <h4 class="text-sm font-bold text-gray-900">
-                                                                            {{ $review->reviewer->name ?? 'Unknown User' }}
+                                                                            {{ $review->reviewer->hu_name ?? 'Unknown User' }}
                                                                         </h4>
                                                                         <span class="text-xs text-gray-500">
-                                                                            {{ $review->created_at->format('M d, Y') }}
+                                                                            {{ optional($review->hr_created_at)->format('M d, Y') ?? '-' }}
                                                                         </span>
                                                                     </div>
 
                                                                     <div class="flex items-center mb-2">
                                                                         @for ($i = 1; $i <= 5; $i++)
                                                                             <i
-                                                                                class="fa-solid fa-star text-xs {{ $i <= $review->rating ? 'text-yellow-400' : 'text-gray-300' }}"></i>
+                                                                                class="fa-solid fa-star text-xs {{ $i <= $review->hr_rating ? 'text-yellow-400' : 'text-gray-300' }}"></i>
                                                                         @endfor
                                                                         <span
-                                                                            class="ml-2 text-xs font-medium text-gray-600">({{ $review->rating }}.0)</span>
+                                                                                class="ml-2 text-xs font-medium text-gray-600">({{ $review->hr_rating }}.0)</span>
                                                                     </div>
 
-                                                                    @if ($review->comment)
+                                                                            @if ($review->hr_comment)
                                                                         <p class="text-sm text-gray-700 italic">
-                                                                            "{{ $review->comment }}"</p>
+                                                                                "{{ $review->hr_comment }}"</p>
                                                                     @else
                                                                         <p class="text-sm text-gray-400 italic">No written
                                                                             comment.</p>
                                                                     @endif
 
-                                                                    @if ($review->reply)
+                                                                            @if ($review->hr_reply)
                                                                         <div
                                                                             class="mt-3 ml-2 pl-3 border-l-2 border-blue-300 bg-blue-50 p-2 rounded-r">
                                                                             <p
                                                                                 class="text-xs font-bold text-blue-800 mb-0.5">
                                                                                 Reply:</p>
                                                                             <p class="text-xs text-blue-900">
-                                                                                {{ $review->reply }}</p>
+                                                                                {{ $review->hr_reply }}</p>
                                                                             <span class="text-[10px] text-blue-400">
-                                                                                {{ \Carbon\Carbon::parse($review->replied_at)->diffForHumans() }}
+                                                                                {{ \Carbon\Carbon::parse($review->hr_replied_at)->diffForHumans() }}
                                                                             </span>
                                                                         </div>
                                                                     @endif
@@ -304,7 +304,7 @@
 
                                             <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
                                                 <button type="button"
-                                                    onclick="closeReviewsModal('reviews-modal-{{ $user->id }}')"
+                                                    onclick="closeReviewsModal('reviews-modal-{{ $user->hu_id }}')"
                                                     class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto">
                                                     Close
                                                 </button>

@@ -15,25 +15,25 @@ class FavoriteController extends Controller
 {
     try {
         $request->validate([
-            'service_id' => 'required|exists:student_services,id',
+            'service_id' => 'required|exists:h2u_student_services,hss_id',
         ]);
 
         $user = Auth::user();
         $serviceId = $request->service_id;
         $service = StudentService::findOrFail($serviceId);
-        $favoritedUserId = $service->user_id;
+        $favoritedUserId = $service->hss_user_id;
 
-        $exists = DB::table('favorites')
-            ->where('user_id', $user->id)
-            ->where('favorited_user_id', $favoritedUserId)
-            ->where('service_id', $serviceId)
+        $exists = DB::table('h2u_favorites')
+            ->where('hf_user_id', $user->hu_id)
+            ->where('hf_favorited_user_id', $favoritedUserId)
+            ->where('hf_service_id', $serviceId)
             ->exists();
 
         if ($exists) {
-            DB::table('favorites')
-                ->where('user_id', $user->id)
-                ->where('favorited_user_id', $favoritedUserId)
-                ->where('service_id', $serviceId)
+            DB::table('h2u_favorites')
+                ->where('hf_user_id', $user->hu_id)
+                ->where('hf_favorited_user_id', $favoritedUserId)
+                ->where('hf_service_id', $serviceId)
                 ->delete();
 
             return response()->json([
@@ -42,10 +42,10 @@ class FavoriteController extends Controller
             ]);
         }
 
-        DB::table('favorites')->insert([
-            'user_id' => $user->id,
-            'favorited_user_id' => $favoritedUserId,
-            'service_id' => $serviceId,
+        DB::table('h2u_favorites')->insert([
+            'hf_user_id' => $user->hu_id,
+            'hf_favorited_user_id' => $favoritedUserId,
+            'hf_service_id' => $serviceId,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -66,11 +66,11 @@ class FavoriteController extends Controller
 
 public function index()
 {
-    $favourites = StudentService::whereIn('id', function ($q) {
-            $q->select('service_id')
-              ->from('favorites')
-              ->where('user_id', Auth::id())
-              ->whereNotNull('service_id');
+        $favourites = StudentService::whereIn('hss_id', function ($q) {
+                        $q->select('hf_service_id')
+                            ->from('h2u_favorites')
+                            ->where('hf_user_id', Auth::id())
+                            ->whereNotNull('hf_service_id');
         })
         // Load the relations
         ->with(['user', 'category']) 
@@ -78,15 +78,15 @@ public function index()
         // --- FIXED LOGIC START (Copied from Services Controller) ---
         // 1. count reviews where reviewee_id matches the service provider
         ->withCount(['reviews' => function ($query) {
-            $query->whereColumn('reviews.reviewee_id', 'student_services.user_id');
+            $query->whereColumn('h2u_reviews.hr_reviewee_id', 'h2u_student_services.hss_user_id');
         }])
         // 2. avg rating where reviewee_id matches the service provider
-        ->withAvg(['reviews' => function ($query) {
-            $query->whereColumn('reviews.reviewee_id', 'student_services.user_id');
-        }], 'rating')
+        ->withAvg(['reviews as reviews_avg_rating' => function ($query) {
+            $query->whereColumn('h2u_reviews.hr_reviewee_id', 'h2u_student_services.hss_user_id');
+        }], 'hr_rating')
         // --- FIXED LOGIC END ---
 
-        ->where('approval_status', 'approved')
+        ->where('hss_approval_status', 'approved')
         ->orderBy('created_at', 'desc')
         ->paginate(12);
 

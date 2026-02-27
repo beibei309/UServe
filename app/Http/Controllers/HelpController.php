@@ -9,11 +9,11 @@ class HelpController extends Controller
 
     public function index(Request $request)
     {
-        $faqs = Faq::where('is_active', true)
-            ->orderBy('category')
-            ->orderBy('display_order')
+        $faqs = Faq::where('hfq_is_active', true)
+            ->orderBy('hfq_category')
+            ->orderBy('hfq_display_order')
             ->get()
-            ->groupBy('category');
+            ->groupBy('hfq_category');
 
         return view('help', compact('faqs'));
     }

@@ -19,17 +19,17 @@ class RequestSeeder extends Seeder
             return;
         }
 
-        $communityUsers = User::where('role', 'community')->get();
+        $communityUsers = User::where('hu_role', 'community')->get();
 
         if ($communityUsers->isEmpty()) {
             $communityUsers->push(User::create([
-                'name' => 'Seeder Community',
-                'email' => 'community+tester@example.com',
-                'password' => Hash::make('password'),
-                'role' => 'community',
-                'phone' => '0190000000',
-                'verification_status' => 'approved',
-                'public_verified_at' => now(),
+                'hu_name' => 'Seeder Community',
+                'hu_email' => 'community+tester@example.com',
+                'hu_password' => Hash::make('password'),
+                'hu_role' => 'community',
+                'hu_phone' => '0190000000',
+                'hu_verification_status' => 'approved',
+                'hu_public_verified_at' => now(),
             ]));
         }
 
@@ -44,26 +44,26 @@ class RequestSeeder extends Seeder
             $paymentStatus = $status === 'completed' ? 'paid' : Arr::random($paymentOptions);
 
             ServiceRequest::create([
-                'student_service_id' => $service->id,
-                'requester_id' => $requester->id,
-                'provider_id' => $service->user_id,
-                'status' => $status,
-                'message' => fake()->sentence(),
-                'offered_price' => $service->suggested_price ?? rand(20, 100),
-                'selected_dates' => now()->addDays(rand(1, 7))->toDateString(),
-                'start_time' => '09:00:00',
-                'end_time' => '11:00:00',
-                'selected_package' => json_encode([
+                'hsr_student_service_id' => $service->hss_id,
+                'hsr_requester_id' => $requester->hu_id,
+                'hsr_provider_id' => $service->hss_user_id,
+                'hsr_status' => $status,
+                'hsr_message' => fake()->sentence(),
+                'hsr_offered_price' => $service->hss_suggested_price ?? rand(20, 100),
+                'hsr_selected_dates' => [now()->addDays(rand(1, 7))->toDateString()],
+                'hsr_start_time' => '09:00:00',
+                'hsr_end_time' => '11:00:00',
+                'hsr_selected_package' => [
                     'tier' => 'basic',
-                    'price' => $service->basic_price,
-                ]),
-                'payment_status' => $paymentStatus,
-                'payment_proof' => null,
-                'dispute_reason' => $paymentStatus === 'dispute' ? 'Sample dispute reason for QA.' : null,
-                'accepted_at' => in_array($status, ['accepted', 'in_progress', 'completed'], true) ? now()->subDays(3) : null,
-                'started_at' => in_array($status, ['in_progress', 'completed'], true) ? now()->subDays(2) : null,
-                'finished_at' => $status === 'completed' ? now()->subDay() : null,
-                'completed_at' => $status === 'completed' ? now()->subDay() : null,
+                    'price' => $service->hss_basic_price,
+                ],
+                'hsr_payment_status' => $paymentStatus,
+                'hsr_payment_proof' => null,
+                'hsr_dispute_reason' => $paymentStatus === 'dispute' ? 'Sample dispute reason for QA.' : null,
+                'hsr_accepted_at' => in_array($status, ['accepted', 'in_progress', 'completed'], true) ? now()->subDays(3) : null,
+                'hsr_started_at' => in_array($status, ['in_progress', 'completed'], true) ? now()->subDays(2) : null,
+                'hsr_finished_at' => $status === 'completed' ? now()->subDay() : null,
+                'hsr_completed_at' => $status === 'completed' ? now()->subDay() : null,
             ]);
         }
     }

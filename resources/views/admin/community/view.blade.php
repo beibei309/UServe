@@ -15,7 +15,7 @@
             <!-- Profile Photo -->
             <div class="h-32 w-32 rounded-full overflow-hidden border">
                 @php
-                    $path = $user->profile_photo_path;
+                    $path = $user->hu_profile_photo_path;
                     // 1. Check if external URL
                     if (Str::startsWith($path, ['http://', 'https://'])) {
                         $imageUrl = $path;
@@ -31,24 +31,24 @@
                         $imageUrl = asset('uploads/profile/default.png');
                     }
                 @endphp
-                <img src="{{ $imageUrl }}" class="w-full h-full object-cover" alt="{{ $user->name }}" />
+                <img src="{{ $imageUrl }}" class="w-full h-full object-cover" alt="{{ $user->hu_name }}" />
             </div>
             <div class="flex-1">
 
                 <!-- Name -->
-                <h1 class="text-3xl font-bold">{{ $user->name }}</h1>
+                <h1 class="text-3xl font-bold">{{ $user->hu_name }}</h1>
 
                 <!-- Email + Phone -->
-                <p class="text-gray-600">{{ $user->email }}</p>
-                <p class="text-gray-600">{{ $user->phone ?? 'No phone provided' }}</p>
+                <p class="text-gray-600">{{ $user->hu_email }}</p>
+                <p class="text-gray-600">{{ $user->hu_phone ?? 'No phone provided' }}</p>
 
                 <!-- Verification -->
                 <div class="mt-2">
-                    @if ($user->verification_status == 'approved')
+                    @if ($user->hu_verification_status == 'approved')
                         <span class="px-3 py-1 text-sm bg-green-100 text-green-700 rounded-full">
                             Approved
                         </span>
-                    @elseif($user->verification_status == 'pending')
+                    @elseif($user->hu_verification_status == 'pending')
                         <span class="px-3 py-1 text-sm bg-yellow-100 text-yellow-700 rounded-full">
                             Pending
                         </span>
@@ -60,14 +60,14 @@
                 </div>
 
                 <!-- Blacklist -->
-                @if ($user->is_blacklisted)
+                @if ($user->hu_is_blacklisted)
                     <div class="mt-2">
                         <span class="px-3 py-1 text-sm bg-red-200 text-red-800 rounded-full">
                            Suspended
                         </span>
 
                         <p class="text-sm text-red-700 mt-1">
-                            Reason: {{ $user->blacklist_reason }}
+                            Reason: {{ $user->hu_blacklist_reason }}
                         </p>
                     </div>
                 @endif
@@ -77,28 +77,28 @@
             <div class="flex flex-col gap-2">
 
                 <!-- Edit -->
-                <a href="{{ route('admin.community.edit', $user->id) }}"
+                <a href="{{ route('admin.community.edit', $user->hu_id) }}"
                     class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 text-sm">
                     Edit User
                 </a>
 
                 <!-- Blacklist / Unblacklist -->
-                @if ($user->is_blacklisted)
-                    <form action="{{ route('admin.community.unblacklist', $user->id) }}" method="POST">
+                @if ($user->hu_is_blacklisted)
+                    <form action="{{ route('admin.community.unblacklist', $user->hu_id) }}" method="POST">
                         @csrf
                         <button class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm w-full">
                             Remove Blacklist
                         </button>
                     </form>
                 @else
-                    <button onclick="openBlacklistModal({{ $user->id }})" 
+                    <button onclick="openBlacklistModal({{ $user->hu_id }})" 
                         class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm w-full">
                         Suspend User
                     </button>
                 @endif
 
                 <!-- Delete -->
-                <form action="{{ route('admin.community.delete', $user->id) }}" method="POST"
+                <form action="{{ route('admin.community.delete', $user->hu_id) }}" method="POST"
                     onsubmit="return confirm('Are you sure you want to delete this user?');">
                     @csrf
                     @method('DELETE')
@@ -126,27 +126,27 @@
                         <i class="fas fa-camera"></i> Live Selfie Check
                     </h3>
 
-                    @if ($user->selfie_media_path)
+                    @if ($user->hu_selfie_media_path)
                         <div
                             class="relative group border border-slate-200 rounded-xl overflow-hidden bg-slate-50 flex-grow">
-                            <img src="{{ route('admin.verifications.selfie', $user->id) }}"
+                            <img src="{{ route('admin.verifications.selfie', $user->hu_id) }}"
                                 class="w-full h-72 object-cover transition duration-300 group-hover:scale-105"
                                 alt="Live Selfie">
 
                             <div
                                 class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                <button onclick="openSelfieModal('{{ route('admin.verifications.selfie', $user->id) }}')"
+                                <button onclick="openSelfieModal('{{ route('admin.verifications.selfie', $user->hu_id) }}')"
                                     class="bg-white text-slate-900 px-4 py-2 rounded-full font-semibold text-sm shadow-xl">
                                     <i class="fas fa-expand-arrows-alt mr-1"></i> View Full Size
                                 </button>
                             </div>
 
-                            @if ($user->verification_note)
+                            @if ($user->hu_verification_note)
                                 <div
                                     class="absolute bottom-3 left-3 right-3 bg-amber-50/90 backdrop-blur border border-amber-200 p-2 rounded-lg">
                                     <p class="text-[10px] uppercase font-bold text-amber-700 leading-tight">Verification
                                         Challenge</p>
-                                    <p class="text-sm text-amber-900 font-medium">{{ $user->verification_note }}</p>
+                                    <p class="text-sm text-amber-900 font-medium">{{ $user->hu_verification_note }}</p>
                                 </div>
                             @endif
                         </div>
@@ -164,7 +164,7 @@
                         <i class="fas fa-file-invoice"></i> Official Proof Document
                     </h3>
 
-                    @if ($user->verification_document_path)
+                    @if ($user->hu_verification_document_path)
                         <div
                             class="border border-slate-200 rounded-xl p-6 bg-white flex flex-col items-center justify-center h-72">
                             <div
@@ -174,7 +174,7 @@
                             <h4 class="text-slate-900 font-bold">Verification Document</h4>
                             <p class="text-slate-500 text-xs mb-6">Stored securely in protected local storage</p>
 
-                            <button onclick="document.getElementById('modalDocumentFrame').src='{{ route('admin.verifications.document', $user->id) }}'; document.getElementById('documentModal').classList.remove('hidden')"
+                            <button onclick="document.getElementById('modalDocumentFrame').src='{{ route('admin.verifications.document', $user->hu_id) }}'; document.getElementById('documentModal').classList.remove('hidden')"
         class="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white text-sm font-bold rounded-xl w-full justify-center">
     <i class="fas fa-eye"></i> Preview Document
 </button>
@@ -195,7 +195,7 @@
                         <h3 class="text-lg font-bold text-slate-800">Geographic Verification</h3>
                         <p class="text-xs text-slate-500">Last known location based on IP or GPS coordinates</p>
                     </div>
-                    @if ($user->latitude && $user->longitude)
+                    @if ($user->hu_latitude && $user->hu_longitude)
                         <span
                             class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700">
                             <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -204,14 +204,14 @@
                     @endif
                 </div>
 
-                @if ($user->latitude && $user->longitude)
+                @if ($user->hu_latitude && $user->hu_longitude)
                     <div class="relative">
                         <div id="map" class="w-full h-64 rounded-xl border border-slate-200 shadow-sm z-0"></div>
                         <div
                             class="mt-3 flex flex-wrap gap-4 text-xs font-mono text-slate-600 bg-slate-50 p-3 rounded-lg border border-slate-100">
-                            <p><span class="text-slate-400">LAT:</span> {{ $user->latitude }}</p>
-                            <p><span class="text-slate-400">LNG:</span> {{ $user->longitude }}</p>
-                            <a href="https://www.google.com/maps/search/?api=1&query={{ $user->latitude }},{{ $user->longitude }}"
+                            <p><span class="text-slate-400">LAT:</span> {{ $user->hu_latitude }}</p>
+                            <p><span class="text-slate-400">LNG:</span> {{ $user->hu_longitude }}</p>
+                            <a href="https://www.google.com/maps/search/?api=1&query={{ $user->hu_latitude }},{{ $user->hu_longitude }}"
                                 target="_blank"
                                 class="text-indigo-600 font-bold hover:text-indigo-800 ml-auto flex items-center gap-1">
                                 VIEW ON GOOGLE MAPS <i class="fas fa-external-link-alt text-[10px]"></i>
@@ -271,7 +271,7 @@
 
                 <div class="mt-4 text-center">
                     <p class="text-white font-medium">Live Selfie Verification</p>
-                    <p class="text-slate-400 text-xs">Captured on: {{ $user->created_at->format('d M Y, H:i A') }}</p>
+                    <p class="text-slate-400 text-xs">Captured on: {{ $user->hu_created_at->format('d M Y, H:i A') }}</p>
                 </div>
             </div>
         </div>
@@ -281,9 +281,9 @@
         <div class="bg-white shadow rounded-lg p-6 mt-6">
             <h2 class="text-xl font-semibold mb-3">Account Information</h2>
 
-            <p class="text-gray-700"><strong>User ID:</strong> {{ $user->id }}</p>
-            <p class="text-gray-700"><strong>Registered On:</strong> {{ $user->created_at->format('d M Y, h:i A') }}</p>
-            <p class="text-gray-700"><strong>Last Updated:</strong> {{ $user->updated_at->format('d M Y, h:i A') }}</p>
+            <p class="text-gray-700"><strong>User ID:</strong> {{ $user->hu_id }}</p>
+            <p class="text-gray-700"><strong>Registered On:</strong> {{ $user->hu_created_at->format('d M Y, h:i A') }}</p>
+            <p class="text-gray-700"><strong>Last Updated:</strong> {{ $user->hu_updated_at->format('d M Y, h:i A') }}</p>
 
         </div>
 
@@ -340,7 +340,7 @@
             let form = document.createElement("form");
             form.method = "POST";
             // Replace PLACEHOLDER with actual ID
-            // NOTE: We used 'selectedUserId' but in View page we might just need {{ $user->id }} 
+            // NOTE: We used 'selectedUserId' but in View page we might just need {{ $user->hu_id }} 
             // BUT to keep it consistent with the JS function signature, we'll use the variable.
             form.action = "{{ route('admin.community.blacklist', 'ID_PLACEHOLDER') }}"
                 .replace('ID_PLACEHOLDER', selectedUserId);
@@ -416,8 +416,8 @@
         });
         document.addEventListener('DOMContentLoaded', function() {
             // Pastikan data lat/long wujud sebelum run script
-            const lat = {{ $user->latitude ?? 'null' }};
-            const lng = {{ $user->longitude ?? 'null' }};
+            const lat = {{ $user->hu_latitude ?? 'null' }};
+            const lng = {{ $user->hu_longitude ?? 'null' }};
 
             if (lat && lng) {
                 // Initialize map
@@ -440,7 +440,7 @@
                         icon: userIcon
                     })
                     .addTo(map)
-                    .bindPopup("<b>{{ $user->name }}</b><br>Location Registered.")
+                    .bindPopup("<b>{{ $user->hu_name }}</b><br>Location Registered.")
                     .openPopup();
             }
         });

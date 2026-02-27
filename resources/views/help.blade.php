@@ -51,22 +51,22 @@
                         <div class="grid grid-cols-1 gap-4">
                             @foreach ($items as $faq)
                                 <div class="group"
-                                    x-show="search === '' || '{{ strtolower($faq->question) }}'.includes(search.toLowerCase())">
+                                    x-show="search === '' || '{{ strtolower($faq->hfq_question) }}'.includes(search.toLowerCase())">
                                     <div class="bg-white rounded-2xl border border-slate-100 shadow-sm transition-all duration-300 group-hover:border-indigo-200 group-hover:shadow-md overflow-hidden"
-                                        :class="selected === {{ $faq->id }} ?
+                                        :class="selected === {{ $faq->hfq_id }} ?
                                             'ring-2 ring-indigo-500/10 border-indigo-200 shadow-lg' : ''">
 
-                                        <button @click="toggle({{ $faq->id }})"
+                                        <button @click="toggle({{ $faq->hfq_id }})"
                                             class="w-full px-6 py-5 text-left flex justify-between items-center focus:outline-none">
                                             <span class="font-bold text-slate-700 transition-colors"
-                                                :class="selected === {{ $faq->id }} ? 'text-indigo-600' :
+                                                :class="selected === {{ $faq->hfq_id }} ? 'text-indigo-600' :
                                                     'group-hover:text-slate-900'">
-                                                {{ $faq->question }}
+                                                {{ $faq->hfq_question }}
                                             </span>
                                             <span
                                                 class="ml-6 flex-shrink-0 w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-indigo-50 transition-colors">
                                                 <svg class="w-4 h-4 text-slate-400 transition-all duration-300"
-                                                    :class="selected === {{ $faq->id }} ? 'rotate-180 text-indigo-600' : ''"
+                                                    :class="selected === {{ $faq->hfq_id }} ? 'rotate-180 text-indigo-600' : ''"
                                                     fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path stroke-linecap="round" stroke-linejoin="round"
                                                         stroke-width="2" d="M19 9l-7 7-7-7" />
@@ -74,11 +74,11 @@
                                             </span>
                                         </button>
 
-                                        <div x-show="selected === {{ $faq->id }}" x-collapse
+                                        <div x-show="selected === {{ $faq->hfq_id }}" x-collapse
                                             class="bg-slate-50/50">
                                             <div class="px-6 pb-6 text-slate-600 leading-relaxed text-sm pt-2">
                                                 <div class="prose prose-slate prose-sm max-w-none">
-                                                    {!! nl2br(e($faq->answer)) !!}
+                                                    {!! nl2br(e($faq->hfq_answer)) !!}
                                                 </div>
                                             </div>
                                         </div>

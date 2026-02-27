@@ -26,7 +26,7 @@
                                 <div>
                                     <label for="name" class="block text-sm font-medium text-gray-700">Full Name</label>
                                     <input type="text" name="name" id="name"
-                                        value="{{ old('name', $user->name) }}"
+                                        value="{{ old('name', $user->hu_name) }}"
                                         class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                                     @error('name')
                                         <span class="text-red-500 text-xs">{{ $message }}</span>
@@ -36,7 +36,7 @@
                                 <div>
                                     <label for="email" class="block text-sm font-medium text-gray-700">Email
                                         Address</label>
-                                    <input type="email" value="{{ $user->email }}" disabled
+                                    <input type="email" value="{{ $user->hu_email }}" disabled
                                         class="mt-1 block w-full rounded-lg border-gray-200 bg-gray-100 text-gray-500 cursor-not-allowed sm:text-sm">
                                     <p class="mt-1 text-xs text-gray-500">Email cannot be changed directly.</p>
                                 </div>
@@ -49,43 +49,43 @@
                                             class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                                             <option value="">Select Faculty</option>
                                             <option value="Fakulti Komputeran dan Meta-Teknologi"
-                                                {{ old('faculty', $user->faculty) == 'Fakulti Komputeran dan Meta-Teknologi' ? 'selected' : '' }}>
+                                                {{ old('faculty', $user->hu_faculty) == 'Fakulti Komputeran dan Meta-Teknologi' ? 'selected' : '' }}>
                                                 Fakulti Komputeran dan Meta-Teknologi
                                             </option>
                                             <option value="Fakulti Bahasa dan Komunikasi"
-                                                {{ old('faculty', $user->faculty) == 'Fakulti Bahasa dan Komunikasi' ? 'selected' : '' }}>
+                                                {{ old('faculty', $user->hu_faculty) == 'Fakulti Bahasa dan Komunikasi' ? 'selected' : '' }}>
                                                 Fakulti Bahasa dan Komunikasi
                                             </option>
                                             <option value="Fakulti Pembangunan Manusia"
-                                                {{ old('faculty', $user->faculty) == 'Fakulti Pembangunan Manusia' ? 'selected' : '' }}>
+                                                {{ old('faculty', $user->hu_faculty) == 'Fakulti Pembangunan Manusia' ? 'selected' : '' }}>
                                                 Fakulti Pembangunan Manusia
                                             </option>
                                             <option value="Fakulti Sains dan Matematik"
-                                                {{ old('faculty', $user->faculty) == 'Fakulti Sains dan Matematik' ? 'selected' : '' }}>
+                                                {{ old('faculty', $user->hu_faculty) == 'Fakulti Sains dan Matematik' ? 'selected' : '' }}>
                                                 Fakulti Sains dan Matematik
                                             </option>
                                             <option value="Fakulti Pengurusan dan Ekonomi"
-                                                {{ old('faculty', $user->faculty) == 'Fakulti Pengurusan dan Ekonomi' ? 'selected' : '' }}>
+                                                {{ old('faculty', $user->hu_faculty) == 'Fakulti Pengurusan dan Ekonomi' ? 'selected' : '' }}>
                                                 Fakulti Pengurusan dan Ekonomi
                                             </option>
                                             <option value="Fakulti Sains Kemanusiaan"
-                                                {{ old('faculty', $user->faculty) == 'Fakulti Sains Kemanusiaan' ? 'selected' : '' }}>
+                                                {{ old('faculty', $user->hu_faculty) == 'Fakulti Sains Kemanusiaan' ? 'selected' : '' }}>
                                                 Fakulti Sains Kemanusiaan
                                             </option>
                                             <option value="Fakulti Muzik dan Seni Persembahan"
-                                                {{ old('faculty', $user->faculty) == 'Fakulti Muzik dan Seni Persembahan' ? 'selected' : '' }}>
+                                                {{ old('faculty', $user->hu_faculty) == 'Fakulti Muzik dan Seni Persembahan' ? 'selected' : '' }}>
                                                 Fakulti Muzik dan Seni Persembahan
                                             </option>
                                             <option value="Fakulti Seni, Komputeran dan Industri Kreatif"
-                                                {{ old('faculty', $user->faculty) == 'Fakulti Seni, Komputeran dan Industri Kreatif' ? 'selected' : '' }}>
+                                                {{ old('faculty', $user->hu_faculty) == 'Fakulti Seni, Komputeran dan Industri Kreatif' ? 'selected' : '' }}>
                                                 Fakulti Seni, Komputeran dan Industri Kreatif
                                             </option>
                                             <option value="Fakulti Sains Sukan dan Kejurulatihan"
-                                                {{ old('faculty', $user->faculty) == 'Fakulti Sains Sukan dan Kejurulatihan' ? 'selected' : '' }}>
+                                                {{ old('faculty', $user->hu_faculty) == 'Fakulti Sains Sukan dan Kejurulatihan' ? 'selected' : '' }}>
                                                 Fakulti Sains Sukan dan Kejurulatihan
                                             </option>
                                             <option value="Fakulti Teknikal dan Vokasional"
-                                                {{ old('faculty', $user->faculty) == 'Fakulti Teknikal dan Vokasional' ? 'selected' : '' }}>
+                                                {{ old('faculty', $user->hu_faculty) == 'Fakulti Teknikal dan Vokasional' ? 'selected' : '' }}>
                                                 Fakulti Teknikal dan Vokasional
                                             </option>
                                         </select>
@@ -98,7 +98,7 @@
                                         <label for="course" class="block text-sm font-medium text-gray-700">Course /
                                             Program</label>
                                         <input type="text" name="course" id="course"
-                                            value="{{ old('course', $user->course) }}"
+                                            value="{{ old('course', $user->hu_course) }}"
                                             placeholder="e.g. Software Engineering"
                                             class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                                         @error('course')
@@ -118,7 +118,7 @@
                                 <div class="mt-1">
                                     <textarea id="bio" name="bio" rows="5"
                                         class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-lg"
-                                        placeholder="Tell us about yourself, your skills, and what services you offer...">{{ old('bio', $user->bio) }}</textarea>
+                                        placeholder="Tell us about yourself, your skills, and what services you offer...">{{ old('bio', $user->hu_bio) }}</textarea>
                                 </div>
                                 <p class="mt-2 text-sm text-gray-500">Brief description for your profile. URLs are
                                     hyperlinked.</p>
@@ -135,7 +135,7 @@
                                 <label for="skills" class="block text-sm font-medium text-gray-700">Skills (Comma
                                     Separated)</label>
                                 <input type="text" name="skills" id="skills"
-                                    value="{{ old('skills', $user->skills) }}"
+                                    value="{{ old('skills', $user->hu_skills) }}"
                                     class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                                     placeholder="Graphic Design, Data Entry, Photography">
                                 <p class="mt-2 text-sm text-gray-500">Separate each skill with a comma.</p>
@@ -157,7 +157,7 @@
                                     <div class="mt-1">
                                         <textarea id="work_experience_message" name="work_experience_message" rows="4"
                                             class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-lg"
-                                            placeholder="Describe your past work experience, projects, or achievements...">{{ old('work_experience_message', $user->work_experience_message) }}</textarea>
+                                            placeholder="Describe your past work experience, projects, or achievements...">{{ old('work_experience_message', $user->hu_work_experience_message) }}</textarea>
                                     </div>
                                     <p class="mt-2 text-sm text-gray-500">Share details about your relevant work history.
                                     </p>
@@ -195,7 +195,7 @@
                                     </div>
 
                                     {{-- Display existing file if present --}}
-                                    @if ($user->work_experience_file)
+                                    @if ($user->hu_work_experience_file)
     <div class="mt-3 flex items-center justify-between p-2 bg-indigo-50 rounded-lg border border-indigo-100">
         <div class="flex items-center truncate">
             <svg class="w-5 h-5 text-indigo-500 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -204,7 +204,7 @@
                 </path>
             </svg>
             <span class="text-sm text-indigo-700 truncate">
-                Current: <a href="{{ asset('storage/' . $user->work_experience_file) }}" target="_blank"
+                Current: <a href="{{ asset('storage/' . $user->hu_work_experience_file) }}" target="_blank"
                     class="underline hover:text-indigo-900 font-medium">View Document</a>
             </span>
         </div>
@@ -239,7 +239,7 @@
                                     Save Changes
                                 </button>
 
-                                <a href="{{ route('students.index', $user->id) }}"
+                                <a href="{{ route('students.index', $user->hu_id) }}"
                                     class="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none transition-colors">
                                     Cancel
                                 </a>

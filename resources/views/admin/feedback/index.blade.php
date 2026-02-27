@@ -28,47 +28,47 @@
                 @foreach($usersWithReviews as $user)
                     <tr class="border-b hover:bg-gray-50">
                         <td class="py-3 px-4 text-sm">
-                            <p class="font-bold">{{ $user->name }}</p>
-                            <p class="text-xs text-gray-500">{{ $user->email }} ({{ $user->role }})</p>
+                            <p class="font-bold">{{ $user->hu_name }}</p>
+                            <p class="text-xs text-gray-500">{{ $user->hu_email }} ({{ $user->hu_role }})</p>
                         </td>
                         
                         {{-- Average Rating: Tentukan warna berdasarkan rating --}}
                         <td class="py-3 px-4 text-sm">
-                            <span class="font-semibold {{ $user->average_rating < 3.0 ? 'text-red-600' : 'text-green-600' }}">
-                                {{ number_format($user->average_rating, 2) }} / 5.0
+                            <span class="font-semibold {{ ($user->reviews_received_avg_rating ?? 0) < 3.0 ? 'text-red-600' : 'text-green-600' }}">
+                                {{ number_format($user->reviews_received_avg_rating ?? 0, 2) }} / 5.0
                             </span>
-                            <span class="text-xs text-gray-500">({{ $user->total_reviews }} reviews)</span>
+                            <span class="text-xs text-gray-500">({{ $user->reviews_received_count ?? 0 }} reviews)</span>
                         </td>
                         
                         {{-- Warning Count --}}
-                        <td class="py-3 px-4 text-sm font-semibold {{ $user->warning_count >= 2 ? 'text-red-700' : 'text-yellow-600' }}">
-                            {{ $user->warning_count }} / 2
+                        <td class="py-3 px-4 text-sm font-semibold {{ $user->hu_warning_count >= 2 ? 'text-red-700' : 'text-yellow-600' }}">
+                            {{ $user->hu_warning_count }} / 2
                         </td>
                         
                         {{-- Block Status --}}
                         <td class="py-3 px-4">
                             <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium 
-                                {{ $user->is_blocked ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800' }}"> 
-                                {{ $user->is_blocked ? 'BLOCKED' : 'Active' }} 
+                                {{ $user->hu_is_blocked ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800' }}"> 
+                                {{ $user->hu_is_blocked ? 'BLOCKED' : 'Active' }} 
                             </span> 
                         </td>
                         
                         {{-- Actions: Notify/Block --}}
                         <td class="py-3 px-4 text-sm">
-                            @if (!$user->is_blocked)
-                                @if ($user->warning_count < 2)
+                            @if (!$user->hu_is_blocked)
+                                @if ($user->hu_warning_count < 2)
                                     {{-- Form untuk send warning --}}
-                                    <form action="{{ route('admin.feedback.warning', $user->id) }}" method="POST" class="inline-block"
-                                        onsubmit="return confirm('Send warning to {{ $user->name }} (Warning #{{ $user->warning_count + 1 }})?');">
+                                    <form action="{{ route('admin.feedback.warning', $user->hu_id) }}" method="POST" class="inline-block"
+                                        onsubmit="return confirm('Send warning to {{ $user->hu_name }} (Warning #{{ $user->hu_warning_count + 1 }})?');">
                                         @csrf
                                         <button type="submit" class="px-3 py-1 bg-yellow-500 text-white text-xs rounded hover:bg-yellow-600 transition-colors">
-                                            Notify Warning ({{ $user->warning_count + 1 }}/2)
+                                            Notify Warning ({{ $user->hu_warning_count + 1 }}/2)
                                         </button>
                                     </form>
                                 @else
                                     {{-- Form untuk block user --}}
-                                    <form action="{{ route('admin.feedback.block', $user->id) }}" method="POST" class="inline-block"
-                                        onsubmit="return confirm('FINAL WARNING: Block user {{ $user->name }} permanently?');">
+                                    <form action="{{ route('admin.feedback.block', $user->hu_id) }}" method="POST" class="inline-block"
+                                        onsubmit="return confirm('FINAL WARNING: Block user {{ $user->hu_name }} permanently?');">
                                         @csrf
                                         <button type="submit" class="px-3 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors">
                                             BLOCK USER

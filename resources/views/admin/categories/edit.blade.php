@@ -23,33 +23,33 @@
             <div class="space-y-6">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Category Name</label>
-                    <input type="text" name="name" value="{{ old('name', $category->name ?? '') }}" 
+                    <input type="text" name="name" value="{{ old('name', $category->hc_name ?? '') }}" 
                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 outline-none" required>
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Slug</label>
-                    <input type="text" name="slug" value="{{ old('slug', $category->slug ?? '') }}" 
+                    <input type="text" name="slug" value="{{ old('slug', $category->hc_slug ?? '') }}" 
                            class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50">
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
                     <textarea name="description" rows="3" 
-                              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 outline-none">{{ old('description', $category->description ?? '') }}</textarea>
+                              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 outline-none">{{ old('description', $category->hc_description ?? '') }}</textarea>
                 </div>
 
                 <div class="flex items-center gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Color</label>
-                        <input type="color" name="color" value="{{ old('color', $category->color ?? '#3b82f6') }}" 
+                        <input type="color" name="color" value="{{ old('color', $category->hc_color ?? '#3b82f6') }}" 
                                class="h-10 w-20 cursor-pointer border rounded-lg p-1">
                     </div>
                     
                     <div class="flex items-center pt-6">
                         <input type="hidden" name="is_active" value="0">
                         <input id="is_active" name="is_active" type="checkbox" value="1" 
-                               {{ old('is_active', $category->is_active ?? true) ? 'checked' : '' }}
+                               {{ old('is_active', $category->hc_is_active ?? true) ? 'checked' : '' }}
                                class="h-5 w-5 text-blue-600 rounded">
                         <label for="is_active" class="ml-2 text-sm text-gray-900 font-medium">Is Active?</label>
                     </div>
@@ -61,10 +61,10 @@
                 
                 <div class="mb-4 relative">
                     <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">
-                        <i id="previewIcon" class="{{ old('icon', $category->icon ?? 'fa fa-folder') }}"></i>
+                        <i id="previewIcon" class="{{ old('icon', $category->hc_icon ?? 'fa fa-folder') }}"></i>
                     </span>
                     <input type="text" id="iconInput" name="icon" 
-                           value="{{ old('icon', $category->icon ?? '') }}" 
+                           value="{{ old('icon', $category->hc_icon ?? '') }}" 
                            placeholder="fa fa-user"
                            class="w-full pl-10 px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 outline-none text-sm">
                 </div>

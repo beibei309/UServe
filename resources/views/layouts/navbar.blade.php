@@ -15,14 +15,14 @@
 @php
     $user = auth()->user();
     $isLoggedIn = auth()->check();
-    $isHelper = $isLoggedIn && $user->role === 'helper';
+    $isHelper = $isLoggedIn && $user->hu_role === 'helper';
 
     // Determine View Mode: 'seller' or 'buyer' (Default)
     // If user is not logged in, default to buyer.
     $viewMode = session('view_mode', 'buyer');
 
     // Safety check: If role is student, force buyer mode
-    if ($isLoggedIn && $user->role === 'student') {
+    if ($isLoggedIn && $user->hu_role === 'student') {
         $viewMode = 'buyer';
     }
 @endphp
@@ -174,7 +174,7 @@
                     </div>
 
                     {{-- SWITCH MODE BUTTONS --}}
-                    @if ($user->role === 'student')
+                    @if ($user->hu_role === 'student')
                         <a href="{{ route('onboarding.students') }}"
                             class="hidden lg:inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-full shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
                             Become a Seller
@@ -198,9 +198,9 @@
                             id="user-menu-button">
                             <span class="sr-only">Open user menu</span>
                             <img class="h-9 w-9 rounded-full object-cover border border-gray-200"
-                                src="{{ $user->profile_photo_path ? asset($user->profile_photo_path) : 'https://ui-avatars.com/api/?name=' . urlencode($user->name) . '&background=random' }}"
-                                alt="{{ $user->name }}">
-                            @if ($user->verification_status === 'approved')
+                                src="{{ $user->hu_profile_photo_path ? asset($user->hu_profile_photo_path) : 'https://ui-avatars.com/api/?name=' . urlencode($user->hu_name) . '&background=random' }}"
+                                alt="{{ $user->hu_name }}">
+                            @if ($user->hu_verification_status === 'approved')
                                 <span
                                     class="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-blue-500 ring-2 ring-white"
                                     title="Verified">
@@ -217,8 +217,8 @@
                             class="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-50"
                             style="display: none;">
                             <div class="px-4 py-3 border-b border-gray-100">
-                                <p class="text-sm text-gray-900 font-semibold truncate">{{ $user->name }}</p>
-                                <p class="text-xs text-gray-500 truncate">{{ $user->email }}</p>
+                                <p class="text-sm text-gray-900 font-semibold truncate">{{ $user->hu_name }}</p>
+                                <p class="text-xs text-gray-500 truncate">{{ $user->hu_email }}</p>
                             </div>
                             <a href="{{ route('profile.edit') }}"
                                 class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-indigo-600">Your
@@ -300,9 +300,9 @@
                 <div class="flex items-center px-5">
                     <div class="flex-shrink-0 relative">
                         <img class="h-10 w-10 rounded-full border border-gray-200"
-                            src="{{ $user->profile_photo_path ? asset($user->profile_photo_path) : 'https://ui-avatars.com/api/?name=' . urlencode($user->name) }}"
+                            src="{{ $user->hu_profile_photo_path ? asset($user->hu_profile_photo_path) : 'https://ui-avatars.com/api/?name=' . urlencode($user->hu_name) }}"
                             alt="">
-                        @if ($user->verification_status === 'approved')
+                        @if ($user->hu_verification_status === 'approved')
                             <span
                                 class="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-blue-500 ring-2 ring-white"
                                 title="Verified">
@@ -315,8 +315,8 @@
                         @endif
                     </div>
                     <div class="ml-3">
-                        <div class="text-base font-medium text-gray-800">{{ $user->name }}</div>
-                        <div class="text-sm font-medium text-gray-500">{{ $user->email }}</div>
+                        <div class="text-base font-medium text-gray-800">{{ $user->hu_name }}</div>
+                        <div class="text-sm font-medium text-gray-500">{{ $user->hu_email }}</div>
                     </div>
                 </div>
                 <div class="mt-3 px-2 space-y-1">
@@ -332,7 +332,7 @@
                             class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50">Orders</a>
                     @endif
 
-                    @if ($user->role === 'student')
+                    @if ($user->hu_role === 'student')
                         <a href="{{ route('onboarding.students') }}"
                             class="block px-3 py-2 rounded-md text-base font-medium text-indigo-600 hover:bg-indigo-50">Become
                             a Seller</a>

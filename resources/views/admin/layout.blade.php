@@ -188,7 +188,7 @@
 
                 </ul>
 
-                @if (auth('admin')->user()->role === 'superadmin')
+                @if (auth('admin')->user()->ha_role === 'superadmin')
                     <div class="px-6 py-4 mt-2">
                         <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Super Admin</p>
                     </div>
@@ -212,11 +212,11 @@
                 <div class="flex items-center gap-3">
                     <div
                         class="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-sm">
-                        {{ strtoupper(auth('admin')->user()->name[0]) }}
+                        {{ strtoupper(auth('admin')->user()->ha_name[0]) }}
                     </div>
                     <div class="flex-1 min-w-0">
-                        <p class="text-sm font-medium text-gray-900 truncate">{{ auth('admin')->user()->name }}</p>
-                        <p class="text-xs text-gray-500 truncate">{{ auth('admin')->user()->role }}</p>
+                        <p class="text-sm font-medium text-gray-900 truncate">{{ auth('admin')->user()->ha_name }}</p>
+                        <p class="text-xs text-gray-500 truncate">{{ auth('admin')->user()->ha_role }}</p>
                     </div>
                     <form method="POST" action="{{ route('admin.logout') }}">
                         @csrf

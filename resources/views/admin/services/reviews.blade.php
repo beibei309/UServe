@@ -9,11 +9,11 @@
     <!-- LEFT -->
     <div>
         <h1 class="text-2xl font-bold text-gray-800">
-            Reviews for: {{ $service->title }}
+            Reviews for: {{ $service->hss_title }}
         </h1>
 
         <p class="text-sm text-gray-500 mt-1">
-            Seller: {{ $service->user->name ?? 'Unknown' }}
+            Seller: {{ $service->user->hu_name ?? 'Unknown' }}
         </p>
     </div>
 
@@ -42,26 +42,26 @@
                 @forelse($reviews as $review)
                 <tr>
                     <td class="px-6 py-3">
-                        {{ $review->reviewer->name ?? 'Unknown User' }}
+                        {{ $review->reviewer->hu_name ?? 'Unknown User' }}
                     </td>
 
                     <td class="px-6 py-3 font-bold">
-                        ⭐ {{ $review->rating }}
+                        ⭐ {{ $review->hr_rating }}
                     </td>
 
                     <td class="px-6 py-3">
-                        {{ $review->comment ?? '-' }}
+                        {{ $review->hr_comment ?? '-' }}
                         
-                        @if($review->reply)
+                        @if($review->hr_reply)
                             <div class="mt-2 text-sm bg-gray-100 p-2 rounded">
                                 <strong>Seller Reply:</strong>
-                                {{ $review->reply }}
+                                {{ $review->hr_reply }}
                             </div>
                         @endif
                     </td>
 
                     <td class="px-6 py-3 text-sm text-gray-500">
-                        {{ $review->created_at->format('d M Y h:i A') }}
+                        {{ optional($review->hr_created_at)->format('d M Y h:i A') ?? '-' }}
                     </td>
                 </tr>
                 @empty

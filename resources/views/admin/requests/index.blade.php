@@ -56,9 +56,9 @@
                             class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
                             <option value="">All Categories</option>
                             @foreach ($categories ?? [] as $category)
-                                <option value="{{ $category->id }}"
-                                    {{ request('category') == $category->id ? 'selected' : '' }}>
-                                    {{ $category->name }}
+                                <option value="{{ $category->hc_id }}"
+                                    {{ request('category') == $category->hc_id ? 'selected' : '' }}>
+                                    {{ $category->hc_name }}
                                 </option>
                             @endforeach
                         </select>
@@ -98,22 +98,22 @@
                         <tbody class="divide-y divide-gray-100">
                             @foreach ($requests as $request)
                                 <tr
-                                    class="hover:bg-gray-50/50 transition-colors {{ $request->status === 'disputed' ? 'bg-red-50/30' : '' }}">
+                                    class="hover:bg-gray-50/50 transition-colors {{ $request->hsr_status === 'disputed' ? 'bg-red-50/30' : '' }}">
 
                                     {{-- Request Details --}}
                                     <td class="py-4 px-6">
                                         <div class="flex items-center gap-3">
                                             <div
                                                 class="h-10 w-10 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600 font-bold text-lg">
-                                                {{ substr($request->studentService->title, 0, 1) }}
+                                                {{ substr($request->studentService->hss_title, 0, 1) }}
                                             </div>
                                             <div>
                                                 <div class="text-sm font-semibold text-gray-900">
-                                                    {{ Str::limit($request->studentService->title, 25) }}</div>
+                                                    {{ Str::limit($request->studentService->hss_title, 25) }}</div>
                                                 <div class="text-xs text-gray-500">
                                                     <span
-                                                        class="capitalize text-indigo-600 font-medium">{{ $request->selected_package }}</span>
-                                                    • RM {{ number_format($request->offered_price, 2) }}
+                                                        class="capitalize text-indigo-600 font-medium">{{ $request->hsr_selected_package }}</span>
+                                                    • RM {{ number_format($request->hsr_offered_price, 2) }}
                                                 </div>
                                             </div>
                                         </div>
@@ -125,12 +125,12 @@
                                             <div class="text-xs flex items-center gap-2">
                                                 <span class="text-gray-400 w-12">From:</span>
                                                 <span
-                                                    class="font-medium text-gray-900">{{ $request->requester->name }}</span>
+                                                    class="font-medium text-gray-900">{{ $request->requester->hu_name }}</span>
                                             </div>
                                             <div class="text-xs flex items-center gap-2">
                                                 <span class="text-gray-400 w-12">To:</span>
                                                 <span
-                                                    class="font-medium text-gray-900">{{ $request->provider->name }}</span>
+                                                    class="font-medium text-gray-900">{{ $request->provider->hu_name }}</span>
                                             </div>
                                         </div>
                                     </td>
@@ -138,7 +138,7 @@
                                     {{-- Schedule --}}
                                     <td class="py-4 px-6">
                                         <div class="text-sm text-gray-900">
-                                            {{ \Carbon\Carbon::parse($request->selected_dates)->format('d M Y') }}
+                                            {{ \Carbon\Carbon::parse($request->hsr_selected_dates)->format('d M Y') }}
                                         </div>
                                         <div class="text-xs text-gray-500">
                                             {{ \Carbon\Carbon::parse($request->created_at)->diffForHumans() }}
@@ -156,13 +156,13 @@
                                                 'cancelled' => 'bg-gray-100 text-gray-600 border-gray-200',
                                                 'rejected' => 'bg-gray-100 text-gray-600 border-gray-200',
                                             ];
-                                            $style = $statusStyles[$request->status] ?? 'bg-gray-100 text-gray-800';
+                                            $style = $statusStyles[$request->hsr_status] ?? 'bg-gray-100 text-gray-800';
                                         @endphp
                                         <span
                                             class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold border {{ $style }} capitalize">
-                                            {{ str_replace('_', ' ', $request->status) }}
+                                            {{ str_replace('_', ' ', $request->hsr_status) }}
                                         </span>
-                                        @if ($request->status === 'disputed')
+                                        @if ($request->hsr_status === 'disputed')
                                             <div class="text-[10px] text-red-600 font-medium mt-1">Admin Action Required
                                             </div>
                                         @endif
@@ -179,22 +179,22 @@
                                             </button>
 
                                             {{-- DISPUTE BUTTON --}}
-                                            @if ($request->status === 'disputed')
+                                            @if ($request->hsr_status === 'disputed')
                                                 @php
                                                     // --- NEW: FETCH REPORTER INFO ---
                                                     $reporterName = 'Unknown';
                                                     $reporterRole = 'System';
 
-                                                    if ($request->reported_by) {
+                                                    if ($request->hsr_reported_by) {
                                                         // Find the user by the reported_by ID
-                                                        $reporterUser = \App\Models\User::find($request->reported_by);
+                                                        $reporterUser = \App\Models\User::find($request->hsr_reported_by);
                                                         if ($reporterUser) {
-                                                            $reporterName = $reporterUser->name;
+                                                            $reporterName = $reporterUser->hu_name;
 
                                                             // Determine Role
-                                                            if ($request->reported_by == $request->requester_id) {
+                                                            if ($request->hsr_reported_by == $request->hsr_requester_id) {
                                                                 $reporterRole = 'Buyer';
-                                                            } elseif ($request->reported_by == $request->provider_id) {
+                                                            } elseif ($request->hsr_reported_by == $request->hsr_provider_id) {
                                                                 $reporterRole = 'Seller';
                                                             } else {
                                                                 $reporterRole = 'Admin';
@@ -205,10 +205,10 @@
 
                                                 <button
                                                     onclick="openDisciplineModal(
-                                                '{{ $request->id }}', 
-                                                '{{ addslashes($request->dispute_reason) }}', 
-                                                { id: '{{ $request->requester->id }}', name: '{{ $request->requester->name }}', warnings: '{{ $request->requester->warning_count }}' },
-                                                { id: '{{ $request->provider->id }}', name: '{{ $request->provider->name }}', warnings: '{{ $request->provider->warning_count }}' },
+                                                '{{ $request->hsr_id }}', 
+                                                '{{ addslashes($request->hsr_dispute_reason) }}', 
+                                                { id: '{{ $request->requester->hu_id }}', name: '{{ $request->requester->hu_name }}', warnings: '{{ $request->requester->hu_warning_count }}' },
+                                                { id: '{{ $request->provider->hu_id }}', name: '{{ $request->provider->hu_name }}', warnings: '{{ $request->provider->hu_warning_count }}' },
                                                 { name: '{{ $reporterName }}', role: '{{ $reporterRole }}' } 
                                             )"
                                                     class="bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1 transition-colors">
@@ -217,7 +217,7 @@
                                             @endif
 
                                             {{-- Delete --}}
-                                            <form action="{{ route('admin.requests.destroy', $request->id) }}"
+                                            <form action="{{ route('admin.requests.destroy', $request->hsr_id) }}"
                                                 method="POST" onsubmit="return confirm('Delete?');" class="inline">
                                                 @csrf @method('DELETE')
                                                 <button type="submit" class="text-gray-400 hover:text-red-600 p-1"><i

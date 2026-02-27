@@ -18,7 +18,7 @@
         </div>
         
         <div class="content">
-            <p>Dear {{ $user->name }},</p>
+            <p>Dear {{ $user->hu_name }},</p>
             
             <p>We are writing to inform you that your account has received a formal warning regarding a recent transaction or report.</p>
             

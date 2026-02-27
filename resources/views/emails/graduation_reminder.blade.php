@@ -1,5 +1,5 @@
 @component('mail::message')
-# Hello {{ $user->name }},
+# Hello {{ $user->hu_name }},
 
 We noticed that your graduation date is approaching on **{{ \Carbon\Carbon::parse($user->studentStatus->graduation_date)->format('d M Y') }}**.
 

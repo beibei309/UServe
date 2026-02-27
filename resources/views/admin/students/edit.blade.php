@@ -13,7 +13,7 @@
         </a>
     </div>
 
-    <form action="{{ route('admin.students.update', $student->id) }}" method="POST">
+    <form action="{{ route('admin.students.update', $student->hu_id) }}" method="POST">
         @csrf
         @method('PUT')
 
@@ -35,7 +35,7 @@
                                 Full Name
                             </label>
                             <input type="text" name="name"
-                                   value="{{ old('name', $student->name) }}"
+                                value="{{ old('name', $student->hu_name) }}"
                                    class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                             @error('name')
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
@@ -47,7 +47,7 @@
                                 Email Address
                             </label>
                             <input type="email" name="email"
-                                   value="{{ old('email', $student->email) }}"
+                                value="{{ old('email', $student->hu_email) }}"
                                    class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                             @error('email')
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
@@ -59,7 +59,7 @@
                                 Phone Number
                             </label>
                             <input type="text" name="phone"
-                                   value="{{ old('phone', $student->phone) }}"
+                                value="{{ old('phone', $student->hu_phone) }}"
                                    class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                         </div>
 
@@ -68,7 +68,7 @@
                                 Matric / Student ID
                             </label>
                             <input type="text" name="student_id"
-                                   value="{{ old('student_id', $student->student_id) }}"
+                                value="{{ old('student_id', $student->hu_student_id) }}"
                                    class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                         </div>
 
@@ -167,26 +167,26 @@
 
     {{-- Pending --}}
     <option value="pending"
-        @if($student->verification_status === 'approved') disabled @endif
-        {{ $student->verification_status === 'pending' ? 'selected' : '' }}>
+        @if($student->hu_verification_status === 'approved') disabled @endif
+        {{ $student->hu_verification_status === 'pending' ? 'selected' : '' }}>
         Pending
     </option>
 
     {{-- Approved --}}
     <option value="approved"
-        {{ $student->verification_status === 'approved' ? 'selected' : '' }}>
+        {{ $student->hu_verification_status === 'approved' ? 'selected' : '' }}>
         Approved (Verified)
     </option>
 
     {{-- Rejected --}}
     <option value="rejected"
-        {{ $student->verification_status === 'rejected' ? 'selected' : '' }}>
+        {{ $student->hu_verification_status === 'rejected' ? 'selected' : '' }}>
         Rejected
     </option>
 
 </select>
 
-@if($student->verification_status === 'approved')
+@if($student->hu_verification_status === 'approved')
     <p class="text-xs text-gray-500 mt-1">
         Once approved, the status cannot be reverted to pending.
     </p>
@@ -201,11 +201,11 @@
                             Current Standing
                         </span>
 
-                        @if($student->is_suspended)
+                        @if($student->hu_is_suspended)
                             <div class="p-2 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
                                 <strong>Banned</strong><br>
                                 <span class="text-xs">
-                                    Reason: {{ $student->blacklist_reason }}
+                                    Reason: {{ $student->hu_blacklist_reason }}
                                 </span>
                             </div>
                         @else

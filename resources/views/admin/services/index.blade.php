@@ -149,10 +149,10 @@
                         <option value="">All Categories</option>
 
                         @foreach ($categories as $category)
-                            <option value="{{ $category->id }}"
-                                style="color: {{ $category->color }}; background:white; font-weight:600;"
-                                {{ request('category') == $category->id ? 'selected' : '' }}>
-                                {{ $category->name }}
+                            <option value="{{ $category->hc_id }}"
+                                style="color: {{ $category->hc_color }}; background:white; font-weight:600;"
+                                {{ request('category') == $category->hc_id ? 'selected' : '' }}>
+                                {{ $category->hc_name }}
                             </option>
                         @endforeach
                     </select>
@@ -213,9 +213,9 @@
                              <td class="py-4 px-6">
     <div class="flex gap-3 items-center">
         <div class="h-14 w-14 bg-gray-100 rounded-lg overflow-hidden border">
-            @if ($service->image_path)
+            @if ($service->hss_image_path)
                 @php
-                    $path = $service->image_path;
+                    $path = $service->hss_image_path;
                     // 1. Check if external URL
                     if (Str::startsWith($path, ['http://', 'https://'])) {
                         $imageUrl = $path;
@@ -229,8 +229,8 @@
                         $imageUrl = asset($path);
                     }
                 @endphp
-                <img src="{{ $imageUrl }}" 
-                     alt="{{ $service->title }}"
+                 <img src="{{ $imageUrl }}" 
+                     alt="{{ $service->hss_title }}"
                      class="w-full h-full object-cover">
             @else
                 <div class="flex items-center justify-center w-full h-full text-gray-400 text-xs">
@@ -240,10 +240,10 @@
         </div>
         <div>
             <p class="font-bold text-gray-900">
-                {{ Str::limit($service->title, 16) }}
+                {{ Str::limit($service->hss_title, 16) }}
             </p>
             <p class="text-xs text-gray-500">
-                {{ Str::limit(strip_tags($service->description), 16) }}
+                {{ Str::limit(strip_tags($service->hss_description), 16) }}
             </p>
         </div>
     </div>
@@ -255,9 +255,9 @@
                                             style="
                 font-size: 10px;
                 white-space: nowrap;
-                background: {{ $service->category->color ?? '#6b7280' }};
+                                background: {{ $service->category->hc_color ?? '#6b7280' }};
               ">
-                                            {{ $service->category->name }}
+                                                                                        {{ $service->category->hc_name }}
                                         </span>
                                     @else
                                         <span class="text-gray-400 text-sm">No Category</span>
@@ -269,7 +269,7 @@
 
                                 {{-- SELLER --}}
                                 <td class="py-4 px-6 text-sm text-gray-700">
-                                    {{ $service->user->name ?? 'Unknown' }}
+                                    {{ $service->user->hu_name ?? 'Unknown' }}
                                 </td>
 
                                 {{-- AVG RATING --}}
@@ -282,7 +282,7 @@
 
                                 {{-- REVIEWS --}}
                                 <td class="py-4 px-6 text-center">
-                                    <a href="{{ route('admin.services.reviews', $service->id) }}"
+                                    <a href="{{ route('admin.services.reviews', $service->hss_id) }}"
                                         class="text-blue-600 hover:underline text-sm">
                                         View all ({{ $service->reviews_count ?? 0 }}) reviews
                                     </a>
@@ -291,18 +291,18 @@
                                 {{-- WARNING --}}
                                 <td class="py-4 px-6 text-center">
                                     <span
-                                        class="font-mono font-bold {{ ($service->warning_count ?? 0) >= 2 ? 'text-red-600' : 'text-gray-700' }}">
-                                        {{ $service->warning_count ?? 0 }}/3
+                                        class="font-mono font-bold {{ ($service->hss_warning_count ?? 0) >= 2 ? 'text-red-600' : 'text-gray-700' }}">
+                                        {{ $service->hss_warning_count ?? 0 }}/3
                                     </span>
                                 </td>
 
                                 {{-- STATUS --}}
                                 <td class="py-4 px-6 text-center">
-                                    @if ($service->approval_status === 'approved')
+                                    @if ($service->hss_approval_status === 'approved')
                                         <span class="badge-green">Approved</span>
-                                    @elseif($service->approval_status === 'rejected')
+                                    @elseif($service->hss_approval_status === 'rejected')
                                         <span class="badge-red">Rejected</span>
-                                    @elseif($service->approval_status === 'suspended')
+                                    @elseif($service->hss_approval_status === 'suspended')
                                         <span class="badge-dark">Suspended</span>
                                     @else
                                         <span class="badge-yellow">Pending</span>
@@ -314,43 +314,43 @@
                                     <div class="flex justify-center gap-2">
 
                                         {{-- VIEW Always --}}
-                                        <a href="{{ route('admin.services.show', $service->id) }}" class="btn-blue">
+                                        <a href="{{ route('admin.services.show', $service->hss_id) }}" class="btn-blue">
                                             View
                                         </a>
 
                                         {{-- IF APPROVED → Allow Warning --}}
-                                        @if ($service->approval_status === 'approved')
+                                        @if ($service->hss_approval_status === 'approved')
                                             <button
-                                                onclick="openWarningModal('{{ route('admin.services.warn', $service->id) }}')"
+                                                onclick="openWarningModal('{{ route('admin.services.warn', $service->hss_id) }}')"
                                                 class="btn-orange">
                                                 Warning
                                             </button>
                                         @endif
 
                                         {{-- IF PENDING --}}
-                                        @if ($service->approval_status === 'pending')
+                                        @if ($service->hss_approval_status === 'pending')
                                             <button
-                                                onclick="openWarningModal('{{ route('admin.services.warn', $service->id) }}')"
+                                                onclick="openWarningModal('{{ route('admin.services.warn', $service->hss_id) }}')"
                                                 class="btn-orange">
                                                 Warning
                                             </button>
 
-                                            <form action="{{ route('admin.services.approve', $service->id) }}"
+                                            <form action="{{ route('admin.services.approve', $service->hss_id) }}"
                                                 method="POST">
                                                 @csrf @method('PATCH')
                                                 <button class="btn-green">Approve</button>
                                             </form>
 
-                                           <button onclick="openRejectModal('{{ route('admin.services.reject', $service->id) }}')" 
+                                           <button onclick="openRejectModal('{{ route('admin.services.reject', $service->hss_id) }}')" 
         class="btn-red">
     Reject
 </button>
                                         @endif
 
                                         {{-- IF WARNING 3/3 & NOT YET SUSPENDED --}}
-                                        @if (($service->warning_count ?? 0) >= 3 && $service->approval_status !== 'suspended')
+                                        @if (($service->hss_warning_count ?? 0) >= 3 && $service->hss_approval_status !== 'suspended')
                                             <button
-                                                onclick="confirmSuspend('{{ route('admin.services.suspend', $service->id) }}')"
+                                                onclick="confirmSuspend('{{ route('admin.services.suspend', $service->hss_id) }}')"
                                                 class="btn-red">
                                                 Suspend
                                             </button>
@@ -359,25 +359,25 @@
 
 
                                         {{-- IF SUSPENDED (BLOCKED) → Only Unblock --}}
-                                        @if ($service->approval_status === 'suspended')
-                                            <button
-                                                onclick="confirmUnblock('{{ route('admin.services.unblock', $service->id) }}')"
-                                                class="btn-green">
+                                        @if ($service->hss_approval_status === 'suspended')
+                                            @if ($service->hss_approval_status === 'approved')
+                                                onclick="confirmUnblock('{{ route('admin.services.unblock', $service->hss_id) }}')"
+                                            @if ($service->hss_approval_status === 'pending')
                                                 Reactive
-                                            </button>
+                                            @if (($service->hss_warning_count ?? 0) >= 3 && $service->hss_approval_status !== 'suspended')
                                         @endif
-
+                                            @if ($service->hss_approval_status === 'suspended')
                                     </div>
-                                </td>
+                if (service.hss_approval_status === 'approved') {
 
-                            </tr>
+                } else if (service.hss_approval_status === 'rejected') {
 
-                        @empty
+                } else if (service.hss_approval_status === 'suspended') {
                             <tr>
                                 <td colspan="9" class="py-10 text-center text-gray-500">
                                     No services found.
                                 </td>
-                            </tr>
+                badge.textContent = service.hss_approval_status.charAt(0).toUpperCase() + service.hss_approval_status.slice(1);
                         @endforelse
                     </tbody>
 

@@ -23,7 +23,7 @@ class ProfileUpdateRequest extends FormRequest
                 'lowercase',
                 'email',
                 'max:255',
-                Rule::unique(User::class)->ignore($this->user()->id),
+                Rule::unique(User::class, 'hu_email')->ignore($this->user()->hu_id, 'hu_id'),
             ],
             'phone' => ['nullable', 'string', 'max:20'],
             'bio' => ['nullable', 'string', 'max:500'],
@@ -31,8 +31,8 @@ class ProfileUpdateRequest extends FormRequest
         ];
 
         // Student-specific fields
-        if ($this->user()->role === 'student') {
-            $rules['student_id'] = ['nullable', 'string', 'max:50', Rule::unique(User::class)->ignore($this->user()->id)];
+        if ($this->user()->hu_role === 'student') {
+            $rules['student_id'] = ['nullable', 'string', 'max:50', Rule::unique(User::class, 'hu_student_id')->ignore($this->user()->hu_id, 'hu_id')];
             $rules['faculty'] = ['nullable', 'string', 'max:255'];
             $rules['course'] = ['nullable', 'string', 'max:255'];
         }
@@ -43,7 +43,7 @@ class ProfileUpdateRequest extends FormRequest
                 'nullable', 
                 'email', 
                 'ends_with:@upsi.edu.my',
-                Rule::unique(User::class)->ignore($this->user()->id)
+                Rule::unique(User::class, 'hu_staff_email')->ignore($this->user()->hu_id, 'hu_id')
             ];
         }
 

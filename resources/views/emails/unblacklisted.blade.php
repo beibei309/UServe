@@ -1,7 +1,7 @@
 @component('mail::message')
 # Your Account Has Been Re-Activated
 
-Hello **{{ $user->name }}**,
+Hello **{{ $user->hu_name }}**, 
 
 Good news! We’re happy to inform you that the restriction (blacklist) on your account has been lifted. You can now access the **S2U / UpsiConnect** platform again.
 

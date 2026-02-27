@@ -51,7 +51,7 @@
                                     @php
                                         $uniqueCategories = $sentRequests
                                             ->map(function ($request) {
-                                                return optional($request->studentService->category)->name ?? 'Other';
+                                                return optional($request->studentService->category)->hc_name ?? 'Other';
                                             })
                                             ->unique()
                                             ->sort()
@@ -126,12 +126,12 @@
                                         @php
                                             // Data Setup
                                             $service = $request->studentService;
-                                            $pkgType = strtolower($request->selected_package ?? 'basic');
+                                            $pkgType = strtolower($request->hsr_selected_package ?? 'basic');
                                             $pkgDuration = $service->{$pkgType . '_duration'} ?? null;
                                             $pkgFrequency = $service->{$pkgType . '_frequency'} ?? null;
 
                                             // Logic for display dates
-                                            $dates = $request->selected_dates;
+                                            $dates = $request->hsr_selected_dates;
 
                                             if (is_string($dates)) {
                                                 $decodedDates = json_decode($dates, true);
@@ -149,12 +149,12 @@
                                             }
 
                                             // CHECK IF SELLER BANNED
-                                            $isSellerBanned = $request->provider->is_suspended == 1 || $request->provider->is_blacklisted == 1;
+                                            $isSellerBanned = $request->provider->hu_is_suspended == 1 || $request->provider->hu_is_blacklisted == 1;
                                         @endphp
 
                                         <div
                                             class="sr-request-item group relative overflow-hidden rounded-2xl border {{ $isSellerBanned ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-white hover:border-yellow-300' }} shadow-sm transition-all duration-300 hover:shadow-md"
-                                            data-category="{{ optional($service->category)->name ?? 'Other' }}">
+                                            data-category="{{ optional($service->category)->hc_name ?? 'Other' }}">
 
                                             <div
                                                 class="absolute top-0 left-0 right-0 h-1 {{ $isSellerBanned ? 'bg-red-500' : 'bg-gradient-to-r from-yellow-400 to-orange-300' }}">
@@ -173,21 +173,21 @@
                                                             @else
                                                                 <span
                                                                     class="inline-flex items-center rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-bold text-yellow-700">
-                                                                    {{ strtoupper($request->status) }}
+                                                                    {{ strtoupper($request->hsr_status) }}
                                                                 </span>
                                                             @endif
                                                             <span
-                                                                class="text-xs text-gray-400">#{{ $request->id }}</span>
+                                                                class="text-xs text-gray-400">#{{ $request->hsr_id }}</span>
                                                         </div>
 
                                                         <h4
                                                             class="text-lg font-bold {{ $isSellerBanned ? 'text-gray-500 line-through' : 'text-gray-900' }} group-hover:text-yellow-600 transition-colors leading-tight">
-                                                            {{ optional($request->studentService)->title ?? 'Custom Request' }}
+                                                            {{ optional($request->studentService)->hss_title ?? 'Custom Request' }}
                                                         </h4>
 
                                                         @if (optional($service)->category && !$isSellerBanned)
                                                             <div class="mt-2 inline-flex items-center gap-1.5 rounded-md px-2 py-1"
-                                                                style="color:{{ $service->category->color }}; background-color: {{ $service->category->color }}10; border: 1px solid {{ $service->category->color }};">
+                                                                style="color:{{ $service->category->hc_color }}; background-color: {{ $service->category->hc_color }}10; border: 1px solid {{ $service->category->hc_color }};">
                                                                 <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24"
                                                                     stroke="currentColor">
                                                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -195,7 +195,7 @@
                                                                         d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                                                                 </svg>
                                                                 <span class="text-xs font-medium">
-                                                                    {{ $service->category->name }}
+                                                                    {{ $service->category->hc_name }}
                                                                 </span>
                                                             </div>
                                                         @endif
@@ -206,14 +206,14 @@
                                                     </div>
 
                                                     <div class="text-left sm:text-right mt-2 sm:mt-0">
-                                                        @if ($request->offered_price)
+                                                        @if ($request->hsr_offered_price)
                                                             <div
                                                                 class="text-2xl font-bold {{ $isSellerBanned ? 'text-gray-400' : 'text-gray-900' }}">
-                                                                RM {{ number_format($request->offered_price, 2) }}
+                                                                RM {{ number_format($request->hsr_offered_price, 2) }}
                                                             </div>
                                                             <div
                                                                 class="text-xs font-medium text-gray-500 uppercase tracking-wide">
-                                                                {{ str_replace('"', '', $request->selected_package) ?? 'Custom' }}
+                                                                {{ str_replace('"', '', $request->hsr_selected_package) ?? 'Custom' }}
                                                                 Package
                                                             </div>
                                                         @endif
@@ -240,7 +240,7 @@
                                                                 <p class="text-xs font-medium text-gray-500 uppercase">
                                                                     Provider</p>
                                                                 <p class="text-sm font-semibold text-gray-900">
-                                                                    {{ $request->provider->name }}</p>
+                                                                    {{ $request->provider->hu_name }}</p>
                                                             </div>
                                                         </div>
 
@@ -293,12 +293,12 @@
                                                     </div>
                                                 @endif
 
-                                                @if ($request->message && !$isSellerBanned)
+                                                @if ($request->hsr_message && !$isSellerBanned)
                                                     <div class="rounded-lg bg-gray-50 p-4 border border-gray-100 mb-6">
                                                         <p class="text-xs font-bold text-gray-400 uppercase mb-1">Your
                                                             Note</p>
                                                         <p class="text-sm text-gray-600 italic">
-                                                            "{{ $request->message }}"</p>
+                                                            "{{ $request->hsr_message }}"</p>
                                                     </div>
                                                 @endif
 
@@ -318,12 +318,12 @@
                                                                 Service Cancelled
                                                             </span>
                                                         @else
-                                                            <button onclick="cancelRequest({{ $request->id }})"
+                                                            <button onclick="cancelRequest({{ $request->hsr_id }})"
                                                                 class="w-full sm:w-auto inline-flex justify-center items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 bg-white border border-red-200 rounded-lg hover:bg-red-50 hover:border-red-300 transition-colors focus:ring-2 focus:ring-offset-1 focus:ring-red-500">
                                                                 Cancel
                                                             </button>
-                                                            <form id="cancel-form-{{ $request->id }}"
-                                                                action="{{ route('service-requests.cancel', $request->id) }}"
+                                                            <form id="cancel-form-{{ $request->hsr_id }}"
+                                                                action="{{ route('service-requests.cancel', $request->hsr_id) }}"
                                                                 method="POST" class="hidden">@csrf</form>
                                                         @endif
 
@@ -340,7 +340,7 @@
                                                                 class="w-full sm:hidden text-center text-sm font-medium text-gray-500 hover:text-gray-900 border border-gray-200 rounded-lg py-2">
                                                                 Details
                                                             </a>
-                                                            <a href="https://wa.me/6{{ $request->provider->phone }}"
+                                                            <a href="https://wa.me/6{{ $request->provider->hu_phone }}"
                                                                 target="_blank"
                                                                 class="flex-1 sm:flex-none inline-flex justify-center items-center gap-2 px-6 py-2 text-sm font-medium text-white bg-green-500 rounded-lg hover:bg-green-600 shadow-sm transition-all hover:-translate-y-0.5">
                                                                 <svg class="w-4 h-4" fill="currentColor"
@@ -386,11 +386,11 @@
                                     @foreach ($sentRequests->whereIn('status', ['accepted', 'in_progress', 'waiting_payment', 'disputed']) as $request)
                                         @php
                                             // --- SETUP DATA ---
-                                            $isSellerBanned = $request->provider->is_suspended == 1 || $request->provider->is_blacklisted == 1;
+                                            $isSellerBanned = $request->provider->hu_is_suspended == 1 || $request->provider->hu_is_blacklisted == 1;
                                             $service = $request->studentService;
 
                                             // Date Parsing
-                                            $dates = $request->selected_dates;
+                                            $dates = $request->hsr_selected_dates;
                                             if (is_string($dates)) {
                                                 $decoded = json_decode($dates, true);
                                                 $dateList = is_array($decoded) ? $decoded : [$dates];
@@ -411,18 +411,18 @@
                                                 $statusText = 'SELLER SUSPENDED';
                                             } else {
                                                 // NORMAL STYLING
-                                                $statusText = strtoupper(str_replace('_', ' ', $request->status));
-                                                $badgeColors = match ($request->status) {
+                                                $statusText = strtoupper(str_replace('_', ' ', $request->hsr_status));
+                                                $badgeColors = match ($request->hsr_status) {
                                                     'disputed' => 'border-red-200 bg-red-50 text-red-700',
                                                     'waiting_payment' => 'border-yellow-200 bg-yellow-50 text-yellow-700',
                                                     default => 'border-blue-200 bg-blue-50 text-blue-700',
                                                 };
-                                                $cardBorder = match ($request->status) {
+                                                $cardBorder = match ($request->hsr_status) {
                                                     'disputed' => 'border-red-200 hover:border-red-300 bg-white',
                                                     'waiting_payment' => 'border-yellow-200 hover:border-yellow-300 bg-white',
                                                     default => 'border-blue-100 hover:border-blue-200 bg-white',
                                                 };
-                                                $stripeColor = match ($request->status) {
+                                                $stripeColor = match ($request->hsr_status) {
                                                     'disputed' => 'bg-red-500',
                                                     'waiting_payment' => 'bg-yellow-500',
                                                     default => 'bg-blue-500',
@@ -432,7 +432,7 @@
 
                                         <div
                                             class="sr-request-item group relative overflow-hidden rounded-2xl border bg-white shadow-sm transition-all duration-300 hover:shadow-md {{ $cardBorder }}"
-                                            data-category="{{ optional($service->category)->name ?? 'Other' }}">
+                                            data-category="{{ optional($service->category)->hc_name ?? 'Other' }}">
                                             <div class="absolute top-0 left-0 right-0 h-1 {{ $stripeColor }}"></div>
                                             <div class="p-5 sm:p-6">
                                                 {{-- Top Header Section --}}
@@ -444,15 +444,15 @@
                                                                 class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold {{ $badgeColors }}">
                                                                 {{ $statusText }}
                                                             </span>
-                                                            <span class="text-xs text-gray-400">#{{ $request->id }}</span>
+                                                            <span class="text-xs text-gray-400">#{{ $request->hsr_id }}</span>
                                                         </div>
                                                         <h4
                                                             class="text-lg font-bold {{ $isSellerBanned ? 'text-gray-500 line-through' : 'text-gray-900' }} group-hover:text-blue-600 transition-colors leading-tight">
-                                                            {{ optional($service)->title ?? 'Custom Request' }}
+                                                            {{ optional($service)->hss_title ?? 'Custom Request' }}
                                                         </h4>
                                                         @if (optional($service)->category && !$isSellerBanned)
                                                             <div class="mt-2 inline-flex items-center gap-1.5 rounded-md px-2 py-1"
-                                                                style="color:{{ $service->category->color }}; background-color: {{ $service->category->color }}10; border: 1px solid {{ $service->category->color }};">
+                                                                style="color:{{ $service->category->hc_color }}; background-color: {{ $service->category->hc_color }}10; border: 1px solid {{ $service->category->hc_color }};">
                                                                 <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24"
                                                                     stroke="currentColor">
                                                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -460,7 +460,7 @@
                                                                         d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                                                                 </svg>
                                                                 <span class="text-xs font-medium">
-                                                                    {{ $service->category->name }}
+                                                                    {{ $service->category->hc_name }}
                                                                 </span>
                                                             </div>
                                                         @endif
@@ -468,14 +468,14 @@
                                                             {{ $request->updated_at->diffForHumans() }}</p>
                                                     </div>
                                                     <div class="text-left sm:text-right mt-2 sm:mt-0">
-                                                        @if ($request->offered_price)
+                                                        @if ($request->hsr_offered_price)
                                                             <div
                                                                 class="text-2xl font-bold {{ $isSellerBanned ? 'text-gray-400' : 'text-gray-900' }}">
-                                                                RM {{ number_format($request->offered_price, 2) }}
+                                                                RM {{ number_format($request->hsr_offered_price, 2) }}
                                                             </div>
                                                             <div
                                                                 class="text-xs font-medium text-gray-400 uppercase tracking-wide">
-                                                                {{ str_replace('"', '', $request->selected_package) ?? 'Custom' }}
+                                                                {{ str_replace('"', '', $request->hsr_selected_package) ?? 'Custom' }}
                                                                 Package
                                                             </div>
                                                         @endif
@@ -502,7 +502,7 @@
                                                                 <p class="text-xs font-medium text-gray-500 uppercase">
                                                                     Provider</p>
                                                                 <p class="text-sm font-semibold text-gray-900">
-                                                                    {{ $request->provider->name }}</p>
+                                                                    {{ $request->provider->hu_name }}</p>
                                                             </div>
                                                         </div>
 
@@ -554,21 +554,21 @@
                                                             </span>
                                                         @else
                                                             {{-- 1. Cancel Button (Only if NOT waiting payment/disputed/completed) --}}
-                                                            @if (!in_array($request->status, ['waiting_payment', 'disputed', 'completed', 'canceled']))
-                                                                <button onclick="cancelRequest({{ $request->id }})"
+                                                            @if (!in_array($request->hsr_status, ['waiting_payment', 'disputed', 'completed', 'canceled']))
+                                                                <button onclick="cancelRequest({{ $request->hsr_id }})"
                                                                     class="text-sm font-medium text-red-600 hover:text-red-700 hover:underline">
                                                                     Cancel Request
                                                                 </button>
-                                                                <form id="cancel-form-{{ $request->id }}"
-                                                                    action="{{ route('service-requests.cancel', $request->id) }}"
+                                                                <form id="cancel-form-{{ $request->hsr_id }}"
+                                                                    action="{{ route('service-requests.cancel', $request->hsr_id) }}"
                                                                     method="POST" class="hidden">
                                                                     @csrf
                                                                 </form>
                                                             @endif
 
                                                             {{-- 2. REPORT ISSUE BUTTON --}}
-                                                            @if (in_array($request->status, ['accepted', 'in_progress']) && $hasDatePassed && !$request->dispute_reason)
-                                                                <button onclick="openReportModal({{ $request->id }})"
+                                                            @if (in_array($request->hsr_status, ['accepted', 'in_progress']) && $hasDatePassed && !$request->hsr_dispute_reason)
+                                                                <button onclick="openReportModal({{ $request->hsr_id }})"
                                                                     class="inline-flex items-center gap-1 text-sm font-medium text-orange-600 hover:text-orange-800 bg-orange-50 hover:bg-orange-100 px-3 py-1.5 rounded-lg border border-orange-200 transition-colors">
                                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor"
                                                                         viewBox="0 0 24 24">
@@ -582,11 +582,11 @@
                                                         @endif
 
                                                         {{-- Show if already reported --}}
-                                                        @if ($request->dispute_reason)
+                                                        @if ($request->hsr_dispute_reason)
                                                             <span
                                                                 class="text-xs text-red-500 font-semibold bg-red-50 px-2 py-1 rounded border border-red-100">
                                                                 Reported:
-                                                                "{{ Str::limit($request->dispute_reason, 20) }}"
+                                                                "{{ Str::limit($request->hsr_dispute_reason, 20) }}"
                                                             </span>
                                                         @endif
 
@@ -601,8 +601,8 @@
                                                         <div class="flex gap-3 w-full sm:w-auto">
 
                                                             {{-- 1. PAY NOW BUTTON --}}
-                                                            @if ($request->status == 'waiting_payment')
-                                                                @if ($request->payment_status == 'verification_status')
+                                                            @if ($request->hsr_status == 'waiting_payment')
+                                                                @if ($request->hsr_payment_status == 'verification_status')
                                                                     <button disabled
                                                                         class="flex-1 sm:flex-none inline-flex justify-center items-center gap-2 px-6 py-2 text-sm font-bold text-yellow-700 bg-yellow-100 border border-yellow-200 rounded-lg cursor-not-allowed">
                                                                         <svg class="w-4 h-4 animate-spin"
@@ -620,7 +620,7 @@
                                                                     </button>
                                                                 @else
                                                                     <button
-                                                                        onclick="openPaymentModal({{ $request->id }}, '{{ number_format($request->offered_price, 2) }}')"
+                                                                        onclick="openPaymentModal({{ $request->hsr_id }}, '{{ number_format($request->hsr_offered_price, 2) }}')"
                                                                         class="flex-1 sm:flex-none inline-flex justify-center items-center gap-2 px-6 py-2 text-sm font-bold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 shadow-sm transition-all hover:-translate-y-0.5">
                                                                         <svg class="w-4 h-4" fill="none"
                                                                             stroke="currentColor" viewBox="0 0 24 24">
@@ -634,7 +634,7 @@
                                                             @endif
 
                                                             {{-- 2. Contact WhatsApp --}}
-                                                            <a href="https://wa.me/6{{ $request->provider->phone }}"
+                                                            <a href="https://wa.me/6{{ $request->provider->hu_phone }}"
                                                                 target="_blank"
                                                                 class="flex-1 sm:flex-none inline-flex justify-center items-center gap-2 px-6 py-2 text-sm font-medium text-white bg-green-500 rounded-lg hover:bg-green-600 shadow-sm transition-all hover:-translate-y-0.5">
                                                                 <svg class="w-4 h-4" fill="currentColor"
@@ -695,11 +695,11 @@
                                         @php
                                             // 1. Data Setup
                                             $service = $request->studentService;
-                                            $pkgType = strtolower($request->selected_package ?? 'basic');
+                                            $pkgType = strtolower($request->hsr_selected_package ?? 'basic');
                                             $pkgDuration = $service->{$pkgType . '_duration'} ?? null;
                                             $pkgFrequency = $service->{$pkgType . '_frequency'} ?? null;
 
-                                            $dates = $request->selected_dates;
+                                            $dates = $request->hsr_selected_dates;
 
                                             if (is_string($dates)) {
                                                 $decodedDates = json_decode($dates, true);
@@ -715,7 +715,7 @@
                                             }
 
                                             // 2. Theme Logic
-                                            $theme = match ($request->status) {
+                                            $theme = match ($request->hsr_status) {
                                                 'completed' => [
                                                     'border' => 'border-green-200 hover:border-green-300',
                                                     'strip' => 'bg-green-500',
@@ -757,7 +757,7 @@
 
                                         <div
                                             class="sr-request-item group relative overflow-hidden rounded-2xl border bg-white shadow-sm transition-all duration-300 hover:shadow-md {{ $theme['border'] }}"
-                                            data-category="{{ optional($service->category)->name ?? 'Other' }}">
+                                            data-category="{{ optional($service->category)->hc_name ?? 'Other' }}">
 
                                             <div class="absolute top-0 left-0 right-0 h-1 {{ $theme['strip'] }}">
                                             </div>
@@ -769,19 +769,19 @@
                                                         <div class="flex items-center gap-3 mb-2">
                                                             <span
                                                                 class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold {{ $theme['badge'] }}">
-                                                                {{ strtoupper($request->status) }}
+                                                                {{ strtoupper($request->hsr_status) }}
                                                             </span>
                                                             <span
-                                                                class="text-xs text-gray-400">#{{ $request->id }}</span>
+                                                                class="text-xs text-gray-400">#{{ $request->hsr_id }}</span>
                                                         </div>
 
                                                         <h4 class="text-lg font-bold text-gray-900 leading-tight">
-                                                            {{ optional($request->studentService)->title ?? 'Custom Request' }}
+                                                            {{ optional($request->studentService)->hss_title ?? 'Custom Request' }}
                                                         </h4>
 
                                                         @if (optional($service)->category)
                                                             <div class="mt-2 inline-flex items-center gap-1.5 rounded-md px-2 py-1"
-                                                                style="color:{{ $service->category->color }}; background-color: {{ $service->category->color }}10; border: 1px solid {{ $service->category->color }};">
+                                                                style="color:{{ $service->category->hc_color }}; background-color: {{ $service->category->hc_color }}10; border: 1px solid {{ $service->category->hc_color }};">
                                                                 <svg class="h-3 w-3" fill="none"
                                                                     viewBox="0 0 24 24" stroke="currentColor">
                                                                     <path stroke-linecap="round"
@@ -789,21 +789,21 @@
                                                                         d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                                                                 </svg>
                                                                 <span class="text-xs font-medium">
-                                                                    {{ $service->category->name }}
+                                                                    {{ $service->category->hc_name }}
                                                                 </span>
                                                             </div>
                                                         @endif
                                                     </div>
 
                                                     <div class="text-left sm:text-right mt-2 sm:mt-0">
-                                                        @if ($request->offered_price)
+                                                        @if ($request->hsr_offered_price)
                                                             <div
                                                                 class="text-2xl font-bold text-gray-400 group-hover:text-gray-900 transition-colors">
-                                                                RM {{ number_format($request->offered_price, 2) }}
+                                                                RM {{ number_format($request->hsr_offered_price, 2) }}
                                                             </div>
                                                             <div
                                                                 class="text-xs font-medium text-gray-400 uppercase tracking-wide">
-                                                                {{ str_replace('"', '', $request->selected_package) ?? 'Custom' }}
+                                                                {{ str_replace('"', '', $request->hsr_selected_package) ?? 'Custom' }}
                                                                 Package
                                                             </div>
                                                         @endif
@@ -827,7 +827,7 @@
                                                             <p class="text-xs font-medium text-gray-500 uppercase">
                                                                 Provider</p>
                                                             <p class="text-sm font-semibold text-gray-700">
-                                                                {{ $request->provider->name }}</p>
+                                                                {{ $request->provider->hu_name }}</p>
                                                         </div>
                                                     </div>
 
@@ -841,7 +841,7 @@
                                                         </div>
                                                         <div>
                                                             <p class="text-xs font-medium text-gray-500 uppercase">
-                                                                {{ $request->status === 'completed' ? 'Completed On' : 'Updated On' }}
+                                                                {{ $request->hsr_status === 'completed' ? 'Completed On' : 'Updated On' }}
                                                             </p>
                                                             <p class="text-sm font-semibold text-gray-700">
                                                                 {{ $request->updated_at->format('M j, Y') }}
@@ -885,9 +885,9 @@
 
                                                     @if (
                                                         $request->isCompleted() &&
-                                                            !$request->reviews()->where('reviewer_id', auth()->id())->exists())
+                                                            !$request->reviews()->where('hr_reviewer_id', auth()->id())->exists())
                                                         <button
-                                                            onclick="openReviewModal({{ $request->id }}, '{{ $request->provider->name }}')"
+                                                            onclick="openReviewModal({{ $request->hsr_id }}, '{{ $request->provider->hu_name }}')"
                                                             class="w-full md:w-auto inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 hover:shadow-md transition-all focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
                                                             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24"
                                                                 stroke="currentColor">

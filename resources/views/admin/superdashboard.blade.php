@@ -60,15 +60,15 @@
             <tbody>
                 @foreach($admins as $admin)
                     <tr class="border-b">
-                        <td class="py-3">{{ $admin->name }}</td>
-                        <td class="py-3">{{ $admin->email }}</td>
-                        <td class="py-3 capitalize">{{ $admin->role }}</td>
+                        <td class="py-3">{{ $admin->ha_name }}</td>
+                        <td class="py-3">{{ $admin->ha_email }}</td>
+                        <td class="py-3 capitalize">{{ $admin->ha_role }}</td>
                         <td class="py-3 flex gap-3">
                             
-                            <a href="{{ route('admin.super.admins.edit', $admin->id) }}"
+                                     <a href="{{ route('admin.super.admins.edit', $admin->ha_id) }}"
                                class="text-blue-600 hover:underline">Edit</a>
 
-                            <form action="{{ route('admin.super.admins.delete', $admin->id) }}"
+                                <form action="{{ route('admin.super.admins.delete', $admin->ha_id) }}"
                                   method="POST"
                                   onsubmit="return confirm('Delete this admin?');">
                                 @csrf

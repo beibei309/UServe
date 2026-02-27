@@ -10,14 +10,18 @@ class AvailabilityController extends Controller
     public function toggle(): JsonResponse
     {
         $user = request()->user();
-        if (!$user || $user->role !== 'helper') {
-            return response()->json(['error' => 'Only authenticated helpers may toggle availability.'], 403);
+        if (!$user || $user->hu_role !== 'helper') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Only authenticated helpers may toggle availability.',
+                'error' => 'Only authenticated helpers may toggle availability.',
+            ], 403);
         }
 
-        $user->is_available = !$user->is_available;
+        $user->hu_is_available = !$user->hu_is_available;
 
         // kalau jadi unavailable, kosongkan dulu tarikh supaya frontend set baru
-        if (!$user->is_available) {
+        if (!$user->hu_is_available) {
             $user->unavailable_start_date = null;
             $user->unavailable_end_date = null;
         }
@@ -25,8 +29,9 @@ class AvailabilityController extends Controller
         $user->save();
 
         return response()->json([
-            'is_available' => $user->is_available,
-            'message' => $user->is_available ? 'Saya Bersedia' : 'Sila pilih tarikh tidak available',
+            'success' => true,
+            'is_available' => $user->hu_is_available,
+            'message' => $user->hu_is_available ? 'Saya Bersedia' : 'Sila pilih tarikh tidak available',
         ]);
     }
 
@@ -41,12 +46,13 @@ class AvailabilityController extends Controller
 
         $user->unavailable_start_date = $request->start_date;
         $user->unavailable_end_date = $request->end_date;
-        $user->is_available = false;
+        $user->hu_is_available = false;
         $user->save();
 
         return response()->json([
+            'success' => true,
             'message' => 'Tarikh unavailable telah disimpan.',
-            'is_available' => $user->is_available,
+            'is_available' => $user->hu_is_available,
             'start_date' => $user->unavailable_start_date,
             'end_date' => $user->unavailable_end_date,
         ]);
@@ -64,10 +70,10 @@ class AvailabilityController extends Controller
         ]);
         
         // 2. Update Availability Boolean
-        $user->is_available = $validated['is_available'];
+        $user->hu_is_available = $validated['is_available'];
 
         // 3. Handle Dates Logic
-        if ($user->is_available) {
+        if ($user->hu_is_available) {
             $user->unavailable_start_date = null;
             $user->unavailable_end_date = null;
         } else {
@@ -77,10 +83,10 @@ class AvailabilityController extends Controller
 
         $user->save();
 
-        $newServiceStatus = $user->is_available ? 'available' : 'unavailable';
+        $newServiceStatus = $user->hu_is_available ? 'available' : 'unavailable';
 
         $user->studentServices()->update([
-            'status' => $newServiceStatus
+            'hss_status' => $newServiceStatus
         ]);
 
 
@@ -88,7 +94,7 @@ class AvailabilityController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Availability settings updated successfully.',
-            'is_available' => $user->is_available,
+            'is_available' => $user->hu_is_available,
             'start_date' => $user->unavailable_start_date,
             'end_date' => $user->unavailable_end_date,
         ]);

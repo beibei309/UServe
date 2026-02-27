@@ -6,22 +6,22 @@
 
     <h2 class="text-2xl font-bold mb-4">Edit Admin</h2>
 
-    <form action="{{ route('admin.super.admins.update', $admin->id) }}" method="POST">
+    <form action="{{ route('admin.super.admins.update', $admin->ha_id) }}" method="POST">
         @csrf
 
         <label>Name</label>
-        <input type="text" name="name" value="{{ $admin->name }}" class="w-full p-2 border rounded mb-3">
+        <input type="text" name="name" value="{{ $admin->ha_name }}" class="w-full p-2 border rounded mb-3">
 
         <label>Email</label>
-        <input type="email" name="email" value="{{ $admin->email }}" class="w-full p-2 border rounded mb-3">
+        <input type="email" name="email" value="{{ $admin->ha_email }}" class="w-full p-2 border rounded mb-3">
 
         <label>Password (leave blank to keep same)</label>
         <input type="password" name="password" class="w-full p-2 border rounded mb-3">
 
         <label>Role</label>
         <select name="role" class="w-full p-2 border rounded mb-3">
-            <option value="admin" {{ $admin->role == 'admin' ? 'selected' : '' }}>Admin</option>
-            <option value="superadmin" {{ $admin->role == 'superadmin' ? 'selected' : '' }}>Super Admin</option>
+            <option value="admin" {{ $admin->ha_role == 'admin' ? 'selected' : '' }}>Admin</option>
+            <option value="superadmin" {{ $admin->ha_role == 'superadmin' ? 'selected' : '' }}>Super Admin</option>
         </select>
 
         <button class="bg-blue-600 text-white px-4 py-2 rounded">Update Admin</button>

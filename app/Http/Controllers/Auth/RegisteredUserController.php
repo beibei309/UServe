@@ -37,12 +37,12 @@ class RegisteredUserController extends Controller
                 'string', 
                 'email', 
                 'max:255', 
-                'unique:'.User::class,
+                'unique:h2u_users,hu_email',
                 'required',
                 'string',
                 'email',
                 'max:255',
-                'unique:' . User::class,
+                'unique:h2u_users,hu_email',
                 function ($attribute, $value, $fail) use ($request) {
                     if ($request->role === 'student' && !str_ends_with($value, '@siswa.upsi.edu.my')) {
                         $fail('Student must use @siswa.upsi.edu.my email');
@@ -104,30 +104,30 @@ class RegisteredUserController extends Controller
         }
 
         $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,                           
-            'password' => Hash::make($request->password),
-            'role' => $request->role,
-            'phone' => $request->phone,
-            'student_id' => $request->student_id,
+            'hu_name' => $request->name,
+            'hu_email' => $request->email,                           
+            'hu_password' => Hash::make($request->password),
+            'hu_role' => $request->role,
+            'hu_phone' => $request->phone,
+            'hu_student_id' => $request->student_id,
             // 'staff_email' => $request->staff_email, // Removed as we use main email
-            'verification_status' => 'pending', // Always pending until email verified
-            'is_available' => $request->role === 'student' ? true : false,
+            'hu_verification_status' => 'pending', // Always pending until email verified
+            'hu_is_available' => $request->role === 'student' ? true : false,
         ]);
 
-        if ($user->role === 'student') {
+        if ($user->hu_role === 'student') {
             $semesterValue = $request->input('semester');
             $semesterValue = is_string($semesterValue) && trim($semesterValue) !== ''
                 ? trim($semesterValue)
                 : null;
 
             StudentStatus::create([
-                'student_id' => $user->id,
-                'matric_no' => $user->student_id,
-                'semester' => $semesterValue,
-                'status' => 'active',
-                'graduation_date' => null,
-                'effective_date' => now(),
+                'hss_student_id' => $user->hu_id,
+                'hss_matric_no' => $user->hu_student_id,
+                'hss_semester' => $semesterValue,
+                'hss_status' => 'active',
+                'hss_graduation_date' => null,
+                'hss_effective_date' => now(),
             ]);
         }
 

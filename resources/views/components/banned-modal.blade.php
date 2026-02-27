@@ -4,14 +4,14 @@
         $isBanned = false;
         $title = 'Account Suspended';
         $message = 'Your account has been suspended due to policy violations.';
-        $reason = $user->blacklist_reason ?? 'No specific reason provided.';
+        $reason = $user->hu_blacklist_reason ?? 'No specific reason provided.';
 
         // Check if user is suspended OR blacklisted, regardless of role
-        if ($user->is_suspended) {
+        if ($user->hu_is_suspended) {
             $isBanned = true;
             $title = 'Account Suspended';
             $message = 'Your account has been suspended. You cannot access the platform.';
-        } elseif ($user->is_blacklisted) {
+        } elseif ($user->hu_is_blacklisted) {
             $isBanned = true;
             $title = 'Account Blacklisted';
             $message = 'Your account has been blacklisted. Access is restricted.';

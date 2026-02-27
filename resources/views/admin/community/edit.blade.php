@@ -5,7 +5,7 @@
 <div class="max-w-4xl mx-auto">
 
     <!-- Back -->
-    <a href="{{ route('admin.community.view', $user->id) }}" 
+    <a href="{{ route('admin.community.view', $user->hu_id) }}" 
        class="text-blue-600 hover:underline text-sm mb-6 inline-block">
         ← Back to Profile
     </a>
@@ -14,7 +14,7 @@
 
     <div class="bg-white shadow-xl rounded-xl p-8 border border-gray-100">
 
-        <form action="{{ route('admin.community.update', $user->id) }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('admin.community.update', $user->hu_id) }}" method="POST" enctype="multipart/form-data">
             @csrf
             @method('PUT')
 
@@ -25,7 +25,7 @@
                 <div class="flex items-center gap-6">
                 <div class="h-24 w-24 rounded-full overflow-hidden border shadow">
                     @php
-                        $path = $user->profile_photo_path;
+                        $path = $user->hu_profile_photo_path;
                         if (Str::startsWith($path, ['http://', 'https://'])) {
                             $imageUrl = $path;
                         } elseif ($path && file_exists(public_path('storage/' . $path))) {
@@ -50,21 +50,21 @@
                 <!-- Name -->
                 <div class="mb-4">
                     <label class="block font-medium text-gray-700 mb-1">Name</label>
-                    <input type="text" name="name" value="{{ $user->name }}"
+                    <input type="text" name="name" value="{{ $user->hu_name }}"
                            class="border p-3 rounded-lg w-full focus:ring-blue-400 focus:border-blue-400" required>
                 </div>
 
                 <!-- Email -->
                 <div class="mb-4">
                     <label class="block font-medium text-gray-700 mb-1">Email</label>
-                    <input type="email" name="email" value="{{ $user->email }}"
+                    <input type="email" name="email" value="{{ $user->hu_email }}"
                            class="border p-3 rounded-lg w-full focus:ring-blue-400 focus:border-blue-400" required>
                 </div>
 
                 <!-- Phone -->
                 <div class="mb-4">
                     <label class="block font-medium text-gray-700 mb-1">Phone</label>
-                    <input type="text" name="phone" value="{{ $user->phone }}"
+                    <input type="text" name="phone" value="{{ $user->hu_phone }}"
                            class="border p-3 rounded-lg w-full focus:ring-blue-400 focus:border-blue-400">
                 </div>
             </div>            
@@ -78,26 +78,26 @@
 
     {{-- Pending (disabled if already approved) --}}
     <option value="pending"
-        {{ $user->verification_status == 'pending' ? 'selected' : '' }}
-        {{ $user->verification_status == 'approved' ? 'disabled' : '' }}>
+        {{ $user->hu_verification_status == 'pending' ? 'selected' : '' }}
+        {{ $user->hu_verification_status == 'approved' ? 'disabled' : '' }}>
         Pending
     </option>
 
     {{-- Approved --}}
     <option value="approved"
-        {{ $user->verification_status == 'approved' ? 'selected' : '' }}>
+        {{ $user->hu_verification_status == 'approved' ? 'selected' : '' }}>
         Approved
     </option>
 
     {{-- Rejected --}}
     <option value="rejected"
-        {{ $user->verification_status == 'rejected' ? 'selected' : '' }}>
+        {{ $user->hu_verification_status == 'rejected' ? 'selected' : '' }}>
         Rejected
     </option>
 
 </select>
 
-@if($user->verification_status === 'approved')
+@if($user->hu_verification_status === 'approved')
     <p class="text-xs text-gray-500 mt-2">
         Verified users cannot be reverted back to Pending.
     </p>
@@ -109,10 +109,10 @@
             <div class="mb-10">
                 <h2 class="text-xl font-semibold mb-3 text-gray-800">Blacklist Status</h2>
 
-                @if($user->is_blacklisted)
+                @if($user->hu_is_blacklisted)
                     <div class="p-4 bg-red-100 border border-red-300 rounded-lg mb-4">
                         <p class="text-red-700 font-semibold">This user is currently blacklisted.</p>
-                        <p class="text-red-700 text-sm mt-1"><strong>Reason:</strong> {{ $user->blacklist_reason }}</p>
+                        <p class="text-red-700 text-sm mt-1"><strong>Reason:</strong> {{ $user->hu_blacklist_reason }}</p>
                     </div>
 
                     <label class="flex items-center gap-2 font-medium text-gray-700">

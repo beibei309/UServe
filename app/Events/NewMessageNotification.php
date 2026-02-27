@@ -2,8 +2,6 @@
 
 namespace App\Events;
 
-use App\Models\Message;
-use App\Models\User;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
@@ -22,7 +20,7 @@ class NewMessageNotification implements ShouldBroadcastNow
     /**
      * Create a new event instance.
      */
-    public function __construct(Message $message, $recipientId)
+    public function __construct($message, $recipientId)
     {
         $this->message = $message;
         $this->recipientId = $recipientId;
@@ -56,7 +54,7 @@ class NewMessageNotification implements ShouldBroadcastNow
         return [
             'message_id' => $this->message->id,
             'conversation_id' => $this->message->conversation_id,
-            'sender_name' => $this->message->sender->name,
+            'sender_name' => $this->message->sender->hu_name,
             'content_preview' => substr($this->message->body ?? '', 0, 50),
             'created_at' => $this->message->created_at->toISOString(),
         ];

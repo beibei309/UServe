@@ -6,6 +6,7 @@ namespace App\Models;
 use App\Models\Review;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -14,44 +15,48 @@ class User extends Authenticatable implements MustVerifyEmail
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
+    protected $table = 'h2u_users';
+    protected $primaryKey = 'hu_id';
+
     /**
      * The attributes that are mass assignable.
      *
      * @var list<string>
      */
     protected $fillable = [
-        'name',
-        'email',
-        'password',
-        'role',
-        'phone',
-        'student_id',
-        'profile_photo_path',
-        'selfie_media_path',
-        'public_verified_at',
-        'verification_status',
-        'staff_email',
-        'reports_count',
-        'staff_verified_at',
-        'is_available',
-        'is_suspended',
-        'is_blacklisted',
-        'is_blocked',
-        'warning_count',
-        'blacklist_reason',
-        'bio',
-        'faculty',
-        'course',
+        'hu_name',
+        'hu_email',
+        'hu_password',
+        'hu_role',
+        'hu_phone',
+        'hu_student_id',
+        'hu_profile_photo_path',
+        'hu_selfie_media_path',
+        'hu_public_verified_at',
+        'hu_verification_status',
+        'hu_staff_email',
+        'hu_reports_count',
+        'hu_staff_verified_at',
+        'hu_is_available',
+        'hu_is_suspended',
+        'hu_is_blacklisted',
+        'hu_is_blocked',
+        'hu_warning_count',
+        'hu_blacklist_reason',
+        'hu_bio',
+        'hu_faculty',
+        'hu_course',
         'address',
-        'latitude',
-        'longitude',
-        'location_verified_at',
+        'hu_latitude',
+        'hu_longitude',
+        'hu_location_verified_at',
         'skills',
-        'work_experience_message',
-        'work_experience_file', 
-        'verification_document_path',
-        'verification_note',  
-        'helper_verified_at',
+        'hu_work_experience_message',
+        'hu_work_experience_file', 
+        'hu_verification_document_path',
+        'hu_verification_note',
+        'hu_helper_verified_at',
+        'helper_status',
     ];
 
     /**
@@ -60,7 +65,7 @@ class User extends Authenticatable implements MustVerifyEmail
      * @var list<string>
      */
     protected $hidden = [
-        'password',
+        'hu_password',
         'remember_token',
     ];
 
@@ -75,23 +80,23 @@ class User extends Authenticatable implements MustVerifyEmail
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
-            'public_verified_at' => 'datetime',
-            'staff_verified_at' => 'datetime',
-            'helper_verified_at' => 'datetime',
-            'location_verified_at' => 'datetime',
-            'is_available' => 'boolean',
-            'is_suspended' => 'boolean',
-            'is_blacklisted' => 'boolean',
-            'is_blocked' => 'boolean',
-            'password' => 'hashed',
+            'hu_email_verified_at' => 'datetime',
+            'hu_public_verified_at' => 'datetime',
+            'hu_staff_verified_at' => 'datetime',
+            'hu_helper_verified_at' => 'datetime',
+            'hu_location_verified_at' => 'datetime',
+            'hu_is_available' => 'boolean',
+            'hu_is_suspended' => 'boolean',
+            'hu_is_blacklisted' => 'boolean',
+            'hu_is_blocked' => 'boolean',
+            'hu_password' => 'hashed',
         ];
     }
 
     // Relationships
     public function services()
     {
-        return $this->hasMany(StudentService::class, 'user_id');
+        return $this->hasMany(StudentService::class, 'hss_user_id', 'hu_id');
     }
 
     /** Backward compatibility aliases */
@@ -100,12 +105,12 @@ class User extends Authenticatable implements MustVerifyEmail
     
     public function reviewsReceived()
     {
-        return $this->hasMany(Review::class, 'reviewee_id');
+        return $this->hasMany(Review::class, 'hr_reviewee_id', 'hu_id');
     }
 
     public function reviewsWritten()
     {
-        return $this->hasMany(Review::class, 'reviewer_id');
+        return $this->hasMany(Review::class, 'hr_reviewer_id', 'hu_id');
     }
     
 
@@ -114,49 +119,57 @@ public function favoriteServices()
 {
     return $this->belongsToMany(
         \App\Models\StudentService::class,
-        'favorites',   // pivot table
-        'user_id',     // user_id on favorites
-        'service_id'   // service_id on favorites (IMPORTANT)
+        'h2u_favorites',
+        'hf_user_id',
+        'hf_service_id',
+        'hu_id',
+        'hss_id'
     )->withTimestamps();
 }
+
+    public function notifications(): MorphMany
+    {
+        return $this->morphMany(DatabaseNotification::class, 'hn_notifiable')
+            ->orderBy('created_at', 'desc');
+    }
 
 
 
     // Helpers
     public function isStudent(): bool
     {
-        return $this->role === 'student';
+        return $this->hu_role === 'student';
     }
 
     public function isCommunity(): bool
     {
-        return $this->role === 'community' || $this->role === 'staff';
+        return $this->hu_role === 'community' || $this->hu_role === 'staff';
     }
 
     public function isStaff(): bool
     {
         // Only community accounts with staff verification qualify as staff
-        return $this->role === 'community' && !is_null($this->staff_verified_at) && !is_null($this->staff_email);
+        return $this->hu_role === 'community' && !is_null($this->hu_staff_verified_at) && !is_null($this->hu_staff_email);
     }
 
     public function isAdmin(): bool
     {
-        return $this->role === 'admin';
+        return $this->hu_role === 'admin';
     }
 
     public function isVerifiedPublic(): bool
     {
-        return !is_null($this->public_verified_at) && $this->verification_status === 'approved';
+        return !is_null($this->hu_public_verified_at) && $this->hu_verification_status === 'approved';
     }
 
     public function isVerifiedStaff(): bool
     {
-        return $this->role === 'community' && !is_null($this->staff_verified_at);
+        return $this->hu_role === 'community' && !is_null($this->hu_staff_verified_at);
     }
 
     public function isAvailable(): bool
     {
-        return (bool) $this->is_available;
+        return (bool) $this->hu_is_available;
     }
 
     public function getTrustBadgeAttribute(): string
@@ -165,7 +178,7 @@ public function favoriteServices()
         if ($this->isVerifiedStaff()) {
             return 'Staf UPSI Rasmi';
         }
-        if ($this->role === 'student' && $this->email_verified_at) {
+        if ($this->hu_role === 'student' && $this->hu_email_verified_at) {
             return 'Pelajar UPSI Terkini';
         }
         if ($this->isVerifiedPublic()) {
@@ -176,17 +189,49 @@ public function favoriteServices()
 
     public function getAverageRatingAttribute(): ?float
     {
-        return $this->reviewsReceived()->avg('rating');
+        return $this->reviewsReceived()->avg('hr_rating');
     }
 
     public function studentStatus()
     {
         // Links User (id) -> StudentStatus (student_id)
-        return $this->hasOne(StudentStatus::class, 'student_id');
+        return $this->hasOne(StudentStatus::class, 'hss_student_id', 'hu_id');
     }
 
     public function serviceRequestsReceived()
     {
-        return $this->hasMany(ServiceRequest::class, 'provider_id');
+        return $this->hasMany(ServiceRequest::class, 'hsr_provider_id', 'hu_id');
+    }
+
+    public function getAuthPassword(): string
+    {
+        return (string) $this->hu_password;
+    }
+
+    public function getEmailForPasswordReset(): string
+    {
+        return (string) $this->hu_email;
+    }
+
+    public function getEmailForVerification(): string
+    {
+        return (string) $this->hu_email;
+    }
+
+    public function routeNotificationForMail($notification = null): string
+    {
+        return (string) $this->hu_email;
+    }
+
+    public function hasVerifiedEmail(): bool
+    {
+        return ! is_null($this->hu_email_verified_at);
+    }
+
+    public function markEmailAsVerified(): bool
+    {
+        return $this->forceFill([
+            'hu_email_verified_at' => $this->freshTimestamp(),
+        ])->save();
     }
 }

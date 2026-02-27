@@ -5,19 +5,19 @@
 </head>
 <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
     
-    <h2>Hi {{ $serviceRequest->provider->name }},</h2>
+    <h2>Hi {{ $serviceRequest->provider->hu_name }},</h2>
 
     <p>You have received a new service request!</p>
 
     <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin: 20px 0;">
-        <p><strong>Service:</strong> {{ $serviceRequest->studentService->title }}</p>
-        <p><strong>Customer:</strong> {{ $serviceRequest->requester->name }}</p>
-        <p><strong>Price Offered:</strong> RM{{ number_format($serviceRequest->offered_price, 2) }}</p>
+        <p><strong>Service:</strong> {{ $serviceRequest->studentService->hss_title }}</p>
+        <p><strong>Customer:</strong> {{ $serviceRequest->requester->hu_name }}</p>
+        <p><strong>Price Offered:</strong> RM{{ number_format($serviceRequest->hsr_offered_price, 2) }}</p>
         
         <hr style="border-top: 1px solid #ddd;">
         
         <p><strong>Message/Details:</strong><br>
-        {!! nl2br(e($serviceRequest->message)) !!}</p>
+        {!! nl2br(e($serviceRequest->hsr_message)) !!}</p>
     </div>
 
     <p>Please login to your dashboard to Accept or Reject this request.</p>

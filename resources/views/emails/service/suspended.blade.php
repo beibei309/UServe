@@ -1,10 +1,10 @@
 @component('mail::message')
 # Service Suspended
 
-Hi {{ $service->user->name }},
+Hi {{ $service->user->hu_name }},
 
 We would like to inform you that your service,
-“{{ $service->title }}”, has been temporarily suspended by the administrator.
+“{{ $service->hss_title }}”, has been temporarily suspended by the administrator.
 
 This decision was made after multiple warnings and concerns were raised regarding this service. During the suspension period, your service will not be visible or accessible to users.
 

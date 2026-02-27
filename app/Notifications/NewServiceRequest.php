@@ -41,10 +41,10 @@ class NewServiceRequest extends Notification
     {
         return [
             'title' => 'New Service Request',
-            'message' => 'You have received a new service request from ' . $this->serviceRequest->requester->name,
-            'service_name' => $this->serviceRequest->studentService->title,
-            'request_id' => $this->serviceRequest->id,
-            'action_url' => route('service-requests.show', $this->serviceRequest->id),
+            'message' => 'You have received a new service request from ' . $this->serviceRequest->requester->hu_name,
+            'service_name' => $this->serviceRequest->studentService->hss_title,
+            'request_id' => $this->serviceRequest->hsr_id,
+            'action_url' => route('service-requests.show', $this->serviceRequest->hsr_id),
             'type' => 'new_request'
         ];
     }

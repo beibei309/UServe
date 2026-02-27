@@ -16,7 +16,7 @@
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
             <div>
                 <h1 class="text-3xl font-bold text-slate-900 tracking-tight">Dashboard</h1>
-                <p class="text-slate-500 mt-1">Welcome back, {{ Auth::user()->name }}! Here's what's happening today.</p>
+                <p class="text-slate-500 mt-1">Welcome back, {{ Auth::user()->hu_name }}! Here's what's happening today.</p>
             </div>
 
             <div class="bg-white p-2 pr-4 rounded-full shadow-sm border border-gray-200 flex items-center gap-3">
@@ -201,15 +201,15 @@
                             <div class="p-3 rounded-xl bg-gray-50 border border-gray-100">
                                 <div class="flex items-center justify-between mb-2">
                                     <div class="flex items-center gap-2">
-                                        <span class="text-sm font-bold text-gray-900">{{ $review->user->name }}</span>
+                                        <span class="text-sm font-bold text-gray-900">{{ $review->user->hu_name }}</span>
                                     </div>
                                     <div class="flex text-yellow-400 text-xs">
-                                        @for ($i = 0; $i < $review->rating; $i++)
+                                        @for ($i = 0; $i < $review->hr_rating; $i++)
                                             <i class="fa-solid fa-star"></i>
                                         @endfor
                                     </div>
                                 </div>
-                                <p class="text-xs text-gray-600 italic">"{{ Str::limit($review->comment, 80) }}"</p>
+                                <p class="text-xs text-gray-600 italic">"{{ Str::limit($review->hr_comment, 80) }}"</p>
                             </div>
                         @empty
                             <p class="text-sm text-gray-400 text-center py-2">No reviews yet.</p>

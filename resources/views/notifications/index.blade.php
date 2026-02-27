@@ -90,7 +90,7 @@
                                             <!-- Actions -->
                                             <div class="flex items-center gap-3">
                                                 @if(isset($notification->data['action_url']) && $notification->data['action_url'] !== '#')
-                                                    <a href="{{ route('notifications.read', $notification->id) }}" 
+                                                    <a href="{{ route('notifications.read', $notification->hn_id) }}" 
                                                         class="inline-flex items-center px-3 py-1.5 border border-indigo-200 text-xs font-medium rounded-lg text-indigo-700 bg-indigo-50 hover:bg-indigo-100 transition-colors">
                                                         View Details
                                                         <svg class="ml-1.5 w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -99,7 +99,7 @@
                                                     </a>
                                                 @else
                                                      @if($isUnread)
-                                                        <form action="{{ route('notifications.read', $notification->id) }}" method="POST" class="inline-block">
+                                                        <form action="{{ route('notifications.read', $notification->hn_id) }}" method="POST" class="inline-block">
                                                             @csrf
                                                             <button type="submit" class="text-xs font-medium text-gray-500 hover:text-indigo-600 transition-colors flex items-center gap-1">
                                                                 <i class="fa-regular fa-circle-check"></i> Mark as read

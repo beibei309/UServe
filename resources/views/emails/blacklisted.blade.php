@@ -1,7 +1,7 @@
 @component('mail::message')
 # Account Blacklisted
 
-Hello {{ $user->name }},
+Hello {{ $user->hu_name }},
 
 We are writing to inform you that your account on the S2U platform has been blacklisted.
 

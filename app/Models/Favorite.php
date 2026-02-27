@@ -6,14 +6,17 @@ use Illuminate\Database\Eloquent\Model;
 
 class Favorite extends Model
 {
+    protected $table = 'h2u_favorites';
+    protected $primaryKey = 'hf_id';
+
     protected $fillable = [
-        'user_id',
-        'favorited_user_id',
-        'service_id',
+        'hf_user_id',
+        'hf_favorited_user_id',
+        'hf_service_id',
     ];
 
     public function service()
     {
-        return $this->belongsTo(StudentService::class, 'service_id');
+        return $this->belongsTo(StudentService::class, 'hf_service_id', 'hss_id');
     }
 }

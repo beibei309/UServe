@@ -20,20 +20,20 @@
                         <div class="relative group">
                             <div
                                 class="w-32 h-32 md:w-44 md:h-44 rounded-full border-4 border-white overflow-hidden bg-white shadow-lg">
-                                @if ($user->profile_photo_path)
-                                    <img src="{{ asset( $user->profile_photo_path) }}"
-                                        alt="{{ $user->name }}"
+                                @if ($user->hu_profile_photo_path)
+                                    <img src="{{ asset( $user->hu_profile_photo_path) }}"
+                                        alt="{{ $user->hu_name }}"
                                         class="w-full h-full object-cover transition transform group-hover:scale-105">
                                 @else
                                     <div
                                         class="w-full h-full bg-slate-800 flex items-center justify-center text-white font-bold text-5xl">
-                                        {{ substr($user->name, 0, 1) }}
+                                        {{ substr($user->hu_name, 0, 1) }}
                                     </div>
                                 @endif
                             </div>
 
                             {{-- Verified Badge --}}
-                            @if ($user->trust_badge)
+                            @if ($user->hu_trust_badge)
                                 <div class="absolute bottom-3 right-3 bg-blue-500 text-white w-8 h-8 flex items-center justify-center rounded-full border-2 border-white shadow-sm"
                                     title="Verified Student">
                                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -49,18 +49,18 @@
                         <div class="md:ml-8 mt-6 md:mt-0 flex-1 w-full">
                             <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
                                 <div>
-                                    <h1 class="text-3xl font-bold text-gray-900 leading-tight mb-1">{{ $user->name }}
+                                    <h1 class="text-3xl font-bold text-gray-900 leading-tight mb-1">{{ $user->hu_name }}
                                     </h1>
                                     <div class="flex items-center gap-2 text-gray-600 font-medium mb-3">
                                         <i class="fa-solid fa-graduation-cap text-indigo-500"></i>
-                                        {{ $user->faculty ?? 'Faculty of Computing' }}
+                                        {{ $user->hu_faculty ?? 'Faculty of Computing' }}
                                         <span class="text-gray-300 mx-1">•</span>
-                                        <span class="text-sm text-gray-500">{{ $user->course ?? 'Student' }}</span>
+                                        <span class="text-sm text-gray-500">{{ $user->hu_course ?? 'Student' }}</span>
                                     </div>
 
                                     <div class="flex flex-wrap items-center gap-4">
                                         {{-- Availability Badge --}}
-                                        @if ($user->is_available)
+                                        @if ($user->hu_is_available)
                                             <span
                                                 class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-green-50 text-green-700 border border-green-200 shadow-sm">
                                                 <span class="relative flex h-2 w-2">
@@ -82,7 +82,7 @@
                                         <div
                                             class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-yellow-50 border border-yellow-200 text-yellow-700 text-xs font-bold shadow-sm">
                                             <i class="fa-solid fa-star text-yellow-500"></i>
-                                            {{ number_format($user->average_rating ?? 0, 1) }}
+                                            {{ number_format($user->hu_average_rating ?? 0, 1) }}
                                             <span class="font-normal text-yellow-600 opacity-80">
                                                 {{ $reviews->count() }}
                                                 reviews</span>
@@ -93,17 +93,17 @@
                                 {{-- ACTION BUTTONS --}}
                                 <div class="mt-6 md:mt-0 flex flex-col sm:flex-row gap-3">
                                     @auth
-                                        @if (auth()->id() !== $user->id)
+                                        @if (auth()->id() !== $user->hu_id)
                                             @php
                                                 // Prepare WhatsApp Link
-                                                $rawPhone = $user->phone_number ?? ($user->phone ?? '');
+                                                $rawPhone = $user->hu_phone_number ?? ($user->hu_phone ?? '');
                                                 $cleanPhone = preg_replace('/[^0-9]/', '', $rawPhone);
                                                 if (substr($cleanPhone, 0, 1) === '0') {
                                                     $cleanPhone = '60' . substr($cleanPhone, 1);
                                                 }
                                                 $whatsappUrl =
                                                     "https://wa.me/{$cleanPhone}?text=Hi " .
-                                                    urlencode($user->name) .
+                                                    urlencode($user->hu_name) .
                                                     ', I saw your profile on S2U.';
                                             @endphp
 
@@ -132,10 +132,10 @@
                     </div>
 
                     {{-- Bio Section --}}
-                    @if ($user->bio)
+                    @if ($user->hu_bio)
                         <div class="mt-8 border-t border-gray-100 pt-6">
                             <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">About Me</h3>
-                            <p class="text-gray-700 leading-relaxed text-lg max-w-4xl font-light">{{ $user->bio }}
+                            <p class="text-gray-700 leading-relaxed text-lg max-w-4xl font-light">{{ $user->hu_bio }}
                             </p>
                         </div>
                     @endif
@@ -153,7 +153,7 @@
                         <div class="space-y-4">
                             <div class="flex justify-between items-center text-sm border-b border-gray-50 pb-2">
                                 <span class="text-gray-500">Member Since</span>
-                                <span class="font-semibold text-gray-900">{{ $user->created_at->format('M Y') }}</span>
+                                <span class="font-semibold text-gray-900">{{ $user->hu_created_at->format('M Y') }}</span>
                             </div>
                             <div class="flex justify-between items-center text-sm border-b border-gray-50 pb-2">
                                 <span class="text-gray-500">Total Services</span>
@@ -162,13 +162,13 @@
                         </div>
                     </div>
 
-                    @if ($user->skills)
+                    @if ($user->hu_skills)
                         <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                             <h3 class="font-bold text-gray-900 mb-4 flex items-center gap-2">
                                 <i class="fa-solid fa-wand-magic-sparkles text-indigo-500"></i> Skills
                             </h3>
                             <div class="flex flex-wrap gap-2">
-                                @foreach (explode(',', $user->skills) as $skill)
+                                @foreach (explode(',', $user->hu_skills) as $skill)
                                     <span
                                         class="px-3 py-1 rounded-lg text-sm font-medium bg-slate-100 text-slate-700 border border-slate-200">
                                         {{ trim($skill) }}
@@ -178,16 +178,16 @@
                         </div>
                     @endif
 
-                    @if ($user->faculty || $user->course)
+                    @if ($user->hu_faculty || $user->hu_course)
                         <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                             <h3 class="font-bold text-gray-900 mb-4 flex items-center gap-2">
                                 <i class="fa-solid fa-university text-indigo-500"></i> Education
                             </h3>
                             <div class="space-y-4">
                                 <div class="relative pl-4 border-l-2 border-indigo-200">
-                                    <h4 class="font-semibold text-gray-900">{{ $user->course ?? 'Course Not Set' }}
+                                    <h4 class="font-semibold text-gray-900">{{ $user->hu_course ?? 'Course Not Set' }}
                                     </h4>
-                                    <p class="text-sm text-gray-600">{{ $user->faculty ?? 'Faculty Not Set' }}</p>
+                                    <p class="text-sm text-gray-600">{{ $user->hu_faculty ?? 'Faculty Not Set' }}</p>
                                     <p class="text-xs text-gray-400 mt-1">Current Student</p>
                                 </div>
                             </div>
@@ -195,21 +195,21 @@
                     @endif
 
                     {{-- Resume / Experience Section --}}
-                    @if ($user->work_experience_message || $user->work_experience_file)
+                    @if ($user->hu_work_experience_message || $user->hu_work_experience_file)
                         <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                             <h3 class="font-bold text-gray-900 mb-4 flex items-center gap-2">
                                 <i class="fa-solid fa-briefcase text-indigo-500"></i> Experience
                             </h3>
 
-                            @if ($user->work_experience_message)
+                            @if ($user->hu_work_experience_message)
                                 <div
                                     class="text-sm text-gray-600 leading-relaxed bg-gray-50 p-3 rounded-lg border border-gray-100 mb-4">
-                                    {!! nl2br(e($user->work_experience_message)) !!}
+                                    {!! nl2br(e($user->hu_work_experience_message)) !!}
                                 </div>
                             @endif
 
-                            @if ($user->work_experience_file)
-                                <a href="{{ asset('storage/' . $user->work_experience_file) }}" target="_blank"
+                            @if ($user->hu_work_experience_file)
+                                <a href="{{ asset('storage/' . $user->hu_work_experience_file) }}" target="_blank"
                                     class="flex items-center justify-center w-full px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition shadow-sm group">
                                     <i
                                         class="fa-regular fa-file-pdf text-red-500 mr-2 group-hover:scale-110 transition-transform"></i>
@@ -241,9 +241,9 @@
 
                                         {{-- Service Image --}}
                                        <a href="{{ route('services.details', $service) }}" class="block h-48 bg-gray-100 overflow-hidden relative">
-    @if ($service->image_path)
+    @if ($service->hss_image_path)
         @php
-            $path = $service->image_path;
+            $path = $service->hss_image_path;
             
             // 1. Check if it's an external URL (e.g. placeholder or S3)
             if (Str::startsWith($path, ['http://', 'https://'])) {
@@ -260,7 +260,7 @@
         @endphp
 
         <img src="{{ $imageUrl }}" 
-             alt="{{ $service->title }}"
+             alt="{{ $service->hss_title }}"
              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
     @else
         <div class="w-full h-full flex items-center justify-center bg-slate-50 text-slate-300">
@@ -270,24 +270,24 @@
 
     {{-- Price Tag --}}
     <div class="absolute bottom-3 right-3 bg-slate-900/90 backdrop-blur-md text-white px-3 py-1.5 rounded-lg text-sm font-bold shadow-lg">
-        RM {{ number_format($service->basic_price ?? 0, 0) }}
+        RM {{ number_format($service->hss_basic_price ?? 0, 0) }}
     </div>
 </a>                                        {{-- Service Details --}}
                                         <div class="p-5 flex flex-col flex-1">
                                             <div class="mb-2">
                                                 <span
                                                     class="text-xs font-bold text-indigo-600 uppercase tracking-wider">
-                                                    {{ $service->category->name ?? 'Service' }}
+                                                    {{ $service->category->hc_name ?? 'Service' }}
                                                 </span>
                                             </div>
 
                                         <a href="{{ route('services.details', $service) }}"
                                                 class="text-lg font-bold text-gray-900 hover:text-indigo-600 line-clamp-2 leading-tight mb-2">
-                                                {{ $service->title }}
+                                                {{ $service->hss_title }}
                                             </a>
 
                                             <p class="text-sm text-gray-500 line-clamp-2 mb-4 flex-1">
-                                                {{ Str::limit(strip_tags($service->description), 80) }}
+                                                {{ Str::limit(strip_tags($service->hss_description), 80) }}
                                             </p>
 
 
@@ -342,7 +342,7 @@
                             <div
                                 class="flex items-center gap-4 bg-slate-50 px-5 py-3 rounded-2xl border border-slate-100">
                                 <span
-                                    class="text-3xl font-bold text-slate-900">{{ number_format($user->average_rating ?? 0, 1) }}</span>
+                                    class="text-3xl font-bold text-slate-900">{{ number_format($user->hu_average_rating ?? 0, 1) }}</span>
                                 <div class="h-8 w-px bg-slate-200"></div>
                                 <div class="flex flex-col">
                                     {{-- 1. Bintang Rating --}}
@@ -350,7 +350,7 @@
                                         @for ($i = 0; $i < 5; $i++)
                                             {{-- Menggunakan average_rating yang kita kira di controller --}}
                                             <i
-                                                class="fas fa-star {{ $i < round($user->average_rating ?? 0) ? '' : 'text-gray-200' }}"></i>
+                                                class="fas fa-star {{ $i < round($user->hu_average_rating ?? 0) ? '' : 'text-gray-200' }}"></i>
                                         @endfor
                                     </div>
 
@@ -371,15 +371,15 @@
                                         <div class="flex items-start gap-4">
                                           {{-- Reviewer Avatar --}}
 <div class="flex-shrink-0">
-    @if ($review->reviewer && $review->reviewer->profile_photo_path)
+    @if ($review->reviewer && $review->reviewer->hu_profile_photo_path)
         {{-- Display Image --}}
-        <img src="{{ asset($review->reviewer->profile_photo_path) }}" 
-             alt="{{ $review->reviewer->name }}"
+        <img src="{{ asset($review->reviewer->hu_profile_photo_path) }}" 
+             alt="{{ $review->reviewer->hu_name }}"
              class="w-11 h-11 rounded-full object-cover border border-indigo-100 shadow-sm">
     @else
         {{-- Fallback to Initials --}}
         <div class="w-11 h-11 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold border border-indigo-100 shadow-sm">
-            {{ substr($review->reviewer->name ?? 'A', 0, 1) }}
+            {{ substr($review->reviewer->hu_name ?? 'A', 0, 1) }}
         </div>
     @endif
 </div>
@@ -388,41 +388,42 @@
                                                     class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
                                                     <div>
                                                         <h4 class="font-bold text-gray-900 text-sm">
-                                                            {{ $review->reviewer->name ?? 'Anonymous User' }}</h4>
+                                                            {{ $review->reviewer->hu_name ?? 'Anonymous User' }}</h4>
                                                         <div class="flex items-center gap-2 mt-0.5">
                                                             <div class="flex text-yellow-400 text-[10px]">
                                                                 @for ($i = 1; $i <= 5; $i++)
                                                                     <i
-                                                                        class="fas fa-star {{ $i <= $review->rating ? '' : 'text-gray-200' }}"></i>
+                                                                        class="fas fa-star {{ $i <= $review->hr_rating ? '' : 'text-gray-200' }}"></i>
+                                                                        class="fas fa-star {{ $i <= $review->hr_rating ? '' : 'text-gray-200' }}"></i>
                                                                 @endfor
                                                             </div>
                                                             <span class="text-[11px] text-gray-400">•
-                                                                {{ $review->created_at->diffForHumans() }}</span>
+                                                                {{ optional($review->hr_created_at)->diffForHumans() ?? 'Recently' }}</span>
                                                         </div>
                                                     </div>
                                                 </div>
 
                                                 {{-- 🏷️ Service Reference Badge --}}
-                                                @if ($review->service)
+                                                @if ($review->studentService)
                                                     <div class="mb-3">
                                                         <span
                                                             class="inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-100">
                                                             <i class="fa-solid fa-tag mr-1.5 opacity-60"></i>
-                                                            Service: {{ $review->service->title }}
+                                                            Service: {{ $review->studentService->hss_title }}
                                                         </span>
                                                     </div>
                                                 @endif
 
                                                 {{-- Review Comment --}}
-                                                @if ($review->comment)
+                                                @if ($review->hr_comment)
                                                     <div
                                                         class="text-sm text-gray-600 leading-relaxed bg-gray-50/50 p-4 rounded-xl rounded-tl-none border border-gray-100">
-                                                        {{ $review->comment }}
+                                                        {{ $review->hr_comment }}
                                                     </div>
                                                 @endif
 
                                                 {{-- 💬 Seller Reply (Dinamik dari DB anda) --}}
-                                                @if ($review->reply)
+                                                @if ($review->hr_reply)
                                                     <div class="mt-4 ml-4 md:ml-8 relative">
                                                         {{-- Garis penunjuk balasan --}}
                                                         <div
@@ -435,13 +436,13 @@
                                                                 <span
                                                                     class="text-[10px] font-bold text-indigo-600 uppercase tracking-wider">Seller's
                                                                     Response</span>
-                                                                @if ($review->replied_at)
+                                                                @if ($review->hr_replied_at)
                                                                     <span class="text-[10px] text-gray-400">•
-                                                                        {{ \Carbon\Carbon::parse($review->replied_at)->diffForHumans() }}</span>
+                                                                        {{ \Carbon\Carbon::parse($review->hr_replied_at)->diffForHumans() }}</span>
                                                                 @endif
                                                             </div>
                                                             <p class="text-sm text-gray-700 italic leading-relaxed">
-                                                                "{{ $review->reply }}"
+                                                                "{{ $review->hr_reply }}"
                                                             </p>
                                                         </div>
                                                     </div>
@@ -464,7 +465,7 @@
                                 </div>
                                 <h3 class="text-gray-900 font-bold">No reviews yet</h3>
                                 <p class="text-gray-500 text-sm mt-1">Be the first to hire and review
-                                    {{ $user->name }}!</p>
+                                    {{ $user->hu_name }}!</p>
                             </div>
                         @endif
                     </div>
