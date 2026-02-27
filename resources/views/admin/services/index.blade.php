@@ -360,24 +360,22 @@
 
                                         {{-- IF SUSPENDED (BLOCKED) → Only Unblock --}}
                                         @if ($service->hss_approval_status === 'suspended')
-                                            @if ($service->hss_approval_status === 'approved')
+                                            <button
                                                 onclick="confirmUnblock('{{ route('admin.services.unblock', $service->hss_id) }}')"
-                                            @if ($service->hss_approval_status === 'pending')
-                                                Reactive
-                                            @if (($service->hss_warning_count ?? 0) >= 3 && $service->hss_approval_status !== 'suspended')
+                                                class="btn-green">
+                                                Reactivate
+                                            </button>
                                         @endif
-                                            @if ($service->hss_approval_status === 'suspended')
+
                                     </div>
-                if (service.hss_approval_status === 'approved') {
-
-                } else if (service.hss_approval_status === 'rejected') {
-
-                } else if (service.hss_approval_status === 'suspended') {
+                                </td>
+                            </tr>
+                        @empty
                             <tr>
-                                <td colspan="9" class="py-10 text-center text-gray-500">
+                                <td colspan="8" class="py-10 text-center text-gray-500">
                                     No services found.
                                 </td>
-                badge.textContent = service.hss_approval_status.charAt(0).toUpperCase() + service.hss_approval_status.slice(1);
+                            </tr>
                         @endforelse
                     </tbody>
 
