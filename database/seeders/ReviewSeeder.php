@@ -10,23 +10,31 @@ class ReviewSeeder extends Seeder
 {
     public function run(): void
     {
-        // Kita ambil ID user yang wujud (selain user id 1 yang biasanya admin)
-        $users = DB::table('users')->where('id', '>', 1)->pluck('id')->toArray();
-        
-        // Kalau tak ada user lain, kita create fake user jap
-        if (empty($users)) {
-            $userId = DB::table('users')->insertGetId([
-                'name' => 'Reviewer Tester',
-                'email' => 'reviewer@test.com',
-                'password' => bcrypt('password'),
-            ]);
-            $users = [$userId];
+        $users = DB::table('users')->pluck('id')->toArray();
+
+        if (count($users) < 2) {
+            $ts = now();
+            for ($i = count($users); $i < 2; $i++) {
+                DB::table('users')->insert([
+                    'name' => 'Reviewer Tester ' . ($i + 1),
+                    'email' => "reviewer{$i}@test.com",
+                    'password' => bcrypt('password'),
+                    'role' => 'community',
+                    'verification_status' => 'approved',
+                    'created_at' => $ts,
+                    'updated_at' => $ts,
+                ]);
+            }
+            $users = DB::table('users')->pluck('id')->toArray();
         }
 
-        // Kita try cari service ID kalau ada
-        $serviceId = null;
-        if (Schema::hasTable('student_services')) {
-            $serviceId = DB::table('student_services')->first()->id ?? null;
+        if (!Schema::hasTable('student_services')) {
+            return;
+        }
+
+        $serviceId = DB::table('student_services')->value('id');
+        if (!$serviceId) {
+            return;
         }
 
         $reviews = [
@@ -38,26 +46,25 @@ class ReviewSeeder extends Seeder
         ];
 
         foreach ($reviews as $index => $data) {
-            // Randomly pick user
-            $randomUser = $users[array_rand($users)];
+            $reviewerId = $users[array_rand($users)];
+            $revieweePool = array_values(array_filter($users, fn ($id) => $id !== $reviewerId));
+            if (empty($revieweePool)) {
+                continue;
+            }
+            $revieweeId = $revieweePool[array_rand($revieweePool)];
 
             $insertData = [
-                'user_id' => $randomUser,
+                'reviewer_id' => $reviewerId,
+                'reviewee_id' => $revieweeId,
+                'student_service_id' => $serviceId,
+                'service_request_id' => null,
                 'rating' => $data['rating'],
                 'comment' => $data['comment'],
+                'reply' => null,
+                'replied_at' => null,
                 'created_at' => now(),
                 'updated_at' => now(),
             ];
-
-            // Kalau table review perlukan service_id, kita masukkan
-            if (Schema::hasColumn('reviews', 'service_id') && $serviceId) {
-                $insertData['service_id'] = $serviceId;
-            }
-            
-            // Kalau table review perlukan reviewed_user_id (Owner servis)
-            if (Schema::hasColumn('reviews', 'reviewed_user_id')) {
-                $insertData['reviewed_user_id'] = 1; // Contoh: Review user ID 1
-            }
 
             DB::table('reviews')->insertOrIgnore($insertData);
         }
