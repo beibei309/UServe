@@ -41,8 +41,9 @@
             </div>
 
             @php
-                $isRequester = auth()->id() === $serviceRequest->hsr_requester_id;
-                $isProvider = auth()->id() === $serviceRequest->hsr_provider_id;
+                $currentUserId = (int) (auth()->user()->hu_id ?? auth()->id());
+                $isRequester = $currentUserId === (int) $serviceRequest->hsr_requester_id;
+                $isProvider = $currentUserId === (int) $serviceRequest->hsr_provider_id;
                 $service = $serviceRequest->studentService;
                 $selectedPackage = is_array($serviceRequest->hsr_selected_package)
                     ? ($serviceRequest->hsr_selected_package[0] ?? 'custom')

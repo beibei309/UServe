@@ -325,21 +325,28 @@ class VerificationController extends Controller
 
         if ($request->hasFile('verification_document')) {
             $file = $request->file('verification_document');
-            $filename = 'verify_' . $user->hu_id . '_' . $file->hashName();
             
-            // Store in storage/app/private/verification_docs (local disk)
-            $path = $file->storeAs('verification_docs', $filename, 'local');
+            // Check if file is valid
+            if ($file && $file->isValid()) {
+                $filename = 'verify_' . $user->hu_id . '_' . $file->hashName();
+                
+                // Store in storage/app/private/verification_docs (local disk)
+                $path = $file->storeAs('verification_docs', $filename, 'local');
 
-            if (!$path || !Storage::disk('local')->exists($path)) {
-                return redirect()->back()->withErrors(['verification_document' => 'Upload failed. Please try again.']);
+                if (!$path || !Storage::disk('local')->exists($path)) {
+                    return redirect()->back()->withErrors(['verification_document' => 'Upload failed. Please try again.']);
+                }
+
+                // Update User
+                $user->hu_verification_document_path = $path;
+                $user->hu_verification_status = 'approved'; 
+                $user->save();
+
+                return redirect()->back()->with('success', 'Verification Successfully!');
+            } else {
+                return redirect()->back()->withErrors(['verification_document' => 'Invalid file uploaded.']);
             }
-
-            // Update User
-            $user->hu_verification_document_path = $path;
-            $user->hu_verification_status = 'approved'; 
-            $user->save();
-
-	return redirect()->back()->with('success', 'Verification Successfully!');        }
+        }
 
         return redirect()->back()->withErrors(['verification_document' => 'Upload failed. Please try again.']);
     }
