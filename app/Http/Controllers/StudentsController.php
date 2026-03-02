@@ -171,15 +171,49 @@ class StudentsController extends Controller
         // Handle work experience file
         if ($request->hasFile('work_experience_file')) {
             $file = $request->file('work_experience_file');
-            $filename = $file->hashName();
-            $storedPath = Storage::disk('public')->putFileAs('uploads/work_experience', $file, $filename);
+            try {
+                $extension = strtolower($file->getClientOriginalExtension() ?: $file->extension() ?: 'bin');
+                $filename = 'workexp_' . $user->hu_id . '_' . now()->format('YmdHis') . '_' . bin2hex(random_bytes(6)) . '.' . $extension;
 
-            if ($storedPath && Storage::disk('public')->exists($storedPath)) {
+                $disk = Storage::disk('public');
+                $directory = 'uploads/work_experience';
+                $storedPath = $directory . '/' . $filename;
+
+                if (!$disk->exists($directory)) {
+                    $disk->makeDirectory($directory);
+                }
+
+                $tmpPath = $file->getRealPath() ?: $file->getPathname();
+                if (empty($tmpPath) || !is_file($tmpPath)) {
+                    return back()
+                        ->withInput()
+                        ->withErrors(['work_experience_file' => 'Upload failed. Temporary upload file is missing. Please retry.']);
+                }
+
+                $contents = @file_get_contents($tmpPath);
+                if ($contents === false) {
+                    return back()
+                        ->withInput()
+                        ->withErrors(['work_experience_file' => 'Upload failed while reading the file. Please retry.']);
+                }
+
+                $stored = $disk->put($storedPath, $contents);
+                if (!$stored || !$disk->exists($storedPath)) {
+                    return back()
+                        ->withInput()
+                        ->withErrors(['work_experience_file' => 'Resume upload failed. Please try again.']);
+                }
+
                 $user->hu_work_experience_file = $storedPath;
-            } else {
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('Work experience upload failed (store)', [
+                    'user_id' => $user->hu_id,
+                    'message' => $e->getMessage(),
+                ]);
+
                 return back()
                     ->withInput()
-                    ->withErrors(['work_experience_file' => 'Resume upload failed. Please try again.']);
+                    ->withErrors(['work_experience_file' => 'Upload failed on this environment. Please retry or check server upload temp settings.']);
             }
         }
 
@@ -227,7 +261,6 @@ class StudentsController extends Controller
     // 3. Handle Work Experience File Upload
     if ($request->hasFile('work_experience_file')) {
         $file = $request->file('work_experience_file');
-        $filename = $file->hashName();
 
         // Delete old file (new + legacy paths)
         if ($user->hu_work_experience_file) {
@@ -239,15 +272,50 @@ class StudentsController extends Controller
             }
         }
 
-        $storedPath = Storage::disk('public')->putFileAs('uploads/work_experience', $file, $filename);
+        try {
+            $extension = strtolower($file->getClientOriginalExtension() ?: $file->extension() ?: 'bin');
+            $filename = 'workexp_' . $user->hu_id . '_' . now()->format('YmdHis') . '_' . bin2hex(random_bytes(6)) . '.' . $extension;
 
-        if (!$storedPath || !Storage::disk('public')->exists($storedPath)) {
+            $disk = Storage::disk('public');
+            $directory = 'uploads/work_experience';
+            $storedPath = $directory . '/' . $filename;
+
+            if (!$disk->exists($directory)) {
+                $disk->makeDirectory($directory);
+            }
+
+            $tmpPath = $file->getRealPath() ?: $file->getPathname();
+            if (empty($tmpPath) || !is_file($tmpPath)) {
+                return back()
+                    ->withInput()
+                    ->withErrors(['work_experience_file' => 'Upload failed. Temporary upload file is missing. Please retry.']);
+            }
+
+            $contents = @file_get_contents($tmpPath);
+            if ($contents === false) {
+                return back()
+                    ->withInput()
+                    ->withErrors(['work_experience_file' => 'Upload failed while reading the file. Please retry.']);
+            }
+
+            $stored = $disk->put($storedPath, $contents);
+            if (!$stored || !$disk->exists($storedPath)) {
+                return back()
+                    ->withInput()
+                    ->withErrors(['work_experience_file' => 'Resume upload failed. Please try again.']);
+            }
+
+            $user->hu_work_experience_file = $storedPath;
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Work experience upload failed (update)', [
+                'user_id' => $user->hu_id,
+                'message' => $e->getMessage(),
+            ]);
+
             return back()
                 ->withInput()
-                ->withErrors(['work_experience_file' => 'Resume upload failed. Please try again.']);
+                ->withErrors(['work_experience_file' => 'Upload failed on this environment. Please retry or check server upload temp settings.']);
         }
-
-        $user->hu_work_experience_file = $storedPath;
     }
 
     // 4. Handle Profile Photo Upload

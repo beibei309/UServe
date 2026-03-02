@@ -430,14 +430,51 @@ public function index(Request $request)
         // 3. Handle File Upload
         if ($request->hasFile('payment_proof')) {
             $file = $request->file('payment_proof');
-            $filename = $file->hashName();
-            $path = Storage::disk('public')->putFileAs('payment_proofs', $file, $filename);
 
-            if (!$path || !Storage::disk('public')->exists($path)) {
-                return back()->withErrors(['payment_proof' => 'Payment proof upload failed. Please try again.']);
+            try {
+                $extension = strtolower($file->getClientOriginalExtension() ?: $file->extension() ?: 'bin');
+                $random = bin2hex(random_bytes(6));
+                $filename = 'payment_' . $serviceRequest->hsr_id . '_' . now()->format('YmdHis') . '_' . $random . '.' . $extension;
+
+                $disk = Storage::disk('public');
+                $directory = 'payment_proofs';
+                $path = $directory . '/' . $filename;
+
+                if (!$disk->exists($directory)) {
+                    $disk->makeDirectory($directory);
+                }
+
+                $tmpPath = $file->getRealPath() ?: $file->getPathname();
+                if (empty($tmpPath) || !is_file($tmpPath)) {
+                    return back()->withErrors([
+                        'payment_proof' => 'Upload failed. Temporary upload file is missing. Please retry.',
+                    ]);
+                }
+
+                $contents = @file_get_contents($tmpPath);
+                if ($contents === false) {
+                    return back()->withErrors([
+                        'payment_proof' => 'Upload failed while reading the file. Please retry.',
+                    ]);
+                }
+
+                $stored = $disk->put($path, $contents);
+                if (!$stored || !$disk->exists($path)) {
+                    return back()->withErrors(['payment_proof' => 'Payment proof upload failed. Please try again.']);
+                }
+
+                $serviceRequest->update(['hsr_payment_proof' => $path]);
+            } catch (\Throwable $e) {
+                Log::error('Payment proof upload failed', [
+                    'service_request_id' => $serviceRequest->hsr_id,
+                    'user_id' => $user->hu_id,
+                    'message' => $e->getMessage(),
+                ]);
+
+                return back()->withErrors([
+                    'payment_proof' => 'Upload failed on this environment. Please retry or check server upload temp settings.',
+                ]);
             }
-
-            $serviceRequest->update(['hsr_payment_proof' => $path]);
         }
 
         // 4. Update Status
