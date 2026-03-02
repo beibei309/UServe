@@ -330,7 +330,53 @@
                                         </a>
                                     @endif
                                 </div>
-                            @endif                        </div>
+                            @endif
+
+                            @if ($serviceRequest->hsr_payment_proof)
+                                @php
+                                    $proofPath = $serviceRequest->hsr_payment_proof;
+                                    if (Str::startsWith($proofPath, ['http://', 'https://'])) {
+                                        $proofUrl = $proofPath;
+                                    } elseif (Str::startsWith($proofPath, 'storage/')) {
+                                        $proofUrl = asset($proofPath);
+                                    } else {
+                                        $proofUrl = asset('storage/' . $proofPath);
+                                    }
+                                @endphp
+                                <div class="mt-8">
+                                    <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                        <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        Payment Information
+                                    </h3>
+                                    
+                                    <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+                                        <div class="flex items-center justify-between mb-4">
+                                            <span class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Payment Proof</span>
+                                            <a href="{{ $proofUrl }}" target="_blank" class="text-indigo-600 hover:text-indigo-800 text-sm font-medium flex items-center gap-1 transition">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                                                Open Original
+                                            </a>
+                                        </div>
+                                        
+                                        <div class="rounded-lg overflow-hidden border border-gray-100 bg-gray-50 flex justify-center p-4">
+                                            @if (Str::endsWith(strtolower($proofPath), '.pdf'))
+                                                <div class="flex flex-col items-center justify-center py-6">
+                                                    <svg class="w-16 h-16 text-red-500 opacity-80 mb-3" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M11.362 2c4.156 0 2.638 6 2.638 6s6-1.65 6 2.457v11.543h-16v-20h7.362zm.827 7.5c-.328-.242-.361-.252-.408-.252-.161 0-.319.497-.319.497l-.234.698s.709-.54 1.144-.725c.168-.071.145-.097-.183-.218zm-2.062 1.488c-.979.622-1.895 1.581-2.072 1.932-.15.297-.478.752-.519 1-.038.225.267.382.435.334.301-.087 1.258-.598 2.156-3.266zm1.196 6.512c.706 0 1.272-.647 1.272-1.446 0-.66-.465-1.195-1.042-1.195-.576 0-1.041.535-1.041 1.195 0 .799.565 1.446 1.271 1.446h-1.46c-1.334-.067-2.618-.46-3.805-1.056l3.364-1.229c.142-.045.242-.1.319-.166.39-.334.618-1.571.618-2.678 0-1.554.025-2.738.04-3.551.011-.643.08-1.282.203-1.91h-5.462v18h14v-11.543c0-3.136-2.522-3.136-2.522-3.136s-.795 3.197-2.428 5.765zm2.844-3c-.928-1.149-1.341-1.693-1.802-1.693-1.173 0-1.246 1.638-1.096 2.413.085.441.258 1.139 1.096 1.139 1.19 0 1.838-.942 1.802-1.859zm-10.222 13h10v-2h-10v2zm0-4h14v-2h-14v2z"/></svg>
+                                                    <p class="text-sm font-semibold text-gray-700">PDF Document Uploaded</p>
+                                                    <a href="{{ $proofUrl }}" target="_blank" class="mt-2 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700">View PDF</a>
+                                                </div>
+                                            @else
+                                                <a href="{{ $proofUrl }}" target="_blank" class="block">
+                                                    <img src="{{ $proofUrl }}" alt="Payment Proof" class="max-w-full h-auto max-h-96 object-contain rounded-md shadow-sm hover:opacity-95 transition-opacity">
+                                                </a>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+                        </div>
 
                         <div class="space-y-8">
                             <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
@@ -572,24 +618,45 @@
             };
 
             try {
-                const response = await fetch(endpoints[action], {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(bodyData)
+                // Show loading state
+                Swal.fire({
+                    title: 'Processing...',
+                    allowOutsideClick: false,
+                    didOpen: () => Swal.showLoading()
                 });
-                const data = await response.json();
-                if (data.success) {
-                    Swal.fire('Success', data.message, 'success').then(() => location.reload());
-                } else {
-                    Swal.fire('Error', data.error || data.message || 'Action failed', 'error');
+
+                // Dynamically build and submit a form instead of fetch to support redirects
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = endpoints[action];
+
+                // Append CSRF Token
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+                if (csrfToken) {
+                    const csrfInput = document.createElement('input');
+                    csrfInput.type = 'hidden';
+                    csrfInput.name = '_token';
+                    csrfInput.value = csrfToken;
+                    form.appendChild(csrfInput);
                 }
+
+                // Append any extra body data (like rejection_reason)
+                for (const [key, value] of Object.entries(bodyData)) {
+                    if (value !== undefined && value !== null) {
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = key;
+                        input.value = value;
+                        form.appendChild(input);
+                    }
+                }
+
+                document.body.appendChild(form);
+                form.submit();
+
             } catch (e) {
                 console.error(e);
-                Swal.fire('Error', 'Network error occurred', 'error');
+                Swal.fire('Error', 'An error occurred while processing your request.', 'error');
             }
         }
 

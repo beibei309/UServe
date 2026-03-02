@@ -11,7 +11,7 @@
     <div class="py-6">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             @php
-                $defaultStatusTab = request('tab', 'in-progress');
+                $defaultStatusTab = request('tab', 'pending');
             @endphp
 
             <div id="sent-content" class="sr-tab-content">
@@ -1086,38 +1086,14 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     const form = document.getElementById('cancel-form-' + id);
-                    const url = form.action;
-                    // Get token from meta tag if form input fails
-                    const token = document.querySelector('meta[name="csrf-token"]').content;
-
-                    fetch(url, {
-                            method: 'POST',
-                            headers: {
-                                'Accept': 'application/json',
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': token
-                            }
-                        })
-                        .then(res => res.json())
-                        .then(data => {
-                            if (data.success) {
-                                Swal.fire("Cancelled", data.message, "success")
-                                    .then(() => location.reload());
-                            } else {
-                                // 🟢 NEW: Handle the 24-hour restriction message
-                                Swal.fire({
-                                    title: data.title || "Cannot Cancel",
-                                    text: data.message || "Could not cancel request.",
-                                    icon: "info", // Info icon feels better for "Please contact seller"
-                                    confirmButtonText: "Okay, I'll Contact Them",
-                                    confirmButtonColor: "#25D366" // WhatsApp Green hint
-                                });
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            Swal.fire("Error", "Something went wrong. Please try again.", "error");
+                    if (form) {
+                        Swal.fire({
+                            title: 'Cancelling...',
+                            allowOutsideClick: false,
+                            didOpen: () => Swal.showLoading()
                         });
+                        form.submit();
+                    }
                 }
             });
         }

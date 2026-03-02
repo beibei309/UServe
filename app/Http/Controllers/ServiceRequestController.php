@@ -318,11 +318,7 @@ public function index(Request $request)
         }
 
         if (!$serviceRequest->isPending()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'This request cannot be accepted.',
-                'error' => 'This request cannot be accepted.',
-            ], 400);
+            return back()->with('error', 'This request cannot be accepted.');
         }
 
         $serviceRequest->accept();
@@ -330,10 +326,7 @@ public function index(Request $request)
         // Notify Requester
         $serviceRequest->requester->notify(new ServiceRequestStatusUpdated($serviceRequest, 'accepted'));
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Service request accepted successfully!'
-        ]);
+        return back()->with('success', 'Service request accepted successfully!');
     }
 
     /**
@@ -382,11 +375,7 @@ public function index(Request $request)
         }
 
         if (!$serviceRequest->isAccepted()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'This request must be accepted first.',
-                'error' => 'This request must be accepted first.',
-            ], 400);
+            return back()->with('error', 'This request must be accepted first.');
         }
 
         
@@ -397,10 +386,7 @@ public function index(Request $request)
        
         $serviceRequest->requester->notify(new ServiceRequestStatusUpdated($serviceRequest, 'in_progress'));
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Service marked as in progress!'
-        ]);
+        return back()->with('success', 'Service marked as in progress!');
     }
 
     public function markWorkFinished(ServiceRequest $serviceRequest)
@@ -413,11 +399,7 @@ public function index(Request $request)
         }
 
         if (!$serviceRequest->isInProgress()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'This request must be in progress first.',
-                'error' => 'This request must be in progress first.',
-            ], 400);
+            return back()->with('error', 'This request must be in progress first.');
         }
 
         
@@ -428,10 +410,7 @@ public function index(Request $request)
        
         $serviceRequest->requester->notify(new ServiceRequestStatusUpdated($serviceRequest, 'waiting_payment'));
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Service marked as finished!'
-        ]);
+        return back()->with('success', 'Service marked as finished!');
     }
 
     // BUYER/REQUESTER SIDE TO MAKE PAKMENT
@@ -581,11 +560,7 @@ public function index(Request $request)
         }
 
         if (!$serviceRequest->isInProgress()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'This request must be in progress first.',
-                'error' => 'This request must be in progress first.',
-            ], 400);
+            return back()->with('error', 'This request must be in progress first.');
         }
 
         // --- UBAH KAT SINI ---
@@ -597,10 +572,7 @@ public function index(Request $request)
         // Notify Requester
         $serviceRequest->requester->notify(new ServiceRequestStatusUpdated($serviceRequest, 'completed'));
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Service marked as completed! Both parties can now leave reviews.'
-        ]);
+        return back()->with('success', 'Service marked as completed! Both parties can now leave reviews.');
     }
 
         public function markAsPaid($id) {
@@ -620,29 +592,18 @@ public function index(Request $request)
 
         // 2. Block if Completed
         if ($serviceRequest->hsr_status === 'completed') {
-            return response()->json([
-                'success' => false,
-                'message' => 'Completed requests cannot be cancelled.',
-                'error' => 'Completed requests cannot be cancelled.',
-            ], 400);
+            return back()->with('error', 'Completed requests cannot be cancelled.');
         }
 
         // 3. Block if In Progress (Seller started work)
         if ($serviceRequest->hsr_status === 'in_progress') {
-            return response()->json([
-                'success' => false,
-                'title'   => 'Work Started',
-                'message' => 'The seller has already started working on this request. Please contact the seller directly to discuss cancellation.'
-            ], 400);
+            return back()->with('error', 'The seller has already started working on this request. Please contact the seller directly to discuss cancellation.');
         }
 
         // 4. Allow Cancellation (for 'pending' or 'accepted')
         $serviceRequest->update(['hsr_status' => 'cancelled']);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Service request cancelled successfully.'
-        ]);
+        return back()->with('success', 'Service request cancelled successfully.');
     }
         public function updateStatus(Request $request, $id)
     {

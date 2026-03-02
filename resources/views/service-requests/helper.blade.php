@@ -13,7 +13,7 @@
 
             @php
                 // Default status tab is 'pending'
-                $defaultStatusTab = request('tab', 'in-progress');
+                $defaultStatusTab = request('tab', 'pending');
             @endphp
 
             <div id="received-content" class="sr-tab-content">
@@ -1412,8 +1412,6 @@
                 reverseButtons: true
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Find the hidden form associated with the button
-                    // Note: Ensure your forms have IDs like "accept-form-123"
                     const formId = `${type}-form-${id}`;
                     const form = document.getElementById(formId);
 
@@ -1422,9 +1420,6 @@
                         return;
                     }
 
-                    const url = form.action;
-                    const token = form.querySelector('input[name="_token"]').value;
-
                     // Show loading state
                     Swal.fire({
                         title: 'Processing...',
@@ -1432,35 +1427,8 @@
                         didOpen: () => Swal.showLoading()
                     });
 
-                    // Send AJAX Request
-                    fetch(url, {
-                            method: 'POST',
-                            headers: {
-                                'X-CSRF-TOKEN': token,
-                                'Accept': 'application/json',
-                                'Content-Type': 'application/json'
-                            }
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                Swal.fire({
-                                    title: 'Success!',
-                                    text: data.message,
-                                    icon: 'success',
-                                    timer: 1500,
-                                    showConfirmButton: false
-                                }).then(() => {
-                                    location.reload(); // Reload page to update the lists
-                                });
-                            } else {
-                                Swal.fire('Error', data.message || 'Something went wrong.', 'error');
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            Swal.fire('Error', 'System error occurred. Please try again.', 'error');
-                        });
+                    // Directly submit the form instead of using fetch
+                    form.submit();
                 }
             });
         }
