@@ -328,29 +328,53 @@ class VerificationController extends Controller
             
             // Check if file is valid
             if ($file && $file->isValid()) {
-                $extension = strtolower($file->getClientOriginalExtension() ?: $file->extension() ?: 'bin');
-                $filename = 'verify_' . $user->hu_id . '_' . now()->format('YmdHis') . '_' . Str::random(12) . '.' . $extension;
+                try {
+                    $extension = strtolower($file->getClientOriginalExtension() ?: $file->extension() ?: 'bin');
+                    $filename = 'verify_' . $user->hu_id . '_' . now()->format('YmdHis') . '_' . Str::random(12) . '.' . $extension;
 
-                $disk = Storage::disk('local');
-                $directory = 'verification_docs';
+                    $disk = Storage::disk('local');
+                    $directory = 'verification_docs';
+                    $path = $directory . '/' . $filename;
 
-                if (!$disk->exists($directory)) {
-                    $disk->makeDirectory($directory);
+                    if (!$disk->exists($directory)) {
+                        $disk->makeDirectory($directory);
+                    }
+
+                    $tmpPath = $file->getRealPath() ?: $file->getPathname();
+                    if (empty($tmpPath) || !is_file($tmpPath)) {
+                        return redirect()->back()->withErrors([
+                            'verification_document' => 'Upload failed. Temporary upload file is missing. Please retry.',
+                        ]);
+                    }
+
+                    $contents = @file_get_contents($tmpPath);
+                    if ($contents === false) {
+                        return redirect()->back()->withErrors([
+                            'verification_document' => 'Upload failed while reading the file. Please retry.',
+                        ]);
+                    }
+
+                    $stored = $disk->put($path, $contents);
+                    if (!$stored || !$disk->exists($path)) {
+                        return redirect()->back()->withErrors(['verification_document' => 'Upload failed. Please try again.']);
+                    }
+
+                    // Update User
+                    $user->hu_verification_document_path = $path;
+                    $user->hu_verification_status = 'approved';
+                    $user->save();
+
+                    return redirect()->back()->with('success', 'Verification Successfully!');
+                } catch (\Throwable $e) {
+                    \Illuminate\Support\Facades\Log::error('Community doc upload failed', [
+                        'user_id' => $user->hu_id,
+                        'message' => $e->getMessage(),
+                    ]);
+
+                    return redirect()->back()->withErrors([
+                        'verification_document' => 'Upload failed on this environment. Please retry or check server upload temp settings.',
+                    ]);
                 }
-
-                // Store in storage/app/private/verification_docs (local disk)
-                $path = $disk->putFileAs($directory, $file, $filename);
-
-                if (empty($path) || !$disk->exists($path)) {
-                    return redirect()->back()->withErrors(['verification_document' => 'Upload failed. Please try again.']);
-                }
-
-                // Update User
-                $user->hu_verification_document_path = $path;
-                $user->hu_verification_status = 'approved'; 
-                $user->save();
-
-                return redirect()->back()->with('success', 'Verification Successfully!');
             } else {
                 return redirect()->back()->withErrors(['verification_document' => 'Invalid file uploaded.']);
             }
