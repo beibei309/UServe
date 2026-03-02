@@ -237,8 +237,20 @@
                                                                 class="flex gap-4 p-4 rounded-lg bg-gray-50 border border-gray-100">
 
                                                                 <div class="flex-shrink-0">
+                                                                    @php
+                                                                        $reviewerPath = $review->reviewer->hu_profile_photo_path ?? null;
+                                                                        if ($reviewerPath && \Illuminate\Support\Str::startsWith($reviewerPath, ['http://', 'https://'])) {
+                                                                            $reviewerImage = $reviewerPath;
+                                                                        } elseif ($reviewerPath && file_exists(public_path('storage/' . $reviewerPath))) {
+                                                                            $reviewerImage = asset('storage/' . $reviewerPath);
+                                                                        } elseif ($reviewerPath) {
+                                                                            $reviewerImage = asset($reviewerPath);
+                                                                        } else {
+                                                                            $reviewerImage = asset('uploads/profile/default.png');
+                                                                        }
+                                                                    @endphp
                                                                     <img class="h-10 w-10 rounded-full object-cover"
-                                                                        src="{{ $review->reviewer && $review->reviewer->hu_profile_photo_path ? asset('storage/' . $review->reviewer->hu_profile_photo_path) : asset('uploads/profile/default.png') }}"
+                                                                        src="{{ $reviewerImage }}"
                                                                         alt="">
                                                                 </div>
 

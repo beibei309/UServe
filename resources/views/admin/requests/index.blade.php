@@ -453,38 +453,59 @@
 
     <script>
         function openViewModal(req, service, requester, provider) {
-            document.getElementById('viewId').textContent = req.id;
-            document.getElementById('viewServiceTitle').textContent = service.title;
-            document.getElementById('viewPackage').textContent = req.selected_package || 'Custom';
-            document.getElementById('viewPrice').textContent = parseFloat(req.offered_price).toFixed(2);
+            const reqId = req.hsr_id ?? req.id;
+            const serviceTitle = service?.hss_title ?? service?.title ?? 'Unknown Service';
+            const selectedPackage = req.hsr_selected_package ?? req.selected_package;
+            const packageLabel = Array.isArray(selectedPackage)
+                ? (selectedPackage[0] ?? 'Custom')
+                : (selectedPackage ?? 'Custom');
+            const offeredPrice = req.hsr_offered_price ?? req.offered_price ?? 0;
+            const status = req.hsr_status ?? req.status ?? 'pending';
+            const requesterName = requester?.hu_name ?? requester?.name ?? 'Unknown';
+            const providerName = provider?.hu_name ?? provider?.name ?? 'Unknown';
+            const requesterEmail = requester?.hu_email ?? requester?.email ?? '-';
+            const providerEmail = provider?.hu_email ?? provider?.email ?? '-';
+            const requesterPhone = requester?.hu_phone ?? requester?.phone ?? null;
+            const providerPhone = provider?.hu_phone ?? provider?.phone ?? null;
+            const selectedDates = req.hsr_selected_dates ?? req.selected_dates;
+            const dateLabel = Array.isArray(selectedDates) ? (selectedDates[0] ?? null) : selectedDates;
+            const startTime = req.hsr_start_time ?? req.start_time;
+            const endTime = req.hsr_end_time ?? req.end_time;
+            const message = req.hsr_message ?? req.message;
+            const disputeReason = req.hsr_dispute_reason ?? req.dispute_reason;
+
+            document.getElementById('viewId').textContent = reqId;
+            document.getElementById('viewServiceTitle').textContent = serviceTitle;
+            document.getElementById('viewPackage').textContent = packageLabel;
+            document.getElementById('viewPrice').textContent = parseFloat(offeredPrice || 0).toFixed(2);
 
             const statusSpan = document.getElementById('viewStatus');
-            statusSpan.textContent = req.status.replace('_', ' ');
+            statusSpan.textContent = status.replace('_', ' ');
             statusSpan.className = `inline-block mt-1 px-3 py-1 rounded-full text-xs font-bold capitalize border `;
-            if (req.status === 'completed') statusSpan.classList.add('bg-green-100', 'text-green-700', 'border-green-200');
-            else if (req.status === 'pending') statusSpan.classList.add('bg-yellow-100', 'text-yellow-700',
+            if (status === 'completed') statusSpan.classList.add('bg-green-100', 'text-green-700', 'border-green-200');
+            else if (status === 'pending') statusSpan.classList.add('bg-yellow-100', 'text-yellow-700',
                 'border-yellow-200');
-            else if (req.status === 'disputed') statusSpan.classList.add('bg-red-100', 'text-red-700', 'border-red-200');
+            else if (status === 'disputed') statusSpan.classList.add('bg-red-100', 'text-red-700', 'border-red-200');
             else statusSpan.classList.add('bg-gray-100', 'text-gray-700', 'border-gray-200');
 
-            document.getElementById('viewReqAvatar').textContent = requester.name.charAt(0);
-            document.getElementById('viewReqName').textContent = requester.name;
-            document.getElementById('viewReqEmail').textContent = requester.email;
-            document.getElementById('viewReqPhone').textContent = requester.phone || 'No Phone';
+            document.getElementById('viewReqAvatar').textContent = requesterName.charAt(0);
+            document.getElementById('viewReqName').textContent = requesterName;
+            document.getElementById('viewReqEmail').textContent = requesterEmail;
+            document.getElementById('viewReqPhone').textContent = requesterPhone || 'No Phone';
 
-            document.getElementById('viewProvAvatar').textContent = provider.name.charAt(0);
-            document.getElementById('viewProvName').textContent = provider.name;
-            document.getElementById('viewProvEmail').textContent = provider.email;
-            document.getElementById('viewProvPhone').textContent = provider.phone || 'No Phone';
+            document.getElementById('viewProvAvatar').textContent = providerName.charAt(0);
+            document.getElementById('viewProvName').textContent = providerName;
+            document.getElementById('viewProvEmail').textContent = providerEmail;
+            document.getElementById('viewProvPhone').textContent = providerPhone || 'No Phone';
 
-            document.getElementById('viewDate').textContent = req.selected_dates || 'Flexible';
-            document.getElementById('viewTime').textContent = (req.start_time || '??') + ' - ' + (req.end_time || '??');
-            document.getElementById('viewMessage').textContent = req.message || 'No additional message.';
+            document.getElementById('viewDate').textContent = dateLabel || 'Flexible';
+            document.getElementById('viewTime').textContent = (startTime || '??') + ' - ' + (endTime || '??');
+            document.getElementById('viewMessage').textContent = message || 'No additional message.';
 
             const disputeDiv = document.getElementById('viewDisputeSection');
-            if (req.status === 'disputed') {
+            if (status === 'disputed') {
                 disputeDiv.classList.remove('hidden');
-                document.getElementById('viewDisputeReason').textContent = req.dispute_reason || 'No reason provided';
+                document.getElementById('viewDisputeReason').textContent = disputeReason || 'No reason provided';
             } else {
                 disputeDiv.classList.add('hidden');
             }

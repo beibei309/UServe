@@ -67,8 +67,8 @@
                         <p><strong>Course:</strong> {{ $student->hu_course ?? '-' }}</p>
                         <p>
                             <strong>Graduation:</strong>
-                            @if ($student->studentStatus && $student->studentStatus->graduation_date)
-                                {{ \Carbon\Carbon::parse($student->studentStatus->graduation_date)->format('d M Y') }}
+                            @if ($student->studentStatus && $student->studentStatus->hss_graduation_date)
+                                {{ \Carbon\Carbon::parse($student->studentStatus->hss_graduation_date)->format('d M Y') }}
                             @else
                                 <span class="text-gray-400 italic">Not set</span>
                             @endif
@@ -124,14 +124,14 @@
                 <div class="space-y-6">
                     <div>
                         <label class="text-xs font-bold text-gray-400 uppercase tracking-widest block mb-2">Verified Since</label>
-                        @if ($student->helper_verified_at)
+                        @if ($student->hu_helper_verified_at)
                             <div class="flex items-start gap-3">
                                 <div class="p-2 bg-emerald-50 rounded-lg">
                                     <i class="fa-regular fa-calendar-check text-emerald-600"></i>
                                 </div>
                                 <div>
-                                    <p class="text-gray-900 font-bold">{{ $student->helper_verified_at->format('d M Y') }}</p>
-                                    <p class="text-sm text-gray-500">{{ $student->helper_verified_at->format('h:i A') }}</p>
+                                    <p class="text-gray-900 font-bold">{{ $student->hu_helper_verified_at->format('d M Y') }}</p>
+                                    <p class="text-sm text-gray-500">{{ $student->hu_helper_verified_at->format('h:i A') }}</p>
                                 </div>
                             </div>
                         @else
@@ -141,12 +141,12 @@
 
                     <div>
                         <label class="text-xs font-bold text-gray-400 uppercase tracking-widest block mb-2">📍 Last Known Location</label>
-                        @if ($student->latitude && $student->longitude)
+                        @if ($student->hu_latitude && $student->hu_longitude)
                             <div class="bg-gray-50 rounded-lg p-3 border border-gray-100">
                                 <p class="text-xs font-mono text-gray-600 leading-relaxed">
-                                    {{ $student->address ?? 'Coordinates: ' . number_format($student->latitude, 5) . ', ' . number_format($student->longitude, 5) }}
+                                    {{ $student->address ?? 'Coordinates: ' . number_format($student->hu_latitude, 5) . ', ' . number_format($student->hu_longitude, 5) }}
                                 </p>
-                                <a href="https://www.google.com/maps?q={{ $student->latitude }},{{ $student->longitude }}" 
+                                <a href="https://www.google.com/maps?q={{ $student->hu_latitude }},{{ $student->hu_longitude }}" 
                                    target="_blank" 
                                    class="text-xs text-emerald-600 font-bold hover:underline mt-2 inline-block">
                                    View on Google Maps →

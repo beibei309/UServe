@@ -540,17 +540,16 @@
                                 <div class="flex justify-between items-center mb-2">
                                     <label class="text-xs font-bold text-gray-700 uppercase">Duration</label>
                                     <span class="text-xs font-medium text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded"
-                                        x-text="selectedDuration + ' Hours'"></span>
+                                        x-text="formatDuration(selectedDuration * sessionDuration)"></span>
                                 </div>
-                                <div class="grid grid-cols-5 gap-2"> {{-- Tukar grid-cols-5 --}}
+                                <div class="grid grid-cols-5 gap-2">
                                     <template x-for="h in [1, 2, 3, 4, 5]" :key="h">
-                                        {{-- Tambah 5 --}}
                                         <button @click="selectDuration(h)" type="button"
                                             class="py-2.5 rounded-xl border text-sm font-bold transition-all"
                                             :class="selectedDuration === h ?
                                                 'bg-slate-800 text-white border-slate-800 shadow-md transform -translate-y-0.5' :
                                                 'bg-white text-gray-600 border-gray-200 hover:border-gray-300 hover:bg-gray-50'">
-                                            <span x-text="h + 'h'"></span>
+                                            <span x-text="formatDuration(h * sessionDuration)"></span>
                                         </button>
                                     </template>
                                 </div>
@@ -880,6 +879,15 @@
                     if (this.currentPackage === 'standard') return 'text-yellow-500';
                     if (this.currentPackage === 'premium') return 'text-red-600';
                     return 'text-indigo-600';
+                },
+
+                formatDuration(minutes) {
+                    if (minutes < 60) {
+                        return minutes + 'm';
+                    } else {
+                        const hours = minutes / 60;
+                        return hours.toFixed(1).replace('.0', '') + 'h';
+                    }
                 },
 
                 // --- METHODS ---

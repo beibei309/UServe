@@ -36,7 +36,7 @@
                             $imageUrl = asset('uploads/profile/default.png');
                         }
                     @endphp
-                    <img src="{{ $imageUrl }}" class="w-full h-full object-cover" alt="Profile" />
+                    <img src="{{ $imageUrl }}" class="w-full h-full object-cover rounded-full" alt="Profile" />
                 </div>
                     <input type="file" name="profile_photo" 
                            class="border p-2 rounded-lg w-full text-sm">
@@ -50,22 +50,29 @@
                 <!-- Name -->
                 <div class="mb-4">
                     <label class="block font-medium text-gray-700 mb-1">Name</label>
-                    <input type="text" name="name" value="{{ $user->hu_name }}"
+                    <input type="text" name="name" value="{{ old('name', $user->hu_name) }}"
                            class="border p-3 rounded-lg w-full focus:ring-blue-400 focus:border-blue-400" required>
                 </div>
 
                 <!-- Email -->
                 <div class="mb-4">
                     <label class="block font-medium text-gray-700 mb-1">Email</label>
-                    <input type="email" name="email" value="{{ $user->hu_email }}"
+                    <input type="email" name="email" value="{{ old('email', $user->hu_email) }}"
                            class="border p-3 rounded-lg w-full focus:ring-blue-400 focus:border-blue-400" required>
                 </div>
 
                 <!-- Phone -->
                 <div class="mb-4">
                     <label class="block font-medium text-gray-700 mb-1">Phone</label>
-                    <input type="text" name="phone" value="{{ $user->hu_phone }}"
+                    <input type="text" name="phone" value="{{ old('phone', $user->hu_phone) }}"
                            class="border p-3 rounded-lg w-full focus:ring-blue-400 focus:border-blue-400">
+                </div>
+
+                <div class="mb-4">
+                    <label class="block font-medium text-gray-700 mb-1">Bio</label>
+                    <textarea name="bio" rows="3"
+                              class="border p-3 rounded-lg w-full focus:ring-blue-400 focus:border-blue-400"
+                              placeholder="Optional bio">{{ old('bio', $user->hu_bio) }}</textarea>
                 </div>
             </div>            
 
@@ -78,20 +85,20 @@
 
     {{-- Pending (disabled if already approved) --}}
     <option value="pending"
-        {{ $user->hu_verification_status == 'pending' ? 'selected' : '' }}
+        {{ old('verification_status', $user->hu_verification_status) == 'pending' ? 'selected' : '' }}
         {{ $user->hu_verification_status == 'approved' ? 'disabled' : '' }}>
         Pending
     </option>
 
     {{-- Approved --}}
     <option value="approved"
-        {{ $user->hu_verification_status == 'approved' ? 'selected' : '' }}>
+        {{ old('verification_status', $user->hu_verification_status) == 'approved' ? 'selected' : '' }}>
         Approved
     </option>
 
     {{-- Rejected --}}
     <option value="rejected"
-        {{ $user->hu_verification_status == 'rejected' ? 'selected' : '' }}>
+        {{ old('verification_status', $user->hu_verification_status) == 'rejected' ? 'selected' : '' }}>
         Rejected
     </option>
 
@@ -127,7 +134,7 @@
 
                     <textarea name="blacklist_reason" rows="3"
                               class="border p-3 rounded-lg w-full focus:ring-red-300 focus:border-red-400"
-                              placeholder="Enter reason to blacklist this user..."></textarea>
+                              placeholder="Enter reason to blacklist this user...">{{ old('blacklist_reason') }}</textarea>
                 @endif
             </div>
 

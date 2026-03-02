@@ -161,10 +161,32 @@ class StudentsController extends Controller
             $user->hu_profile_photo_path = 'profile-photos/' . $filename;
         }
 
+        $facultyMap = [
+            'FKMT' => 'Fakulti Komputeran dan Meta-Teknologi',
+            'FBK' => 'Fakulti Bahasa dan Komunikasi',
+            'FPM' => 'Fakulti Pembangunan Manusia',
+            'FSMT' => 'Fakulti Sains dan Matematik',
+            'FPE' => 'Fakulti Pengurusan dan Ekonomi',
+            'FSKIK' => 'Fakulti Seni, Komputeran dan Industri Kreatif',
+            'FMUP' => 'Fakulti Muzik dan Seni Persembahan',
+            'FSSKJ' => 'Fakulti Sains Sukan dan Kejurulatihan',
+            'FTV' => 'Fakulti Teknikal dan Vokasional',
+            'FSK' => 'Fakulti Sains Kemanusiaan',
+        ];
+
         // Update basic fields
-        $user->hu_faculty = $validated['faculty'] ?? $user->hu_faculty;
-        $user->hu_course = $validated['course'] ?? $user->hu_course;
-        $user->hu_bio = $validated['bio'] ?? $user->hu_bio;
+        if ($request->filled('faculty')) {
+            $incomingFaculty = trim((string) $validated['faculty']);
+            $user->hu_faculty = $facultyMap[$incomingFaculty] ?? $incomingFaculty;
+        }
+
+        if ($request->filled('course')) {
+            $user->hu_course = trim((string) $validated['course']);
+        }
+
+        if ($request->filled('bio')) {
+            $user->hu_bio = trim((string) $validated['bio']);
+        }
         $user->skills = $validated['skills'] ?? $user->skills;
         $user->hu_work_experience_message = $validated['work_experience_message'] ?? $user->hu_work_experience_message;
 
@@ -238,6 +260,19 @@ class StudentsController extends Controller
 {
     $user = Auth::user();
 
+        $facultyMap = [
+            'FKMT' => 'Fakulti Komputeran dan Meta-Teknologi',
+            'FBK' => 'Fakulti Bahasa dan Komunikasi',
+            'FPM' => 'Fakulti Pembangunan Manusia',
+            'FSMT' => 'Fakulti Sains dan Matematik',
+            'FPE' => 'Fakulti Pengurusan dan Ekonomi',
+            'FSKIK' => 'Fakulti Seni, Komputeran dan Industri Kreatif',
+            'FMUP' => 'Fakulti Muzik dan Seni Persembahan',
+            'FSSKJ' => 'Fakulti Sains Sukan dan Kejurulatihan',
+            'FTV' => 'Fakulti Teknikal dan Vokasional',
+            'FSK' => 'Fakulti Sains Kemanusiaan',
+        ];
+
     // 1. Validate inputs
     $validated = $request->validate([
         'name' => 'required|string|max:255',
@@ -252,11 +287,28 @@ class StudentsController extends Controller
 
     // 2. Update Basic Information
     $user->hu_name = $validated['name'];
-    $user->hu_faculty = $validated['faculty'] ?? $user->hu_faculty;
-    $user->hu_course = $validated['course'] ?? $user->hu_course;
-    $user->hu_bio = $validated['bio'];
-    $user->skills = $validated['skills'];
-    $user->hu_work_experience_message = $validated['work_experience_message'] ?? null;
+
+    if ($request->filled('faculty')) {
+        $incomingFaculty = trim((string) $request->input('faculty'));
+        $user->hu_faculty = $facultyMap[$incomingFaculty] ?? $incomingFaculty;
+    }
+
+    if ($request->filled('course')) {
+        $user->hu_course = trim((string) $request->input('course'));
+    }
+
+    if ($request->has('bio')) {
+        $user->hu_bio = $validated['bio'];
+    }
+
+    if ($request->has('skills')) {
+        $user->skills = $validated['skills'];
+    }
+
+    if ($request->has('work_experience_message')) {
+        $incomingExperience = trim((string) ($validated['work_experience_message'] ?? ''));
+        $user->hu_work_experience_message = $incomingExperience !== '' ? $incomingExperience : $user->hu_work_experience_message;
+    }
 
     // 3. Handle Work Experience File Upload
     if ($request->hasFile('work_experience_file')) {

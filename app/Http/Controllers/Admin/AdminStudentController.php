@@ -95,6 +95,19 @@ class AdminStudentController extends Controller
     // Only allow student OR helper
     $student = User::whereIn('hu_role', ['student', 'helper'])->findOrFail($id);
 
+        $facultyMap = [
+            'FKMT' => 'Fakulti Komputeran dan Meta-Teknologi',
+            'FBK' => 'Fakulti Bahasa dan Komunikasi',
+            'FPM' => 'Fakulti Pembangunan Manusia',
+            'FSMT' => 'Fakulti Sains dan Matematik',
+            'FPE' => 'Fakulti Pengurusan dan Ekonomi',
+            'FSKIK' => 'Fakulti Seni, Komputeran dan Industri Kreatif',
+            'FMUP' => 'Fakulti Muzik dan Seni Persembahan',
+            'FSSKJ' => 'Fakulti Sains Sukan dan Kejurulatihan',
+            'FTV' => 'Fakulti Teknikal dan Vokasional',
+            'FSK' => 'Fakulti Sains Kemanusiaan',
+        ];
+
     // VALIDATION
     $request->validate([
         'name' => 'required|string|max:255',
@@ -110,20 +123,42 @@ class AdminStudentController extends Controller
         'work_experience_message' => 'nullable|string',
     ]);
 
-    // UPDATE DATA
-    $student->update([
+    $updateData = [
         'hu_name' => $request->name,
         'hu_email' => $request->email,
-        'hu_phone' => $request->phone,
-        'hu_student_id' => $request->student_id,
-        'hu_faculty' => $request->faculty,
-        'hu_course' => $request->course,
         'hu_verification_status' => $request->verification_status,
+    ];
 
-        // Helper fields
-        'hu_skills' => $request->skills,
-        'hu_work_experience_message' => $request->work_experience_message,
-    ]);
+    if ($request->filled('phone')) {
+        $updateData['hu_phone'] = trim((string) $request->input('phone'));
+    }
+
+    if ($request->filled('student_id')) {
+        $updateData['hu_student_id'] = trim((string) $request->input('student_id'));
+    }
+
+    if ($request->filled('faculty')) {
+        $incomingFaculty = trim((string) $request->input('faculty'));
+        $updateData['hu_faculty'] = $facultyMap[$incomingFaculty] ?? $incomingFaculty;
+    }
+
+    if ($request->filled('course')) {
+        $updateData['hu_course'] = trim((string) $request->input('course'));
+    }
+
+    if ($request->has('skills')) {
+        $updateData['skills'] = $request->skills;
+    }
+
+    if ($request->has('work_experience_message')) {
+        $incomingExperience = trim((string) $request->input('work_experience_message', ''));
+        $updateData['hu_work_experience_message'] = $incomingExperience !== ''
+            ? $incomingExperience
+            : $student->hu_work_experience_message;
+    }
+
+    // UPDATE DATA
+    $student->update($updateData);
 
     return redirect()
         ->route('admin.students.index')

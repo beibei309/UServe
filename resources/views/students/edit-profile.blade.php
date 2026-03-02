@@ -43,49 +43,65 @@
 
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                     <div>
+                                        @php
+                                            $facultyMap = [
+                                                'FKMT' => 'Fakulti Komputeran dan Meta-Teknologi',
+                                                'FBK' => 'Fakulti Bahasa dan Komunikasi',
+                                                'FPM' => 'Fakulti Pembangunan Manusia',
+                                                'FSMT' => 'Fakulti Sains dan Matematik',
+                                                'FPE' => 'Fakulti Pengurusan dan Ekonomi',
+                                                'FSKIK' => 'Fakulti Seni, Komputeran dan Industri Kreatif',
+                                                'FMUP' => 'Fakulti Muzik dan Seni Persembahan',
+                                                'FSSKJ' => 'Fakulti Sains Sukan dan Kejurulatihan',
+                                                'FTV' => 'Fakulti Teknikal dan Vokasional',
+                                                'FSK' => 'Fakulti Sains Kemanusiaan',
+                                            ];
+                                            $currentFaculty = old('faculty', $user->hu_faculty ?? $user->faculty);
+                                            $currentFaculty = $facultyMap[$currentFaculty] ?? $currentFaculty;
+                                        @endphp
                                         <label for="faculty"
                                             class="block text-sm font-medium text-gray-700">Faculty</label>
                                         <select name="faculty" id="faculty"
                                             class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                                             <option value="">Select Faculty</option>
                                             <option value="Fakulti Komputeran dan Meta-Teknologi"
-                                                {{ old('faculty', $user->hu_faculty ?? $user->faculty) == 'Fakulti Komputeran dan Meta-Teknologi' ? 'selected' : '' }}>
+                                                {{ $currentFaculty == 'Fakulti Komputeran dan Meta-Teknologi' ? 'selected' : '' }}>
                                                 Fakulti Komputeran dan Meta-Teknologi
                                             </option>
                                             <option value="Fakulti Bahasa dan Komunikasi"
-                                                {{ old('faculty', $user->hu_faculty ?? $user->faculty) == 'Fakulti Bahasa dan Komunikasi' ? 'selected' : '' }}>
+                                                {{ $currentFaculty == 'Fakulti Bahasa dan Komunikasi' ? 'selected' : '' }}>
                                                 Fakulti Bahasa dan Komunikasi
                                             </option>
                                             <option value="Fakulti Pembangunan Manusia"
-                                                {{ old('faculty', $user->hu_faculty ?? $user->faculty) == 'Fakulti Pembangunan Manusia' ? 'selected' : '' }}>
+                                                {{ $currentFaculty == 'Fakulti Pembangunan Manusia' ? 'selected' : '' }}>
                                                 Fakulti Pembangunan Manusia
                                             </option>
                                             <option value="Fakulti Sains dan Matematik"
-                                                {{ old('faculty', $user->hu_faculty ?? $user->faculty) == 'Fakulti Sains dan Matematik' ? 'selected' : '' }}>
+                                                {{ $currentFaculty == 'Fakulti Sains dan Matematik' ? 'selected' : '' }}>
                                                 Fakulti Sains dan Matematik
                                             </option>
                                             <option value="Fakulti Pengurusan dan Ekonomi"
-                                                {{ old('faculty', $user->hu_faculty ?? $user->faculty) == 'Fakulti Pengurusan dan Ekonomi' ? 'selected' : '' }}>
+                                                {{ $currentFaculty == 'Fakulti Pengurusan dan Ekonomi' ? 'selected' : '' }}>
                                                 Fakulti Pengurusan dan Ekonomi
                                             </option>
                                             <option value="Fakulti Sains Kemanusiaan"
-                                                {{ old('faculty', $user->hu_faculty ?? $user->faculty) == 'Fakulti Sains Kemanusiaan' ? 'selected' : '' }}>
+                                                {{ $currentFaculty == 'Fakulti Sains Kemanusiaan' ? 'selected' : '' }}>
                                                 Fakulti Sains Kemanusiaan
                                             </option>
                                             <option value="Fakulti Muzik dan Seni Persembahan"
-                                                {{ old('faculty', $user->hu_faculty ?? $user->faculty) == 'Fakulti Muzik dan Seni Persembahan' ? 'selected' : '' }}>
+                                                {{ $currentFaculty == 'Fakulti Muzik dan Seni Persembahan' ? 'selected' : '' }}>
                                                 Fakulti Muzik dan Seni Persembahan
                                             </option>
                                             <option value="Fakulti Seni, Komputeran dan Industri Kreatif"
-                                                {{ old('faculty', $user->hu_faculty ?? $user->faculty) == 'Fakulti Seni, Komputeran dan Industri Kreatif' ? 'selected' : '' }}>
+                                                {{ $currentFaculty == 'Fakulti Seni, Komputeran dan Industri Kreatif' ? 'selected' : '' }}>
                                                 Fakulti Seni, Komputeran dan Industri Kreatif
                                             </option>
                                             <option value="Fakulti Sains Sukan dan Kejurulatihan"
-                                                {{ old('faculty', $user->hu_faculty ?? $user->faculty) == 'Fakulti Sains Sukan dan Kejurulatihan' ? 'selected' : '' }}>
+                                                {{ $currentFaculty == 'Fakulti Sains Sukan dan Kejurulatihan' ? 'selected' : '' }}>
                                                 Fakulti Sains Sukan dan Kejurulatihan
                                             </option>
                                             <option value="Fakulti Teknikal dan Vokasional"
-                                                {{ old('faculty', $user->hu_faculty ?? $user->faculty) == 'Fakulti Teknikal dan Vokasional' ? 'selected' : '' }}>
+                                                {{ $currentFaculty == 'Fakulti Teknikal dan Vokasional' ? 'selected' : '' }}>
                                                 Fakulti Teknikal dan Vokasional
                                             </option>
                                         </select>

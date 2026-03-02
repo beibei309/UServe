@@ -104,22 +104,39 @@ public function update(Request $request, $id)
 {
     $user = User::where('hu_role', 'community')->findOrFail($id);
 
+    $validated = $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => 'required|email|max:255',
+        'phone' => 'nullable|string|max:20',
+        'bio' => 'nullable|string|max:1000',
+        'verification_status' => 'required|in:pending,approved,rejected',
+        'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4096',
+        'blacklist_reason' => 'nullable|string|max:255',
+        'remove_blacklist' => 'nullable|in:1',
+    ]);
+
     // 🔒 Prevent reverting approved users back to pending
     if (
         $user->hu_verification_status === 'approved' &&
-        $request->verification_status === 'pending'
+        $validated['verification_status'] === 'pending'
     ) {
         return back()->with('error', 'Verified users cannot be reverted to pending.');
     }
 
     // Basic info
-    $user->hu_name  = $request->name;
-    $user->hu_email = $request->email;
-    $user->hu_phone = $request->phone;
-    $user->hu_bio   = $request->bio;
+    $user->hu_name  = $validated['name'];
+    $user->hu_email = $validated['email'];
+
+    if ($request->filled('phone')) {
+        $user->hu_phone = trim((string) $validated['phone']);
+    }
+
+    if ($request->filled('bio')) {
+        $user->hu_bio = trim((string) $validated['bio']);
+    }
 
     // Now it is SAFE to update verification status
-    $user->hu_verification_status = $request->verification_status;
+    $user->hu_verification_status = $validated['verification_status'];
 
     // Upload new profile photo
     if ($request->hasFile('profile_photo')) {
@@ -157,10 +174,10 @@ public function update(Request $request, $id)
             $user->hu_is_suspended = 0; // Sync suspended
             $user->hu_blacklist_reason = null;
         } 
-        elseif ($request->blacklist_reason) {
+        elseif ($request->filled('blacklist_reason')) {
             $user->hu_is_blacklisted = 1;
             $user->hu_is_suspended = 1; // Sync suspended
-            $user->hu_blacklist_reason = $request->blacklist_reason;
+            $user->hu_blacklist_reason = trim((string) $validated['blacklist_reason']);
         }
 
     $user->save();

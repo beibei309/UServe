@@ -73,36 +73,51 @@
                         </div>
 
                         <div>
-    <label class="block text-sm font-medium text-gray-700 mb-2">
-        Faculty
-    </label>
+                            @php
+                                $facultyMap = [
+                                    'FKMT' => 'Fakulti Komputeran dan Meta-Teknologi',
+                                    'FBK' => 'Fakulti Bahasa dan Komunikasi',
+                                    'FPM' => 'Fakulti Pembangunan Manusia',
+                                    'FSMT' => 'Fakulti Sains dan Matematik',
+                                    'FPE' => 'Fakulti Pengurusan dan Ekonomi',
+                                    'FSKIK' => 'Fakulti Seni, Komputeran dan Industri Kreatif',
+                                    'FMUP' => 'Fakulti Muzik dan Seni Persembahan',
+                                    'FSSKJ' => 'Fakulti Sains Sukan dan Kejurulatihan',
+                                    'FTV' => 'Fakulti Teknikal dan Vokasional',
+                                    'FSK' => 'Fakulti Sains Kemanusiaan',
+                                ];
+                                $currentFaculty = old('faculty', $student->hu_faculty);
+                                $currentFaculty = $facultyMap[$currentFaculty] ?? $currentFaculty;
+                            @endphp
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Faculty
+                            </label>
 
-    <select name="faculty" class="w-full rounded-lg border-gray-300">
-    <option value="">Select Faculty</option>
+                            <select name="faculty" class="w-full rounded-lg border-gray-300">
+                                <option value="">Select Faculty</option>
+                                <option value="Fakulti Komputeran dan Meta-Teknologi" {{ $currentFaculty == 'Fakulti Komputeran dan Meta-Teknologi' ? 'selected' : '' }}>Fakulti Komputeran dan Meta-Teknologi</option>
+                                <option value="Fakulti Bahasa dan Komunikasi" {{ $currentFaculty == 'Fakulti Bahasa dan Komunikasi' ? 'selected' : '' }}>Fakulti Bahasa dan Komunikasi</option>
+                                <option value="Fakulti Pembangunan Manusia" {{ $currentFaculty == 'Fakulti Pembangunan Manusia' ? 'selected' : '' }}>Fakulti Pembangunan Manusia</option>
+                                <option value="Fakulti Sains dan Matematik" {{ $currentFaculty == 'Fakulti Sains dan Matematik' ? 'selected' : '' }}>Fakulti Sains dan Matematik</option>
+                                <option value="Fakulti Pengurusan dan Ekonomi" {{ $currentFaculty == 'Fakulti Pengurusan dan Ekonomi' ? 'selected' : '' }}>Fakulti Pengurusan dan Ekonomi</option>
+                                <option value="Fakulti Sains Kemanusiaan" {{ $currentFaculty == 'Fakulti Sains Kemanusiaan' ? 'selected' : '' }}>Fakulti Sains Kemanusiaan</option>
+                                <option value="Fakulti Muzik dan Seni Persembahan" {{ $currentFaculty == 'Fakulti Muzik dan Seni Persembahan' ? 'selected' : '' }}>Fakulti Muzik dan Seni Persembahan</option>
+                                <option value="Fakulti Seni, Komputeran dan Industri Kreatif" {{ $currentFaculty == 'Fakulti Seni, Komputeran dan Industri Kreatif' ? 'selected' : '' }}>Fakulti Seni, Komputeran dan Industri Kreatif</option>
+                                <option value="Fakulti Sains Sukan dan Kejurulatihan" {{ $currentFaculty == 'Fakulti Sains Sukan dan Kejurulatihan' ? 'selected' : '' }}>Fakulti Sains Sukan dan Kejurulatihan</option>
+                                <option value="Fakulti Teknikal dan Vokasional" {{ $currentFaculty == 'Fakulti Teknikal dan Vokasional' ? 'selected' : '' }}>Fakulti Teknikal dan Vokasional</option>
+                            </select>
 
-    <option value="FKMT" {{ old('faculty', $student->faculty)=='FKMT' ? 'selected' : '' }}>FKMT</option>
-    <option value="FPE" {{ old('faculty', $student->faculty)=='FPE' ? 'selected' : '' }}>FPE</option>
-    <option value="FSKIK" {{ old('faculty', $student->faculty)=='FSKIK' ? 'selected' : '' }}>FSKIK</option>
-    <option value="FSK" {{ old('faculty', $student->faculty)=='FSK' ? 'selected' : '' }}>FSK</option>
-    <option value="FSMT" {{ old('faculty', $student->faculty)=='FSMT' ? 'selected' : '' }}>FSMT</option>
-    <option value="FBK" {{ old('faculty', $student->faculty)=='FBK' ? 'selected' : '' }}>FBK</option>
-    <option value="FPM" {{ old('faculty', $student->faculty)=='FPM' ? 'selected' : '' }}>FPM</option>
-    <option value="FMUP" {{ old('faculty', $student->faculty)=='FMUP' ? 'selected' : '' }}>FMUP</option>
-    <option value="FSSKJ" {{ old('faculty', $student->faculty)=='FSSKJ' ? 'selected' : '' }}>FSSKJ</option>
-    <option value="FTV" {{ old('faculty', $student->faculty)=='FTV' ? 'selected' : '' }}>FTV</option>
-</select>
-
-    @error('faculty')
-        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-    @enderror
-</div>
+                            @error('faculty')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">
                                 Course
                             </label>
                             <input type="text" name="course"
-                                   value="{{ old('course', $student->course) }}"
+                                   value="{{ old('course', $student->hu_course) }}"
                                    class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                         </div>
 
@@ -141,7 +156,7 @@
                             </label>
                             <textarea name="work_experience_message" rows="4"
                                       class="w-full border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500"
-                                      placeholder="Describe experience or services offered...">{{ old('work_experience_message', $student->work_experience_message) }}</textarea>
+                                      placeholder="Describe experience or services offered...">{{ old('work_experience_message', $student->hu_work_experience_message) }}</textarea>
                         </div>
 
                     </div>

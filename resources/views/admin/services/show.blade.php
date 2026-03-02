@@ -118,9 +118,9 @@
                 <div class="p-4 bg-blue-50 border rounded">
                     <p class="text-xs font-bold text-blue-700 uppercase">Basic</p>
                     <p class="text-lg font-bold">RM {{ $service->hss_basic_price }}</p>
-                    <p class="text-xs text-gray-600">
-                        {{ $service->hss_basic_description ?? 'No description' }}
-                    </p>
+                    <div class="text-xs text-gray-600">
+                        {!! $service->hss_basic_description ? $service->hss_basic_description : 'No description' !!}
+                    </div>
                 </div>
                 @endif
 
@@ -129,9 +129,9 @@
                 <div class="p-4 bg-yellow-50 border rounded">
                     <p class="text-xs font-bold text-yellow-700 uppercase">Standard</p>
                     <p class="text-lg font-bold">RM {{ $service->hss_standard_price }}</p>
-                    <p class="text-xs text-gray-600">
-                        {{ $service->hss_standard_description ?? 'No description' }}
-                    </p>
+                    <div class="text-xs text-gray-600">
+                        {!! $service->hss_standard_description ? $service->hss_standard_description : 'No description' !!}
+                    </div>
                 </div>
                 @endif
 
@@ -140,9 +140,9 @@
                 <div class="p-4 bg-purple-50 border rounded">
                     <p class="text-xs font-bold text-purple-700 uppercase">Premium</p>
                     <p class="text-lg font-bold">RM {{ $service->hss_premium_price }}</p>
-                    <p class="text-xs text-gray-600">
-                        {{ $service->hss_premium_description ?? 'No description' }}
-                    </p>
+                    <div class="text-xs text-gray-600">
+                        {!! $service->hss_premium_description ? $service->hss_premium_description : 'No description' !!}
+                    </div>
                 </div>
                 @endif
 

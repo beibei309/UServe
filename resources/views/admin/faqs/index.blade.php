@@ -17,9 +17,9 @@
                     @foreach ($items as $faq)
                         <div class="p-4 flex justify-between items-start">
                             <div>
-                                <p class="font-medium">{{ $faq->question }}</p>
+                                <p class="font-medium">{{ $faq->hfq_question }}</p>
                                 <p class="text-sm text-gray-600 mt-1">
-                                    {{ Str::limit(strip_tags($faq->answer), 120) }}
+                                    {{ Str::limit(strip_tags($faq->hfq_answer), 120) }}
                                 </p>
                             </div>
 
@@ -28,8 +28,8 @@
                                     @csrf
                                     <button
                                         class="text-xs px-3 py-1 rounded
-                                        {{ $faq->is_active ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-600' }}">
-                                        {{ $faq->is_active ? 'Active' : 'Hidden' }}
+                                        {{ $faq->hfq_is_active ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-600' }}">
+                                        {{ $faq->hfq_is_active ? 'Active' : 'Hidden' }}
                                     </button>
                                 </form>
 

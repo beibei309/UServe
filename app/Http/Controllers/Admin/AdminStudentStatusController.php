@@ -59,18 +59,24 @@ class AdminStudentStatusController extends Controller
 
     // 2. SHOW CREATE FORM
     public function create(Request $request)
-{
+    {
         $existingStatusIds = StudentStatus::pluck('hss_student_id')->toArray();
 
         $students = User::whereIn('hu_role', ['student', 'helper'])
             ->whereNotIn('hu_id', $existingStatusIds)
             ->orderBy('hu_name', 'asc')
-        ->get();
+            ->get();
 
-    $selectedStudentId = $request->input('student_id');
+        $selectedStudentId = $request->input('student_id');
+        $selectedStudent = null;
 
-    return view('admin.student_status.create', compact('students', 'selectedStudentId'));
-}
+        if ($selectedStudentId) {
+            // Fetch the student regardless of whether they have a status (for the display box)
+            $selectedStudent = User::find($selectedStudentId);
+        }
+
+        return view('admin.student_status.create', compact('students', 'selectedStudentId', 'selectedStudent'));
+    }
 
 
     // 3. STORE NEW STATUS
@@ -145,11 +151,24 @@ class AdminStudentStatusController extends Controller
 
         $statusRecord = StudentStatus::findOrFail($id);
 
-        $statusRecord->update([
-            'hss_semester' => $request->semester,
-            'hss_status' => $request->status,
-            'hss_graduation_date' => $request->graduation_date,
-        ]);
+        $incomingStatus = $request->status;
+        $updateData = [
+            'hss_status' => $incomingStatus,
+        ];
+
+        if (in_array($incomingStatus, ['Graduated', 'Dismissed'], true)) {
+            $updateData['hss_semester'] = 'Final';
+        } elseif ($request->filled('semester')) {
+            $updateData['hss_semester'] = trim((string) $request->input('semester'));
+        }
+
+        if ($incomingStatus === 'Dismissed') {
+            $updateData['hss_graduation_date'] = null;
+        } elseif ($request->filled('graduation_date')) {
+            $updateData['hss_graduation_date'] = $request->graduation_date;
+        }
+
+        $statusRecord->update($updateData);
 
         return redirect()->route('admin.student_status.index')
             ->with('success', 'Student status updated.');

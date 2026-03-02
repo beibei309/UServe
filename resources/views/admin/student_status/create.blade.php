@@ -26,11 +26,7 @@
 
     <div class="bg-white border border-gray-300 shadow-sm rounded-lg p-4">
 
-        @if($selectedStudentId)
-            @php
-                $selectedStudent = $students->firstWhere('hu_id', $selectedStudentId);
-            @endphp
-
+        @if($selectedStudent)
             {{-- AUTO-SELECTED STUDENT --}}
             <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
                 <p class="text-sm text-gray-600 mb-1">Selected Student</p>
@@ -43,7 +39,7 @@
             </div>
 
             {{-- HIDDEN INPUT --}}
-            <input type="hidden" name="student_id" value="{{ $selectedStudentId }}">
+            <input type="hidden" name="student_id" value="{{ $selectedStudent->hu_id }}">
 
         @else
             {{-- NORMAL SELECTION LIST --}}

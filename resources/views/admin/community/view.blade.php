@@ -271,7 +271,10 @@
 
                 <div class="mt-4 text-center">
                     <p class="text-white font-medium">Live Selfie Verification</p>
-                    <p class="text-slate-400 text-xs">Captured on: {{ $user->hu_created_at->format('d M Y, H:i A') }}</p>
+                    @php
+                        $createdAt = $user->hu_created_at ?? $user->created_at;
+                    @endphp
+                    <p class="text-slate-400 text-xs">Captured on: {{ $createdAt ? \Carbon\Carbon::parse($createdAt)->format('d M Y, H:i A') : '-' }}</p>
                 </div>
             </div>
         </div>
@@ -281,9 +284,13 @@
         <div class="bg-white shadow rounded-lg p-6 mt-6">
             <h2 class="text-xl font-semibold mb-3">Account Information</h2>
 
+            @php
+                $registeredAt = $user->hu_created_at ?? $user->created_at;
+                $updatedAt = $user->hu_updated_at ?? $user->updated_at;
+            @endphp
             <p class="text-gray-700"><strong>User ID:</strong> {{ $user->hu_id }}</p>
-            <p class="text-gray-700"><strong>Registered On:</strong> {{ $user->hu_created_at->format('d M Y, h:i A') }}</p>
-            <p class="text-gray-700"><strong>Last Updated:</strong> {{ $user->hu_updated_at->format('d M Y, h:i A') }}</p>
+            <p class="text-gray-700"><strong>Registered On:</strong> {{ $registeredAt ? \Carbon\Carbon::parse($registeredAt)->format('d M Y, h:i A') : '-' }}</p>
+            <p class="text-gray-700"><strong>Last Updated:</strong> {{ $updatedAt ? \Carbon\Carbon::parse($updatedAt)->format('d M Y, h:i A') : '-' }}</p>
 
         </div>
 
