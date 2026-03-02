@@ -328,12 +328,20 @@ class VerificationController extends Controller
             
             // Check if file is valid
             if ($file && $file->isValid()) {
-                $filename = 'verify_' . $user->hu_id . '_' . $file->hashName();
-                
-                // Store in storage/app/private/verification_docs (local disk)
-                $path = $file->storeAs('verification_docs', $filename, 'local');
+                $extension = strtolower($file->getClientOriginalExtension() ?: $file->extension() ?: 'bin');
+                $filename = 'verify_' . $user->hu_id . '_' . now()->format('YmdHis') . '_' . Str::random(12) . '.' . $extension;
 
-                if (!$path || !Storage::disk('local')->exists($path)) {
+                $disk = Storage::disk('local');
+                $directory = 'verification_docs';
+
+                if (!$disk->exists($directory)) {
+                    $disk->makeDirectory($directory);
+                }
+
+                // Store in storage/app/private/verification_docs (local disk)
+                $path = $disk->putFileAs($directory, $file, $filename);
+
+                if (empty($path) || !$disk->exists($path)) {
                     return redirect()->back()->withErrors(['verification_document' => 'Upload failed. Please try again.']);
                 }
 
