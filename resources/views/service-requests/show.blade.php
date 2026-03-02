@@ -687,7 +687,8 @@
             e.preventDefault();
             const formData = new FormData(this);
             try {
-                const res = await fetch('/reviews', {
+                const reviewStoreUrl = @json(route('reviews.store'));
+                const res = await fetch(reviewStoreUrl, {
                     method: 'POST',
                     body: formData,
                     headers: {
@@ -695,12 +696,19 @@
                         'Accept': 'application/json'
                     }
                 });
-                const data = await res.json();
+
+                let data = null;
+                try {
+                    data = await res.json();
+                } catch (parseError) {
+                    data = { success: false, error: 'Unexpected server response.' };
+                }
+
                 if (data.success) {
                     closeReviewModal();
                     Swal.fire("Thank You!", "Review submitted.", "success").then(() => location.reload());
                 } else {
-                    Swal.fire("Error", data.error, "error");
+                    Swal.fire("Error", data.error || 'Unable to submit review.', "error");
                 }
             } catch (err) {
                 Swal.fire("Error", "System error", "error");
