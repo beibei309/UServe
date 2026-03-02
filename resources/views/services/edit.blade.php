@@ -88,7 +88,8 @@
 
         /* Toggle Switch */
         .toggle-checkbox:checked {
-            right: 0;
+            left: 1.25rem;
+            right: auto;
             border-color: #6366f1;
         }
 
@@ -97,7 +98,8 @@
         }
 
         .toggle-checkbox {
-            right: 0;
+            left: 0;
+            right: auto;
             z-index: 1;
             border-color: #cbd5e1;
             transition: all 0.3s;
@@ -228,7 +230,7 @@
                 <div id="pricing" class="tab-section hidden p-8">
                     <div class="mb-6">
                         <h2 class="text-xl font-bold text-gray-900">Packages & Pricing</h2>
-                        <p class="text-gray-500 text-sm">Define your session durations and costs.</p>
+                        <p class="text-gray-500 text-sm">Define your costs and what students get per package.</p>
                     </div>
 
                     <div class="border border-gray-200 rounded-xl p-6 mb-6 bg-gray-50 relative">
@@ -248,12 +250,13 @@
                                     class="w-full mt-1 border-gray-300 rounded-md focus:ring-gray-500 focus:border-gray-500">
                             </div>
                              <div><label class="text-xs font-bold text-gray-600 uppercase">Duration</label><input
-                                        type="text" name="packages[0][duration]" value="{{ $service->hss_basic_duration }}" placeholder="e.g. 2 Hours"
+                                        type="text" name="packages[0][duration]" value="{{ $service->hss_basic_duration }}" placeholder="e.g. 1 hour"
                                         class="w-full mt-1 border-gray-200 rounded-md"></div>
                             <div>
-                                <label class="text-xs font-bold text-gray-500 uppercase">Frequency</label>
+                                <label class="text-xs font-bold text-gray-500 uppercase">Billing Unit</label>
                                 <input type="text" name="packages[0][frequency]" value="{{ $service->hss_basic_frequency }}" placeholder="e.g. per session"
                                     class="w-full mt-1 border-gray-300 rounded-md">
+                                <p class="mt-1 text-[11px] text-gray-400">Examples: per session, per hour, per day, per task</p>
                             </div>
                         </div>
                         <div>
@@ -286,12 +289,13 @@
                                 <div><label class="text-xs font-bold text-blue-600 uppercase">Price</label><input
                                         type="number" name="packages[1][price]" value="{{ $service->hss_standard_price }}"
                                         class="w-full mt-1 border-blue-200 rounded-md"></div>
-                                <div><label class="text-xs font-bold text-blue-600 uppercase">Duration</label><input
-                                        type="text" name="packages[1][duration]" value="{{ $service->hss_standard_duration }}" placeholder="e.g. 2 Hours"
+                                <div><label class="text-xs font-bold text-blue-600 uppercase">Duration (shown to student)</label><input
+                                    type="text" name="packages[1][duration]" value="{{ $service->hss_standard_duration }}" placeholder="e.g. 2 hours"
                                         class="w-full mt-1 border-blue-200 rounded-md"></div>
-                                <div><label class="text-xs font-bold text-blue-600 uppercase">Frequency</label>
-                                    <input type="text" name="packages[1][frequency]" value="{{ $service->hss_standard_frequency }}" placeholder="e.g. per session"
+                                <div><label class="text-xs font-bold text-blue-600 uppercase">Billing Unit</label>
+                                    <input type="text" name="packages[1][frequency]" value="{{ $service->hss_standard_frequency }}" placeholder="e.g. per session, per hour"
                                     class="w-full mt-1 border-blue-300 rounded-md">
+                                    <p class="mt-1 text-[11px] text-blue-400">Examples: per session, per hour, per day, per task</p>
                                 </div>
                             </div>
                             <div class="bg-white rounded-md border border-blue-200 overflow-hidden">
@@ -309,12 +313,13 @@
                                 <div><label class="text-xs font-bold text-purple-600 uppercase">Price</label><input
                                         type="number" name="packages[2][price]" value="{{ $service->hss_premium_price }}"
                                         class="w-full mt-1 border-purple-200 rounded-md"></div>
-                                 <div><label class="text-xs font-bold text-purple-600 uppercase">Duration</label><input
-                                        type="text" name="packages[2][duration]" value="{{ $service->hss_premium_duration }}" placeholder="e.g. 2 Hours"
+                                 <div><label class="text-xs font-bold text-purple-600 uppercase">Duration (shown to student)</label><input
+                                    type="text" name="packages[2][duration]" value="{{ $service->hss_premium_duration }}" placeholder="e.g. 3 hours"
                                         class="w-full mt-1 border-purple-200 rounded-md"></div>
-                                <div><label class="text-xs font-bold text-purple-600 uppercase">Frequency</label>
-                                     <input type="text" name="packages[2][frequency]" value="{{ $service->hss_premium_frequency }}" placeholder="e.g. per session"
+                                <div><label class="text-xs font-bold text-purple-600 uppercase">Billing Unit</label>
+                                     <input type="text" name="packages[2][frequency]" value="{{ $service->hss_premium_frequency }}" placeholder="e.g. per session, per hour"
                                     class="w-full mt-1 border-purple-300 rounded-md">
+                                      <p class="mt-1 text-[11px] text-purple-400">Examples: per session, per hour, per day, per task</p>
                                 </div>
                             </div>
                             <div class="bg-white rounded-md border border-purple-200 overflow-hidden">
@@ -469,7 +474,7 @@
                                                             :name="`operating_hours[${day.key}][enabled]`"
                                                             :id="`toggle-${day.key}`" x-model="schedule[day.key].enabled"
                                                             @change="refreshPreview()" value="1"
-                                                            class="toggle-checkbox absolute block w-7 h-7 rounded-full bg-white border-4 appearance-none cursor-pointer border-slate-200 checked:right-0 checked:border-indigo-600 transition-all duration-300 shadow-sm" />
+                                                            class="toggle-checkbox absolute block w-7 h-7 rounded-full bg-white border-4 appearance-none cursor-pointer border-slate-200 checked:border-indigo-600 transition-all duration-300 shadow-sm" />
                                                         <label :for="`toggle-${day.key}`"
                                                             class="toggle-label block overflow-hidden h-7 rounded-full bg-slate-200 cursor-pointer"></label>
                                                     </div>
@@ -506,7 +511,8 @@
                                 {{-- 🟢 NEW: PREVIEW SECTION (Student View Simulator) --}}
                                 {{-- 🟢 NEW: PREVIEW & BLOCKING SECTION --}}
                                 <div x-show="isSessionBased"
-                                    class="bg-slate-50 rounded-3xl border border-slate-200 p-6 relative">
+                                    class="bg-slate-50 rounded-3xl border border-slate-200 p-6 relative"
+                                    :class="isUnavailable ? 'opacity-40 pointer-events-none select-none' : ''">
                                     <div class="flex flex-col md:flex-row justify-between items-center mb-4 gap-4">
                                         <div>
                                             <h3 class="font-bold text-slate-800"><i
@@ -590,8 +596,7 @@
                             <div class="lg:col-span-1 space-y-6">
                                 {{-- Kita tambah x-data di sini untuk kawal UI bila toggle ditekan --}}
                                 {{-- Pastikan tukar $service->is_active mengikut nama column DB anda (contoh: is_unavailable atau active status) --}}
-                                <div class="bg-white rounded-3xl shadow-sm border border-slate-100 p-6 sticky top-24"
-                                    x-data="{ isUnavailable: {{ $service->hss_is_active ? 'false' : 'true' }} }">
+                                <div class="bg-white rounded-3xl shadow-sm border border-slate-100 p-6 sticky top-24">
 
                                     {{-- 1. TOGGLE UNAVAILABLE (BARU) --}}
                                     <div class="flex items-center justify-between mb-6 pb-6 border-b border-slate-100">
@@ -603,9 +608,8 @@
                                         <div class="relative inline-block w-12 h-7">
                                             {{-- Input ini hantar '1' jika unavailable. Controller perlu handle logic ini. --}}
                                             <input type="checkbox" name="is_unavailable" id="toggle-unavailable"
-                                                class="toggle-checkbox absolute block w-7 h-7 rounded-full bg-white border-4 appearance-none cursor-pointer border-slate-200 checked:right-0 checked:border-indigo-600 transition-all duration-300 shadow-sm"
-                                                x-model="isUnavailable" value="1" {{-- Jika DB guna is_active, logic ini mungkin terbalik --}}
-                                                {{ !$service->hss_is_active ? 'checked' : '' }} />
+                                                class="toggle-checkbox absolute block w-7 h-7 rounded-full bg-white border-4 appearance-none cursor-pointer border-slate-200 checked:border-indigo-600 transition-all duration-300 shadow-sm"
+                                                x-model="isUnavailable" value="1" />
                                             <label for="toggle-unavailable"
                                                 class="toggle-label block overflow-hidden h-7 rounded-full bg-slate-200 cursor-pointer"></label>
                                         </div>
@@ -719,6 +723,7 @@
         function scheduleHandler() {
             return {
                 isSessionBased: @json($service->hss_session_duration !== null),
+                isUnavailable: @json(!$service->hss_is_active),
                 currentDuration: @json($service->hss_session_duration ?? 60),
 
                 // Data from Controller
@@ -726,7 +731,7 @@
                 bookedSlots: @json($bookedSlots ?? []), // Real bookings (cannot change)
 
                 // 🟢 NEW: Manually Blocked Slots (e.g., ["2025-12-17 14:00"])
-                blockedSlots: @json($service->blocked_slots ?? []),
+                blockedSlots: @json($service->hss_blocked_slots ?? []),
 
                 days: [{
                         key: 'mon',
@@ -820,8 +825,17 @@
                     let startMinutes = this.timeToMinutes(daySettings.start);
                     let endMinutes = this.timeToMinutes(daySettings.end);
                     let duration = parseInt(this.currentDuration);
+                    const now = new Date();
+                    const todayStr = now.toISOString().split('T')[0];
+                    const isToday = this.previewDate === todayStr;
+                    const currentMinutes = now.getHours() * 60 + now.getMinutes();
 
                     for (let time = startMinutes; time + duration <= endMinutes; time += duration) {
+                        // Hide slots that have already fully passed for today
+                        if (isToday && (time + duration) <= currentMinutes) {
+                            continue;
+                        }
+
                         let startTimeStr = this.minutesToTime(time);
                         let endTimeStr = this.minutesToTime(time + duration);
 
@@ -840,7 +854,11 @@
                         });
                     }
 
-                    if (this.previewSlots.length === 0) this.previewMessage = 'No slots available settings.';
+                    if (this.previewSlots.length === 0) {
+                        this.previewMessage = isToday
+                            ? 'No remaining slots for today.'
+                            : 'No slots available settings.';
+                    }
                 },
 
                 // --- Helpers ---

@@ -87,7 +87,11 @@ class ReviewController extends Controller
             'reply' => 'required|string|max:1000',
         ]);
 
-    $review = Review::findOrFail($id);
+        if (!ctype_digit((string) $id)) {
+            return back()->with('error', 'Invalid review ID.');
+        }
+
+    $review = Review::findOrFail((int) $id);
 
         // Pastikan hanya helper yang berkaitan boleh reply
         if ($review->hr_reviewee_id != Auth::id()) {

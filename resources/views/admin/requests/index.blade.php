@@ -102,6 +102,18 @@
 
                                     {{-- Request Details --}}
                                     <td class="py-4 px-6">
+                                        @php
+                                            $selectedPackage = $request->hsr_selected_package;
+                                            $selectedPackageLabel = is_array($selectedPackage)
+                                                ? implode(', ', array_filter($selectedPackage))
+                                                : ($selectedPackage ?? '');
+
+                                            $selectedDates = $request->hsr_selected_dates;
+                                            $selectedDateValues = is_array($selectedDates)
+                                                ? array_values(array_filter($selectedDates))
+                                                : (filled($selectedDates) ? [$selectedDates] : []);
+                                            $firstSelectedDate = $selectedDateValues[0] ?? null;
+                                        @endphp
                                         <div class="flex items-center gap-3">
                                             <div
                                                 class="h-10 w-10 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600 font-bold text-lg">
@@ -112,7 +124,7 @@
                                                     {{ Str::limit($request->studentService->hss_title, 25) }}</div>
                                                 <div class="text-xs text-gray-500">
                                                     <span
-                                                        class="capitalize text-indigo-600 font-medium">{{ $request->hsr_selected_package }}</span>
+                                                        class="capitalize text-indigo-600 font-medium">{{ $selectedPackageLabel !== '' ? $selectedPackageLabel : '—' }}</span>
                                                     • RM {{ number_format($request->hsr_offered_price, 2) }}
                                                 </div>
                                             </div>
@@ -138,8 +150,13 @@
                                     {{-- Schedule --}}
                                     <td class="py-4 px-6">
                                         <div class="text-sm text-gray-900">
-                                            {{ \Carbon\Carbon::parse($request->hsr_selected_dates)->format('d M Y') }}
+                                            {{ $firstSelectedDate ? \Carbon\Carbon::parse($firstSelectedDate)->format('d M Y') : 'Not set' }}
                                         </div>
+                                        @if (count($selectedDateValues) > 1)
+                                            <div class="text-xs text-indigo-600">
+                                                +{{ count($selectedDateValues) - 1 }} more date(s)
+                                            </div>
+                                        @endif
                                         <div class="text-xs text-gray-500">
                                             {{ \Carbon\Carbon::parse($request->created_at)->diffForHumans() }}
                                         </div>

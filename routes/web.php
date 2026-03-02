@@ -70,7 +70,7 @@ Route::middleware(['auth'])->group(function () {
         ->name('verification.save_location');
     
     Route::get('/onboarding/community', function() {
-        if (\Illuminate\Support\Facades\Auth::check() && \Illuminate\Support\Facades\Auth::user()->verification_status === 'approved') {
+        if (\Illuminate\Support\Facades\Auth::check() && \Illuminate\Support\Facades\Auth::user()->hu_verification_status === 'approved') {
             return redirect()->route('dashboard')->with('info', 'Your account is already verified!');
         }
         return view('onboarding.community_verification');

@@ -82,7 +82,7 @@
                                         <div
                                             class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-yellow-50 border border-yellow-200 text-yellow-700 text-xs font-bold shadow-sm">
                                             <i class="fa-solid fa-star text-yellow-500"></i>
-                                            {{ number_format($user->hu_average_rating ?? 0, 1) }}
+                                            {{ number_format($averageRating ?? 0, 1) }}
                                             <span class="font-normal text-yellow-600 opacity-80">
                                                 {{ $reviews->count() }}
                                                 reviews</span>
@@ -153,7 +153,7 @@
                         <div class="space-y-4">
                             <div class="flex justify-between items-center text-sm border-b border-gray-50 pb-2">
                                 <span class="text-gray-500">Member Since</span>
-                                <span class="font-semibold text-gray-900">{{ $user->hu_created_at->format('M Y') }}</span>
+                                <span class="font-semibold text-gray-900">{{ optional($user->created_at ?? $user->hu_created_at)->format('M Y') ?? 'N/A' }}</span>
                             </div>
                             <div class="flex justify-between items-center text-sm border-b border-gray-50 pb-2">
                                 <span class="text-gray-500">Total Services</span>
@@ -162,13 +162,13 @@
                         </div>
                     </div>
 
-                    @if ($user->hu_skills)
+                    @if ($user->skills ?? $user->hu_skills)
                         <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                             <h3 class="font-bold text-gray-900 mb-4 flex items-center gap-2">
                                 <i class="fa-solid fa-wand-magic-sparkles text-indigo-500"></i> Skills
                             </h3>
                             <div class="flex flex-wrap gap-2">
-                                @foreach (explode(',', $user->hu_skills) as $skill)
+                                @foreach (explode(',', $user->skills ?? $user->hu_skills) as $skill)
                                     <span
                                         class="px-3 py-1 rounded-lg text-sm font-medium bg-slate-100 text-slate-700 border border-slate-200">
                                         {{ trim($skill) }}
@@ -178,7 +178,7 @@
                         </div>
                     @endif
 
-                    @if ($user->hu_faculty || $user->hu_course)
+                    @if ($user->hu_faculty || $user->faculty || $user->hu_course || $user->course)
                         <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                             <h3 class="font-bold text-gray-900 mb-4 flex items-center gap-2">
                                 <i class="fa-solid fa-university text-indigo-500"></i> Education
@@ -342,7 +342,7 @@
                             <div
                                 class="flex items-center gap-4 bg-slate-50 px-5 py-3 rounded-2xl border border-slate-100">
                                 <span
-                                    class="text-3xl font-bold text-slate-900">{{ number_format($user->hu_average_rating ?? 0, 1) }}</span>
+                                    class="text-3xl font-bold text-slate-900">{{ number_format($averageRating ?? 0, 1) }}</span>
                                 <div class="h-8 w-px bg-slate-200"></div>
                                 <div class="flex flex-col">
                                     {{-- 1. Bintang Rating --}}
@@ -350,7 +350,7 @@
                                         @for ($i = 0; $i < 5; $i++)
                                             {{-- Menggunakan average_rating yang kita kira di controller --}}
                                             <i
-                                                class="fas fa-star {{ $i < round($user->hu_average_rating ?? 0) ? '' : 'text-gray-200' }}"></i>
+                                                class="fas fa-star {{ $i < round($averageRating ?? 0) ? '' : 'text-gray-200' }}"></i>
                                         @endfor
                                     </div>
 
@@ -394,11 +394,10 @@
                                                                 @for ($i = 1; $i <= 5; $i++)
                                                                     <i
                                                                         class="fas fa-star {{ $i <= $review->hr_rating ? '' : 'text-gray-200' }}"></i>
-                                                                        class="fas fa-star {{ $i <= $review->hr_rating ? '' : 'text-gray-200' }}"></i>
                                                                 @endfor
                                                             </div>
                                                             <span class="text-[11px] text-gray-400">•
-                                                                {{ optional($review->hr_created_at)->diffForHumans() ?? 'Recently' }}</span>
+                                                                {{ optional($review->created_at)->diffForHumans() ?? 'Recently' }}</span>
                                                         </div>
                                                     </div>
                                                 </div>

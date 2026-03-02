@@ -138,7 +138,13 @@
 
     {{-- META INFO --}}
     <div class="flex flex-wrap items-center gap-4 text-sm mt-4">
-        <span class="font-semibold text-slate-900">{{ $service->user->hu_name }}</span> |
+        <span class="font-semibold text-slate-900">
+            @auth
+                {{ $service->user->hu_name }}
+            @else
+                {{ substr($service->user->hu_name, 0, 1) . '****' }}
+            @endauth
+        </span> |
         <span class="text-slate-500">
             <i class="fa-solid fa-star text-yellow-400"></i>
             {{ $service->hss_rating ?? '0.0' }}
@@ -265,7 +271,7 @@
                                 <h3 class="text-xl font-bold text-slate-900 mb-1">
                                     {{-- Optional: Mask name for guests if you want extra privacy --}}
                                     @guest
-                                        {{ Str::mask($service->user->hu_name, '*', 3) }}
+                                        {{ substr($service->user->hu_name, 0, 1) . '****' }}
                                     @else
                                         {{ $service->user->hu_name }}
                                     @endguest
@@ -402,7 +408,12 @@
                         <div class="bg-slate-50 p-4 rounded-r-xl rounded-bl-xl">
                             <div class="flex items-center gap-2 mb-2">
                                 <span class="text-xs font-bold text-gray-700 flex items-center gap-1">
-                                    Reply from seller: {{ $service->user->hu_name }}
+                                    Reply from seller: 
+                                    @auth
+                                        {{ $service->user->hu_name }}
+                                    @else
+                                        {{ substr($service->user->hu_name, 0, 1) . '****' }}
+                                    @endauth
                                     @if ($service->user->hu_trust_badge)
                                         <i class="fas fa-check-circle text-[10px] text-blue-500"></i>
                                     @endif

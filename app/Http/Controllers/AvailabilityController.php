@@ -22,8 +22,8 @@ class AvailabilityController extends Controller
 
         // kalau jadi unavailable, kosongkan dulu tarikh supaya frontend set baru
         if (!$user->hu_is_available) {
-            $user->unavailable_start_date = null;
-            $user->unavailable_end_date = null;
+            $user->hu_unavailable_start_date = null;
+            $user->hu_unavailable_end_date = null;
         }
 
         $user->save();
@@ -44,8 +44,8 @@ class AvailabilityController extends Controller
             'end_date' => 'required|date|after_or_equal:start_date',
         ]);
 
-        $user->unavailable_start_date = $request->start_date;
-        $user->unavailable_end_date = $request->end_date;
+        $user->hu_unavailable_start_date = $request->start_date;
+        $user->hu_unavailable_end_date = $request->end_date;
         $user->hu_is_available = false;
         $user->save();
 
@@ -53,8 +53,8 @@ class AvailabilityController extends Controller
             'success' => true,
             'message' => 'Tarikh unavailable telah disimpan.',
             'is_available' => $user->hu_is_available,
-            'start_date' => $user->unavailable_start_date,
-            'end_date' => $user->unavailable_end_date,
+            'start_date' => $user->hu_unavailable_start_date,
+            'end_date' => $user->hu_unavailable_end_date,
         ]);
     }
 
@@ -74,11 +74,11 @@ class AvailabilityController extends Controller
 
         // 3. Handle Dates Logic
         if ($user->hu_is_available) {
-            $user->unavailable_start_date = null;
-            $user->unavailable_end_date = null;
+            $user->hu_unavailable_start_date = null;
+            $user->hu_unavailable_end_date = null;
         } else {
-            $user->unavailable_start_date = $validated['start_date'];
-            $user->unavailable_end_date = $validated['end_date'];
+            $user->hu_unavailable_start_date = $validated['start_date'];
+            $user->hu_unavailable_end_date = $validated['end_date'];
         }
 
         $user->save();
@@ -95,8 +95,8 @@ class AvailabilityController extends Controller
             'success' => true,
             'message' => 'Availability settings updated successfully.',
             'is_available' => $user->hu_is_available,
-            'start_date' => $user->unavailable_start_date,
-            'end_date' => $user->unavailable_end_date,
+            'start_date' => $user->hu_unavailable_start_date,
+            'end_date' => $user->hu_unavailable_end_date,
         ]);
     }
 }

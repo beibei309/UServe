@@ -100,7 +100,7 @@
                         {{-- ========================== --}}
                         <div id="pending-content"
                             class="sr-status-tab-content {{ $defaultStatusTab === 'pending' ? '' : 'hidden' }}">
-                            @if ($sentRequests->where('status', 'pending')->isEmpty())
+                            @if ($sentRequests->where('hsr_status', 'pending')->isEmpty())
                                 <div
                                     class="flex flex-col items-center justify-center py-16 text-center bg-white rounded-xl border border-dashed border-gray-300">
                                     <div class="rounded-full bg-gray-50 p-4 mb-4">
@@ -122,11 +122,14 @@
                                 </div>
                             @else
                                 <div class="space-y-6">
-                                    @foreach ($sentRequests->where('status', 'pending') as $request)
+                                    @foreach ($sentRequests->where('hsr_status', 'pending') as $request)
                                         @php
                                             // Data Setup
                                             $service = $request->studentService;
-                                            $pkgType = strtolower($request->hsr_selected_package ?? 'basic');
+                                            $selectedPackage = is_array($request->hsr_selected_package)
+                                                ? ($request->hsr_selected_package[0] ?? 'basic')
+                                                : ($request->hsr_selected_package ?? 'basic');
+                                            $pkgType = strtolower((string) $selectedPackage);
                                             $pkgDuration = $service->{$pkgType . '_duration'} ?? null;
                                             $pkgFrequency = $service->{$pkgType . '_frequency'} ?? null;
 
@@ -213,7 +216,7 @@
                                                             </div>
                                                             <div
                                                                 class="text-xs font-medium text-gray-500 uppercase tracking-wide">
-                                                                {{ str_replace('"', '', $request->hsr_selected_package) ?? 'Custom' }}
+                                                                {{ is_array($request->hsr_selected_package) ? ($request->hsr_selected_package[0] ?? 'Custom') : (trim((string) $request->hsr_selected_package) !== '' ? str_replace('"', '', (string) $request->hsr_selected_package) : 'Custom') }}
                                                                 Package
                                                             </div>
                                                         @endif
@@ -366,7 +369,7 @@
                         {{-- ========================== --}}
                         <div id="in-progress-content"
                             class="sr-status-tab-content {{ $defaultStatusTab === 'in-progress' ? '' : 'hidden' }}">
-                            @if ($sentRequests->whereIn('status', ['accepted', 'in_progress', 'waiting_payment', 'disputed'])->isEmpty())
+                            @if ($sentRequests->whereIn('hsr_status', ['accepted', 'in_progress', 'waiting_payment', 'disputed'])->isEmpty())
                                 {{-- Empty State --}}
                                 <div
                                     class="flex flex-col items-center justify-center py-16 text-center bg-white rounded-xl border border-dashed border-gray-300">
@@ -383,7 +386,7 @@
                                 </div>
                             @else
                                 <div class="space-y-6">
-                                    @foreach ($sentRequests->whereIn('status', ['accepted', 'in_progress', 'waiting_payment', 'disputed']) as $request)
+                                    @foreach ($sentRequests->whereIn('hsr_status', ['accepted', 'in_progress', 'waiting_payment', 'disputed']) as $request)
                                         @php
                                             // --- SETUP DATA ---
                                             $isSellerBanned = $request->provider->hu_is_suspended == 1 || $request->provider->hu_is_blacklisted == 1;
@@ -475,7 +478,7 @@
                                                             </div>
                                                             <div
                                                                 class="text-xs font-medium text-gray-400 uppercase tracking-wide">
-                                                                {{ str_replace('"', '', $request->hsr_selected_package) ?? 'Custom' }}
+                                                                {{ is_array($request->hsr_selected_package) ? ($request->hsr_selected_package[0] ?? 'Custom') : (trim((string) $request->hsr_selected_package) !== '' ? str_replace('"', '', (string) $request->hsr_selected_package) : 'Custom') }}
                                                                 Package
                                                             </div>
                                                         @endif
@@ -675,7 +678,7 @@
 
                         <div id="completed-content"
                             class="sr-status-tab-content {{ $defaultStatusTab === 'completed' ? '' : 'hidden' }}">
-                            @if ($sentRequests->whereIn('status', ['completed', 'cancelled', 'rejected'])->isEmpty())
+                            @if ($sentRequests->whereIn('hsr_status', ['completed', 'cancelled', 'rejected'])->isEmpty())
                                 <div
                                     class="flex flex-col items-center justify-center py-16 text-center bg-white rounded-xl border border-dashed border-gray-300">
                                     <div class="rounded-full bg-gray-50 p-4 mb-4">
@@ -691,11 +694,14 @@
                                 </div>
                             @else
                                 <div class="space-y-6">
-                                    @foreach ($sentRequests->whereIn('status', ['completed', 'cancelled', 'rejected']) as $request)
+                                    @foreach ($sentRequests->whereIn('hsr_status', ['completed', 'cancelled', 'rejected']) as $request)
                                         @php
                                             // 1. Data Setup
                                             $service = $request->studentService;
-                                            $pkgType = strtolower($request->hsr_selected_package ?? 'basic');
+                                            $selectedPackage = is_array($request->hsr_selected_package)
+                                                ? ($request->hsr_selected_package[0] ?? 'basic')
+                                                : ($request->hsr_selected_package ?? 'basic');
+                                            $pkgType = strtolower((string) $selectedPackage);
                                             $pkgDuration = $service->{$pkgType . '_duration'} ?? null;
                                             $pkgFrequency = $service->{$pkgType . '_frequency'} ?? null;
 
@@ -803,7 +809,7 @@
                                                             </div>
                                                             <div
                                                                 class="text-xs font-medium text-gray-400 uppercase tracking-wide">
-                                                                {{ str_replace('"', '', $request->hsr_selected_package) ?? 'Custom' }}
+                                                                {{ is_array($request->hsr_selected_package) ? ($request->hsr_selected_package[0] ?? 'Custom') : (trim((string) $request->hsr_selected_package) !== '' ? str_replace('"', '', (string) $request->hsr_selected_package) : 'Custom') }}
                                                                 Package
                                                             </div>
                                                         @endif

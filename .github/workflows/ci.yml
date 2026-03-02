@@ -51,6 +51,18 @@ jobs:
       - name: Install Composer dependencies
         run: composer install --no-interaction --prefer-dist --optimize-autoloader
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install JS dependencies
+        run: npm ci
+
+      - name: Build Vite assets
+        run: npm run build
+
       - name: PHP syntax check
         run: find app database routes tests -name "*.php" -print0 | xargs -0 -n1 php -l
 

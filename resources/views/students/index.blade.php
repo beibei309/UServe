@@ -445,10 +445,10 @@
         // Alpine Logic (Preserved from original but cleaned up)
         function availabilityComponent() {
             return {
-                isAvailable: {{ Auth::user()->is_available ? 'true' : 'false' }},
+                isAvailable: {{ Auth::user()->hu_is_available ? 'true' : 'false' }},
                 showModal: false,
-                startDate: '{{ Auth::user()->unavailable_start_date ?? '' }}',
-                endDate: '{{ Auth::user()->unavailable_end_date ?? '' }}',
+                startDate: '{{ Auth::user()->hu_unavailable_start_date ?? '' }}',
+                endDate: '{{ Auth::user()->hu_unavailable_end_date ?? '' }}',
 
                 openModal() {
                     this.showModal = true;

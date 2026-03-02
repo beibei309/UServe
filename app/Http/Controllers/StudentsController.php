@@ -318,10 +318,13 @@ public function deleteWorkExperienceFile()
                         ->latest()
                         ->get();
 
+        $averageRating = (float) ($user->reviewsReceived()->avg('hr_rating') ?? 0);
+
         return view('students.profile', [
             'user' => $user,
             'services' => $services,
-            'reviews' => $user->reviewsReceived
+            'reviews' => $user->reviewsReceived,
+            'averageRating' => round($averageRating, 1),
         ]);
     }
 }

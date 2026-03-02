@@ -386,7 +386,7 @@
                                                 class="flex items-center gap-3 group/user overflow-hidden max-w-[200px]">
                                                 <div class="relative flex-shrink-0">
 
-                                                    <img src="{{ $service->user->hu_profile_photo_path ? asset( $service->user->hu_profile_photo_path) : 'https://ui-avatars.com/api/?name=' . urlencode($service->user->hu_name) . '&background=random' }}"
+                                                    <img src="{{ $service->user->hu_profile_photo_path ? asset( $service->user->hu_profile_photo_path) : (Auth::check() ? 'https://ui-avatars.com/api/?name=' . urlencode($service->user->hu_name) . '&background=random' : 'https://ui-avatars.com/api/?name=' . urlencode(substr($service->user->hu_name, 0, 1)) . '&background=random') }}"
                                                         class="w-12 h-12 rounded-2xl object-cover border-2 border-white shadow-md group-hover/user:ring-2 group-hover/user:ring-indigo-500 transition-all duration-300 @guest blur-sm @endguest">
 
                                                     @guest

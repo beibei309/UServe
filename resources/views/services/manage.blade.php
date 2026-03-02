@@ -190,7 +190,7 @@
                                             class="flex items-center justify-center px-4 py-2.5 bg-gray-50 text-gray-700 text-sm font-semibold rounded-xl hover:bg-gray-100 hover:text-gray-900 transition-all border border-gray-200">
                                             Edit / Status
                                         </button>
-                                        <button onclick="openServiceModal({{ json_encode($service) }})"
+                                        <button onclick='openServiceModal(@json($service), @json($imageUrl))'
                                             class="flex items-center justify-center px-4 py-2.5 bg-indigo-50 text-indigo-700 text-sm font-semibold rounded-xl hover:bg-indigo-100 transition-all border border-indigo-100">
                                             Preview
                                         </button>
@@ -345,17 +345,19 @@
         });
 
         // --- 2. Modal Logic ---
-        function openServiceModal(service) {
+        function openServiceModal(service, imageUrl) {
             const modal = document.getElementById('serviceModal');
+            const serviceId = service.hss_id ?? service.id;
+            const getField = (prefixed, fallback) => service[prefixed] ?? service[fallback] ?? null;
 
-            document.getElementById('modalTitle').textContent = service.title;
-             document.getElementById('modalImage').src = service.full_image_url;           
+            document.getElementById('modalTitle').textContent = getField('hss_title', 'title') || 'Untitled Service';
+            document.getElementById('modalImage').src = imageUrl || 'https://via.placeholder.com/400x300?text=Service+Image';
 
             if (service.category) {
-                document.getElementById('modalCategory').textContent = service.category.name;
+                document.getElementById('modalCategory').textContent = service.category.hc_name ?? service.category.name ?? '';
             }
 
-            const descContent = document.getElementById(`data-desc-${service.id}`).innerHTML;
+            const descContent = document.getElementById(`data-desc-${serviceId}`).innerHTML;
             document.getElementById('modalDescription').innerHTML = descContent;
 
             const pkgContainer = document.getElementById('modalPackagesContainer');
@@ -384,9 +386,12 @@
             let hasPackages = false;
 
             tiers.forEach(tier => {
-                if (service[`${tier.key}_price`]) {
+                const price = getField(`hss_${tier.key}_price`, `${tier.key}_price`);
+                const frequency = getField(`hss_${tier.key}_frequency`, `${tier.key}_frequency`);
+
+                if (price) {
                     hasPackages = true;
-                    const desc = document.getElementById(`data-pkg-${tier.key}-desc-${service.id}`).innerHTML;
+                    const desc = document.getElementById(`data-pkg-${tier.key}-desc-${serviceId}`).innerHTML;
 
                     const colors = {
                         teal: 'bg-white border-teal-600 hover:border-teal-600',
@@ -399,9 +404,9 @@
                         <div class="md:w-1/3 flex flex-col justify-center border-b md:border-b-0 md:border-r border-black/5 pb-4 md:pb-0 md:pr-5">
                             <span class="inline-block self-start px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider mb-2 ${tier.badge}">${tier.label}</span>
                             <div class="flex items-baseline gap-1">
-                                <span class="text-2xl font-extrabold text-gray-900">RM${service[`${tier.key}_price`]}</span>
+                                <span class="text-2xl font-extrabold text-gray-900">RM${price}</span>
                             </div>
-                            <span class="text-xs text-gray-500 font-medium">per ${service[`${tier.key}_frequency`]}</span>
+                            <span class="text-xs text-gray-500 font-medium">per ${frequency || 'session'}</span>
                         </div>
                         <div class="md:w-2/3 prose prose-sm max-w-none text-gray-600 text-sm flex items-center">
                             <div>${desc || '<span class="italic opacity-50">No description provided.</span>'}</div>

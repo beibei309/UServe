@@ -49,43 +49,43 @@
                                             class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                                             <option value="">Select Faculty</option>
                                             <option value="Fakulti Komputeran dan Meta-Teknologi"
-                                                {{ old('faculty', $user->hu_faculty) == 'Fakulti Komputeran dan Meta-Teknologi' ? 'selected' : '' }}>
+                                                {{ old('faculty', $user->hu_faculty ?? $user->faculty) == 'Fakulti Komputeran dan Meta-Teknologi' ? 'selected' : '' }}>
                                                 Fakulti Komputeran dan Meta-Teknologi
                                             </option>
                                             <option value="Fakulti Bahasa dan Komunikasi"
-                                                {{ old('faculty', $user->hu_faculty) == 'Fakulti Bahasa dan Komunikasi' ? 'selected' : '' }}>
+                                                {{ old('faculty', $user->hu_faculty ?? $user->faculty) == 'Fakulti Bahasa dan Komunikasi' ? 'selected' : '' }}>
                                                 Fakulti Bahasa dan Komunikasi
                                             </option>
                                             <option value="Fakulti Pembangunan Manusia"
-                                                {{ old('faculty', $user->hu_faculty) == 'Fakulti Pembangunan Manusia' ? 'selected' : '' }}>
+                                                {{ old('faculty', $user->hu_faculty ?? $user->faculty) == 'Fakulti Pembangunan Manusia' ? 'selected' : '' }}>
                                                 Fakulti Pembangunan Manusia
                                             </option>
                                             <option value="Fakulti Sains dan Matematik"
-                                                {{ old('faculty', $user->hu_faculty) == 'Fakulti Sains dan Matematik' ? 'selected' : '' }}>
+                                                {{ old('faculty', $user->hu_faculty ?? $user->faculty) == 'Fakulti Sains dan Matematik' ? 'selected' : '' }}>
                                                 Fakulti Sains dan Matematik
                                             </option>
                                             <option value="Fakulti Pengurusan dan Ekonomi"
-                                                {{ old('faculty', $user->hu_faculty) == 'Fakulti Pengurusan dan Ekonomi' ? 'selected' : '' }}>
+                                                {{ old('faculty', $user->hu_faculty ?? $user->faculty) == 'Fakulti Pengurusan dan Ekonomi' ? 'selected' : '' }}>
                                                 Fakulti Pengurusan dan Ekonomi
                                             </option>
                                             <option value="Fakulti Sains Kemanusiaan"
-                                                {{ old('faculty', $user->hu_faculty) == 'Fakulti Sains Kemanusiaan' ? 'selected' : '' }}>
+                                                {{ old('faculty', $user->hu_faculty ?? $user->faculty) == 'Fakulti Sains Kemanusiaan' ? 'selected' : '' }}>
                                                 Fakulti Sains Kemanusiaan
                                             </option>
                                             <option value="Fakulti Muzik dan Seni Persembahan"
-                                                {{ old('faculty', $user->hu_faculty) == 'Fakulti Muzik dan Seni Persembahan' ? 'selected' : '' }}>
+                                                {{ old('faculty', $user->hu_faculty ?? $user->faculty) == 'Fakulti Muzik dan Seni Persembahan' ? 'selected' : '' }}>
                                                 Fakulti Muzik dan Seni Persembahan
                                             </option>
                                             <option value="Fakulti Seni, Komputeran dan Industri Kreatif"
-                                                {{ old('faculty', $user->hu_faculty) == 'Fakulti Seni, Komputeran dan Industri Kreatif' ? 'selected' : '' }}>
+                                                {{ old('faculty', $user->hu_faculty ?? $user->faculty) == 'Fakulti Seni, Komputeran dan Industri Kreatif' ? 'selected' : '' }}>
                                                 Fakulti Seni, Komputeran dan Industri Kreatif
                                             </option>
                                             <option value="Fakulti Sains Sukan dan Kejurulatihan"
-                                                {{ old('faculty', $user->hu_faculty) == 'Fakulti Sains Sukan dan Kejurulatihan' ? 'selected' : '' }}>
+                                                {{ old('faculty', $user->hu_faculty ?? $user->faculty) == 'Fakulti Sains Sukan dan Kejurulatihan' ? 'selected' : '' }}>
                                                 Fakulti Sains Sukan dan Kejurulatihan
                                             </option>
                                             <option value="Fakulti Teknikal dan Vokasional"
-                                                {{ old('faculty', $user->hu_faculty) == 'Fakulti Teknikal dan Vokasional' ? 'selected' : '' }}>
+                                                {{ old('faculty', $user->hu_faculty ?? $user->faculty) == 'Fakulti Teknikal dan Vokasional' ? 'selected' : '' }}>
                                                 Fakulti Teknikal dan Vokasional
                                             </option>
                                         </select>
@@ -98,7 +98,7 @@
                                         <label for="course" class="block text-sm font-medium text-gray-700">Course /
                                             Program</label>
                                         <input type="text" name="course" id="course"
-                                            value="{{ old('course', $user->hu_course) }}"
+                                            value="{{ old('course', $user->hu_course ?? $user->course) }}"
                                             placeholder="e.g. Software Engineering"
                                             class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                                         @error('course')
@@ -135,7 +135,7 @@
                                 <label for="skills" class="block text-sm font-medium text-gray-700">Skills (Comma
                                     Separated)</label>
                                 <input type="text" name="skills" id="skills"
-                                    value="{{ old('skills', $user->hu_skills) }}"
+                                    value="{{ old('skills', $user->skills ?? $user->hu_skills) }}"
                                     class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                                     placeholder="Graphic Design, Data Entry, Photography">
                                 <p class="mt-2 text-sm text-gray-500">Separate each skill with a comma.</p>
@@ -173,7 +173,7 @@
                                         (Resume/CV/Portfolio)</label>
 
                                     <div
-                                        class="mt-2 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:bg-gray-50 transition-colors">
+                                        class="mt-2 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:bg-gray-50 transition-colors" id="file-drop-area">
                                         <div class="space-y-1 text-center">
                                             <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor"
                                                 fill="none" viewBox="0 0 48 48" aria-hidden="true">
@@ -190,13 +190,13 @@
                                                 </label>
                                                 <p class="pl-1">or drag and drop</p>
                                             </div>
-                                            <p class="text-xs text-gray-500">PDF, DOC, DOCX up to 10MB</p>
+                                            <p class="text-xs text-gray-500" id="file-name-display">PDF, DOC, DOCX up to 10MB</p>
                                         </div>
                                     </div>
 
                                     {{-- Display existing file if present --}}
                                     @if ($user->hu_work_experience_file)
-    <div class="mt-3 flex items-center justify-between p-2 bg-indigo-50 rounded-lg border border-indigo-100">
+    <div class="mt-3 flex items-center justify-between p-2 bg-indigo-50 rounded-lg border border-indigo-100" id="current-file-container">
         <div class="flex items-center truncate">
             <svg class="w-5 h-5 text-indigo-500 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -226,13 +226,13 @@
                         </div>
                     </div>
 
-                    {{-- Right Column: Actions --}}
+                        {{-- Right Column: Actions --}}
                     <div class="lg:col-span-1 space-y-8">
 
                         {{-- [REMOVED] Profile Photo Card was here --}}
 
                         {{-- Action Buttons --}}
-                        <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm sticky top-8">
+                        <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm sticky top-28 z-10">
                             <div class="flex flex-col gap-3">
                                 <button type="submit"
                                     class="w-full flex justify-center py-2 px-4 border border-custom-teal rounded-lg shadow-sm text-sm font-medium text-white bg-custom-teal hover:bg-white hover:text-custom-teal focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-custom-teal transition-colors">
@@ -280,6 +280,37 @@
 </script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+
+            // File upload listener
+            const fileInput = document.getElementById('work_experience_file');
+            const fileNameDisplay = document.getElementById('file-name-display');
+            const fileDropArea = document.getElementById('file-drop-area');
+            const currentFileContainer = document.getElementById('current-file-container');
+            
+            if (fileInput) {
+                fileInput.addEventListener('change', function(e) {
+                    if (this.files && this.files.length > 0) {
+                        const fileName = this.files[0].name;
+                        fileNameDisplay.textContent = 'Selected file: ' + fileName;
+                        fileNameDisplay.classList.add('text-indigo-600', 'font-medium');
+                        fileNameDisplay.classList.remove('text-gray-500');
+                        fileDropArea.classList.add('border-indigo-500', 'bg-indigo-50');
+                        
+                        if (currentFileContainer) {
+                            currentFileContainer.classList.add('opacity-50');
+                        }
+                    } else {
+                        fileNameDisplay.textContent = 'PDF, DOC, DOCX up to 10MB';
+                        fileNameDisplay.classList.remove('text-indigo-600', 'font-medium');
+                        fileNameDisplay.classList.add('text-gray-500');
+                        fileDropArea.classList.remove('border-indigo-500', 'bg-indigo-50');
+                        
+                        if (currentFileContainer) {
+                            currentFileContainer.classList.remove('opacity-50');
+                        }
+                    }
+                });
+            }
 
             // Jika ada session success dari controller ? Tunjuk SweetAlert
             @if (session('success'))

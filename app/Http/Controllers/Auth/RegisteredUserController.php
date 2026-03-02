@@ -134,6 +134,10 @@ class RegisteredUserController extends Controller
 
         event(new Registered($user));
 
+        if (method_exists($user, 'sendEmailVerificationNotification')) {
+            $user->sendEmailVerificationNotification();
+        }
+
         Auth::login($user);
 
         return redirect(route('dashboard', absolute: false));

@@ -123,7 +123,8 @@
             <div id="pricing" class="tab-section hidden p-8">
                 <div class="mb-6">
                     <h2 class="text-xl font-bold text-gray-900">Packages & Pricing</h2>
-                    <p class="text-gray-500 text-sm">Define your costs and what you offer.</p>
+                    <p class="text-gray-500 text-sm">Define your costs and what students get per package.</p>
+                    <p class="text-gray-400 text-xs mt-1">Duration = how long the service takes (e.g. 1 hour). Billing Unit = how price is charged (e.g. per session / per hour).</p>
                 </div>
 
                 {{-- Basic Package (Required) --}}
@@ -138,12 +139,13 @@
                             <input type="number" id="basic_price" name="packages[0][price]" class="w-full mt-1 border-gray-300 rounded-md focus:ring-gray-500 focus:border-gray-500">
                         </div>
                         <div>
-                            <label class="text-xs font-bold text-gray-500 uppercase">Duration (Display)</label>
-                            <input type="text" name="packages[0][duration]" placeholder="e.g. 1 Hour" class="w-full mt-1 border-gray-300 rounded-md">
+                            <label class="text-xs font-bold text-gray-500 uppercase">Duration (shown to student)</label>
+                            <input type="text" name="packages[0][duration]" placeholder="e.g. 1 hour" class="w-full mt-1 border-gray-300 rounded-md">
                         </div>
                         <div>
-                            <label class="text-xs font-bold text-gray-500 uppercase">Frequency</label>
+                            <label class="text-xs font-bold text-gray-500 uppercase">Billing Unit</label>
                             <input type="text" name="packages[0][frequency]" placeholder="e.g. per session" class="w-full mt-1 border-gray-300 rounded-md">
+                            <p class="mt-1 text-[11px] text-gray-400">Examples: per session, per hour, per day, per task, per page</p>
                         </div>
                     </div>
                     <div>
@@ -171,8 +173,8 @@
                         <input type="hidden" name="packages[1][package_type]" value="standard">
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                             <div><label class="text-xs font-bold text-blue-600 uppercase">Price (RM)</label><input type="number" name="packages[1][price]" class="w-full mt-1 border-blue-200 rounded-md"></div>
-                            <div><label class="text-xs font-bold text-blue-600 uppercase">Duration</label><input type="text" name="packages[1][duration]" class="w-full mt-1 border-blue-200 rounded-md"></div>
-                            <div><label class="text-xs font-bold text-blue-600 uppercase">Frequency</label><input type="text" name="packages[1][frequency]" class="w-full mt-1 border-blue-300 rounded-md"></div>
+                            <div><label class="text-xs font-bold text-blue-600 uppercase">Duration (shown to student)</label><input type="text" name="packages[1][duration]" placeholder="e.g. 2 hours" class="w-full mt-1 border-blue-200 rounded-md"></div>
+                            <div><label class="text-xs font-bold text-blue-600 uppercase">Billing Unit</label><input type="text" name="packages[1][frequency]" placeholder="e.g. per session" class="w-full mt-1 border-blue-300 rounded-md"><p class="mt-1 text-[11px] text-blue-400">Examples: per session, per hour, per day, per task, per page</p></div>
                         </div>
                         <div class="bg-white rounded-md border border-blue-200 overflow-hidden"><div id="editor-standard" class="h-20"></div></div>
                         <input type="hidden" name="packages[1][description]" id="input-standard">
@@ -183,8 +185,8 @@
                         <input type="hidden" name="packages[2][package_type]" value="premium">
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                             <div><label class="text-xs font-bold text-purple-600 uppercase">Price (RM)</label><input type="number" name="packages[2][price]" class="w-full mt-1 border-purple-200 rounded-md"></div>
-                            <div><label class="text-xs font-bold text-purple-600 uppercase">Duration</label><input type="text" name="packages[2][duration]" class="w-full mt-1 border-purple-200 rounded-md"></div>
-                            <div><label class="text-xs font-bold text-purple-600 uppercase">Frequency</label><input type="text" name="packages[2][frequency]" class="w-full mt-1 border-purple-300 rounded-md"></div>
+                            <div><label class="text-xs font-bold text-purple-600 uppercase">Duration (shown to student)</label><input type="text" name="packages[2][duration]" placeholder="e.g. 3 hours" class="w-full mt-1 border-purple-200 rounded-md"></div>
+                            <div><label class="text-xs font-bold text-purple-600 uppercase">Billing Unit</label><input type="text" name="packages[2][frequency]" placeholder="e.g. per session" class="w-full mt-1 border-purple-300 rounded-md"><p class="mt-1 text-[11px] text-purple-400">Examples: per session, per hour, per day, per task, per page</p></div>
                         </div>
                         <div class="bg-white rounded-md border border-purple-200 overflow-hidden"><div id="editor-premium" class="h-20"></div></div>
                         <input type="hidden" name="packages[2][description]" id="input-premium">

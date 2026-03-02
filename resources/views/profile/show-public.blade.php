@@ -35,7 +35,7 @@
                         <div>
                             <h1 class="text-3xl font-black text-slate-900">{{ $user->hu_name }}</h1>
                             <p class="text-slate-500 font-medium mt-1">
-                                Member since {{ $user->hu_created_at->format('F Y') }}
+                                Member since {{ optional($user->created_at ?? $user->hu_created_at)->format('F Y') ?? 'N/A' }}
                             </p>
                             @if ($user->hu_role === 'student')
                                 <span

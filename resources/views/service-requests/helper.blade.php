@@ -131,7 +131,12 @@
                 @php
                     // Data Setup
                     $service = $request->studentService;
-                    $pkgType = strtolower($request->hsr_selected_package ?? 'basic');
+                    $selectedPackage = is_array($request->hsr_selected_package)
+                        ? ($request->hsr_selected_package[0] ?? 'basic')
+                        : ($request->hsr_selected_package ?? 'basic');
+                    $packageLabel = trim(str_replace('"', '', (string) $selectedPackage));
+                    $packageLabel = $packageLabel !== '' ? $packageLabel : 'Custom';
+                    $pkgType = strtolower($packageLabel);
                     $pkgDescription = $service->{$pkgType . '_description'} ?? null;
                     $pkgDuration = $service->{$pkgType . '_duration'} ?? null;
                     $pkgFrequency = $service->{$pkgType . '_frequency'} ?? null;
@@ -180,7 +185,7 @@
                                         RM {{ number_format($request->hsr_offered_price, 2) }}
                                     </div>
                                     <div class="text-xs font-medium text-gray-500 uppercase tracking-wide">
-                                        {{ str_replace('"', '', $request->hsr_selected_package) ?? 'Custom' }} Package
+                                        {{ $packageLabel }} Package
                                     </div>
                                 @endif
                             </div>
@@ -283,7 +288,7 @@
 </div>
 
                         <div id="in-progress-content" class="sr-status-tab-content {{ $defaultStatusTab === 'in-progress' ? '' : 'hidden' }}">
-    @if ($receivedRequests->whereIn('status', ['accepted', 'in_progress', 'waiting_payment', 'disputed'])->isEmpty())
+    @if ($receivedRequests->whereIn('hsr_status', ['accepted', 'in_progress', 'waiting_payment', 'disputed'])->isEmpty())
         <div class="flex flex-col items-center justify-center py-16 text-center bg-white rounded-xl border border-dashed border-gray-300">
             <div class="rounded-full bg-blue-50 p-4 mb-4">
                 <svg class="w-10 h-10 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -295,11 +300,16 @@
         </div>
     @else
         <div class="space-y-6">
-            @foreach ($receivedRequests->whereIn('status', ['accepted', 'in_progress', 'waiting_payment', 'disputed']) as $request)
+            @foreach ($receivedRequests->whereIn('hsr_status', ['accepted', 'in_progress', 'waiting_payment', 'disputed']) as $request)
                 @php
                     // 1. Data Setup
                     $service = $request->studentService;
                     $displayId = str_pad($request->hsr_id, 5, '0', STR_PAD_LEFT);
+                    $selectedPackage = is_array($request->hsr_selected_package)
+                        ? ($request->hsr_selected_package[0] ?? 'custom')
+                        : ($request->hsr_selected_package ?? 'custom');
+                    $packageLabel = trim(str_replace('"', '', (string) $selectedPackage));
+                    $packageLabel = $packageLabel !== '' ? $packageLabel : 'Custom';
                     
                     // 2. Dynamic Styling based on Status
                     $statusTheme = match ($request->hsr_status) {
@@ -347,7 +357,7 @@
                                         RM {{ number_format($request->hsr_offered_price, 2) }}
                                     </span>
                                     <div class="text-xs font-medium text-gray-400 uppercase tracking-wide">
-                                          {{ str_replace('"', '', $request->hsr_selected_package) ?? 'Custom'}} Package
+                                          {{ $packageLabel }} Package
                                     </div>
                                 </div>
                             @endif
@@ -499,6 +509,11 @@
                     // 1. Data Setup
                     $service = $request->studentService;
                     $displayId = str_pad($request->hsr_id, 5, '0', STR_PAD_LEFT);
+                    $selectedPackage = is_array($request->hsr_selected_package)
+                        ? ($request->hsr_selected_package[0] ?? 'custom')
+                        : ($request->hsr_selected_package ?? 'custom');
+                    $packageLabel = trim(str_replace('"', '', (string) $selectedPackage));
+                    $packageLabel = $packageLabel !== '' ? $packageLabel : 'Custom';
 
                     // 2. Styling Logic
                     $theme = match ($request->hsr_status) {
@@ -564,7 +579,7 @@
                                         RM {{ number_format($request->hsr_offered_price, 2) }}
                                     </span>
                                     <div class="text-xs font-medium text-gray-400 uppercase tracking-wide">
-                                          {{ str_replace('"', '', $request->hsr_selected_package) ?? 'Custom'}} Package
+                                          {{ $packageLabel }} Package
                                     </div>
                                 </div>
                             @endif
@@ -904,17 +919,18 @@
                             function openReviewModal(review, requesterName) {
                                 // 1. Populate Buyer Review
                                 document.getElementById('modalRequesterName').innerText = requesterName;
-                                document.getElementById('modalComment').innerText = review.comment || 'No textual comment provided.';
-                                document.getElementById('modalDate').innerText = new Date(review.created_at).toLocaleDateString(undefined, {
+                                document.getElementById('modalComment').innerText = review.hr_comment || review.comment || 'No textual comment provided.';
+                                const reviewCreatedAt = review.created_at || review.hr_created_at;
+                                document.getElementById('modalDate').innerText = reviewCreatedAt ? new Date(reviewCreatedAt).toLocaleDateString(undefined, {
                                     year: 'numeric',
                                     month: 'long',
                                     day: 'numeric'
-                                });
+                                }) : 'Unknown date';
 
                                 // Generate Stars
                                 let starsHtml = '';
                                 for (let i = 1; i <= 5; i++) {
-                                    starsHtml += `<i class="${i <= review.rating ? 'fas' : 'far'} fa-star"></i>`;
+                                    starsHtml += `<i class="${i <= (review.hr_rating || review.rating || 0) ? 'fas' : 'far'} fa-star"></i>`;
                                 }
                                 document.getElementById('modalStars').innerHTML = starsHtml;
 
@@ -922,17 +938,21 @@
                                 const replyForm = document.getElementById('replyForm');
                                 const viewReplyContainer = document.getElementById('viewReplyContainer');
 
-                                if (review.reply) {
+                                if (review.hr_reply || review.reply) {
                                     replyForm.classList.add('hidden');
                                     viewReplyContainer.classList.remove('hidden');
-                                    document.getElementById('modalReplyText').innerText = review.reply;
-                                    document.getElementById('modalRepliedAt').innerText = new Date(review.replied_at).toLocaleDateString();
+                                    document.getElementById('modalReplyText').innerText = review.hr_reply || review.reply;
+                                    const repliedAt = review.hr_replied_at || review.replied_at;
+                                    document.getElementById('modalRepliedAt').innerText = repliedAt ? new Date(repliedAt).toLocaleDateString() : 'Unknown date';
                                 } else {
                                     viewReplyContainer.classList.add('hidden');
                                     replyForm.classList.remove('hidden');
-                                    // Ensure you have a named route like 'reviews.reply' that accepts the ID
-                                    // If your route is resource based: /reviews/{id}/reply
-                                   replyForm.action = "{{ url('reviews') }}/" + review.id + "/reply";
+                                    const reviewId = review.hr_id || review.id;
+                                    if (!reviewId) {
+                                        Swal.fire({ icon: 'error', title: 'Invalid review', text: 'Unable to find review ID for reply.' });
+                                        return;
+                                    }
+                                    replyForm.action = "{{ url('reviews') }}/" + reviewId + "/reply";
 
                                 }
 

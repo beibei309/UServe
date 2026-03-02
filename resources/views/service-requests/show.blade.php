@@ -44,6 +44,11 @@
                 $isRequester = auth()->id() === $serviceRequest->hsr_requester_id;
                 $isProvider = auth()->id() === $serviceRequest->hsr_provider_id;
                 $service = $serviceRequest->studentService;
+                $selectedPackage = is_array($serviceRequest->hsr_selected_package)
+                    ? ($serviceRequest->hsr_selected_package[0] ?? 'custom')
+                    : ($serviceRequest->hsr_selected_package ?? 'custom');
+                $selectedPackageLabel = trim(str_replace('"', '', (string) $selectedPackage));
+                $selectedPackageLabel = $selectedPackageLabel !== '' ? $selectedPackageLabel : 'Custom';
 
                 // --- 1. Check Suspension Status ---
                 $providerBanned = $serviceRequest->provider->hu_is_suspended == 1 || $serviceRequest->provider->hu_is_blacklisted == 1;
@@ -150,7 +155,7 @@
                                     <div>
                                         <label class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Package Selected</label>
                                         <p class="text-lg font-medium text-gray-900 mt-1">
-                                            {{ ucfirst(trim($serviceRequest->hsr_selected_package, '"') ?? 'Custom') }}
+                                            {{ ucfirst($selectedPackageLabel) }}
                                         </p>
                                     </div>
 
