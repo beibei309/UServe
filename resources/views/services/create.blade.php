@@ -403,6 +403,9 @@
         if (currentId === 'pricing' && nextId === 'description' && !document.getElementById('basic_price').value) {
             Swal.fire({ icon: 'warning', title: 'Missing Info', text: 'Please set a price for the Basic Package.' }); return;
         }
+        if (currentId === 'description' && nextId === 'availability' && !document.getElementById('input-main').value) {
+            Swal.fire({ icon: 'warning', title: 'Missing Info', text: 'Please provide a service description.' }); return;
+        }
         
         // Tab switching
         document.querySelectorAll('.tab-section').forEach(el => el.classList.add('hidden'));
@@ -464,10 +467,20 @@
                     confirmButtonText: 'Go to Dashboard', confirmButtonColor: '#10b981'
                 }).then(() => { window.location.href = "{{ route('services.manage') }}"; });
             } else {
-                // Show validation errors or generic error
-                let msg = data.error || 'Please check your inputs.';
-                if(data.errors) { msg = Object.values(data.errors).flat().join('\n'); }
-                Swal.fire('Error', msg, 'error');
+                // Show validation errors or specific server error message
+                let msg = data.message || 'Please check your inputs.';
+                
+                if (data.errors) {
+                    msg = Object.values(data.errors).flat().join('\n');
+                } else if (data.error) {
+                    msg = data.error;
+                }
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Publication Failed',
+                    text: msg
+                });
             }
         } catch (error) {
             console.error(error);

@@ -17,18 +17,22 @@ class ProfileUpdateRequest extends FormRequest
     {
         $rules = [
             'name' => ['required', 'string', 'max:255'],
-            'email' => [
+            'phone' => ['nullable', 'string', 'max:20'],
+            'bio' => ['nullable', 'string', 'max:500'],
+            'profile_photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,gif', 'max:10240'],
+        ];
+
+        // Allow email updates ONLY for admins/superadmins
+        if ($this->user()->hu_role === 'admin' || $this->user()->hu_role === 'superadmin') {
+            $rules['email'] = [
                 'required',
                 'string',
                 'lowercase',
                 'email',
                 'max:255',
                 Rule::unique(User::class, 'hu_email')->ignore($this->user()->hu_id, 'hu_id'),
-            ],
-            'phone' => ['nullable', 'string', 'max:20'],
-            'bio' => ['nullable', 'string', 'max:500'],
-            'profile_photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,gif', 'max:10240'],
-        ];
+            ];
+        }
 
         // Student-specific fields
         if ($this->user()->hu_role === 'student') {

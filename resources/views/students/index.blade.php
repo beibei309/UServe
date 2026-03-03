@@ -31,9 +31,18 @@
                     </span>
                 </div>
                 <div class="h-8 w-px bg-gray-200 mx-2"></div>
+                {{-- Quick toggle: switches immediately without opening modal --}}
+                <button @click="quickToggle()"
+                    class="text-sm font-semibold px-3 py-1.5 rounded-full transition-all"
+                    :class="isAvailable
+                        ? 'bg-red-50 text-red-600 hover:bg-red-100 border border-red-200'
+                        : 'bg-green-50 text-green-600 hover:bg-green-100 border border-green-200'"
+                    :disabled="isSaving"
+                    x-text="isSaving ? 'Saving...' : (isAvailable ? 'Go Offline' : 'Go Online')">
+                </button>
                 <button @click="openModal()"
                     class="text-sm font-semibold text-indigo-600 hover:text-indigo-800 hover:underline">
-                    Settings
+                    <i class="fa-solid fa-sliders text-xs mr-1"></i>Settings
                 </button>
             </div>
         </div>
@@ -446,6 +455,7 @@
         function availabilityComponent() {
             return {
                 isAvailable: {{ Auth::user()->hu_is_available ? 'true' : 'false' }},
+                isSaving: false,
                 showModal: false,
                 startDate: '{{ Auth::user()->hu_unavailable_start_date ?? '' }}',
                 endDate: '{{ Auth::user()->hu_unavailable_end_date ?? '' }}',
@@ -467,7 +477,22 @@
                     });
                 },
 
-                // LOGIC: Add 1 Week or 1 Month
+                // Quick one-click toggle from the header bar
+                quickToggle() {
+                    if (this.isSaving) return;
+                    // If currently available, going offline -> open modal so dates can be set
+                    if (this.isAvailable) {
+                        this.isAvailable = false;
+                        this.openModal();
+                    } else {
+                        // Going back online -> clear dates and save immediately
+                        this.isAvailable = true;
+                        this.startDate = '';
+                        this.endDate = '';
+                        this.doSave(true, null, null);
+                    }
+                },
+
                 addDuration(daysToAdd, monthsToAdd) {
                     // 1. If Start Date is empty, set it to Today
                     if (!this.startDate) {
@@ -519,51 +544,55 @@
                             return;
                         }
                     } else {
-                        // If available, we clear dates in the backend logic usually, 
-                        // but we send null here to be sure.
                         finalStartDate = null;
                         finalEndDate = null;
                     }
 
-                    // API Request
-     fetch("{{ route('availability.updateSettings') }}", {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').getAttribute('content'),
-        'Accept': 'application/json'
-    },
-    body: JSON.stringify({
-        is_available: this.isAvailable,
-        start_date: finalStartDate,
-        end_date: finalEndDate
-    })
-})
-.then(res => {
-    if (!res.ok) return res.json().then(e => { throw new Error(e.message || 'Server error'); });
-    return res.json();
-})
-.then(data => {
-    this.isAvailable = data.is_available;
-    this.startDate = data.start_date || '';
-    this.endDate = data.end_date || '';
-    this.closeModal();
-    Swal.fire({
-        icon: 'success',
-        title: 'Updated!',
-        text: data.message,
-        showConfirmButton: false,
-        timer: 1500
-    });
-})
-.catch(err => {
-    Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: err.message,
-        confirmButtonColor: '#d33'
-    });
-});
+                    this.doSave(this.isAvailable, finalStartDate, finalEndDate);
+                },
+
+                doSave(isAvailable, startDate, endDate) {
+                    this.isSaving = true;
+                    fetch("{{ route('availability.updateSettings') }}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').getAttribute('content'),
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            is_available: isAvailable,
+                            start_date: startDate,
+                            end_date: endDate
+                        })
+                    })
+                    .then(res => {
+                        if (!res.ok) return res.json().then(e => { throw new Error(e.message || 'Server error'); });
+                        return res.json();
+                    })
+                    .then(data => {
+                        this.isAvailable = data.is_available;
+                        this.startDate = data.start_date || '';
+                        this.endDate = data.end_date || '';
+                        this.isSaving = false;
+                        this.closeModal();
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Updated!',
+                            text: data.message,
+                            showConfirmButton: false,
+                            timer: 1500
+                        });
+                    })
+                    .catch(err => {
+                        this.isSaving = false;
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: err.message,
+                            confirmButtonColor: '#d33'
+                        });
+                    });
                 }
             }
         }

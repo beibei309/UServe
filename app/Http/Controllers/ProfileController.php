@@ -136,7 +136,6 @@ class ProfileController extends Controller
         {
             $map = [
                 'name' => 'hu_name',
-                'email' => 'hu_email',
                 'phone' => 'hu_phone',
                 'staff_email' => 'hu_staff_email',
                 'bio' => 'hu_bio',
@@ -148,6 +147,11 @@ class ProfileController extends Controller
                 'longitude' => 'hu_longitude',
                 'work_experience_message' => 'hu_work_experience_message',
             ];
+
+            // Only allow email mapping for admins/superadmins
+            if (Auth::user()->hu_role === 'admin' || Auth::user()->hu_role === 'superadmin') {
+                $map['email'] = 'hu_email';
+            }
 
             $result = [];
             foreach ($validated as $key => $value) {

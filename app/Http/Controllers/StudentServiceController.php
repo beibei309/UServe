@@ -196,25 +196,25 @@ $isUnavailable = $request->has('is_unavailable'); // Check checkbox status
         $service->hss_status = 'available';   // Set text column
     }
     // 4. Update Basic Info
-    $service->hss_title = $validated['title'];
+    $service->hss_title = $this->sanitizeInput($validated['title']);
     $service->hss_category_id = $validated['category_id'];
     $service->hss_description = $validated['description'] ?? '';
 
     // 5. Handle Packages (Same as before)
     $packages = $request->input('packages', []);
-    $service->hss_basic_duration    = $packages[0]['duration'] ?? null;
-    $service->hss_basic_frequency   = $packages[0]['frequency'] ?? null;
+    $service->hss_basic_duration    = $this->sanitizeInput($packages[0]['duration'] ?? null);
+    $service->hss_basic_frequency   = $this->sanitizeInput($packages[0]['frequency'] ?? null);
     $service->hss_basic_price       = $packages[0]['price'] ?? null;
     $service->hss_basic_description = $packages[0]['description'] ?? null;
 
     if ($request->has('offer_packages')) {
-        $service->hss_standard_duration    = $packages[1]['duration'] ?? null;
-        $service->hss_standard_frequency   = $packages[1]['frequency'] ?? null;
+        $service->hss_standard_duration    = $this->sanitizeInput($packages[1]['duration'] ?? null);
+        $service->hss_standard_frequency   = $this->sanitizeInput($packages[1]['frequency'] ?? null);
         $service->hss_standard_price       = $packages[1]['price'] ?? null;
         $service->hss_standard_description = $packages[1]['description'] ?? null;
 
-        $service->hss_premium_duration     = $packages[2]['duration'] ?? null;
-        $service->hss_premium_frequency    = $packages[2]['frequency'] ?? null;
+        $service->hss_premium_duration     = $this->sanitizeInput($packages[2]['duration'] ?? null);
+        $service->hss_premium_frequency    = $this->sanitizeInput($packages[2]['frequency'] ?? null);
         $service->hss_premium_price        = $packages[2]['price'] ?? null;
         $service->hss_premium_description  = $packages[2]['description'] ?? null;
     } else {
@@ -338,151 +338,184 @@ $isUnavailable = $request->has('is_unavailable'); // Check checkbox status
         return view('services.create', compact('categories'));
     }
 
-   public function store(Request $request)
-{
-    $user = $request->user();
+    public function store(Request $request)
+    {
+        try {
+            $user = $request->user();
 
-    // 1. Authorization
-    if (!$user || $user->hu_role !== 'helper') {
-        abort(403, 'Only helpers can create services.');
-    }
+            // 1. Authorization
+            if (!$user || $user->hu_role !== 'helper') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Only helpers can create services.',
+                    'error' => 'Only helpers can create services.',
+                ], 403);
+            }
 
-    // 2. Determine if Creating or Updating
-    $serviceId = $request->input('service_id');
+            // 2. Determine if Creating or Updating
+            $serviceId = $request->input('service_id');
 
-    if ($serviceId) {
-        $service = StudentService::findOrFail($serviceId);
-        if ($service->hss_user_id != $user->hu_id) {
+            if ($serviceId) {
+                $service = StudentService::findOrFail($serviceId);
+                if ($service->hss_user_id != $user->hu_id) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'You may only edit your own services.',
+                        'error' => 'You may only edit your own services.',
+                    ], 403);
+                }
+            } else {
+                $service = new StudentService();
+                $service->hss_user_id = $user->hu_id;
+                $service->hss_approval_status = 'pending';
+                $service->hss_status = 'available';
+                $service->hss_is_active = true;
+            }
+
+            // 3. Validation
+            $rules = [
+                'title' => 'required|string|max:255',
+                'category_id' => 'required|exists:h2u_categories,hc_id',
+                'image' => 'nullable|image|max:10240',
+                'template_image' => 'nullable|string',
+                'description' => 'required|string',
+                'unavailable_dates' => 'nullable|string',
+                'is_session_based' => 'nullable',
+                'session_duration' => 'nullable|integer',
+
+                // Packages...
+                'packages.0.price' => 'required|numeric|min:0',
+                'packages.0.duration' => 'nullable|string',
+                'packages.0.frequency' => 'nullable|string',
+                'packages.0.description' => 'nullable|string',
+            ];
+
+            $validated = $request->validate($rules);
+
+            // 4. Save Overview
+            $service->hss_title = $this->sanitizeInput($validated['title']);
+            $service->hss_category_id = $validated['category_id'];
+            $service->hss_description = $validated['description'];
+
+            // 5. Image
+            if ($request->hasFile('image')) {
+                $file = $request->file('image');
+                $filename = $file->hashName();
+
+                if (!file_exists(public_path('storage/services'))) {
+                    mkdir(public_path('storage/services'), 0755, true);
+                }
+
+                $file->move(public_path('storage/services'), $filename);
+                $service->hss_image_path = 'storage/services/' . $filename;
+            } elseif ($request->filled('template_image')) {
+                $service->hss_image_path = $request->input('template_image');
+            }
+
+            // 6. Availability (Block Dates)
+            $dates = $request->input('unavailable_dates');
+            if ($dates) {
+                $dateArray = array_filter(array_map('trim', explode(',', $dates)));
+                $service->hss_unavailable_dates = array_values($dateArray);
+            } else {
+                $service->hss_unavailable_dates = [];
+            }
+
+            // 7. Packages
+            $packages = $request->input('packages', []);
+            $service->hss_basic_price       = $packages[0]['price'] ?? 0;
+            $service->hss_basic_duration    = $this->sanitizeInput($packages[0]['duration'] ?? null);
+            $service->hss_basic_frequency   = $this->sanitizeInput($packages[0]['frequency'] ?? null);
+            $service->hss_basic_description = $packages[0]['description'] ?? null;
+
+            if (!empty($packages[1]['price'])) {
+                $service->hss_standard_price       = $packages[1]['price'];
+                $service->hss_standard_duration    = $this->sanitizeInput($packages[1]['duration'] ?? null);
+                $service->hss_standard_frequency   = $this->sanitizeInput($packages[1]['frequency'] ?? null);
+                $service->hss_standard_description = $packages[1]['description'] ?? null;
+            } else {
+                $service->hss_standard_price = null;
+            }
+
+            if (!empty($packages[2]['price'])) {
+                $service->hss_premium_price       = $packages[2]['price'];
+                $service->hss_premium_duration    = $this->sanitizeInput($packages[2]['duration'] ?? null);
+                $service->hss_premium_frequency   = $this->sanitizeInput($packages[2]['frequency'] ?? null);
+                $service->hss_premium_description = $packages[2]['description'] ?? null;
+            } else {
+                $service->hss_premium_price = null;
+            }
+
+            // 8. Handle Weekly Schedule
+            $inputHours = $request->input('operating_hours', []);
+            $cleanSchedule = [];
+            $daysList = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+
+            foreach ($daysList as $day) {
+                $dayData = $inputHours[$day] ?? [];
+                $cleanSchedule[$day] = [
+                    'enabled' => isset($dayData['enabled']) && ($dayData['enabled'] == '1' || $dayData['enabled'] === true),
+                    'start'   => $dayData['start'] ?? '09:00',
+                    'end'     => $dayData['end'] ?? '17:00',
+                ];
+            }
+            $service->hss_operating_hours = $cleanSchedule;
+
+            // 9. Session Duration Logic
+            if ($request->input('is_session_based') == '1') {
+                $service->hss_session_duration = $request->input('session_duration', 60);
+            } else {
+                $service->hss_session_duration = null;
+            }
+
+            // 10. Save
+            $service->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Service published successfully!',
+                'service' => $service
+            ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'You may only edit your own services.',
-                'error' => 'You may only edit your own services.',
-            ], 403);
+                'message' => 'Validation error',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Service Store Error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Internal server error',
+                'error' => $e->getMessage()
+            ], 500);
         }
-    } else {
-        $service = new StudentService();
-        $service->hss_user_id = $user->hu_id;
-        $service->hss_approval_status = 'pending';
-        $service->hss_status = 'available';
-        $service->hss_is_active = true;
     }
 
-    // 3. Validation
-    $rules = [
-        'title' => 'required|string|max:255',
-        'category_id' => 'required|exists:h2u_categories,hc_id',
-        'image' => 'nullable|image|max:10240',
-        'template_image' => 'nullable|string',
-        'description' => 'required|string',
-        'unavailable_dates' => 'nullable|string',
-        'is_session_based' => 'nullable',
-        'session_duration' => 'nullable|integer', // Added validation for this
+    /**
+     * Sanitize input strings to remove or replace special characters 
+     * that might cause SQL encoding errors (e.g., non-breaking hyphens, multiplication signs).
+     */
+    private function sanitizeInput($text)
+    {
+        if (is_null($text)) return null;
 
-        // Packages...
-        'packages.0.price' => 'required|numeric|min:0',
-        'packages.0.duration' => 'nullable|string',
-        'packages.0.frequency' => 'nullable|string',
-        'packages.0.description' => 'nullable|string',
-        'packages.1.price' => 'nullable|numeric|min:0',
-        'packages.1.duration' => 'nullable|string',
-        'packages.1.frequency' => 'nullable|string',
-        'packages.1.description' => 'nullable|string',
-        'packages.2.price' => 'nullable|numeric|min:0',
-        'packages.2.duration' => 'nullable|string',
-        'packages.2.frequency' => 'nullable|string',
-        'packages.2.description' => 'nullable|string',
-    ];
-
-    $validated = $request->validate($rules);
-
-    // 4. Save Overview
-    $service->hss_title = $validated['title'];
-    $service->hss_category_id = $validated['category_id'];
-    $service->hss_description = $validated['description'];
-
-    // 5. Image
-    if ($request->hasFile('image')) {
-
-    $file = $request->file('image');
-    $filename = $file->hashName();
-
-    // Make sure folder exists
-    if (!file_exists(public_path('storage/services'))) {
-        mkdir(public_path('storage/services'), 0755, true);
-    }
-
-    // Move file to public/storage/services
-    $file->move(public_path('storage/services'), $filename);
-
-    // Save path in DB
-    $service->hss_image_path = 'storage/services/' . $filename;
-
-} elseif ($request->filled('template_image')) {
-
-    $service->hss_image_path = $request->input('template_image');
-}
-
-    // 6. Availability (Block Dates)
-    $dates = $request->input('unavailable_dates');
-    if ($dates) {
-        $dateArray = array_map('trim', explode(',', $dates));
-        $service->hss_unavailable_dates = array_values($dateArray);
-    } else {
-        $service->hss_unavailable_dates = [];
-    }
-
-    // 7. Packages
-    $packages = $request->input('packages', []);
-    $service->hss_basic_price       = $packages[0]['price'] ?? 0;
-    $service->hss_basic_duration    = $packages[0]['duration'] ?? null;
-    $service->hss_basic_frequency   = $packages[0]['frequency'] ?? null;
-    $service->hss_basic_description = $packages[0]['description'] ?? null;
-
-    if (!empty($packages[1]['price'])) {
-        $service->hss_standard_price       = $packages[1]['price'];
-        $service->hss_standard_duration    = $packages[1]['duration'] ?? null;
-        $service->hss_standard_frequency   = $packages[1]['frequency'] ?? null;
-        $service->hss_standard_description = $packages[1]['description'] ?? null;
-    }
-    if (!empty($packages[2]['price'])) {
-        $service->hss_premium_price       = $packages[2]['price'];
-        $service->hss_premium_duration    = $packages[2]['duration'] ?? null;
-        $service->hss_premium_frequency   = $packages[2]['frequency'] ?? null;
-        $service->hss_premium_description = $packages[2]['description'] ?? null;
-    }
-
-    // 🟢 8. Handle Weekly Schedule (THIS WAS MISSING)
-    $inputHours = $request->input('operating_hours', []);
-    $cleanSchedule = [];
-    $days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
-
-    foreach ($days as $day) {
-        $dayData = $inputHours[$day] ?? [];
-        $cleanSchedule[$day] = [
-            'enabled' => isset($dayData['enabled']) && $dayData['enabled'] == '1',
-            'start'   => $dayData['start'] ?? '09:00',
-            'end'     => $dayData['end'] ?? '17:00',
+        $replacements = [
+            "\xE2\x80\x91" => "-", // Non-breaking hyphen (the one in the error)
+            "\xE2\x80\x90" => "-", // Hyphen
+            "\xE2\x80\x92" => "-", // Figure dash
+            "\xE2\x80\x93" => "-", // En dash
+            "\xE2\x80\x94" => "-", // Em dash
+            "\xC3\x97"     => "x", // Multiplication sign
+            "\xE2\x80\x98" => "'", // Left single quote
+            "\xE2\x80\x99" => "'", // Right single quote
+            "\xE2\x80\x9C" => '"', // Left double quote
+            "\xE2\x80\x9D" => '"', // Right double quote
         ];
+
+        return strtr($text, $replacements);
     }
-    $service->hss_operating_hours = $cleanSchedule; // Laravel casts this to JSON automatically if model is set up
-
-    // 9. Session Duration Logic
-    // If user selected "One-off Task", this sets duration to NULL.
-    if ($request->input('is_session_based') == '1') {
-        $service->hss_session_duration = $request->input('session_duration', 60);
-    } else {
-        $service->hss_session_duration = null;
-    }
-
-    // 10. Save
-    $service->save();
-
-    return response()->json([
-        'success' => true,
-        'message' => 'Service published successfully!',
-        'service' => $service
-    ]);
-}
 
    public function manage(Request $request)
 {

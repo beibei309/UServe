@@ -164,7 +164,9 @@
                                     <div>
                                         <label class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Email Address</label>
                                         <input type="email" name="email" value="{{ old('email', $user->hu_email) }}" required
-                                            class="block w-full rounded-2xl border-slate-200 bg-slate-50/50 py-3.5 px-4 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-semibold text-slate-700">
+                                            @if($user->hu_role !== 'admin' && $user->hu_role !== 'superadmin') readonly @endif
+                                            class="block w-full rounded-2xl border-slate-200 py-3.5 px-4 transition-all font-semibold 
+                                            @if($user->hu_role !== 'admin' && $user->hu_role !== 'superadmin') bg-slate-100 text-slate-400 cursor-not-allowed @else bg-slate-50/50 text-slate-700 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 @endif">
                                         @error('email') <p class="mt-2 text-xs text-rose-500 font-bold">{{ $message }}</p> @enderror
                                     </div>
 
