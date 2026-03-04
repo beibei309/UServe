@@ -1,107 +1,80 @@
 @extends('admin.layout')
 
 @section('content')
-    <div class="min-h-screen bg-gray-50 py-8 font-sans">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="px-4 sm:px-6 py-4">
+        
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+            <h1 class="text-3xl font-bold transition-colors duration-300" style="color: var(--text-primary);">Service Request Management</h1>
+        </div>
 
-            {{-- Page Header --}}
-            <div class="mb-8">
-                <h1 class="text-2xl font-bold text-gray-900">Service Request Management</h1>
-                <p class="text-sm text-gray-500 mt-1">Monitor transactions, track status, and resolve disputes.</p>
-            </div>
+        <div class="p-4 rounded-lg shadow-xl mb-6 border transition-all duration-300"
+             style="background-color: var(--bg-secondary); border-color: var(--border-color);">
+            <form method="GET" action="{{ route('admin.requests.index') }}" class="flex flex-wrap gap-4">
 
-            {{-- Filters & Search Section --}}
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6">
-                <form method="GET" action="{{ route('admin.requests.index') }}"
-                    class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+                {{-- Search Input --}}
+                <div class="flex-1 min-w-[300px]">
+                    <input type="text" name="search" value="{{ request('search') }}"
+                        placeholder="Search by requester, provider or service..."
+                        class="w-full px-4 py-2 border rounded-lg transition-colors duration-300 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
+                        style="background-color: var(--bg-tertiary); color: var(--text-primary); border-color: var(--border-color);">
+                </div>
 
-                    {{-- Search Input --}}
-                    <div class="md:col-span-4">
-                        <label
-                            class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Search</label>
-                        <div class="relative">
-                            <input type="text" name="search" value="{{ request('search') }}"
-                                placeholder="Requester, Provider or Service..."
-                                class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all">
-                            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-gray-400 text-sm"></i>
-                        </div>
-                    </div>
+                {{-- Status Filter --}}
+                <div>
+                    <select name="status"
+                        class="px-4 py-2 border rounded-lg transition-colors duration-300 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
+                        style="background-color: var(--bg-tertiary); color: var(--text-primary); border-color: var(--border-color);">
+                        <option value="">All Statuses</option>
+                        <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                        <option value="in_progress" {{ request('status') == 'in_progress' ? 'selected' : '' }}>In Progress</option>
+                        <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Completed</option>
+                        <option value="disputed" {{ request('status') == 'disputed' ? 'selected' : '' }}>⚠ Disputed</option>
+                        <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>Rejected</option>
+                        <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                    </select>
+                </div>
 
-                    {{-- Status Filter --}}
-                    <div class="md:col-span-3">
-                        <label
-                            class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Status</label>
-                        <select name="status"
-                            class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
-                            <option value="">All Statuses</option>
-                            <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
-                            <option value="in_progress" {{ request('status') == 'in_progress' ? 'selected' : '' }}>In
-                                Progress</option>
-                            <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Completed
+                {{-- Category Filter --}}
+                <div>
+                    <select name="category"
+                        class="px-4 py-2 border rounded-lg transition-colors duration-300 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
+                        style="background-color: var(--bg-tertiary); color: var(--text-primary); border-color: var(--border-color);">
+                        <option value="">All Categories</option>
+                        @foreach ($categories ?? [] as $category)
+                            <option value="{{ $category->hc_id }}"
+                                {{ request('category') == $category->hc_id ? 'selected' : '' }}>
+                                {{ $category->hc_name }}
                             </option>
-                            <option value="disputed" {{ request('status') == 'disputed' ? 'selected' : '' }}
-                                class="text-red-600 font-bold">⚠ Disputed</option>
-                            <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>Rejected
-                            </option>
-                            <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Cancelled
-                            </option>
-                        </select>
-                    </div>
+                        @endforeach
+                    </select>
+                </div>
 
-                    {{-- Category Filter --}}
-                    <div class="md:col-span-3">
-                        <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Service
-                            Category</label>
-                        <select name="category"
-                            class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
-                            <option value="">All Categories</option>
-                            @foreach ($categories ?? [] as $category)
-                                <option value="{{ $category->hc_id }}"
-                                    {{ request('category') == $category->hc_id ? 'selected' : '' }}>
-                                    {{ $category->hc_name }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
+                <button type="submit" class="px-6 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-lg hover:from-cyan-400 hover:to-blue-500 transition-all duration-300">
+                    Search
+                </button>
+            </form>
+        </div>
 
-                    {{-- Filter Buttons --}}
-                    <div class="md:col-span-2 flex gap-2">
-                        <button type="submit"
-                            class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-lg text-sm transition-colors shadow-sm">
-                            Filter
-                        </button>
-                        <a href="{{ route('admin.requests.index') }}"
-                            class="px-3 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg text-sm transition-colors border border-gray-200"
-                            title="Reset Filters">
-                            <i class="fa-solid fa-rotate-right"></i>
-                        </a>
-                    </div>
-                </form>
-            </div>
+        {{-- Data Table --}}
+        <div class="p-4 rounded-lg shadow-xl border transition-all duration-300"
+             style="background-color: var(--bg-secondary); border-color: var(--border-color);">
+            <div class="overflow-x-auto">
+                <table class="min-w-full">
+                    <thead>
+                        <tr style="background-color: var(--bg-tertiary);">
+                            <th class="py-3 px-3 text-left text-xs font-medium" style="color: var(--text-secondary);">Request Details</th>
+                            <th class="py-3 px-3 text-left text-xs font-medium" style="color: var(--text-secondary);">Parties Involved</th>
+                            <th class="py-3 px-3 text-center text-xs font-medium" style="color: var(--text-secondary);">Schedule</th>
+                            <th class="py-3 px-3 text-center text-xs font-medium" style="color: var(--text-secondary);">Status</th>
+                            <th class="py-3 px-3 text-center text-xs font-medium" style="color: var(--text-secondary);">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach ($requests as $request)
+                        <tr class="border-b transition-all duration-300 {{ $request->hsr_status === 'disputed' ? 'bg-red-50' : '' }}" style="border-color: var(--border-color);">
 
-            {{-- Table Container --}}
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left whitespace-nowrap">
-                        <thead>
-                            <tr class="bg-gray-50 border-b border-gray-200">
-                                <th class="py-4 px-6 text-xs font-bold text-gray-500 uppercase tracking-wider">Request
-                                    Details</th>
-                                <th class="py-4 px-6 text-xs font-bold text-gray-500 uppercase tracking-wider">Parties
-                                    Involved</th>
-                                <th class="py-4 px-6 text-xs font-bold text-gray-500 uppercase tracking-wider">Schedule</th>
-                                <th class="py-4 px-6 text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
-                                <th class="py-4 px-6 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">
-                                    Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-100">
-                            @foreach ($requests as $request)
-                                <tr
-                                    class="hover:bg-gray-50/50 transition-colors {{ $request->hsr_status === 'disputed' ? 'bg-red-50/30' : '' }}">
-
-                                    {{-- Request Details --}}
-                                    <td class="py-4 px-6">
+                            {{-- Request Details --}}
+                            <td class="py-4 px-3">
                                         @php
                                             $selectedPackage = $request->hsr_selected_package;
                                             $selectedPackageLabel = is_array($selectedPackage)
@@ -115,171 +88,155 @@
                                             $firstSelectedDate = $selectedDateValues[0] ?? null;
                                         @endphp
                                         <div class="flex items-center gap-3">
-                                            <div
-                                                class="h-10 w-10 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600 font-bold text-lg">
+                                            <div class="h-8 w-8 rounded-lg bg-cyan-100 flex items-center justify-center text-cyan-700 font-bold text-sm">
                                                 {{ substr($request->studentService->hss_title, 0, 1) }}
                                             </div>
                                             <div>
-                                                <div class="text-sm font-semibold text-gray-900">
+                                                <div class="text-sm font-semibold transition-colors duration-300" style="color: var(--text-primary);">
                                                     {{ Str::limit($request->studentService->hss_title, 25) }}</div>
-                                                <div class="text-xs text-gray-500">
-                                                    <span
-                                                        class="capitalize text-indigo-600 font-medium">{{ $selectedPackageLabel !== '' ? $selectedPackageLabel : '—' }}</span>
+                                                <div class="text-xs transition-colors duration-300" style="color: var(--text-secondary);">
+                                                    <span class="capitalize text-cyan-600 font-medium">{{ $selectedPackageLabel !== '' ? $selectedPackageLabel : '—' }}</span>
                                                     • RM {{ number_format($request->hsr_offered_price, 2) }}
                                                 </div>
                                             </div>
                                         </div>
                                     </td>
 
-                                    {{-- Parties --}}
-                                    <td class="py-4 px-6">
-                                        <div class="flex flex-col gap-1">
-                                            <div class="text-xs flex items-center gap-2">
-                                                <span class="text-gray-400 w-12">From:</span>
-                                                <span
-                                                    class="font-medium text-gray-900">{{ $request->requester->hu_name }}</span>
-                                            </div>
-                                            <div class="text-xs flex items-center gap-2">
-                                                <span class="text-gray-400 w-12">To:</span>
-                                                <span
-                                                    class="font-medium text-gray-900">{{ $request->provider->hu_name }}</span>
-                                            </div>
+                                {{-- Parties --}}
+                                <td class="py-4 px-3">
+                                    <div class="flex flex-col gap-1">
+                                        <div class="text-xs flex items-center gap-2">
+                                            <span class="w-12 transition-colors duration-300" style="color: var(--text-muted);">From:</span>
+                                            <span class="font-medium transition-colors duration-300" style="color: var(--text-primary);">{{ $request->requester->hu_name }}</span>
                                         </div>
-                                    </td>
+                                        <div class="text-xs flex items-center gap-2">
+                                            <span class="w-12 transition-colors duration-300" style="color: var(--text-muted);">To:</span>
+                                            <span class="font-medium transition-colors duration-300" style="color: var(--text-primary);">{{ $request->provider->hu_name }}</span>
+                                        </div>
+                                    </div>
+                                </td>
 
-                                    {{-- Schedule --}}
-                                    <td class="py-4 px-6">
-                                        <div class="text-sm text-gray-900">
-                                            {{ $firstSelectedDate ? \Carbon\Carbon::parse($firstSelectedDate)->format('d M Y') : 'Not set' }}
+                                {{-- Schedule --}}
+                                <td class="py-4 px-3">
+                                    <div class="text-sm transition-colors duration-300" style="color: var(--text-primary);">
+                                        {{ $firstSelectedDate ? \Carbon\Carbon::parse($firstSelectedDate)->format('d M Y') : 'Not set' }}
+                                    </div>
+                                    @if (count($selectedDateValues) > 1)
+                                        <div class="text-xs text-cyan-600">
+                                            +{{ count($selectedDateValues) - 1 }} more date(s)
                                         </div>
-                                        @if (count($selectedDateValues) > 1)
-                                            <div class="text-xs text-indigo-600">
-                                                +{{ count($selectedDateValues) - 1 }} more date(s)
-                                            </div>
-                                        @endif
-                                        <div class="text-xs text-gray-500">
-                                            {{ \Carbon\Carbon::parse($request->created_at)->diffForHumans() }}
-                                        </div>
-                                    </td>
+                                    @endif
+                                    <div class="text-xs transition-colors duration-300" style="color: var(--text-secondary);">
+                                        {{ \Carbon\Carbon::parse($request->created_at)->diffForHumans() }}
+                                    </div>
+                                </td>
 
-                                    {{-- Status --}}
-                                    <td class="py-4 px-6">
-                                        @php
-                                            $statusStyles = [
-                                                'pending' => 'bg-yellow-100 text-yellow-800 border-yellow-200',
-                                                'in_progress' => 'bg-blue-100 text-blue-800 border-blue-200',
-                                                'completed' => 'bg-green-100 text-green-800 border-green-200',
-                                                'disputed' => 'bg-red-100 text-red-800 border-red-200 animate-pulse',
-                                                'cancelled' => 'bg-gray-100 text-gray-600 border-gray-200',
-                                                'rejected' => 'bg-gray-100 text-gray-600 border-gray-200',
-                                            ];
-                                            $style = $statusStyles[$request->hsr_status] ?? 'bg-gray-100 text-gray-800';
-                                        @endphp
-                                        <span
-                                            class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold border {{ $style }} capitalize">
-                                            {{ str_replace('_', ' ', $request->hsr_status) }}
-                                        </span>
+                                {{-- Status --}}
+                                <td class="py-4 px-3">
+                                    @php
+                                        $statusStyles = [
+                                            'pending' => 'bg-yellow-100 text-yellow-800 border-yellow-200',
+                                            'in_progress' => 'bg-blue-100 text-blue-800 border-blue-200',
+                                            'completed' => 'bg-green-100 text-green-800 border-green-200',
+                                            'disputed' => 'bg-red-100 text-red-800 border-red-200 animate-pulse',
+                                            'cancelled' => 'bg-gray-100 text-gray-600 border-gray-200',
+                                            'rejected' => 'bg-gray-100 text-gray-600 border-gray-200',
+                                        ];
+                                        $style = $statusStyles[$request->hsr_status] ?? 'bg-gray-100 text-gray-600 border-gray-200';
+                                    @endphp
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold border {{ $style }} capitalize">
+                                        {{ str_replace('_', ' ', $request->hsr_status) }}
+                                    </span>
+                                    @if ($request->hsr_status === 'disputed')
+                                        <div class="text-[10px] text-red-600 font-medium mt-1">Admin Action Required</div>
+                                    @endif
+                                </td>
+
+                                {{-- Actions --}}
+                                <td class="py-4 px-3 text-right">
+                                    <div class="flex items-center justify-end gap-2">
+                                        <button onclick='openViewModal(@json($request), @json($request->studentService), @json($request->requester), @json($request->provider))'
+                                            class="text-blue-500 hover:text-blue-700 transition-colors duration-300" title="View">
+                                            <i class="fa-solid fa-eye"></i>
+                                        </button>
+
                                         @if ($request->hsr_status === 'disputed')
-                                            <div class="text-[10px] text-red-600 font-medium mt-1">Admin Action Required
-                                            </div>
-                                        @endif
-                                    </td>
+                                            @php
+                                                $reporterName = 'Unknown';
+                                                $reporterRole = 'System';
 
-                                    {{-- ACTIONS COLUMN --}}
-                                    <td class="py-4 px-6 text-right">
-                                        <div class="flex items-center justify-end gap-2">
-                                            {{-- View Details --}}
-                                            <button
-                                                onclick='openViewModal(@json($request), @json($request->studentService), @json($request->requester), @json($request->provider))'
-                                                class="text-gray-400 hover:text-indigo-600 p-1">
-                                                <i class="fa-solid fa-eye"></i>
-                                            </button>
-
-                                            {{-- DISPUTE BUTTON --}}
-                                            @if ($request->hsr_status === 'disputed')
-                                                @php
-                                                    // --- NEW: FETCH REPORTER INFO ---
-                                                    $reporterName = 'Unknown';
-                                                    $reporterRole = 'System';
-
-                                                    if ($request->hsr_reported_by) {
-                                                        // Find the user by the reported_by ID
-                                                        $reporterUser = \App\Models\User::find($request->hsr_reported_by);
-                                                        if ($reporterUser) {
-                                                            $reporterName = $reporterUser->hu_name;
-
-                                                            // Determine Role
-                                                            if ($request->hsr_reported_by == $request->hsr_requester_id) {
-                                                                $reporterRole = 'Buyer';
-                                                            } elseif ($request->hsr_reported_by == $request->hsr_provider_id) {
-                                                                $reporterRole = 'Seller';
-                                                            } else {
-                                                                $reporterRole = 'Admin';
-                                                            }
+                                                if ($request->hsr_reported_by) {
+                                                    $reporterUser = \App\Models\User::find($request->hsr_reported_by);
+                                                    if ($reporterUser) {
+                                                        $reporterName = $reporterUser->hu_name;
+                                                        if ($request->hsr_reported_by == $request->hsr_requester_id) {
+                                                            $reporterRole = 'Buyer';
+                                                        } elseif ($request->hsr_reported_by == $request->hsr_provider_id) {
+                                                            $reporterRole = 'Seller';
+                                                        } else {
+                                                            $reporterRole = 'Admin';
                                                         }
                                                     }
-                                                @endphp
-
-                                                <button
-                                                    onclick="openDisciplineModal(
+                                                }
+                                            @endphp
+                                            <button onclick="openDisciplineModal(
                                                 '{{ $request->hsr_id }}', 
                                                 '{{ addslashes($request->hsr_dispute_reason) }}', 
                                                 { id: '{{ $request->requester->hu_id }}', name: '{{ $request->requester->hu_name }}', warnings: '{{ $request->requester->hu_warning_count }}' },
                                                 { id: '{{ $request->provider->hu_id }}', name: '{{ $request->provider->hu_name }}', warnings: '{{ $request->provider->hu_warning_count }}' },
                                                 { name: '{{ $reporterName }}', role: '{{ $reporterRole }}' } 
                                             )"
-                                                    class="bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1 transition-colors">
-                                                    <i class="fa-solid fa-gavel"></i> Review
-                                                </button>
-                                            @endif
+                                                class="bg-red-100 hover:bg-red-200 text-red-700 px-2 py-1 rounded-lg text-xs font-bold transition-colors">
+                                                <i class="fa-solid fa-gavel"></i> Review
+                                            </button>
+                                        @endif
 
-                                            {{-- Delete --}}
-                                            <form action="{{ route('admin.requests.destroy', $request->hsr_id) }}"
-                                                method="POST" onsubmit="return confirm('Delete?');" class="inline">
-                                                @csrf @method('DELETE')
-                                                <button type="submit" class="text-gray-400 hover:text-red-600 p-1"><i
-                                                        class="fa-solid fa-trash-can"></i></button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @endforeach
+                                        <form action="{{ route('admin.requests.destroy', $request->hsr_id) }}" method="POST" onsubmit="return confirm('Delete?');" class="inline">
+                                            @csrf @method('DELETE')
+                                            <button type="submit" class="text-red-500 hover:text-red-700 transition-colors duration-300" title="Delete">
+                                                <i class="fa-solid fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
 
-                            @if ($requests->isEmpty())
-                                <tr>
-                                    <td colspan="5" class="py-8 text-center text-gray-500">
-                                        <div class="flex flex-col items-center justify-center">
-                                            <i class="fa-regular fa-folder-open text-3xl mb-2 text-gray-300"></i>
-                                            <p>No service requests found matching your filters.</p>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @endif
-                        </tbody>
-                    </table>
-                </div>
-
-                {{-- Pagination --}}
-                @if ($requests->hasPages())
-                    <div class="px-6 py-4 bg-gray-50 border-t border-gray-200">
-                        {{ $requests->appends(request()->query())->links() }}
-                    </div>
-                @endif
+                        @if ($requests->isEmpty())
+                            <tr>
+                                <td colspan="5" class="py-8 text-center transition-colors duration-300" style="color: var(--text-secondary);">
+                                    No service requests found.
+                                </td>
+                            </tr>
+                        @endif
+                    </tbody>
+                </table>
             </div>
         </div>
+
+        @if ($requests->hasPages())
+            <div class="mt-4 px-4">
+                {{ $requests->appends(request()->query())->links() }}
+            </div>
+        @endif
     </div>
 
     {{-- VIEW DETAIL MODAL --}}
     <div id="viewDetailModal"
-        class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden z-50 flex items-center justify-center backdrop-blur-sm p-4">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden max-h-[90vh] overflow-y-auto">
-            <div class="bg-gray-50 px-6 py-4 border-b border-gray-100 flex justify-between items-center sticky top-0 z-10">
+        class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center backdrop-blur-sm p-4">
+        <div class="rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden max-h-[90vh] overflow-y-auto transition-all duration-300"
+             style="background-color: var(--bg-primary);">
+            <div class="px-6 py-4 border-b flex justify-between items-center sticky top-0 z-10 transition-colors duration-300"
+                 style="background-color: var(--bg-tertiary); border-color: var(--border-color);">
                 <div>
-                    <h3 class="text-lg font-bold text-gray-900">Request Details</h3>
-                    <p class="text-xs text-gray-500">ID: #<span id="viewId"></span></p>
+                    <h3 class="text-lg font-bold transition-colors duration-300" style="color: var(--text-primary);">Request Details</h3>
+                    <p class="text-xs transition-colors duration-300" style="color: var(--text-secondary);">ID: #<span id="viewId"></span></p>
                 </div>
                 <button onclick="closeViewModal()"
-                    class="text-gray-400 hover:text-gray-600 bg-white rounded-full p-1 shadow-sm border border-gray-200">
+                    class="rounded-full p-1 shadow-sm border transition-all duration-300"
+                    style="color: var(--text-secondary); background-color: var(--bg-secondary); border-color: var(--border-color);"
+                    onmouseover="this.style.color = 'var(--text-primary)';"
+                    onmouseout="this.style.color = 'var(--text-secondary)';">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
                         </path>
@@ -402,8 +359,8 @@
                 </span>
             </div>
             <div class="grid grid-cols-2 gap-2">
-                <button type="button" onclick="submitDiscipline('warn', 'requester')" class="py-2 bg-yellow-400 hover:bg-yellow-500 text-yellow-900 rounded-lg text-sm font-bold transition-colors"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Warn</button>
-                <button type="button" onclick="submitDiscipline('ban', 'requester')" class="py-2 bg-gray-800 hover:bg-gray-900 text-white rounded-lg text-sm font-bold transition-colors"><i class="fa-solid fa-ban mr-1"></i> Ban</button>
+                <button type="button" onclick="submitDiscipline('warn', 'requester')" class="text-yellow-500 hover:text-yellow-400 transition border rounded-lg py-2" title="Warn"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Warn</button>
+                <button type="button" onclick="submitDiscipline('ban', 'requester')" class="text-red-600 hover:text-red-900 transition border rounded-lg py-2" title="Ban"><i class="fa-solid fa-ban mr-1"></i> Ban</button>
             </div>
         </div>
 
@@ -418,8 +375,8 @@
                 </span>
             </div>
             <div class="grid grid-cols-2 gap-2">
-                <button type="button" onclick="submitDiscipline('warn', 'provider')" class="py-2 bg-yellow-400 hover:bg-yellow-500 text-yellow-900 rounded-lg text-sm font-bold transition-colors"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Warn</button>
-                <button type="button" onclick="submitDiscipline('ban', 'provider')" class="py-2 bg-gray-800 hover:bg-gray-900 text-white rounded-lg text-sm font-bold transition-colors"><i class="fa-solid fa-ban mr-1"></i> Ban</button>
+                <button type="button" onclick="submitDiscipline('warn', 'provider')" class="text-yellow-500 hover:text-yellow-400 transition border rounded-lg py-2" title="Warn"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Warn</button>
+                <button type="button" onclick="submitDiscipline('ban', 'provider')" class="text-red-600 hover:text-red-900 transition border rounded-lg py-2" title="Ban"><i class="fa-solid fa-ban mr-1"></i> Ban</button>
             </div>
         </div>
     </div>

@@ -1,19 +1,24 @@
 @extends('admin.layout')
 
 @section('content')
+<div class="px-4 sm:px-6">
 
     <div class="max-w-4xl mx-auto">
 
         <!-- Back Button -->
-        <a href="{{ route('admin.community.index') }}" class="text-blue-600 hover:underline text-sm mb-4 inline-block">
+        <a href="{{ route('admin.community.index') }}" 
+           class="hover:text-cyan-400 text-sm mb-4 inline-block transition-colors duration-300"
+           style="color: var(--text-secondary);">
             ← Back to Community List
         </a>
 
         <!-- Profile Header -->
-        <div class="bg-white shadow rounded-lg p-6 flex gap-6 items-center">
+        <div class="shadow rounded-lg p-6 flex flex-col md:flex-row gap-6 items-start md:items-center border transition-all duration-300"
+             style="background-color: var(--bg-secondary); border-color: var(--border-color);">
 
             <!-- Profile Photo -->
-            <div class="h-32 w-32 rounded-full overflow-hidden border">
+            <div class="h-32 w-32 rounded-full overflow-hidden border transition-colors duration-300 shrink-0"
+                 style="border-color: var(--border-color);">
                 @php
                     $path = $user->hu_profile_photo_path;
                     // 1. Check if external URL
@@ -36,11 +41,11 @@
             <div class="flex-1">
 
                 <!-- Name -->
-                <h1 class="text-3xl font-bold">{{ $user->hu_name }}</h1>
+                <h1 class="text-3xl font-bold transition-colors duration-300" style="color: var(--text-primary);">{{ $user->hu_name }}</h1>
 
                 <!-- Email + Phone -->
-                <p class="text-gray-600">{{ $user->hu_email }}</p>
-                <p class="text-gray-600">{{ $user->hu_phone ?? 'No phone provided' }}</p>
+                <p class="transition-colors duration-300" style="color: var(--text-secondary);">{{ $user->hu_email }}</p>
+                <p class="transition-colors duration-300" style="color: var(--text-secondary);">{{ $user->hu_phone ?? 'No phone provided' }}</p>
 
                 <!-- Verification -->
                 <div class="mt-2">
@@ -74,38 +79,28 @@
             </div>
 
             <!-- Action Buttons -->
-            <div class="flex flex-col gap-2">
+            <div class="flex flex-col sm:flex-row gap-2 mt-6 sm:mt-0">
 
                 <!-- Edit -->
                 <a href="{{ route('admin.community.edit', $user->hu_id) }}"
-                    class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 text-sm">
-                    Edit User
+                    class="px-4 py-2 bg-cyan-500 hover:bg-cyan-600 text-white rounded text-sm text-center transition-colors duration-300">
+                    <i class="fa-solid fa-edit mr-1"></i> Edit User
                 </a>
 
                 <!-- Blacklist / Unblacklist -->
                 @if ($user->hu_is_blacklisted)
                     <form action="{{ route('admin.community.unblacklist', $user->hu_id) }}" method="POST">
                         @csrf
-                        <button class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm w-full">
-                            Remove Blacklist
+                        <button class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm w-full transition-colors duration-300">
+                            <i class="fa-solid fa-unlock mr-1"></i> Remove Blacklist
                         </button>
                     </form>
                 @else
                     <button onclick="openBlacklistModal({{ $user->hu_id }})" 
-                        class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm w-full">
-                        Suspend User
+                        class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm w-full transition-colors duration-300">
+                        <i class="fa-solid fa-ban mr-1"></i> Suspend User
                     </button>
                 @endif
-
-                <!-- Delete -->
-                <form action="{{ route('admin.community.delete', $user->hu_id) }}" method="POST"
-                    onsubmit="return confirm('Are you sure you want to delete this user?');">
-                    @csrf
-                    @method('DELETE')
-                    <button class="px-4 py-2 bg-gray-700 text-white rounded hover:bg-black text-sm w-full">
-                        Delete User
-                    </button>
-                </form>
 
             </div>
 

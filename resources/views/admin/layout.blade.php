@@ -4,33 +4,262 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel | S2U</title>
+    <title>Admin Panel | UServe</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
+        :root {
+            /* Light theme colors */
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-tertiary: #e2e8f0;
+            --text-primary: #1e293b;
+            --text-secondary: #475569;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --sidebar-bg: #ffffff;
+            --sidebar-border: #e2e8f0;
+            --hover-bg: #f1f5f9;
+            --active-bg: #e0f2fe;
+            --shadow: rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="dark"] {
+            /* Dark theme colors */
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #e2e8f0;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --sidebar-bg: #1e293b;
+            --sidebar-border: #334155;
+            --hover-bg: #334155;
+            --active-bg: #0f172a;
+            --shadow: rgba(0, 0, 0, 0.3);
+        }
         /* Smooth transition for sidebar width and transforms */
         .sidebar-transition {
             transition: all 0.3s ease-in-out;
         }
+        
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Theme-aware Standardized Admin Button Styles */
+        .btn-blue {
+            background: #2563eb;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+        [data-theme="dark"] .btn-blue {
+            background: #1e3a8a;
+            color: #dbeafe;
+        }
+
+        .btn-green {
+            background: #16a34a;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+        [data-theme="dark"] .btn-green {
+            background: #14532d;
+            color: #bbf7d0;
+        }
+
+        .btn-red {
+            background: #dc2626;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+        [data-theme="dark"] .btn-red {
+            background: #7f1d1d;
+            color: #fecaca;
+        }
+
+        .btn-orange {
+            background: #ea580c;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+        [data-theme="dark"] .btn-orange {
+            background: #9a3412;
+            color: #fed7aa;
+        }
+
+        .btn-gray {
+            background: #6b7280;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+        [data-theme="dark"] .btn-gray {
+            background: #374151;
+            color: #e5e7eb;
+        }
+
+        .btn-blue:hover,
+        .btn-green:hover,
+        .btn-red:hover,
+        .btn-orange:hover,
+        .btn-gray:hover {
+            opacity: 0.8;
+            transform: translateY(-1px);
+        }
+
+        /* Theme-aware Status Badge Styles */
+        .badge-green {
+            background: #10b981;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        [data-theme="dark"] .badge-green {
+            background: #065f46;
+            color: #d1fae5;
+        }
+
+        .badge-red {
+            background: #ef4444;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        [data-theme="dark"] .badge-red {
+            background: #7f1d1d;
+            color: #fecaca;
+        }
+
+        .badge-yellow {
+            background: #f59e0b;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        [data-theme="dark"] .badge-yellow {
+            background: #78350f;
+            color: #fde68a;
+        }
+
+        .badge-dark {
+            background: #6b7280;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        [data-theme="dark"] .badge-dark {
+            background: #374151;
+            color: #e5e7eb;
+        }
+
+        /* Theme Toggle Button */
+        .theme-toggle {
+            position: relative;
+            width: 50px;
+            height: 25px;
+            background: var(--bg-tertiary);
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid var(--border-color);
+            outline: none;
+            padding: 0;
+        }
+
+        .theme-toggle::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 19px;
+            height: 19px;
+            background: white;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        [data-theme="dark"] .theme-toggle::after {
+            transform: translateX(23px);
+            background: #fbbf24;
+        }
+
+        /* Smooth content transitions */
+        #main-content {
+            transition: opacity 0.15s ease-in-out;
+        }
+
+        /* Ensure smooth transitions don't interfere with other elements */
+        #main-content.transitioning {
+            pointer-events: none;
+        }
+
+        /* Loading styles */
+        #loading-indicator {
+            backdrop-filter: blur(2px);
+        }
     </style>
 </head>
 
-<body class="bg-gray-50 font-sans antialiased text-gray-900">
+<body class="font-sans antialiased" data-theme="dark">
 
     <div class="flex h-screen overflow-hidden">
 
         <aside id="sidebar"
-            class="sidebar-transition fixed inset-y-0 left-0 z-30 w-64 bg-white shadow-xl transform -translate-x-full lg:translate-x-0 lg:static lg:inset-0 flex flex-col border-r border-gray-200">
+            class="sidebar-transition fixed inset-y-0 left-0 z-30 w-64 shadow-2xl transform -translate-x-full lg:translate-x-0 lg:static lg:inset-0 flex flex-col border-r transition-colors duration-300"
+            style="background-color: var(--sidebar-bg); border-color: var(--sidebar-border);">
 
-            <div class="flex items-center justify-between p-6 h-16 border-b border-gray-200 bg-white">
+            <div class="flex items-center justify-between p-6 h-16 border-b transition-colors duration-300"
+                 style="border-color: var(--sidebar-border); background-color: var(--sidebar-bg);">
                 <div>
-                    <h1 class="text-2xl font-bold text-blue-600 tracking-wider">S2U</h1>
-                    <p class="text-xs text-gray-500 uppercase tracking-widest">Admin</p>
+                    <h1 class="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-600 bg-clip-text text-transparent tracking-wider">UServe</h1>
+                    <p class="text-xs uppercase tracking-widest mt-1 transition-colors duration-300" style="color: var(--text-muted);">Admin</p>
                 </div>
-                <button onclick="toggleSidebar()" class="lg:hidden text-gray-500 hover:text-red-500 focus:outline-none">
+                <button onclick="toggleSidebar()" class="lg:hidden hover:text-red-500 focus:outline-none transition-colors duration-300" style="color: var(--text-muted);">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
                         </path>
@@ -43,8 +272,13 @@
 
                     <li>
                         <a href="{{ route('admin.dashboard') }}"
-                            class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors
-                           {{ request()->routeIs('admin.dashboard') ? 'bg-blue-50 text-blue-700 font-semibold' : 'text-gray-600 hover:bg-gray-100 hover:text-blue-600' }}">
+                            class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors duration-300
+                           {{ request()->routeIs('admin.dashboard') ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold' : '' }}"
+                           @if(!request()->routeIs('admin.dashboard'))
+                           style="color: var(--text-secondary);" 
+                           onmouseover="this.style.backgroundColor = 'var(--hover-bg)'; this.style.color = 'var(--text-primary)';" 
+                           onmouseout="this.style.backgroundColor = 'transparent'; this.style.color = 'var(--text-secondary)';"
+                           @endif>
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z">
@@ -56,8 +290,15 @@
 
                     <li>
                         <button onclick="toggleSubMenu('pageMenu', 'pageArrow')"
-                            class="w-full flex items-center justify-between px-4 py-3 rounded-lg transition-colors
-                                {{ request()->routeIs('admin.pages.*') ? 'text-blue-700 font-semibold bg-blue-50' : 'text-gray-600 hover:bg-gray-100 hover:text-blue-600' }}">
+                            class="w-full flex items-center justify-between px-4 py-3 rounded-lg transition-colors duration-300
+                                {{ request()->routeIs('admin.pages.*') ? 'text-white font-semibold' : '' }}"
+                            @if(request()->routeIs('admin.pages.*'))
+                            style="background-color: var(--hover-bg);"
+                            @else
+                            style="color: var(--text-secondary);"
+                            onmouseover="this.style.backgroundColor = 'var(--hover-bg)'; this.style.color = 'var(--text-primary)';"
+                            onmouseout="this.style.backgroundColor = 'transparent'; this.style.color = 'var(--text-secondary)';"
+                            @endif>
                             <div class="flex items-center gap-3">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -78,15 +319,25 @@
                             class="pl-11 mt-1 space-y-1 {{ request()->routeIs('admin.pages.*') ? '' : 'hidden' }}">
                             <li>
                                 <a href="{{ route('admin.faqs.index') }}"
-                                    class="block px-4 py-2 text-sm rounded-lg hover:bg-blue-50 hover:text-blue-600 text-gray-600">Help
+                                    class="block px-4 py-2 text-sm rounded-lg transition-colors duration-300"
+                                    style="color: var(--text-secondary);"
+                                    onmouseover="this.style.backgroundColor = 'var(--hover-bg)'; this.style.color = '#06b6d4';"
+                                    onmouseout="this.style.backgroundColor = 'transparent'; this.style.color = 'var(--text-secondary)';">Help
                                     page</a>
                             </li>
                         </ul>
                     </li>
                     <li>
                         <button onclick="toggleSubMenu('studentSubMenu', 'studentMenuArrow')"
-                            class="w-full flex items-center justify-between px-4 py-3 rounded-lg transition-colors
-                                {{ request()->routeIs('admin.students.*') || request()->routeIs('admin.student_status.*') ? 'text-blue-700 font-semibold bg-blue-50' : 'text-gray-600 hover:bg-gray-100 hover:text-blue-600' }}">
+                            class="w-full flex items-center justify-between px-4 py-3 rounded-lg transition-colors duration-300
+                                {{ request()->routeIs('admin.students.*') || request()->routeIs('admin.student_status.*') ? 'text-white font-semibold' : '' }}"
+                            @if(request()->routeIs('admin.students.*') || request()->routeIs('admin.student_status.*'))
+                            style="background-color: var(--hover-bg);"
+                            @else
+                            style="color: var(--text-secondary);"
+                            onmouseover="this.style.backgroundColor = 'var(--hover-bg)'; this.style.color = 'var(--text-primary)';"
+                            onmouseout="this.style.backgroundColor = 'transparent'; this.style.color = 'var(--text-secondary)';"
+                            @endif>
                             <div class="flex items-center gap-3">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -107,20 +358,37 @@
                             class="pl-11 mt-1 space-y-1 {{ request()->routeIs('admin.students.*') || request()->routeIs('admin.student_status.*') ? '' : 'hidden' }}">
                             <li>
                                 <a href="{{ route('admin.students.index') }}"
-                                    class="block px-4 py-2 text-sm rounded-lg hover:bg-blue-50 hover:text-blue-600 {{ request()->routeIs('admin.students.index') ? 'text-blue-600 font-semibold' : 'text-gray-600' }}">View
+                                    class="block px-4 py-2 text-sm rounded-lg transition-colors duration-300
+                                    {{ request()->routeIs('admin.students.index') ? 'text-cyan-400 font-semibold' : '' }}"
+                                    @if(!request()->routeIs('admin.students.index'))
+                                    style="color: var(--text-secondary);"
+                                    onmouseover="this.style.backgroundColor = 'var(--hover-bg)'; this.style.color = '#06b6d4';"
+                                    onmouseout="this.style.backgroundColor = 'transparent'; this.style.color = 'var(--text-secondary)';"
+                                    @endif>View
                                     Students</a>
                             </li>
                             <li>
                                 <a href="{{ route('admin.student_status.index') }}"
-                                    class="block px-4 py-2 text-sm rounded-lg hover:bg-blue-50 hover:text-blue-600 {{ request()->routeIs('admin.student_status.index') ? 'text-blue-600 font-semibold' : 'text-gray-600' }}">Student
+                                    class="block px-4 py-2 text-sm rounded-lg transition-colors duration-300
+                                    {{ request()->routeIs('admin.student_status.index') ? 'text-cyan-400 font-semibold' : '' }}"
+                                    @if(!request()->routeIs('admin.student_status.index'))
+                                    style="color: var(--text-secondary);"
+                                    onmouseover="this.style.backgroundColor = 'var(--hover-bg)'; this.style.color = '#06b6d4';"
+                                    onmouseout="this.style.backgroundColor = 'transparent'; this.style.color = 'var(--text-secondary)';"
+                                    @endif>Student
                                     Status</a>
                             </li>
                         </ul>
                     </li>
                     <li>
                         <a href="{{ route('admin.community.index') }}"
-                            class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors
-                           {{ request()->routeIs('admin.community.*') ? 'bg-blue-50 text-blue-700 font-semibold' : 'text-gray-600 hover:bg-gray-100 hover:text-blue-600' }}">
+                            class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors duration-300
+                           {{ request()->routeIs('admin.community.*') ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold' : '' }}"
+                           @if(!request()->routeIs('admin.community.*'))
+                           style="color: var(--text-secondary);" 
+                           onmouseover="this.style.backgroundColor = 'var(--hover-bg)'; this.style.color = 'var(--text-primary)';" 
+                           onmouseout="this.style.backgroundColor = 'transparent'; this.style.color = 'var(--text-secondary)';"
+                           @endif>
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
@@ -131,8 +399,13 @@
                     </li>
                     <li>
                         <a href="{{ route('admin.categories.index') }}"
-                            class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors
-                           {{ request()->routeIs('admin.categories.index') ? 'bg-blue-50 text-blue-700 font-semibold' : 'text-gray-600 hover:bg-gray-100 hover:text-blue-600' }}">
+                            class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors duration-300
+                           {{ request()->routeIs('admin.categories.index') ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold' : '' }}"
+                           @if(!request()->routeIs('admin.categories.index'))
+                           style="color: var(--text-secondary);" 
+                           onmouseover="this.style.backgroundColor = 'var(--hover-bg)'; this.style.color = 'var(--text-primary)';" 
+                           onmouseout="this.style.backgroundColor = 'transparent'; this.style.color = 'var(--text-secondary)';"
+                           @endif>
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01">
@@ -143,8 +416,15 @@
                     </li>
                     <li>
                         <button onclick="toggleSubMenu('serviceMenu', 'serviceArrow')"
-                            class="w-full flex items-center justify-between px-4 py-3 rounded-lg transition-colors
-            {{ request()->routeIs('admin.services.*') || request()->routeIs('admin.services.*') ? 'text-blue-700 font-semibold bg-blue-50' : 'text-gray-600 hover:bg-gray-100 hover:text-blue-600' }}">
+                            class="w-full flex items-center justify-between px-4 py-3 rounded-lg transition-colors duration-300
+            {{ request()->routeIs('admin.services.*') || request()->routeIs('admin.services.*') ? 'text-white font-semibold' : '' }}"
+                            @if(request()->routeIs('admin.services.*'))
+                            style="background-color: var(--hover-bg);"
+                            @else
+                            style="color: var(--text-secondary);"
+                            onmouseover="this.style.backgroundColor = 'var(--hover-bg)'; this.style.color = 'var(--text-primary)';"
+                            onmouseout="this.style.backgroundColor = 'transparent'; this.style.color = 'var(--text-secondary)';"
+                            @endif>
                             <div class="flex items-center gap-3">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -166,7 +446,13 @@
                             class="pl-11 mt-1 space-y-1 {{ request()->routeIs('admin.services.*') || request()->routeIs('admin.services.*') ? '' : 'hidden' }}">                      
                             <li>
                                 <a href="{{ route('admin.services.index') }}"
-                                    class="block px-4 py-2 text-sm rounded-lg hover:bg-blue-50 hover:text-blue-600 {{ request()->routeIs('admin.services.*') ? 'text-blue-600 font-semibold' : 'text-gray-600' }}">View
+                                    class="block px-4 py-2 text-sm rounded-lg transition-colors duration-300
+                                    {{ request()->routeIs('admin.services.*') ? 'text-cyan-400 font-semibold' : '' }}"
+                                    @if(!request()->routeIs('admin.services.*'))
+                                    style="color: var(--text-secondary);"
+                                    onmouseover="this.style.backgroundColor = 'var(--hover-bg)'; this.style.color = '#06b6d4';"
+                                    onmouseout="this.style.backgroundColor = 'transparent'; this.style.color = 'var(--text-secondary)';"
+                                    @endif>View
                                     Services</a>
                             </li>
                         </ul>
@@ -174,8 +460,13 @@
 
                     <li>
                         <a href="{{ route('admin.requests.index') }}"
-                            class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors
-                           {{ request()->routeIs('admin.requests.index') ? 'bg-blue-50 text-blue-700 font-semibold' : 'text-gray-600 hover:bg-gray-100 hover:text-blue-600' }}">
+                            class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors duration-300
+                           {{ request()->routeIs('admin.requests.index') ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold' : '' }}"
+                           @if(!request()->routeIs('admin.requests.index'))
+                           style="color: var(--text-secondary);" 
+                           onmouseover="this.style.backgroundColor = 'var(--hover-bg)'; this.style.color = 'var(--text-primary)';" 
+                           onmouseout="this.style.backgroundColor = 'transparent'; this.style.color = 'var(--text-secondary)';"
+                           @endif>
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01">
@@ -190,12 +481,15 @@
 
                 @if (auth('admin')->user()->ha_role === 'superadmin')
                     <div class="px-6 py-4 mt-2">
-                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Super Admin</p>
+                        <p class="text-xs font-semibold uppercase tracking-wider transition-colors duration-300" style="color: var(--text-muted);">Super Admin</p>
                     </div>
                     <ul class="space-y-1 px-3">
                         <li>
                             <a href="{{ route('admin.super.admins.index') }}"
-                                class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-600 hover:bg-red-50 hover:text-red-600 transition-colors">
+                                class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors duration-300"
+                                style="color: var(--text-secondary);"
+                                onmouseover="this.style.backgroundColor = 'rgba(239, 68, 68, 0.2)'; this.style.color = '#f87171';"
+                                onmouseout="this.style.backgroundColor = 'transparent'; this.style.color = 'var(--text-secondary)';">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
@@ -208,19 +502,22 @@
                 @endif
             </nav>
 
-            <div class="p-4 border-t border-gray-200">
+            <div class="p-4 transition-colors duration-300" style="border-top: 1px solid var(--border-color);">
                 <div class="flex items-center gap-3">
                     <div
-                        class="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-sm">
+                        class="w-9 h-9 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold text-sm">
                         {{ strtoupper(auth('admin')->user()->ha_name[0]) }}
                     </div>
                     <div class="flex-1 min-w-0">
-                        <p class="text-sm font-medium text-gray-900 truncate">{{ auth('admin')->user()->ha_name }}</p>
-                        <p class="text-xs text-gray-500 truncate">{{ auth('admin')->user()->ha_role }}</p>
+                        <p class="text-sm font-medium truncate transition-colors duration-300" style="color: var(--text-primary);">{{ auth('admin')->user()->ha_name }}</p>
+                        <p class="text-xs truncate transition-colors duration-300" style="color: var(--text-muted);">{{ auth('admin')->user()->ha_role }}</p>
                     </div>
                     <form method="POST" action="{{ route('admin.logout') }}">
                         @csrf
-                        <button class="p-2 text-gray-400 hover:text-red-600 rounded-lg hover:bg-gray-100"
+                        <button class="p-2 rounded-lg transition-colors duration-300 hover:text-red-500"
+                                style="color: var(--text-muted);"
+                                onmouseover="this.style.backgroundColor = 'var(--hover-bg)';"
+                                onmouseout="this.style.backgroundColor = 'transparent';"
                             title="Logout">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -235,37 +532,102 @@
 
         <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
 
-            <header
-                class="bg-white border-b border-gray-200 h-16 flex items-center justify-between px-4 sm:px-6 lg:px-8">
+            <header class="px-4 sm:px-8 py-4 flex items-center justify-between shadow-md transition-colors duration-300"
+                    style="background-color: var(--bg-secondary); border-bottom: 1px solid var(--border-color);">
                 <div class="flex items-center gap-4">
                     <button onclick="toggleSidebar()"
-                        class="text-gray-500 hover:text-blue-600 focus:outline-none focus:bg-gray-100 p-2 rounded-md">
+                        class="p-2 rounded-md focus:outline-none transition-colors duration-300 hover:text-cyan-400"
+                        style="color: var(--text-muted); background-color: transparent;"
+                        onmouseover="this.style.backgroundColor = 'var(--hover-bg)';" 
+                        onmouseout="this.style.backgroundColor = 'transparent';">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M4 6h16M4 12h16M4 18h16"></path>
                         </svg>
                     </button>
-                    <h2 class="text-lg font-semibold text-gray-800">Admin Dashboard</h2>
+                    <h2 class="text-lg font-semibold transition-colors duration-300" style="color: var(--text-primary);">Admin Dashboard</h2>
                 </div>
 
                 <div class="flex items-center gap-4">
-                    <span class="text-sm text-gray-500 hidden sm:block">{{ now()->format('D, M d Y') }}</span>
+                    <span class="text-sm hidden sm:block transition-colors duration-300" style="color: var(--text-muted);">{{ now()->format('D, M d Y') }}</span>
+                    
+                    <!-- Theme Toggle -->
+                    <div class="flex items-center gap-3">
+                        <svg class="w-4 h-4" style="color: var(--text-muted);" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707"/>
+                        </svg>
+                        <button type="button" class="theme-toggle" onclick="toggleTheme(event)" title="Toggle light/dark mode"></button>
+                        <svg class="w-4 h-4" style="color: var(--text-muted);" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+                        </svg>
+                    </div>
                 </div>
             </header>
 
-            <main class="flex-1 overflow-y-auto p-4 sm:p-8 bg-gray-50">
+            <main id="main-content" class="flex-1 overflow-y-auto p-4 sm:p-8 transition-colors duration-300" style="background-color: var(--bg-primary);">
                 @yield('content')
             </main>
         </div>
 
         <div id="mobileOverlay" onclick="toggleSidebar()"
-            class="fixed inset-0 bg-gray-900 bg-opacity-50 z-20 hidden lg:hidden transition-opacity"></div>
+            class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden lg:hidden transition-opacity"></div>
 
     </div>
 
     @yield('scripts')
 
     <script>
+        // Theme Management
+        function initializeTheme() {
+            const savedTheme = localStorage.getItem('admin-theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const theme = savedTheme || (prefersDark ? 'dark' : 'light');
+            
+            document.body.setAttribute('data-theme', theme);
+            updateNavigation();
+        }
+
+        function toggleTheme(event) {
+            // Prevent any default behavior or event bubbling
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            
+            const currentTheme = document.body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            // Use requestAnimationFrame for smooth transition
+            requestAnimationFrame(() => {
+                document.body.setAttribute('data-theme', newTheme);
+                localStorage.setItem('admin-theme', newTheme);
+                updateNavigation();
+            });
+            
+            return false; // Ensure no navigation occurs
+        }
+
+        function updateNavigation() {
+            const isDark = document.body.getAttribute('data-theme') === 'dark';
+            const navLinks = document.querySelectorAll('nav a:not(.bg-gradient-to-r)');
+            const buttons = document.querySelectorAll('button:not(.theme-toggle)');
+            
+            // Update navigation link colors
+            navLinks.forEach(link => {
+                if (!link.classList.contains('bg-gradient-to-r')) {
+                    link.style.color = isDark ? '#e2e8f0' : '#475569';
+                }
+            });
+            
+            // Update submenu buttons
+            const submenuButtons = document.querySelectorAll('button[onclick*="toggleSubMenu"]');
+            submenuButtons.forEach(button => {
+                if (!button.closest('.bg-gradient-to-r')) {
+                    button.style.color = isDark ? '#e2e8f0' : '#475569';
+                }
+            });
+        }
+
         // Submenu Toggle (for Student/Page menus)
         function toggleSubMenu(menuId, arrowId) {
             const menu = document.getElementById(menuId);
@@ -303,6 +665,203 @@
                 }
             }
         }
+
+        // Initialize theme on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeTheme();
+            
+            // Listen for system theme changes
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+                if (!localStorage.getItem('admin-theme')) {
+                    document.body.setAttribute('data-theme', e.matches ? 'dark' : 'light');
+                    updateNavigation();
+                }
+            });
+        });
+
+        // AJAX Navigation System
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add loading indicator
+            const loadingIndicator = document.createElement('div');
+            loadingIndicator.id = 'loading-indicator';
+            loadingIndicator.innerHTML = '<div class="loading-spinner"></div>';
+            loadingIndicator.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.1);
+                display: none;
+                justify-content: center;
+                align-items: center;
+                z-index: 9999;
+            `;
+            document.body.appendChild(loadingIndicator);
+
+            // Add loading spinner styles
+            const spinnerStyle = document.createElement('style');
+            spinnerStyle.textContent = `
+                .loading-spinner {
+                    width: 40px;
+                    height: 40px;
+                    border: 3px solid #f3f3f3;
+                    border-top: 3px solid #06b6d4;
+                    border-radius: 50%;
+                    animation: spin 1s linear infinite;
+                }
+                @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                }
+            `;
+            document.head.appendChild(spinnerStyle);
+
+            // Intercept navigation links
+            document.addEventListener('click', function(e) {
+                const link = e.target.closest('a[href]');
+                
+                // Only intercept admin panel internal links
+                if (link && 
+                    link.href.includes('/admin/') && 
+                    !link.href.includes('#') &&
+                    !link.target &&
+                    !link.download &&
+                    link.origin === window.location.origin) {
+                    
+                    e.preventDefault();
+                    navigateTo(link.href);
+                }
+            });
+
+            // Handle browser back/forward buttons
+            window.addEventListener('popstate', function(e) {
+                if (e.state && e.state.isAjax) {
+                    loadContent(window.location.href, false);
+                }
+            });
+
+            function navigateTo(url) {
+                loadContent(url, true);
+            }
+
+            function loadContent(url, pushState = true) {
+                showLoading();
+                
+                fetch(url, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'text/html'
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.text();
+                })
+                .then(html => {
+                    // Create a temporary container to parse the response
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = html;
+                    
+                    // Extract the main content
+                    const newContent = tempDiv.querySelector('main');
+                    const currentMain = document.querySelector('#main-content');
+                    
+                    if (newContent && currentMain) {
+                        // Replace content with fade effect
+                        currentMain.classList.add('transitioning');
+                        currentMain.style.opacity = '0';
+                        
+                        setTimeout(() => {
+                            currentMain.innerHTML = newContent.innerHTML;
+                            currentMain.style.opacity = '1';
+                            currentMain.classList.remove('transitioning');
+                            
+                            // Update page title
+                            const newTitle = tempDiv.querySelector('title');
+                            if (newTitle) {
+                                document.title = newTitle.textContent;
+                            }
+                            
+                            // Re-run any scripts in the new content
+                            executeScripts(currentMain);
+                            
+                            // Update browser history
+                            if (pushState) {
+                                window.history.pushState({isAjax: true}, '', url);
+                            }
+                            
+                            // Update navigation state
+                            updateNavigationState(url);
+                            
+                            hideLoading();
+                        }, 150);
+                    } else {
+                        // Fallback to normal navigation
+                        window.location.href = url;
+                    }
+                })
+                .catch(error => {
+                    console.error('Navigation error:', error);
+                    // Fallback to normal navigation
+                    window.location.href = url;
+                });
+            }
+
+            function showLoading() {
+                loadingIndicator.style.display = 'flex';
+            }
+
+            function hideLoading() {
+                loadingIndicator.style.display = 'none';
+            }
+
+            function executeScripts(container) {
+                const scripts = container.querySelectorAll('script');
+                scripts.forEach(script => {
+                    if (script.src) {
+                        // External script
+                        const newScript = document.createElement('script');
+                        newScript.src = script.src;
+                        document.head.appendChild(newScript);
+                    } else {
+                        // Inline script
+                        try {
+                            eval(script.textContent);
+                        } catch (e) {
+                            console.error('Script execution error:', e);
+                        }
+                    }
+                });
+            }
+
+            function updateNavigationState(url) {
+                // Remove active states from all navigation items
+                const navLinks = document.querySelectorAll('nav a, nav button');
+                navLinks.forEach(link => {
+                    link.classList.remove('bg-gradient-to-r', 'from-cyan-500', 'to-blue-600', 'text-white', 'font-semibold');
+                    link.style.backgroundColor = '';
+                });
+
+                // Find and highlight the current page navigation item
+                const currentPath = new URL(url).pathname;
+                navLinks.forEach(link => {
+                    if (link.href && new URL(link.href).pathname === currentPath) {
+                        link.classList.add('bg-gradient-to-r', 'from-cyan-500', 'to-blue-600', 'text-white', 'font-semibold');
+                    }
+                });
+            }
+
+            // Initialize navigation state
+            updateNavigationState(window.location.href);
+            
+            // Set initial history state
+            if (!window.history.state) {
+                window.history.replaceState({isAjax: true}, '', window.location.href);
+            }
+        });
     </script>
 </body>
 

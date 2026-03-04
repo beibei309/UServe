@@ -1,11 +1,12 @@
 @extends('admin.layout')
 
 @section('content')
-
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold">Student Status Management</h1>
+<div class="px-4 sm:px-6">
+    
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <h1 class="text-3xl font-bold transition-colors duration-300" style="color: var(--text-primary);">Student Status Management</h1>
         <a href="{{ route('admin.student_status.create') }}"
-            class="px-5 py-2.5 bg-blue-600 text-white font-medium rounded shadow hover:bg-blue-700 transition">
+            class="px-5 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-medium rounded shadow transition-all duration-300">
             + Assign New Status
         </a>
     </div>
@@ -17,13 +18,16 @@
             <div class="flex-1">
                 <input type="text" name="search" value="{{ request('search') }}"
                     placeholder="Search by Name or Matric No..."
-                    class="w-full border border-gray-300 rounded-md px-4 py-2 focus:ring-blue-500 focus:border-blue-500">
+                    class="w-full border rounded-md px-4 py-2 transition-colors duration-300"
+                    style="background-color: var(--bg-secondary); border-color: var(--border-color); color: var(--text-primary);"
+                    onfocus="this.style.borderColor = '#06b6d4'; this.style.boxShadow = '0 0 0 1px #06b6d4';">
             </div>
 
             {{-- Graduation Filter Dropdown --}}
             <div class="w-full md:w-64">
                 <select name="grad_filter" onchange="this.form.submit()"
-                    class="w-full border border-gray-300 rounded-md px-4 py-2 focus:ring-blue-500 focus:border-blue-500 bg-white">
+                    class="w-full border rounded-md px-4 py-2 transition-colors duration-300"
+                    style="background-color: var(--bg-secondary); border-color: var(--border-color); color: var(--text-primary);">
                     <option value="">All Graduation Dates</option>
                     <option value="expired" {{ request('grad_filter') == 'expired' ? 'selected' : '' }}>
                         Overdue (Date Passed)
@@ -42,7 +46,8 @@
 
             {{-- Reset Button --}}
             <a href="{{ route('admin.student_status.index') }}"
-                class="px-4 py-2 bg-gray-100 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-200 text-center">
+                class="px-4 py-2 border rounded-md text-center transition-all duration-300 hover:bg-cyan-500 hover:text-white"
+                style="background-color: var(--bg-tertiary); color: var(--text-secondary); border-color: var(--border-color);">
                 Reset
             </a>
 
@@ -50,62 +55,65 @@
     </div>
 
     @if (session('success'))
-        <div class="p-4 bg-green-50 text-green-800 rounded-md border border-green-200 mb-6">
-            {{ session('success') }}
+        <div class="p-4 bg-green-900 bg-opacity-30 border border-green-700 rounded-md mb-6 transition-all duration-300">
+            <p class="text-green-200">{{ session('success') }}</p>
         </div>
     @endif
 
     @if (session('info'))
-        <div class="p-4 bg-blue-50 text-blue-800 rounded-md border border-blue-200 mb-6">
-            {{ session('info') }}
+        <div class="p-4 bg-cyan-900 bg-opacity-30 border border-cyan-700 rounded-md mb-6 transition-all duration-300">
+            <p class="text-cyan-200">{{ session('info') }}</p>
         </div>
     @endif
 
-    <div class="bg-white shadow-sm rounded-lg border border-gray-200 overflow-hidden">
-        <table class="w-full text-left border-collapse">
-            <thead class="bg-gray-50 text-gray-700 text-xs uppercase tracking-wider">
-                <tr>
-                    <th class="py-3 px-6 font-semibold">Student Name</th>
-                    <th class="py-3 px-6 font-semibold">Matric No</th>
-                    <th class="py-3 px-6 font-semibold">Current Semester</th>
-                    <th class="py-3 px-6 font-semibold">Graduation Date</th>
-                    <th class="py-3 px-6 font-semibold">Status</th>
-                    <th class="py-3 px-6 font-semibold text-right">Actions</th>
-                </tr>
-            </thead>
+    {{-- MOBILE RESPONSIVE TABLE --}}
+    <div class="hidden md:block">
+        <div class="shadow-xl rounded-lg border overflow-hidden transition-all duration-300"
+             style="background-color: var(--bg-secondary); border-color: var(--border-color);">
+            <table class="w-full text-left border-collapse">
+                <thead class="text-xs uppercase tracking-wider border-b transition-colors duration-300"
+                       style="background-color: var(--bg-tertiary); color: var(--text-secondary); border-color: var(--border-color);">
+                    <tr>
+                        <th class="py-3 px-6 font-semibold">Student Name</th>
+                        <th class="py-3 px-6 font-semibold">Matric No</th>
+                        <th class="py-3 px-6 font-semibold">Current Semester</th>
+                        <th class="py-3 px-6 font-semibold">Graduation Date</th>
+                        <th class="py-3 px-6 font-semibold">Status</th>
+                        <th class="py-3 px-6 font-semibold text-right">Actions</th>
+                    </tr>
+                </thead>
 
-            <tbody class="divide-y divide-gray-100">
-                @forelse($students as $student)
-                    <tr class="hover:bg-gray-50 transition duration-150">
+                <tbody class="divide-y transition-colors duration-300" style="border-color: var(--border-color);">
+                    @forelse($students as $student)
+                        <tr class="hover:opacity-80 transition-opacity duration-150">
 
-                        {{-- NAME --}}
-                        <td class="py-4 px-6 font-medium text-gray-900">
-                            {{ $student->hu_name }}
-                        </td>
+                            {{-- NAME --}}
+                            <td class="py-4 px-6 font-medium transition-colors duration-300" style="color: var(--text-primary);">
+                                {{ $student->hu_name }}
+                            </td>
 
-                        {{-- MATRIC NO --}}
-                        <td class="py-4 px-6 text-gray-500">
-                            {{ $student->hu_student_id ?? '-' }}
-                        </td>
+                            {{-- MATRIC NO --}}
+                            <td class="py-4 px-6 transition-colors duration-300" style="color: var(--text-secondary);">
+                                {{ $student->hu_student_id ?? '-' }}
+                            </td>
 
-                        {{-- SEMESTER --}}
-                        <td class="py-4 px-6 text-gray-600">
-                            @if ($student->studentStatus && $student->studentStatus->hss_status === 'Graduated')
-                                <span class="text-gray-400 italic">-</span>
-                            @else
-                                {{ $student->studentStatus->hss_semester ?? '-' }}
-                            @endif
-                        </td>
+                            {{-- SEMESTER --}}
+                            <td class="py-4 px-6 transition-colors duration-300" style="color: var(--text-secondary);">
+                                @if ($student->studentStatus && $student->studentStatus->hss_status === 'Graduated')
+                                    <span class="italic transition-colors duration-300" style="color: var(--text-muted);">-</span>
+                                @else
+                                    {{ $student->studentStatus->hss_semester ?? '-' }}
+                                @endif
+                            </td>
 
-                        {{-- GRADUATION DATE --}}
-                        <td class="py-4 px-6 text-gray-600">
-                            @if ($student->studentStatus && $student->studentStatus->hss_graduation_date)
-                                {{-- Use the format you prefer here. If you want the EST label, replace this part with the code from previous steps --}}
-                                {{ \Carbon\Carbon::parse($student->studentStatus->hss_graduation_date)->format('d M Y') }}
-                            @else
-                                <span class="text-gray-400 italic">-</span>
-                            @endif
-                        </td>
+                            {{-- GRADUATION DATE --}}
+                            <td class="py-4 px-6 transition-colors duration-300" style="color: var(--text-secondary);">
+                                @if ($student->studentStatus && $student->studentStatus->hss_graduation_date)
+                                    {{ \Carbon\Carbon::parse($student->studentStatus->hss_graduation_date)->format('d M Y') }}
+                                @else
+                                    <span class="italic transition-colors duration-300" style="color: var(--text-muted);">-</span>
+                                @endif
+                            </td>
 
                         {{-- STATUS BADGE --}}
                         <td class="py-4 px-6">
@@ -185,8 +193,8 @@
 
             {{-- EDIT BUTTON --}}
             <a href="{{ route('admin.student_status.edit', $student->studentStatus->hss_id) }}"
-                class="text-indigo-600 hover:text-indigo-900 font-medium text-sm">
-                Edit
+                class="text-cyan-400 hover:text-cyan-300 transition-colors duration-300 font-medium text-sm">
+                <i class="fa-solid fa-edit"></i>
             </a>
 
             {{-- DELETE BUTTON --}}
@@ -195,14 +203,14 @@
                 onsubmit="return confirm('Remove status record?');">
                 @csrf
                 @method('DELETE')
-                <button class="text-red-500 hover:text-red-700 font-medium text-sm">
-                    Delete
+                <button class="text-red-500 hover:text-red-400 transition-colors duration-300 ml-3" title="Delete">
+                    <i class="fa-solid fa-trash"></i>
                 </button>
             </form>
         @else
             {{-- ADD BUTTON --}}
             <a href="{{ route('admin.student_status.create', ['student_id' => $student->hu_id]) }}"
-                class="text-blue-600 hover:underline">
+                class="text-cyan-400 hover:text-cyan-300 transition-colors duration-300 hover:underline">
                 + Add Status
             </a>
         @endif
@@ -212,12 +220,95 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="py-8 text-center text-gray-500">No students found.</td>
+                        <td colspan="6" class="py-8 text-center transition-colors duration-300" style="color: var(--text-muted);">No students found.</td>
                     </tr>
                 @endforelse
             </tbody>
         </table>
-        <div class="p-4">{{ $students->links() }}</div>
+        <div class="p-4 transition-colors duration-300" style="background-color: var(--bg-primary); border-top: 1px solid; border-color: var(--border-color);">{{ $students->links() }}</div>
+    </div>
+
+    {{-- MOBILE RESPONSIVE CARDS --}}
+    <div class="block md:hidden space-y-4">
+        @forelse($students as $student)
+            <div class="rounded-lg border p-4 transition-all duration-300"
+                 style="background-color: var(--bg-secondary); border-color: var(--border-color);">
+                <div class="flex items-start justify-between mb-3">
+                    <div class="flex-1">
+                        <h3 class="font-medium transition-colors duration-300" style="color: var(--text-primary);">{{ $student->hu_name }}</h3>
+                        <p class="text-sm transition-colors duration-300" style="color: var(--text-secondary);">{{ $student->hu_student_id ?? 'No Matric' }}</p>
+                    </div>
+                    
+                    @php $status = strtolower($student->studentStatus->hss_status ?? ''); @endphp
+                    @if ($status == 'active')
+                        <span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Active</span>
+                    @elseif($status == 'probation')
+                        <span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Probation</span>
+                    @elseif($status == 'graduated')
+                        <span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Graduated</span>
+                    @elseif($status == 'deferred')
+                        <span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Deferred</span>
+                    @elseif($status == '')
+                        <span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-400">Not Set</span>
+                    @else
+                        <span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">{{ ucfirst($status) }}</span>
+                    @endif
+                </div>
+                
+                <div class="grid grid-cols-2 gap-2 text-sm mb-3">
+                    <div>
+                        <span class="font-medium transition-colors duration-300" style="color: var(--text-primary);">Semester:</span>
+                        <span class="transition-colors duration-300" style="color: var(--text-secondary);">
+                            @if ($student->studentStatus && $student->studentStatus->hss_status === 'Graduated')
+                                <span class="italic">-</span>
+                            @else
+                                {{ $student->studentStatus->hss_semester ?? '-' }}
+                            @endif
+                        </span>
+                    </div>
+                    <div>
+                        <span class="font-medium transition-colors duration-300" style="color: var(--text-primary);">Graduation:</span>
+                        <span class="transition-colors duration-300" style="color: var(--text-secondary);">
+                            @if ($student->studentStatus && $student->studentStatus->hss_graduation_date)
+                                {{ \Carbon\Carbon::parse($student->studentStatus->hss_graduation_date)->format('d M Y') }}
+                            @else
+                                <span class="italic">-</span>
+                            @endif
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="flex flex-wrap gap-2">
+                    @if ($student->studentStatus)
+                        <a href="{{ route('admin.student_status.edit', $student->studentStatus->hss_id) }}"
+                            class="text-cyan-400 hover:text-cyan-300 transition-colors duration-300 text-sm">
+                            <i class="fa-solid fa-edit"></i> Edit
+                        </a>
+                        
+                        <form action="{{ route('admin.student_status.delete', $student->studentStatus->hss_id) }}"
+                            method="POST" class="inline-block"
+                            onsubmit="return confirm('Remove status record?');">
+                            @csrf
+                            @method('DELETE')
+                            <button class="text-red-500 hover:text-red-400 transition-colors duration-300 text-sm">
+                                <i class="fa-solid fa-trash"></i> Delete
+                            </button>
+                        </form>
+                    @else
+                        <a href="{{ route('admin.student_status.create', ['student_id' => $student->hu_id]) }}"
+                            class="text-cyan-400 hover:text-cyan-300 transition-colors duration-300 text-sm">
+                            + Add Status
+                        </a>
+                    @endif
+                </div>
+            </div>
+        @empty
+            <div class="text-center py-8 transition-colors duration-300" style="color: var(--text-muted);">
+                No students found.
+            </div>
+        @endforelse
+        
+        <div class="mt-4">{{ $students->links() }}</div>
     </div>
     <script>
     function confirmSendReminder(studentId, studentName) {

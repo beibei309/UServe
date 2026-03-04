@@ -1,55 +1,72 @@
 @extends('admin.layout')
 
 @section('content')
-    <div class="px-4 md:px-8">
+    <div class="px-4 md:px-0">
 
         <!-- Title -->
-        <h1 class="text-4xl font-bold text-gray-800">Dashboard</h1>
-        <p class="text-gray-500 mt-1">Monitor platform activity and analytics.</p>
+        <h1 class="text-4xl font-bold transition-colors duration-300" style="color: var(--text-primary);">Dashboard</h1>
+        <p class="mt-1 font-medium transition-colors duration-300" style="color: var(--text-secondary);">Monitor platform activity and analytics.</p>
 
         <!-- STAT CARDS -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mt-10">
 
             <!-- CARD: Total Students -->
             <a href="{{ route('admin.students.index') }}"
-                class="bg-white p-6 rounded-2xl shadow-md hover:shadow-xl hover:scale-[1.02] transition border border-gray-100 block">
-                <p class="text-gray-500 font-medium">Total Students</p>
-                <p class="text-5xl font-bold text-blue-600 mt-2">{{ $totalStudents }}</p>
+                class="group relative p-6 rounded-2xl shadow-xl hover:shadow-2xl hover:shadow-cyan-500/20 hover:scale-[1.02] transition-all duration-300 block overflow-hidden border"
+                style="background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%); border-color: var(--border-color);">
+                <div class="absolute inset-0 bg-gradient-to-r from-cyan-500 to-blue-600 opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
+                <div class="relative z-10">
+                    <p class="font-medium text-sm transition-colors duration-300" style="color: var(--text-secondary);">Total Students</p>
+                    <p class="text-5xl font-bold text-cyan-400 mt-4">{{ $totalStudents }}</p>
+                </div>
             </a>
 
             <!-- CARD: Total Community Users -->
             <a href="{{ route('admin.community.index') }}"
-                class="bg-white p-6 rounded-2xl shadow-md hover:shadow-xl hover:scale-[1.02] transition border border-gray-100 block">
-                <p class="text-gray-500 font-medium">Total Community Users</p>
-                <p class="text-5xl font-bold text-purple-600 mt-2">{{ $totalCommunityUsers }}</p>
+                class="group relative p-6 rounded-2xl shadow-xl hover:shadow-2xl hover:shadow-purple-500/20 hover:scale-[1.02] transition-all duration-300 block overflow-hidden border"
+                style="background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%); border-color: var(--border-color);">
+                <div class="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-600 opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
+                <div class="relative z-10">
+                    <p class="font-medium text-sm transition-colors duration-300" style="color: var(--text-secondary);">Total Community Users</p>
+                    <p class="text-5xl font-bold text-purple-400 mt-4">{{ $totalCommunityUsers }}</p>
+                </div>
             </a>
 
             <!-- CARD: Total Services -->
             <a href="{{ route('admin.services.index') }}"
-                class="bg-white p-6 rounded-2xl shadow-md hover:shadow-xl hover:scale-[1.02] transition border border-gray-100 block">
-                <p class="text-gray-500 font-medium">Total Services</p>
-                <p class="text-5xl font-bold text-pink-600 mt-2">{{ $totalServices }}</p>
+                class="group relative p-6 rounded-2xl shadow-xl hover:shadow-2xl hover:shadow-pink-500/20 hover:scale-[1.02] transition-all duration-300 block overflow-hidden border"
+                style="background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%); border-color: var(--border-color);">
+                <div class="absolute inset-0 bg-gradient-to-r from-pink-500 to-orange-600 opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
+                <div class="relative z-10">
+                    <p class="font-medium text-sm transition-colors duration-300" style="color: var(--text-secondary);">Total Services</p>
+                    <p class="text-5xl font-bold text-pink-400 mt-4">{{ $totalServices }}</p>
+                </div>
             </a>
 
             <!-- CARD: Pending Requests -->
             <a href="#"
-                class="bg-white p-6 rounded-2xl shadow-md hover:shadow-xl hover:scale-[1.02] transition border border-gray-100 block">
-                <p class="text-gray-500 font-medium">Pending Requests</p>
-                <p class="text-5xl font-bold text-yellow-600 mt-2">{{ $pendingRequests }}</p>
+                class="group relative p-6 rounded-2xl shadow-xl hover:shadow-2xl hover:shadow-yellow-500/20 hover:scale-[1.02] transition-all duration-300 block overflow-hidden border"
+                style="background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%); border-color: var(--border-color);">
+                <div class="absolute inset-0 bg-gradient-to-r from-yellow-500 to-orange-600 opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
+                <div class="relative z-10">
+                    <p class="font-medium text-sm transition-colors duration-300" style="color: var(--text-secondary);">Pending Requests</p>
+                    <p class="text-5xl font-bold text-yellow-400 mt-4">{{ $pendingRequests }}</p>
+                </div>
             </a>
 
         </div>
 
         @if ($pendingStudents > 0)
             <div
-                class="mt-6 bg-red-100 border border-red-300 text-red-700 px-6 py-4 rounded-xl flex items-center justify-between">
+                class="mt-6 px-6 py-4 rounded-xl flex items-center justify-between border transition-all duration-300"
+                style="background-color: rgba(239, 68, 68, 0.1); border-color: #ef4444; color: #f87171;">
                 <div>
                     <strong>⚠ Action Required</strong><br>
                     {{ $pendingStudents }} student(s) are waiting for approval.
                 </div>
 
                 <a href="{{ route('admin.students.index', ['verification_status' => 'pending']) }}"
-                    class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">
+                    class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors duration-300">
                     Review Now
                 </a>
             </div>
@@ -57,14 +74,15 @@
 
         @if ($pendingHelpers > 0)
             <div
-                class="mt-4 bg-yellow-100 border border-yellow-300 text-yellow-800 px-6 py-4 rounded-xl flex items-center justify-between">
+                class="mt-6 px-6 py-4 rounded-xl flex items-center justify-between border transition-all duration-300"
+                style="background-color: rgba(245, 158, 11, 0.1); border-color: #f59e0b; color: #fbbf24;">
                 <div>
                     <strong>⚠ Action Required</strong><br>
                     {{ $pendingHelpers }} helper(s) are waiting for verification.
                 </div>
 
-                <a href="{{ route('admin.students.index', ['verification_status' => 'pending']) }}"
-                    class="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 transition">
+                <a href="{{ route('admin.verifications.index') }}"
+                    class="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 transition-colors duration-300">
                     Review Helpers
                 </a>
             </div>
@@ -72,14 +90,15 @@
 
         @if ($studentsWithoutStatus > 0)
             <div
-                class="mt-6 bg-orange-100 border border-orange-300 text-orange-800 px-6 py-4 rounded-xl flex items-center justify-between">
+                class="mt-6 px-6 py-4 rounded-xl flex items-center justify-between border transition-all duration-300"
+                style="background-color: rgba(234, 88, 12, 0.1); border-color: #ea580c; color: #fb923c;">
                 <div>
                     <strong>⚠ Action Required</strong><br>
                     {{ $studentsWithoutStatus }} student(s) do not have an academic status assigned.
                 </div>
 
                 <a href="{{ route('admin.student_status.index') }}"
-                    class="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition">
+                    class="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors duration-300">
                     Assign Status
                 </a>
             </div>
@@ -89,14 +108,16 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
 
             <!-- LINE CHART -->
-            <div class="bg-white p-8 rounded-2xl shadow-md border border-gray-100">
-                <h2 class="text-lg font-semibold text-gray-700 mb-4">Monthly Student Registrations</h2>
+            <div class="p-8 rounded-2xl shadow-xl border transition-all duration-300"
+                 style="background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%); border-color: var(--border-color);">
+                <h2 class="text-lg font-semibold mb-4 transition-colors duration-300" style="color: var(--text-primary);">Monthly Student Registrations</h2>
                 <canvas id="studentChart" height="120"></canvas>
             </div>
 
             <!-- BAR CHART -->
-            <div class="bg-white p-8 rounded-2xl shadow-md border border-gray-100">
-                <h2 class="text-lg font-semibold text-gray-700 mb-4">Services Created Per Month</h2>
+            <div class="p-8 rounded-2xl shadow-xl border transition-all duration-300"
+                 style="background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%); border-color: var(--border-color);">
+                <h2 class="text-lg font-semibold mb-4 transition-colors duration-300" style="color: var(--text-primary);">Services Created Per Month</h2>
                 <canvas id="serviceChart" height="120"></canvas>
             </div>
 
@@ -127,10 +148,10 @@
                 datasets: [{
                     label: 'Students',
                     data: {!! json_encode(array_values($studentsPerMonth)) !!},
-                    borderColor: '#6366F1', // Indigo
-                    backgroundColor: 'rgba(99, 102, 241, 0.25)',
-                    pointBackgroundColor: '#4F46E5',
-                    pointBorderColor: '#ffffff',
+                    borderColor: '#06B6D4', // Cyan
+                    backgroundColor: 'rgba(6, 182, 212, 0.25)',
+                    pointBackgroundColor: '#06B6D4',
+                    pointBorderColor: '#0f172a',
                     pointRadius: 5,
                     pointHoverRadius: 7,
                     tension: 0.4,
@@ -147,11 +168,17 @@
                 scales: {
                     y: {
                         beginAtZero: true,
+                        ticks: {
+                            color: '#94a3b8'
+                        },
                         grid: {
-                            color: '#E5E7EB'
+                            color: '#1e293b'
                         }
                     },
                     x: {
+                        ticks: {
+                            color: '#94a3b8'
+                        },
                         grid: {
                             display: false
                         }
@@ -173,9 +200,9 @@
                     label: 'Services Created',
                     data: {!! json_encode(array_values($servicesPerMonth)) !!},
                     backgroundColor: [
-                        '#22C55E', '#16A34A', '#10B981', '#34D399',
-                        '#4ADE80', '#86EFAC', '#6EE7B7', '#2DD4BF',
-                        '#14B8A6', '#0D9488', '#059669', '#047857'
+                        '#06B6D4', '#0891B2', '#0E7490', '#155E75',
+                        '#1E40AF', '#1E3A8A', '#312E81', '#4C1D95',
+                        '#5B21B6', '#6B21A8', '#7C2D12', '#92400E'
                     ],
                     borderRadius: 10
                 }]
@@ -190,11 +217,17 @@
                 scales: {
                     y: {
                         beginAtZero: true,
+                        ticks: {
+                            color: '#94a3b8'
+                        },
                         grid: {
-                            color: '#E5E7EB'
+                            color: '#1e293b'
                         }
                     },
                     x: {
+                        ticks: {
+                            color: '#94a3b8'
+                        },
                         grid: {
                             display: false
                         }

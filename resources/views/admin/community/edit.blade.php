@@ -1,18 +1,21 @@
 @extends('admin.layout')
 
 @section('content')
+<div class="px-4 sm:px-6">
 
 <div class="max-w-4xl mx-auto">
 
     <!-- Back -->
     <a href="{{ route('admin.community.view', $user->hu_id) }}" 
-       class="text-blue-600 hover:underline text-sm mb-6 inline-block">
+       class="hover:text-cyan-400 text-sm mb-6 inline-block transition-colors duration-300"
+       style="color: var(--text-secondary);">
         ← Back to Profile
     </a>
 
-    <h1 class="text-3xl font-bold mb-6 text-gray-800">Edit Community User</h1>
+    <h1 class="text-3xl font-bold mb-6 transition-colors duration-300" style="color: var(--text-primary);">Edit Community User</h1>
 
-    <div class="bg-white shadow-xl rounded-xl p-8 border border-gray-100">
+    <div class="shadow-xl rounded-xl p-8 border transition-all duration-300"
+         style="background-color: var(--bg-secondary); border-color: var(--border-color);">
 
         <form action="{{ route('admin.community.update', $user->hu_id) }}" method="POST" enctype="multipart/form-data">
             @csrf
@@ -20,10 +23,11 @@
 
             <!-- SECTION: PROFILE PHOTO -->
             <div class="mb-8">
-                <h2 class="text-xl font-semibold mb-3 text-gray-800">Profile Photo</h2>
+                <h2 class="text-xl font-semibold mb-3 transition-colors duration-300" style="color: var(--text-primary);">Profile Photo</h2>
 
-                <div class="flex items-center gap-6">
-                <div class="h-24 w-24 rounded-full overflow-hidden border shadow">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+                <div class="h-24 w-24 rounded-full overflow-hidden border shadow transition-colors duration-300"
+                     style="border-color: var(--border-color);">
                     @php
                         $path = $user->hu_profile_photo_path;
                         if (Str::startsWith($path, ['http://', 'https://'])) {
@@ -39,49 +43,60 @@
                     <img src="{{ $imageUrl }}" class="w-full h-full object-cover rounded-full" alt="Profile" />
                 </div>
                     <input type="file" name="profile_photo" 
-                           class="border p-2 rounded-lg w-full text-sm">
+                           class="border p-2 rounded-lg w-full text-sm transition-colors duration-300"
+                           style="background-color: var(--bg-tertiary); border-color: var(--border-color); color: var(--text-primary);">
                 </div>
             </div>
 
             <!-- SECTION: BASIC INFO -->
             <div class="mb-8">
-                <h2 class="text-xl font-semibold mb-3 text-gray-800">Basic Information</h2>
+                <h2 class="text-xl font-semibold mb-3 transition-colors duration-300" style="color: var(--text-primary);">Basic Information</h2>
 
                 <!-- Name -->
                 <div class="mb-4">
-                    <label class="block font-medium text-gray-700 mb-1">Name</label>
+                    <label class="block font-medium mb-1 transition-colors duration-300" style="color: var(--text-primary);">Name</label>
                     <input type="text" name="name" value="{{ old('name', $user->hu_name) }}"
-                           class="border p-3 rounded-lg w-full focus:ring-blue-400 focus:border-blue-400" required>
+                           class="border p-3 rounded-lg w-full transition-colors duration-300"
+                           style="background-color: var(--bg-tertiary); border-color: var(--border-color); color: var(--text-primary);"
+                           onfocus="this.style.borderColor = '#06b6d4'; this.style.boxShadow = '0 0 0 2px rgba(6, 182, 212, 0.2)';" required>
                 </div>
 
                 <!-- Email -->
                 <div class="mb-4">
-                    <label class="block font-medium text-gray-700 mb-1">Email</label>
+                    <label class="block font-medium mb-1 transition-colors duration-300" style="color: var(--text-primary);">Email</label>
                     <input type="email" name="email" value="{{ old('email', $user->hu_email) }}"
-                           class="border p-3 rounded-lg w-full focus:ring-blue-400 focus:border-blue-400" required>
+                           class="border p-3 rounded-lg w-full transition-colors duration-300"
+                           style="background-color: var(--bg-tertiary); border-color: var(--border-color); color: var(--text-primary);"
+                           onfocus="this.style.borderColor = '#06b6d4'; this.style.boxShadow = '0 0 0 2px rgba(6, 182, 212, 0.2)';" required>
                 </div>
 
                 <!-- Phone -->
                 <div class="mb-4">
-                    <label class="block font-medium text-gray-700 mb-1">Phone</label>
+                    <label class="block font-medium mb-1 transition-colors duration-300" style="color: var(--text-primary);">Phone</label>
                     <input type="text" name="phone" value="{{ old('phone', $user->hu_phone) }}"
-                           class="border p-3 rounded-lg w-full focus:ring-blue-400 focus:border-blue-400">
+                           class="border p-3 rounded-lg w-full transition-colors duration-300"
+                           style="background-color: var(--bg-tertiary); border-color: var(--border-color); color: var(--text-primary);"
+                           onfocus="this.style.borderColor = '#06b6d4'; this.style.boxShadow = '0 0 0 2px rgba(6, 182, 212, 0.2)';">
                 </div>
 
                 <div class="mb-4">
-                    <label class="block font-medium text-gray-700 mb-1">Bio</label>
+                    <label class="block font-medium mb-1 transition-colors duration-300" style="color: var(--text-primary);">Bio</label>
                     <textarea name="bio" rows="3"
-                              class="border p-3 rounded-lg w-full focus:ring-blue-400 focus:border-blue-400"
+                              class="border p-3 rounded-lg w-full transition-colors duration-300"
+                              style="background-color: var(--bg-tertiary); border-color: var(--border-color); color: var(--text-primary);"
+                              onfocus="this.style.borderColor = '#06b6d4'; this.style.boxShadow = '0 0 0 2px rgba(6, 182, 212, 0.2)';"
                               placeholder="Optional bio">{{ old('bio', $user->hu_bio) }}</textarea>
                 </div>
             </div>            
 
             <!-- SECTION: VERIFICATION -->
             <div class="mb-8">
-                <h2 class="text-xl font-semibold mb-3 text-gray-800">Verification Status</h2>
+                <h2 class="text-xl font-semibold mb-3 transition-colors duration-300" style="color: var(--text-primary);">Verification Status</h2>
 
                 <select name="verification_status"
-        class="border p-3 rounded-lg w-full focus:ring-blue-400 focus:border-blue-400">
+        class="border p-3 rounded-lg w-full transition-colors duration-300"
+        style="background-color: var(--bg-tertiary); border-color: var(--border-color); color: var(--text-primary);"
+        onfocus="this.style.borderColor = '#06b6d4'; this.style.boxShadow = '0 0 0 2px rgba(6, 182, 212, 0.2)';">
 
     {{-- Pending (disabled if already approved) --}}
     <option value="pending"
@@ -105,7 +120,7 @@
 </select>
 
 @if($user->hu_verification_status === 'approved')
-    <p class="text-xs text-gray-500 mt-2">
+    <p class="text-xs mt-2 transition-colors duration-300" style="color: var(--text-muted);">
         Verified users cannot be reverted back to Pending.
     </p>
 @endif
@@ -114,7 +129,7 @@
 
             <!-- SECTION: BLACKLIST -->
             <div class="mb-10">
-                <h2 class="text-xl font-semibold mb-3 text-gray-800">Blacklist Status</h2>
+                <h2 class="text-xl font-semibold mb-3 transition-colors duration-300" style="color: var(--text-primary);">Blacklist Status</h2>
 
                 @if($user->hu_is_blacklisted)
                     <div class="p-4 bg-red-100 border border-red-300 rounded-lg mb-4">
@@ -122,29 +137,32 @@
                         <p class="text-red-700 text-sm mt-1"><strong>Reason:</strong> {{ $user->hu_blacklist_reason }}</p>
                     </div>
 
-                    <label class="flex items-center gap-2 font-medium text-gray-700">
+                    <label class="flex items-center gap-2 font-medium transition-colors duration-300" style="color: var(--text-primary);">
                         <input type="checkbox" name="remove_blacklist" value="1">
                         Remove blacklist
                     </label>
 
                 @else
-                    <label class="block font-medium text-gray-700 mb-1">
+                    <label class="block font-medium mb-1 transition-colors duration-300" style="color: var(--text-primary);">
                         Add blacklist reason (optional)
                     </label>
 
                     <textarea name="blacklist_reason" rows="3"
-                              class="border p-3 rounded-lg w-full focus:ring-red-300 focus:border-red-400"
+                              class="border p-3 rounded-lg w-full transition-colors duration-300"
+                              style="background-color: var(--bg-tertiary); border-color: var(--border-color); color: var(--text-primary);"
+                              onfocus="this.style.borderColor = '#ef4444'; this.style.boxShadow = '0 0 0 2px rgba(239, 68, 68, 0.2)';"
                               placeholder="Enter reason to blacklist this user...">{{ old('blacklist_reason') }}</textarea>
                 @endif
             </div>
 
             <!-- SUBMIT BUTTON -->
-            <button class="px-6 py-3 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition">
-                Save Changes
+            <button class="px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white rounded-lg shadow transition-all duration-300">
+                <i class="fa-solid fa-save mr-2"></i> Save Changes
             </button>
 
         </form>
     </div>
 </div>
 
+</div>
 @endsection
