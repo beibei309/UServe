@@ -25,6 +25,10 @@
     if ($isLoggedIn && $user->hu_role === 'student') {
         $viewMode = 'buyer';
     }
+
+    if ($isLoggedIn && $user->hu_role === 'helper' && $user->hu_is_blocked) {
+        $viewMode = 'buyer';
+    }
 @endphp
 
 {{-- TOP UTILITY BAR --}}
@@ -86,6 +90,12 @@
                     <span
                         class="ml-2 px-2 py-0.5 rounded text-xs font-bold bg-green-100 text-green-700 uppercase tracking-wide">
                         Seller Mode
+                    </span>
+                @endif
+                @if ($isLoggedIn && $user->hu_role === 'helper' && $user->hu_is_blocked)
+                    <span
+                        class="ml-2 px-2 py-0.5 rounded text-xs font-bold bg-amber-100 text-amber-700 uppercase tracking-wide">
+                        Seller Blocked
                     </span>
                 @endif
             </div>
@@ -190,7 +200,7 @@
                             class="hidden lg:inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-full shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
                             Become a Seller
                         </a>
-                    @elseif ($isHelper)
+                    @elseif ($isHelper && !$user->hu_is_blocked)
                         <form action="{{ route('switch.mode') }}" method="POST" class="hidden lg:inline-flex">
                             @csrf
                             <button type="submit"
@@ -347,7 +357,7 @@
                         <a href="{{ route('onboarding.students') }}"
                             class="block px-3 py-2 rounded-md text-base font-medium text-indigo-600 hover:bg-indigo-50">Become
                             a Seller</a>
-                    @elseif ($isHelper)
+                    @elseif ($isHelper && !$user->hu_is_blocked)
                         {{-- MOBILE SWITCH BUTTON --}}
                         <form action="{{ route('switch.mode') }}" method="POST">
                             @csrf
@@ -379,6 +389,18 @@
         @endauth
     </div>
 </nav>
+
+@auth
+    @if (auth()->user()->hu_role === 'helper' && auth()->user()->hu_is_blocked)
+        <div class="w-full bg-amber-50 border-b border-amber-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
+                <p class="text-xs sm:text-sm font-medium text-amber-800">
+                    Seller access is blocked on your account. You can still browse and use buyer features.
+                </p>
+            </div>
+        </div>
+    @endif
+@endauth
 
 <x-account-restriction-modal />
 <x-verification-modal />

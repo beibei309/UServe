@@ -36,7 +36,8 @@ class StudentServiceController extends Controller
         ->whereHas('student', function ($q) {
             $q->where('hu_role', 'helper')
               ->where('hu_is_suspended', 0)     // Exclude suspended users
-              ->where('hu_is_blacklisted', 0);  // Exclude blacklisted  users
+              ->where('hu_is_blacklisted', 0)   // Exclude blacklisted users
+              ->where('hu_is_blocked', 0);      // Exclude blocked users from seller listings
         });
 
     if ($currentUserId) {
@@ -298,7 +299,7 @@ $isUnavailable = $request->has('is_unavailable'); // Check checkbox status
             ], 422);
         }
 
-	if ($user->hu_is_suspended == 1 || $user->hu_is_blacklisted  == 1) {
+	if ($user->hu_is_suspended == 1 || $user->hu_is_blacklisted == 1 || $user->hu_is_blocked == 1) {
         return response()->json([
             'success' => false,
             'message' => 'This user is currently unavailable.',
@@ -587,7 +588,7 @@ $isUnavailable = $request->has('is_unavailable'); // Check checkbox status
     public function details(Request $request, $id)
     {
         $service = StudentService::with(['user', 'category', 'orders'])->findOrFail($id);
-	if ($service->user->hu_is_suspended == 1 || $service->user->hu_is_blacklisted == 1) {
+	if ($service->user->hu_is_suspended == 1 || $service->user->hu_is_blacklisted == 1 || $service->user->hu_is_blocked == 1) {
         // Return 404 Not Found so no info is displayed
         abort(404); 
     }

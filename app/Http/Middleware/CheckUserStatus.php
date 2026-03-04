@@ -81,20 +81,25 @@ class CheckUserStatus
                 return redirect()->route('dashboard');
             }
 
-            if ($user->hu_is_blocked || $user->hu_is_blacklisted || $user->hu_is_suspended) {
-                // Allow viewing pages (GET/HEAD) so the restriction modal can appear immediately
-                // on the page the user clicked. Still block any state-changing actions.
-                if (!$request->routeIs('logout') && !in_array($request->method(), ['GET', 'HEAD'], true)) {
-                    if ($wantsJson) {
-                        return response()->json([
-                            'message' => 'Your account is restricted. You cannot continue browsing.',
-                        ], 403);
-                    }
+            if ($user->isHardLocked() && !$request->routeIs('logout')) {
+                $reason = $user->hu_blacklist_reason ?: 'Violation of terms';
+                $message = $user->hu_is_blacklisted
+                    ? 'Your account has been permanently blacklisted.'
+                    : 'Your account has been suspended.';
 
-                    return redirect()
-                        ->back()
-                        ->with('error', 'Your account is restricted. You cannot continue browsing.');
+                Auth::guard('web')->logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+
+                if ($wantsJson) {
+                    return response()->json([
+                        'message' => $message . ' Reason: "' . $reason . '"',
+                    ], 403);
                 }
+
+                return redirect()
+                    ->route('login')
+                    ->with('error', $message . ' Reason: "' . $reason . '"');
             }
 
             $sellerOnlyRoutes = [
@@ -108,9 +113,43 @@ class CheckUserStatus
                 'availability.toggle',
                 'availability.updateSettings',
                 'switch.mode',
+                'service-requests.accept',
+                'service-requests.reject',
+                'service-requests.mark-in-progress',
+                'service-requests.mark-work-finished',
+                'service-requests.mark-completed',
+                'service-requests.mark-paid',
             ];
 
+            if ($request->routeIs('service-requests.index') && session('view_mode', 'buyer') === 'seller' && $user->hu_role === 'helper' && $user->hu_is_blocked) {
+                session(['view_mode' => 'buyer']);
+
+                if ($wantsJson) {
+                    return response()->json([
+                        'message' => 'Your account is blocked from seller actions. Buying is still available.',
+                    ], 403);
+                }
+
+                return redirect()
+                    ->route('dashboard')
+                    ->with('error', 'Your account is blocked from seller actions. You can continue using buyer features.');
+            }
+
             if ($request->routeIs($sellerOnlyRoutes)) {
+                if ($user->hu_role === 'helper' && $user->hu_is_blocked) {
+                    session(['view_mode' => 'buyer']);
+
+                    if ($wantsJson) {
+                        return response()->json([
+                            'message' => 'Your account is blocked from seller actions. Buying is still available.',
+                        ], 403);
+                    }
+
+                    return redirect()
+                        ->route('dashboard')
+                        ->with('error', 'Your account is blocked from seller actions. You can continue using buyer features.');
+                }
+
                 $isVerifiedHelper = $user->hu_role === 'helper' && !empty($user->hu_helper_verified_at);
 
                 if (!$isVerifiedHelper) {

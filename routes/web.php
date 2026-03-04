@@ -267,7 +267,9 @@ Route::middleware(['auth:admin', 'prevent-back-history'])->prefix('admin')->grou
     Route::get('/reports', [AdminPageController::class, 'reports'])->name('admin.reports.page');
     Route::get('/feedback', [AdminFeedbackController::class, 'index'])->name('admin.feedback.index');
     Route::post('/feedback/{user}/warning', [AdminFeedbackController::class, 'sendWarning'])->name('admin.feedback.warning');
-    Route::post('/feedback/{user}/block', [AdminFeedbackController::class, 'blockUser'])->name('admin.feedback.block');   
+    Route::post('/feedback/{user}/enforce', [AdminFeedbackController::class, 'enforceRoleAction'])->name('admin.feedback.enforce');
+    Route::post('/feedback/{user}/block', [AdminFeedbackController::class, 'blockUser'])->name('admin.feedback.block');
+    Route::post('/feedback/{user}/unblock', [AdminFeedbackController::class, 'unblockUser'])->name('admin.feedback.unblock');
 
     // ========================================
     // SERVICE MODERATION

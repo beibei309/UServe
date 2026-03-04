@@ -38,6 +38,7 @@ class ReportAdminController extends Controller
         if ($data['status'] === 'banned') {
             User::where('hu_id', $report->hrp_target_user_id)->update([
                 'hu_is_blacklisted' => true,
+                'hu_is_suspended' => false,
                 'hu_blacklist_reason' => $data['action_taken'] ?? 'Banned via report resolution',
             ]);
         }

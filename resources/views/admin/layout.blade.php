@@ -185,6 +185,19 @@
                         </a>
                     </li>
 
+                    <li>
+                        <a href="{{ route('admin.feedback.index') }}"
+                            class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors
+                           {{ request()->routeIs('admin.feedback.*') ? 'bg-blue-50 text-blue-700 font-semibold' : 'text-gray-600 hover:bg-gray-100 hover:text-blue-600' }}">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 4v-4z">
+                                </path>
+                            </svg>
+                            Manage Feedback
+                        </a>
+                    </li>
+
 
                 </ul>
 

@@ -59,15 +59,14 @@
                     @endif
                 </div>
 
-                <!-- Blacklist -->
-                @if ($user->hu_is_blacklisted)
+                @if ($user->hu_is_blacklisted || $user->hu_is_suspended)
                     <div class="mt-2">
-                        <span class="px-3 py-1 text-sm bg-red-200 text-red-800 rounded-full">
-                           Suspended
+                        <span class="px-3 py-1 text-sm rounded-full bg-red-200 text-red-800">
+                           {{ ucfirst($user->moderationStatusKey()) }}
                         </span>
 
                         <p class="text-sm text-red-700 mt-1">
-                            Reason: {{ $user->hu_blacklist_reason }}
+                            Reason: {{ $user->hu_blacklist_reason ?: 'No specific reason provided.' }}
                         </p>
                     </div>
                 @endif
@@ -83,17 +82,17 @@
                 </a>
 
                 <!-- Blacklist / Unblacklist -->
-                @if ($user->hu_is_blacklisted)
+                @if ($user->hu_is_blacklisted || $user->hu_is_suspended)
                     <form action="{{ route('admin.community.unblacklist', $user->hu_id) }}" method="POST">
                         @csrf
                         <button class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm w-full">
-                            Remove Blacklist
+                            Reactivate Account
                         </button>
                     </form>
                 @else
                     <button onclick="openBlacklistModal({{ $user->hu_id }})" 
                         class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm w-full">
-                        Suspend User
+                        Blacklist User
                     </button>
                 @endif
 
@@ -302,7 +301,7 @@
 
         <div class="bg-white w-full max-w-md p-6 rounded-lg shadow-xl">
 
-            <h2 class="text-xl font-bold mb-4">Suspend User</h2>
+            <h2 class="text-xl font-bold mb-4">Blacklist User</h2>
             <p class="text-gray-600 mb-3">Please provide a reason:</p>
 
             <textarea id="blacklistReason" rows="3" class="w-full border rounded p-2 focus:ring focus:ring-red-300"
@@ -340,7 +339,7 @@
             const reason = document.getElementById("blacklistReason").value.trim();
 
             if (!reason) {
-                alert("Please enter account suspended reason.");
+                alert("Please enter a blacklist reason.");
                 return;
             }
 

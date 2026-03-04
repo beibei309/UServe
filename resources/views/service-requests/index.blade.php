@@ -151,16 +151,15 @@
                                                 $dateCount = is_array($dates) ? count($dates) : ($firstDate ? 1 : 0);
                                             }
 
-                                            // CHECK IF SELLER BANNED
-                                            $isSellerBanned = $request->provider->hu_is_suspended == 1 || $request->provider->hu_is_blacklisted == 1;
+                                            $isSellerRestricted = $request->provider->hu_is_suspended == 1 || $request->provider->hu_is_blacklisted == 1 || $request->provider->hu_is_blocked == 1;
                                         @endphp
 
                                         <div
-                                            class="sr-request-item group relative overflow-hidden rounded-2xl border {{ $isSellerBanned ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-white hover:border-yellow-300' }} shadow-sm transition-all duration-300 hover:shadow-md"
+                                            class="sr-request-item group relative overflow-hidden rounded-2xl border {{ $isSellerRestricted ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-white hover:border-yellow-300' }} shadow-sm transition-all duration-300 hover:shadow-md"
                                             data-category="{{ optional($service->category)->hc_name ?? 'Other' }}">
 
                                             <div
-                                                class="absolute top-0 left-0 right-0 h-1 {{ $isSellerBanned ? 'bg-red-500' : 'bg-gradient-to-r from-yellow-400 to-orange-300' }}">
+                                                class="absolute top-0 left-0 right-0 h-1 {{ $isSellerRestricted ? 'bg-red-500' : 'bg-gradient-to-r from-yellow-400 to-orange-300' }}">
                                             </div>
 
                                             <div class="p-5 sm:p-6">
@@ -168,10 +167,10 @@
                                                     class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mb-6">
                                                     <div class="flex-1">
                                                         <div class="flex items-center gap-3 mb-2">
-                                                            @if ($isSellerBanned)
+                                                            @if ($isSellerRestricted)
                                                                 <span
                                                                     class="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-bold text-red-700">
-                                                                    SELLER SUSPENDED
+                                                                    SELLER RESTRICTED
                                                                 </span>
                                                             @else
                                                                 <span
@@ -184,11 +183,11 @@
                                                         </div>
 
                                                         <h4
-                                                            class="text-lg font-bold {{ $isSellerBanned ? 'text-gray-500 line-through' : 'text-gray-900' }} group-hover:text-yellow-600 transition-colors leading-tight">
+                                                            class="text-lg font-bold {{ $isSellerRestricted ? 'text-gray-500 line-through' : 'text-gray-900' }} group-hover:text-yellow-600 transition-colors leading-tight">
                                                             {{ optional($request->studentService)->hss_title ?? 'Custom Request' }}
                                                         </h4>
 
-                                                        @if (optional($service)->category && !$isSellerBanned)
+                                                        @if (optional($service)->category && !$isSellerRestricted)
                                                             <div class="mt-2 inline-flex items-center gap-1.5 rounded-md px-2 py-1"
                                                                 style="color:{{ $service->category->hc_color }}; background-color: {{ $service->category->hc_color }}10; border: 1px solid {{ $service->category->hc_color }};">
                                                                 <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24"
@@ -211,7 +210,7 @@
                                                     <div class="text-left sm:text-right mt-2 sm:mt-0">
                                                         @if ($request->hsr_offered_price)
                                                             <div
-                                                                class="text-2xl font-bold {{ $isSellerBanned ? 'text-gray-400' : 'text-gray-900' }}">
+                                                                class="text-2xl font-bold {{ $isSellerRestricted ? 'text-gray-400' : 'text-gray-900' }}">
                                                                 RM {{ number_format($request->hsr_offered_price, 2) }}
                                                             </div>
                                                             <div
@@ -224,7 +223,7 @@
                                                 </div>
 
                                                 {{-- Hide details if banned to keep it clean --}}
-                                                @if (!$isSellerBanned)
+                                                @if (!$isSellerRestricted)
                                                     <div class="h-px w-full bg-gray-100 my-4"></div>
 
                                                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
@@ -296,7 +295,7 @@
                                                     </div>
                                                 @endif
 
-                                                @if ($request->hsr_message && !$isSellerBanned)
+                                                @if ($request->hsr_message && !$isSellerRestricted)
                                                     <div class="rounded-lg bg-gray-50 p-4 border border-gray-100 mb-6">
                                                         <p class="text-xs font-bold text-gray-400 uppercase mb-1">Your
                                                             Note</p>
@@ -308,7 +307,7 @@
                                                 <div
                                                     class="flex flex-col-reverse sm:flex-row items-center justify-between gap-4 pt-2">
                                                     <div class="flex items-center gap-4 w-full sm:w-auto">
-                                                        @if ($isSellerBanned)
+                                                        @if ($isSellerRestricted)
                                                             {{-- BANNED STATE: No Cancel button (visually cancelled) --}}
                                                             <span
                                                                 class="inline-flex items-center gap-2 text-sm font-bold text-red-600 bg-red-50 px-3 py-2 rounded-lg border border-red-100 w-full sm:w-auto justify-center">
@@ -337,7 +336,7 @@
                                                     </div>
 
                                                     {{-- Only show WhatsApp if NOT banned --}}
-                                                    @if (!$isSellerBanned)
+                                                    @if (!$isSellerRestricted)
                                                         <div class="flex gap-3 w-full sm:w-auto">
                                                             <a href="{{ route('service-requests.show', $request) }}"
                                                                 class="w-full sm:hidden text-center text-sm font-medium text-gray-500 hover:text-gray-900 border border-gray-200 rounded-lg py-2">
@@ -389,7 +388,7 @@
                                     @foreach ($sentRequests->whereIn('hsr_status', ['accepted', 'in_progress', 'waiting_payment', 'disputed']) as $request)
                                         @php
                                             // --- SETUP DATA ---
-                                            $isSellerBanned = $request->provider->hu_is_suspended == 1 || $request->provider->hu_is_blacklisted == 1;
+                                            $isSellerRestricted = $request->provider->hu_is_suspended == 1 || $request->provider->hu_is_blacklisted == 1 || $request->provider->hu_is_blocked == 1;
                                             $service = $request->studentService;
 
                                             // Date Parsing
@@ -406,12 +405,12 @@
                                                 ->gte($firstServiceDate->startOfDay());
 
                                             // STYLING LOGIC
-                                            if ($isSellerBanned) {
+                                            if ($isSellerRestricted) {
                                                 // BANNED STYLING
                                                 $badgeColors = 'border-red-200 bg-red-100 text-red-700';
                                                 $cardBorder = 'border-red-300 bg-red-50 hover:border-red-400';
                                                 $stripeColor = 'bg-red-500';
-                                                $statusText = 'SELLER SUSPENDED';
+                                                $statusText = 'SELLER RESTRICTED';
                                             } else {
                                                 // NORMAL STYLING
                                                 $statusText = strtoupper(str_replace('_', ' ', $request->hsr_status));
@@ -450,10 +449,10 @@
                                                             <span class="text-xs text-gray-400">#{{ $request->hsr_id }}</span>
                                                         </div>
                                                         <h4
-                                                            class="text-lg font-bold {{ $isSellerBanned ? 'text-gray-500 line-through' : 'text-gray-900' }} group-hover:text-blue-600 transition-colors leading-tight">
+                                                            class="text-lg font-bold {{ $isSellerRestricted ? 'text-gray-500 line-through' : 'text-gray-900' }} group-hover:text-blue-600 transition-colors leading-tight">
                                                             {{ optional($service)->hss_title ?? 'Custom Request' }}
                                                         </h4>
-                                                        @if (optional($service)->category && !$isSellerBanned)
+                                                        @if (optional($service)->category && !$isSellerRestricted)
                                                             <div class="mt-2 inline-flex items-center gap-1.5 rounded-md px-2 py-1"
                                                                 style="color:{{ $service->category->hc_color }}; background-color: {{ $service->category->hc_color }}10; border: 1px solid {{ $service->category->hc_color }};">
                                                                 <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24"
@@ -473,7 +472,7 @@
                                                     <div class="text-left sm:text-right mt-2 sm:mt-0">
                                                         @if ($request->hsr_offered_price)
                                                             <div
-                                                                class="text-2xl font-bold {{ $isSellerBanned ? 'text-gray-400' : 'text-gray-900' }}">
+                                                                class="text-2xl font-bold {{ $isSellerRestricted ? 'text-gray-400' : 'text-gray-900' }}">
                                                                 RM {{ number_format($request->hsr_offered_price, 2) }}
                                                             </div>
                                                             <div
@@ -488,7 +487,7 @@
                                                 <div class="h-px w-full bg-gray-100 my-4"></div>
 
                                                 {{-- Details Grid - Only show if valid --}}
-                                                @if (!$isSellerBanned)
+                                                @if (!$isSellerRestricted)
                                                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
                                                         {{-- Provider --}}
                                                         <div class="flex items-start gap-3">
@@ -543,7 +542,7 @@
                                                     {{-- LEFT SIDE: Cancel & Report --}}
                                                     <div class="flex items-center gap-4 w-full sm:w-auto">
 
-                                                        @if ($isSellerBanned)
+                                                        @if ($isSellerRestricted)
                                                             {{-- Banned State: Show cancelled text --}}
                                                             <span
                                                                 class="inline-flex items-center gap-2 text-sm font-bold text-red-600 bg-red-50 px-3 py-2 rounded-lg border border-red-100 w-full sm:w-auto justify-center">
@@ -600,7 +599,7 @@
                                                     </div>
 
                                                     {{-- RIGHT SIDE: Actions (Payment & Contact) --}}
-                                                    @if (!$isSellerBanned)
+                                                    @if (!$isSellerRestricted)
                                                         <div class="flex gap-3 w-full sm:w-auto">
 
                                                             {{-- 1. PAY NOW BUTTON --}}

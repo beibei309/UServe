@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Review;
+use App\Models\ServiceRequest;
 use App\Models\User;
 use App\Http\Requests\ProfileUpdateRequest;
 use Illuminate\Http\RedirectResponse;
@@ -18,7 +19,6 @@ class ProfileController extends Controller
 
     public function showPublic(User $user)
     {
-        
         $reviews = Review::where('hr_reviewee_id', $user->hu_id)
             ->with(['reviewer', 'studentService'])
             ->latest()
@@ -26,8 +26,13 @@ class ProfileController extends Controller
 
         $totalReviews = $reviews->count();
         $averageRating = $totalReviews > 0 ? $reviews->avg('hr_rating') : 0;
+        $reportCount = (int) ($user->hu_reports_count ?? 0);
+        $latestReportReason = ServiceRequest::where('hsr_requester_id', $user->hu_id)
+            ->whereNotNull('hsr_dispute_reason')
+            ->orderByDesc('updated_at')
+            ->value('hsr_dispute_reason');
 
-        return view('profile.show-public', compact('user', 'reviews', 'totalReviews', 'averageRating'));
+        return view('profile.show-public', compact('user', 'reviews', 'totalReviews', 'averageRating', 'reportCount', 'latestReportReason'));
     }
 
     public function edit(Request $request): View

@@ -14,16 +14,16 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>Account Suspended</h1>
+            <h1>Seller Access Blocked</h1>
         </div>
         <div class="content">
             <p>Dear {{ $user->hu_name }},</p>
-            <p>Your account on S2U has been suspended by the admin after moderation review.</p>
+            <p>Your seller access on S2U has been blocked after moderation review.</p>
             <div class="notice-box">
                 <strong>Reason:</strong><br>
                 {{ $reason }}
             </div>
-            <p>If you believe this is a mistake, please contact support.</p>
+            <p>You can still use buyer features. Contact support if you believe this action is incorrect.</p>
         </div>
         <div class="footer">
             <p>&copy; {{ date('Y') }} UPSI Connect. All rights reserved.</p>

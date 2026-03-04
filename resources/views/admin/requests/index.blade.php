@@ -224,12 +224,12 @@
                                                     onclick="openDisciplineModal(
                                                 '{{ $request->hsr_id }}', 
                                                 '{{ addslashes($request->hsr_dispute_reason) }}', 
-                                                { id: '{{ $request->requester->hu_id }}', name: '{{ $request->requester->hu_name }}', warnings: '{{ $request->requester->hu_warning_count }}' },
-                                                { id: '{{ $request->provider->hu_id }}', name: '{{ $request->provider->hu_name }}', warnings: '{{ $request->provider->hu_warning_count }}' },
+                                                { id: '{{ $request->requester->hu_id }}', name: '{{ $request->requester->hu_name }}', warnings: '{{ $request->requester->hu_warning_count }}', role: '{{ $request->requester->hu_role }}' },
+                                                { id: '{{ $request->provider->hu_id }}', name: '{{ $request->provider->hu_name }}', warnings: '{{ $request->provider->hu_warning_count }}', role: '{{ $request->provider->hu_role }}' },
                                                 { name: '{{ $reporterName }}', role: '{{ $reporterRole }}' } 
                                             )"
                                                     class="bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1 transition-colors">
-                                                    <i class="fa-solid fa-gavel"></i> Review
+                                                    <i class="fa-solid fa-gavel"></i> Resolve
                                                 </button>
                                             @endif
 
@@ -356,22 +356,22 @@
 
     {{-- DISPUTE RESOLUTION MODAL --}}
     <div id="disciplineModal"
-        class="fixed inset-0 bg-gray-900 bg-opacity-60 hidden z-50 flex items-center justify-center backdrop-blur-sm p-4">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden">
+        class="fixed inset-0 bg-gray-900 bg-opacity-60 hidden z-50 flex items-start sm:items-center justify-center backdrop-blur-sm p-3 sm:p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[92vh] overflow-hidden flex flex-col">
 
-            <div class="bg-gray-900 px-6 py-4 flex justify-between items-center">
+            <div class="bg-gray-900 px-5 sm:px-6 py-4 flex justify-between items-center">
                 <h3 class="text-lg font-bold text-white flex items-center gap-2">
-                    <i class="fa-solid fa-shield-halved text-red-500"></i> Resolve Dispute & Discipline
+                    <i class="fa-solid fa-shield-halved text-red-500"></i> Resolve Dispute
                 </h3>
                 <button onclick="closeDisciplineModal()" class="text-gray-400 hover:text-white transition-colors">
                     <i class="fa-solid fa-xmark text-xl"></i>
                 </button>
             </div>
 
-            <div class="p-6">
-                <div class="mb-6 bg-red-50 border border-red-100 p-4 rounded-xl">
+            <div class="p-5 sm:p-6 overflow-y-auto">
+                <div class="mb-4 bg-red-50 border border-red-100 p-3 rounded-xl">
                     <div class="flex justify-between items-center mb-2">
-                        <h4 class="text-xs font-bold text-red-500 uppercase tracking-wide">Dispute Reason</h4>
+                        <h4 class="text-xs font-bold text-red-500 uppercase tracking-wide">Reported Statement</h4>
                         <div
                             class="flex items-center gap-1 text-xs bg-white border border-red-100 px-2 py-1 rounded-md shadow-sm">
                             <span class="text-gray-400">Reported by:</span>
@@ -381,71 +381,118 @@
                         </div>
                     </div>
                     <p id="discModalReason" class="text-gray-800 text-sm italic font-medium leading-relaxed">...</p>
+                    <p class="text-[11px] text-red-700 mt-2">
+                        This is the reporter claim only. Verify evidence (payment proof, chat timeline, work delivery) before assigning fault.
+                    </p>
                 </div>
 
-                <p class="text-sm text-gray-500 mb-4 text-center">Who is at fault? Select a user to apply a penalty.</p>
+                <div class="mb-4 rounded-xl border border-indigo-100 bg-indigo-50 px-3 py-3 text-xs text-indigo-900">
+                    <div class="font-bold uppercase tracking-wide mb-2">How this works</div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        <div>1) Pick Buyer or Seller card based on who is at fault.</div>
+                        <div>2) Write message/reason in the note box.</div>
+                        <div>3) Click Warn or Suspend/Blacklist.</div>
+                        <div>4) Or close without penalty using Resume/Complete options below.</div>
+                    </div>
+                </div>
+
+                <p class="text-sm text-gray-500 mb-4 text-center">Who is at fault? Choose a card and action.</p>
 
                 <form id="disciplineForm" method="POST" action="">
     @csrf
     <input type="hidden" name="action_type" id="inputActionType"> 
     <input type="hidden" name="target_user_id" id="inputTargetUserId">
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
         {{-- 1. REQUESTER CARD --}}
-        <div class="border border-gray-200 rounded-xl p-4 hover:border-gray-300 transition-colors relative group">
+        <div class="border border-gray-200 rounded-xl p-3.5 hover:border-gray-300 transition-colors relative group">
             <div class="absolute top-2 right-2 text-xs font-bold text-gray-400">Buyer</div>
-            <h4 id="discReqName" class="font-bold text-gray-900 text-lg"></h4>
+            <h4 id="discReqName" class="font-bold text-gray-900 text-base"></h4>
             <div class="flex items-center gap-2 text-xs text-gray-500 mb-4">
                 <span class="bg-gray-100 px-2 py-0.5 rounded">ID: <span id="discReqId"></span></span>
                 <span class="bg-orange-100 text-orange-700 px-2 py-0.5 rounded flex items-center gap-1">
-                    <i class="fa-solid fa-triangle-exclamation"></i> <span id="discReqWarnings">0</span> Warnings
+                    <i class="fa-solid fa-triangle-exclamation"></i> <span id="discReqWarnings">0</span>/{{ config('moderation.user_warning_limit', 3) }} Warnings
                 </span>
             </div>
             <div class="grid grid-cols-2 gap-2">
-                <button type="button" onclick="submitDiscipline('warn', 'requester')" class="py-2 bg-yellow-400 hover:bg-yellow-500 text-yellow-900 rounded-lg text-sm font-bold transition-colors"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Warn</button>
-                <button type="button" onclick="submitDiscipline('ban', 'requester')" class="py-2 bg-gray-800 hover:bg-gray-900 text-white rounded-lg text-sm font-bold transition-colors"><i class="fa-solid fa-ban mr-1"></i> Ban</button>
+                <button type="button" onclick="submitDiscipline('warn', 'requester')" title="Send warning email, increase warning count, and resume request"
+                    class="py-2 bg-yellow-400 hover:bg-yellow-500 text-yellow-900 rounded-lg text-xs sm:text-sm font-bold transition-colors inline-flex items-center justify-center gap-1">
+                    <i class="fa-solid fa-triangle-exclamation"></i> Warn
+                </button>
+                <button type="button" onclick="submitDiscipline('suspend_or_blacklist', 'requester')" title="Community becomes blacklisted, others suspended; request cancelled"
+                    class="py-2 bg-gray-800 hover:bg-gray-900 text-white rounded-lg text-xs sm:text-sm font-bold transition-colors inline-flex items-center justify-center gap-1">
+                    <i class="fa-solid fa-ban"></i> Suspend / Blacklist
+                </button>
             </div>
         </div>
 
         {{-- 2. PROVIDER CARD --}}
-        <div class="border border-gray-200 rounded-xl p-4 hover:border-gray-300 transition-colors relative group">
+        <div class="border border-gray-200 rounded-xl p-3.5 hover:border-gray-300 transition-colors relative group">
             <div class="absolute top-2 right-2 text-xs font-bold text-gray-400">Seller</div>
-            <h4 id="discProvName" class="font-bold text-gray-900 text-lg"></h4>
+            <h4 id="discProvName" class="font-bold text-gray-900 text-base"></h4>
             <div class="flex items-center gap-2 text-xs text-gray-500 mb-4">
                 <span class="bg-gray-100 px-2 py-0.5 rounded">ID: <span id="discProvId"></span></span>
                 <span class="bg-orange-100 text-orange-700 px-2 py-0.5 rounded flex items-center gap-1">
-                    <i class="fa-solid fa-triangle-exclamation"></i> <span id="discProvWarnings">0</span> Warnings
+                    <i class="fa-solid fa-triangle-exclamation"></i> <span id="discProvWarnings">0</span>/{{ config('moderation.user_warning_limit', 3) }} Warnings
                 </span>
             </div>
             <div class="grid grid-cols-2 gap-2">
-                <button type="button" onclick="submitDiscipline('warn', 'provider')" class="py-2 bg-yellow-400 hover:bg-yellow-500 text-yellow-900 rounded-lg text-sm font-bold transition-colors"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Warn</button>
-                <button type="button" onclick="submitDiscipline('ban', 'provider')" class="py-2 bg-gray-800 hover:bg-gray-900 text-white rounded-lg text-sm font-bold transition-colors"><i class="fa-solid fa-ban mr-1"></i> Ban</button>
+                <button type="button" onclick="submitDiscipline('warn', 'provider')" title="Send warning email, increase warning count, and resume request"
+                    class="py-2 bg-yellow-400 hover:bg-yellow-500 text-yellow-900 rounded-lg text-xs sm:text-sm font-bold transition-colors inline-flex items-center justify-center gap-1">
+                    <i class="fa-solid fa-triangle-exclamation"></i> Warn
+                </button>
+                <button type="button" onclick="submitDiscipline('suspend_or_blacklist', 'provider')" title="Community becomes blacklisted, others suspended; request cancelled"
+                    class="py-2 bg-gray-800 hover:bg-gray-900 text-white rounded-lg text-xs sm:text-sm font-bold transition-colors inline-flex items-center justify-center gap-1">
+                    <i class="fa-solid fa-ban"></i> Suspend / Blacklist
+                </button>
             </div>
         </div>
     </div>
 
     {{-- Admin Note Input (FIXED ID HERE) --}}
-    <div class="mt-6">
+    <div class="mt-4">
         <label class="block text-xs font-bold text-gray-500 uppercase mb-1">
-            Warning Message / Ban Reason <span class="text-red-500">*</span>
+            Warning Message / Restriction Reason <span class="text-red-500">*</span>
         </label>
         <textarea 
             name="admin_note" 
             id="adminNoteInput"  {{-- THIS WAS MISSING --}}
-            rows="2" 
+            rows="3" 
             class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-red-500 outline-none" 
-            placeholder="Write the warning message here to send to the user..." 
+            placeholder="Write the warning message or suspension/blacklist reason..." 
             required></textarea>
+        <p class="text-[11px] text-gray-500 mt-1">Warn: request resumes. Suspend/Blacklist: request is cancelled.</p>
+        <p id="actionPreview" class="hidden text-[11px] mt-2 rounded-md px-2 py-1 border"></p>
     </div>
 </form>
 
-                <div class="mt-4 pt-4 border-t border-gray-100 text-center">
+                <div class="mt-4 pt-4 border-t border-gray-100">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-3">
+                        <form action="" method="POST" id="resumeForm">
+                            @csrf
+                            <input type="hidden" name="action_type" value="resume">
+                            <button type="submit"
+                                class="w-full py-2 bg-indigo-100 hover:bg-indigo-200 text-indigo-800 rounded-lg text-xs font-bold transition-colors">
+                                Close Without Penalty (Resume to Waiting Payment)
+                            </button>
+                        </form>
+                        <form action="" method="POST" id="completePaidForm">
+                            @csrf
+                            <input type="hidden" name="action_type" value="complete_paid">
+                            <button type="submit"
+                                class="w-full py-2 bg-green-100 hover:bg-green-200 text-green-800 rounded-lg text-xs font-bold transition-colors">
+                                Close Without Penalty (Mark Completed & Paid)
+                            </button>
+                        </form>
+                    </div>
+                    <div class="text-center">
                     <form action="" method="POST" id="dismissForm">
                         @csrf
                         <input type="hidden" name="action_type" value="dismiss">
                         <button type="submit" class="text-xs text-gray-400 hover:text-gray-600 underline">Dismiss dispute
-                            without penalty (Mark as Resolved)</button>
+                            without penalty (Mark as Cancelled)</button>
                     </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -518,6 +565,10 @@
 
         let currentRequesterId = null;
         let currentProviderId = null;
+        let currentRequesterRole = null;
+        let currentProviderRole = null;
+        let currentRequesterWarnings = 0;
+        let currentProviderWarnings = 0;
 
         function openDisciplineModal(requestId, reason, requester, provider, reporter) {
             document.getElementById('discModalReason').textContent = reason || 'No reason provided.';
@@ -534,21 +585,30 @@
             document.getElementById('discReqId').textContent = requester.id;
             document.getElementById('discReqWarnings').textContent = requester.warnings;
             currentRequesterId = requester.id;
+            currentRequesterRole = requester.role;
+            currentRequesterWarnings = parseInt(requester.warnings || 0, 10);
 
             document.getElementById('discProvName').textContent = provider.name;
             document.getElementById('discProvId').textContent = provider.id;
             document.getElementById('discProvWarnings').textContent = provider.warnings;
             currentProviderId = provider.id;
+            currentProviderRole = provider.role;
+            currentProviderWarnings = parseInt(provider.warnings || 0, 10);
 
             const baseUrl = "{{ url('admin/requests') }}/" + requestId + "/resolve";
             document.getElementById('disciplineForm').action = baseUrl;
             document.getElementById('dismissForm').action = baseUrl;
+            document.getElementById('resumeForm').action = baseUrl;
+            document.getElementById('completePaidForm').action = baseUrl;
+            document.getElementById('actionPreview').classList.add('hidden');
+            document.getElementById('actionPreview').textContent = '';
 
             document.getElementById('disciplineModal').classList.remove('hidden');
         }
 
         function closeDisciplineModal() {
             document.getElementById('disciplineModal').classList.add('hidden');
+            document.getElementById('actionPreview').classList.add('hidden');
         }
 
         function submitDiscipline(action, target) {
@@ -573,10 +633,36 @@
             const targetId = (target === 'requester') ? currentRequesterId : currentProviderId;
             const targetName = (target === 'requester') ? document.getElementById('discReqName').textContent : document
                 .getElementById('discProvName').textContent;
+            const targetWarnings = (target === 'requester') ? currentRequesterWarnings : currentProviderWarnings;
+            const warningLimit = {{ config('moderation.user_warning_limit', 3) }};
 
-            let confirmMsg = (action === 'ban') ?
-                `Are you sure you want to PERMANENTLY BAN ${targetName}?` :
-                `Send this warning to ${targetName}?`;
+            if (action === 'warn' && targetWarnings >= warningLimit) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Warning Limit Reached',
+                    text: `This user is already at ${warningLimit}/${warningLimit}. Use Suspend/Blacklist for the next action.`,
+                    confirmButtonColor: '#3085d6',
+                });
+                return;
+            }
+
+            const targetRole = (target === 'requester') ? currentRequesterRole : currentProviderRole;
+            let confirmMsg;
+            let previewMsg;
+            const previewEl = document.getElementById('actionPreview');
+            if (action === 'suspend_or_blacklist') {
+                const penaltyLabel = (targetRole === 'community') ? 'BLACKLIST' : 'SUSPEND';
+                previewMsg = (targetRole === 'community')
+                    ? 'Preview: Sends blacklist email, sets account to blacklisted, and cancels this request.'
+                    : 'Preview: Sends suspension email, sets account to suspended, and cancels this request.';
+                confirmMsg = `Are you sure you want to ${penaltyLabel} ${targetName}?\n${previewMsg}`;
+            } else {
+                previewMsg = 'Preview: Sends warning email, increments warning count, and resumes this request to Waiting Payment.';
+                confirmMsg = `Send this warning to ${targetName}?\n${previewMsg}`;
+            }
+            previewEl.textContent = previewMsg;
+            previewEl.className = 'text-[11px] mt-2 rounded-md px-2 py-1 border bg-indigo-50 border-indigo-200 text-indigo-800';
+            previewEl.classList.remove('hidden');
 
             // 3. Confirm and Submit
             if (confirm(confirmMsg)) {

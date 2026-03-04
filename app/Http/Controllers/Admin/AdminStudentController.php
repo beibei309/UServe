@@ -21,7 +21,7 @@ class AdminStudentController extends Controller
     public function index(Request $request)
 {
     $search  = $request->input('search');
-    $status  = $request->input('status'); // student | helper | banned | null
+    $status  = $request->input('status');
     $faculty = $request->input('faculty');
 
     $students = User::whereIn('hu_role', ['student', 'helper'])
@@ -39,18 +39,28 @@ class AdminStudentController extends Controller
         })
 
         // STATUS FILTERS
-        ->when($status === 'banned', function ($query) {
+        ->when($status === 'suspended', function ($query) {
             $query->where('hu_is_suspended', 1);
+        })
+
+        ->when($status === 'blacklisted', function ($query) {
+            $query->where('hu_is_blacklisted', 1);
+        })
+
+        ->when($status === 'blocked', function ($query) {
+            $query->where('hu_is_blocked', 1);
         })
 
         ->when($status === 'student', function ($query) {
             $query->where('hu_role', 'student')
-                ->where('hu_is_suspended', 0);
+                ->where('hu_is_suspended', 0)
+                ->where('hu_is_blacklisted', 0);
         })
 
         ->when($status === 'helper' || $status === 'helpers', function ($query) {
             $query->where('hu_role', 'helper')
-                ->where('hu_is_suspended', 0);
+                ->where('hu_is_suspended', 0)
+                ->where('hu_is_blacklisted', 0);
         })
 
         // FACULTY FILTER
@@ -207,6 +217,7 @@ class AdminStudentController extends Controller
     // Ban user
     $student->update([
         'hu_is_suspended' => 1,
+        'hu_is_blacklisted' => 0,
         'hu_blacklist_reason' => $request->blacklist_reason,
     ]);
 
@@ -237,13 +248,15 @@ class AdminStudentController extends Controller
     // Unban user
     $student->update([
         'hu_is_suspended' => 0,
+        'hu_is_blacklisted' => 0,
+        'hu_is_blocked' => 0,
         'hu_blacklist_reason' => null,
     ]);
 
     Mail::to($student->hu_email)->send(new AccountUnbannedMail($student));
 
     return redirect()->route('admin.students.index')
-        ->with('success', 'User unbanned and email notification sent.');
+        ->with('success', 'User reactivated and email notification sent.');
 }
 
 // Show helper verification selfie
@@ -299,13 +312,17 @@ public function export(Request $request)
     // STATUS FILTER
     if ($request->filled('status')) {
         if ($request->status == 'active') {
-            $query->where('hu_is_suspended', 0);
-        } elseif ($request->status == 'banned') {
+            $query->where('hu_is_suspended', 0)->where('hu_is_blacklisted', 0)->where('hu_is_blocked', 0);
+        } elseif ($request->status == 'suspended') {
             $query->where('hu_is_suspended', 1);
+        } elseif ($request->status == 'blacklisted') {
+            $query->where('hu_is_blacklisted', 1);
+        } elseif ($request->status == 'blocked') {
+            $query->where('hu_is_blocked', 1);
         } elseif ($request->status == 'student') {
-            $query->where('hu_role', 'student')->where('hu_is_suspended', 0);
+            $query->where('hu_role', 'student')->where('hu_is_suspended', 0)->where('hu_is_blacklisted', 0);
         } elseif ($request->status == 'helper') {
-            $query->where('hu_role', 'helper')->where('hu_is_suspended', 0);
+            $query->where('hu_role', 'helper')->where('hu_is_suspended', 0)->where('hu_is_blacklisted', 0);
         }
     }
 
@@ -321,7 +338,7 @@ public function export(Request $request)
                 'Email' => $student->hu_email,
                 'Phone' => $student->hu_phone,
                 'Student ID' => $student->hu_student_id,
-                'Status' => $student->hu_is_suspended ? 'Banned' : ($student->hu_verification_status == 'approved' ? 'Verified' : 'Not Verified'),
+                'Status' => ucfirst($student->moderationStatusKey()),
             ];
         });
 

@@ -1,21 +1,24 @@
 @auth
     @php
         $user = auth()->user();
-        $isRestricted = $user->hu_is_blocked || $user->hu_is_suspended || $user->hu_is_blacklisted;
+        $isRestricted = $user->isHardLocked();
         $reason = $user->hu_blacklist_reason ?: 'No specific reason provided.';
 
         $title = 'Account Restricted';
-        $message = 'You cannot continue browsing at this time. Please contact support.';
+        $message = 'Your account cannot access the platform at this time.';
+        $statusLabel = 'Restricted';
+        $scope = 'Site access: Disabled';
 
         if ($user->hu_is_blacklisted) {
             $title = 'Account Blacklisted';
             $message = 'Your account has been permanently blacklisted. Please contact support for further assistance.';
+            $statusLabel = 'Blacklisted';
+            $scope = 'Site access: Disabled permanently';
         } elseif ($user->hu_is_suspended) {
             $title = 'Account Suspended';
             $message = 'Your account has been suspended temporarily. Please contact support for details.';
-        } elseif ($user->hu_is_blocked) {
-            $title = 'Account Blocked';
-            $message = 'Your account has been blocked. Please contact support for assistance.';
+            $statusLabel = 'Suspended';
+            $scope = 'Site access: Disabled temporarily';
         }
     @endphp
 
@@ -32,6 +35,12 @@
 
                 <h2 class="text-2xl font-bold text-slate-900 mb-3">{{ $title }}</h2>
                 <p class="text-slate-600 mb-6 leading-relaxed">{{ $message }}</p>
+
+                <div class="bg-slate-50 p-4 rounded-xl text-left border border-slate-200 mb-4">
+                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wide">Restriction Type</p>
+                    <p class="text-sm font-semibold text-slate-900 mt-1">{{ $statusLabel }}</p>
+                    <p class="text-xs text-slate-600 mt-1">{{ $scope }}</p>
+                </div>
 
                 <div class="bg-red-50 p-4 rounded-xl text-left border border-red-100 mb-6">
                     <p class="text-xs font-bold text-red-500 uppercase tracking-wide">Reason</p>

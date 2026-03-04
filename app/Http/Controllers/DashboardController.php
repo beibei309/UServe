@@ -141,6 +141,11 @@ public function index(Request $request)
             return back()->with('error', 'Unauthorized action.');
         }
 
+        if ($user->hu_is_blocked) {
+            session(['view_mode' => 'buyer']);
+            return redirect()->route('dashboard')->with('error', 'Your account is blocked from seller actions. You can continue using buyer features.');
+        }
+
         // Get current mode (default to 'seller' for helpers if not set)
         $currentMode = session('view_mode', 'seller');
 

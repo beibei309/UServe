@@ -1,16 +1,33 @@
-@component('mail::message')
-# Your Account Has Been Re-Activated
-
-Hello **{{ $user->hu_name }}**, 
-
-Good news! We’re happy to inform you that the restriction (blacklist) on your account has been lifted. You can now access the **S2U / UpsiConnect** platform again.
-
-@component('mail::button', ['url' => config('app.url') . '/login'])
-Login Now
-@endcomponent
-
-If you have any questions, please feel free to contact our support team.
-
-Thank you,<br>
-**{{ config('app.name') }} Admin Team**
-@endcomponent
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; background: #ffffff; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .header { border-bottom: 2px solid #10b981; padding-bottom: 15px; margin-bottom: 20px; }
+        .header h1 { color: #059669; margin: 0; font-size: 24px; }
+        .content { color: #333333; line-height: 1.6; }
+        .notice-box { background-color: #ecfdf5; border-left: 4px solid #10b981; padding: 15px; margin: 20px 0; color: #065f46; }
+        .button { display: inline-block; background-color: #4F46E5; color: #ffffff; text-decoration: none; padding: 10px 18px; border-radius: 6px; margin-top: 8px; }
+        .footer { margin-top: 30px; font-size: 12px; color: #666666; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Account Reactivated</h1>
+        </div>
+        <div class="content">
+            <p>Dear {{ $user->hu_name }},</p>
+            <p>Your account restriction has been lifted. You can now access S2U again.</p>
+            <div class="notice-box">
+                Your account is back to active status.
+            </div>
+            <a class="button" href="{{ config('app.url') . '/login' }}">Login Now</a>
+        </div>
+        <div class="footer">
+            <p>&copy; {{ date('Y') }} UPSI Connect. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

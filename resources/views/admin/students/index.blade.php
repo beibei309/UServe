@@ -7,6 +7,9 @@
 @section('content')
     <div>
         <h1 class="text-3xl font-bold mb-4">Manage Students</h1>
+        <p class="text-xs text-gray-500 mb-4">
+            This page manages student/helper suspension. Seller blocking is handled in Feedback, and community blacklist is handled in Community Management.
+        </p>
 
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-5">
             <form method="GET" class="flex items-center gap-2 w-full md:w-auto">
@@ -54,9 +57,19 @@
                 Sellers
             </a>
 
-            <a href="{{ route('admin.students.index', ['status' => 'banned'] + request()->except('page')) }}"
-                class="{{ $pill }} {{ request('status') == 'banned' ? $active : $inactive }}">
+            <a href="{{ route('admin.students.index', ['status' => 'suspended'] + request()->except('page')) }}"
+                class="{{ $pill }} {{ request('status') == 'suspended' ? $active : $inactive }}">
                 Suspended
+            </a>
+
+            <a href="{{ route('admin.students.index', ['status' => 'blacklisted'] + request()->except('page')) }}"
+                class="{{ $pill }} {{ request('status') == 'blacklisted' ? $active : $inactive }}">
+                Blacklisted
+            </a>
+
+            <a href="{{ route('admin.students.index', ['status' => 'blocked'] + request()->except('page')) }}"
+                class="{{ $pill }} {{ request('status') == 'blocked' ? $active : $inactive }}">
+                Blocked
             </a>
         </div>
 
@@ -101,8 +114,12 @@
                             <td class="py-3 px-4 text-sm">{{ $student->hu_student_id ?? '-' }}</td>
 
                             <td class="py-3 px-4">
-                                @if ($student->hu_is_suspended)
+                                @if ($student->hu_is_blacklisted)
+                                    <span class="px-3 py-1 text-xs bg-red-200 text-red-800 rounded-full">Blacklisted</span>
+                                @elseif ($student->hu_is_suspended)
                                     <span class="px-3 py-1 text-xs bg-red-100 text-red-700 rounded-full">Suspended</span>
+                                @elseif ($student->hu_is_blocked)
+                                    <span class="px-3 py-1 text-xs bg-amber-100 text-amber-800 rounded-full">Blocked</span>
                                 @elseif ($student->hu_verification_status === 'approved')
                                         <span class="px-3 py-1 text-xs bg-green-100 text-green-700 rounded-full">Verified</span>
                                 @else
@@ -126,20 +143,20 @@
                                     </a>
 
                                     {{-- BAN / UNBAN --}}
-                                    @if ($student->hu_is_suspended)
+                                    @if ($student->hu_is_suspended || $student->hu_is_blacklisted || $student->hu_is_blocked)
                                         {{-- Tambah class 'unban-form' pada form dan 'unban-btn' pada button --}}
                                         <form action="{{ route('admin.students.unban', $student->hu_id) }}" method="POST"
                                             class="unban-form inline">
                                             @csrf
                                             <button type="button"
                                                 class="text-green-600 hover:text-green-900 transition unban-btn"
-                                                title="Unban">
+                                                title="Reactivate">
                                                 <i class="fa-solid fa-unlock"></i>
                                             </button>
                                         </form>
                                     @else
                                         <button onclick="openBanModal({{ $student->hu_id }})"
-                                            class="text-red-600 hover:text-red-900 transition" title="Ban">
+                                            class="text-red-600 hover:text-red-900 transition" title="Suspend">
                                             <i class="fa-solid fa-ban"></i>
                                         </button>
                                     @endif
@@ -172,8 +189,8 @@
     <div id="banModal"
         class="hidden fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
         <div class="bg-white w-full max-w-md p-6 rounded-lg shadow-xl">
-            <h2 class="text-xl font-bold mb-4">Ban Student</h2>
-            <p class="text-gray-600 mb-3">Please provide a reason for banning this student:</p>
+            <h2 class="text-xl font-bold mb-4">Suspend Student</h2>
+            <p class="text-gray-600 mb-3">Please provide a reason for suspending this student:</p>
             <textarea id="banReason" rows="3" class="w-full border rounded p-2 focus:ring focus:ring-red-300"
                 placeholder="Write reason..."></textarea>
 
@@ -184,7 +201,7 @@
             <div class="mt-5 flex justify-end gap-3">
                 <button onclick="closeBanModal()" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded">Cancel</button>
                 <button onclick="submitBan()" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded">Confirm
-                    Ban</button>
+                    Suspension</button>
             </div>
         </div>
     </div>
@@ -205,7 +222,7 @@
         function submitBan() {
             const reason = document.getElementById("banReason").value.trim();
             if (!reason) {
-                alert("Please enter a ban reason.");
+                alert("Please enter a suspension reason.");
                 return;
             }
 

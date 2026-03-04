@@ -216,11 +216,18 @@
                             Current Standing
                         </span>
 
-                        @if($student->hu_is_suspended)
+                        @if($student->hu_is_blacklisted || $student->hu_is_suspended)
                             <div class="p-2 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
-                                <strong>Banned</strong><br>
+                                <strong>{{ ucfirst($student->moderationStatusKey()) }}</strong><br>
                                 <span class="text-xs">
                                     Reason: {{ $student->hu_blacklist_reason }}
+                                </span>
+                            </div>
+                        @elseif($student->hu_is_blocked)
+                            <div class="p-2 bg-amber-50 border border-amber-200 rounded text-amber-800 text-sm">
+                                <strong>Blocked</strong><br>
+                                <span class="text-xs">
+                                    Seller actions are restricted.
                                 </span>
                             </div>
                         @else

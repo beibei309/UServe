@@ -21,6 +21,6 @@ class ServiceSuspendedMail extends Mailable
     public function build()
     {
         return $this->subject('Your Service Has Been Suspended')
-                    ->markdown('emails.service.suspended');
+                    ->view('emails.service.suspended');
     }
 }

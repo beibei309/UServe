@@ -1,7 +1,7 @@
 @auth
     @php
         $user = auth()->user();
-        $isRestricted = $user->hu_is_blocked || $user->hu_is_suspended || $user->hu_is_blacklisted;
+        $isRestricted = $user->isHardLocked();
         $isCommunityUnverified =
             $user->hu_role === 'community' &&
             $user->hu_verification_status !== 'approved' &&

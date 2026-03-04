@@ -24,7 +24,7 @@ class UserUnblacklisted extends Mailable
     public function build()
     {
         return $this->subject('Important: Your account has been reactivate')
-                    ->markdown('emails.unblacklisted');
+                    ->view('emails.unblacklisted');
     }
 
     /**

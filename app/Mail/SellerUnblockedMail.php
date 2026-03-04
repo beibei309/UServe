@@ -7,11 +7,11 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
-class GraduationReminderMail extends Mailable
+class SellerUnblockedMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $user;
+    public User $user;
 
     public function __construct(User $user)
     {
@@ -20,7 +20,7 @@ class GraduationReminderMail extends Mailable
 
     public function build()
     {
-        return $this->subject('Action Required: Preparing for Graduation')
-                    ->view('emails.graduation_reminder'); 
+        return $this->subject('S2U: Seller Access Restored')
+            ->view('emails.seller_unblocked');
     }
 }

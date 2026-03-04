@@ -76,12 +76,13 @@
                     </div>
                 </div>
 
-                {{-- BANNED --}}
-                @if ($student->hu_is_suspended)
-                    <div class="mt-6 p-4 bg-red-50 border border-red-200 rounded">
-                        <strong class="text-red-700">Student Banned</strong>
-                        <p class="text-sm text-red-600 mt-1">
-                            Reason: {{ $student->hu_blacklist_reason }}
+                @if ($student->hu_is_blacklisted || $student->hu_is_suspended || $student->hu_is_blocked)
+                    <div class="mt-6 p-4 {{ $student->hu_is_blocked ? 'bg-amber-50 border-amber-200' : 'bg-red-50 border-red-200' }} border rounded">
+                        <strong class="{{ $student->hu_is_blocked ? 'text-amber-700' : 'text-red-700' }}">
+                            {{ ucfirst($student->moderationStatusKey()) }}
+                        </strong>
+                        <p class="text-sm {{ $student->hu_is_blocked ? 'text-amber-700' : 'text-red-600' }} mt-1">
+                            Reason: {{ $student->hu_blacklist_reason ?: 'No specific reason provided.' }}
                         </p>
                     </div>
                 @endif
@@ -94,17 +95,17 @@
                     Edit Profile
                 </a>
 
-                @if ($student->hu_is_suspended)
+                @if ($student->hu_is_suspended || $student->hu_is_blacklisted)
                     <form action="{{ route('admin.students.unban', $student->hu_id) }}" method="POST">
                         @csrf
                         <button class="px-4 py-2 bg-green-600 text-white rounded text-sm w-full">
-                            Unban
+                            Reactivate
                         </button>
                     </form>
                 @else
                     <button onclick="openBanModal({{ $student->hu_id }})"
                         class="px-4 py-2 bg-red-600 text-white rounded text-sm">
-                        Ban
+                        Suspend
                     </button>
                 @endif
             </div>
@@ -347,9 +348,9 @@
     {{-- BAN MODAL --}}
     <div id="banModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div class="bg-white p-6 rounded-lg w-full max-w-md">
-            <h2 class="text-lg font-bold mb-3">Ban Student</h2>
+            <h2 class="text-lg font-bold mb-3">Suspend Student</h2>
 
-            <textarea id="banReason" rows="3" class="w-full border rounded p-2 mb-4" placeholder="Reason for ban..."></textarea>
+            <textarea id="banReason" rows="3" class="w-full border rounded p-2 mb-4" placeholder="Reason for suspension..."></textarea>
 
             <form id="banForm" method="POST">@csrf</form>
 

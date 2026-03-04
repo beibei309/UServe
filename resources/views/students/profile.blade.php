@@ -88,6 +88,22 @@
                                                 reviews</span>
                                         </div>
                                     </div>
+
+                                    @if (($reportCount ?? 0) > 0)
+                                        <div class="mt-3 max-w-xl rounded-xl border border-red-200 bg-red-50 px-4 py-3">
+                                            <p class="text-[10px] font-bold text-red-800 uppercase tracking-widest">Report</p>
+                                            <p class="text-sm text-red-700 mt-1">
+                                                This account has been reported <span class="font-black">{{ $reportCount }} time(s)</span>.
+                                            </p>
+                                            @if (!empty($latestReportReason))
+                                                <p class="text-xs text-red-700 mt-1">
+                                                    Latest report reason: {{ \Illuminate\Support\Str::limit($latestReportReason, 140) }}
+                                                </p>
+                                            @else
+                                                <p class="text-xs text-red-700 mt-1">Report reason is under admin review.</p>
+                                            @endif
+                                        </div>
+                                    @endif
                                 </div>
 
                                 {{-- ACTION BUTTONS --}}

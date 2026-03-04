@@ -51,15 +51,13 @@
                 $selectedPackageLabel = trim(str_replace('"', '', (string) $selectedPackage));
                 $selectedPackageLabel = $selectedPackageLabel !== '' ? $selectedPackageLabel : 'Custom';
 
-                // --- 1. Check Suspension Status ---
-                $providerBanned = $serviceRequest->provider->hu_is_suspended == 1 || $serviceRequest->provider->hu_is_blacklisted == 1;
-                $buyerBanned = $serviceRequest->requester->hu_is_suspended == 1 || $serviceRequest->requester->hu_is_blacklisted == 1;
-                $isSuspended = $providerBanned || $buyerBanned;
+                $providerRestricted = $serviceRequest->provider->hu_is_suspended == 1 || $serviceRequest->provider->hu_is_blacklisted == 1 || $serviceRequest->provider->hu_is_blocked == 1;
+                $buyerRestricted = $serviceRequest->requester->hu_is_suspended == 1 || $serviceRequest->requester->hu_is_blacklisted == 1;
+                $isRestricted = $providerRestricted || $buyerRestricted;
 
                 // --- 2. Determine Colors (Using Inline Styles to guarantee visibility) ---
                 
-                if ($isSuspended) {
-                    // Force RED if suspended
+                if ($isRestricted) {
                     $headerStyle = 'background: linear-gradient(to right, #ef4444, #b91c1c);'; // Red-500 to Red-700
                     $statusDot = 'bg-red-400';
                 } else {
@@ -124,8 +122,8 @@
                                 {{-- Dynamic Status Dot --}}
                                 <span class="w-3 h-3 rounded-full {{ $statusDot }}"></span>
                                 
-                                @if($isSuspended)
-                                    Suspended / Blocked
+                                @if($isRestricted)
+                                    Account Restricted
                                 @else
                                     {{ str_replace('_', ' ', $serviceRequest->hsr_status) }}
                                 @endif
@@ -284,7 +282,7 @@
                                         Service Reference
                                     </h3>
 
-                                    @if($providerBanned)
+                                    @if($providerRestricted)
                                         {{-- BANNED: Non-clickable Div --}}
                                         <div class="block bg-gray-50 rounded-xl border border-gray-200 p-5 flex gap-4 items-start opacity-75 cursor-not-allowed relative">
                                             {{-- "Unavailable" Badge --}}
@@ -388,7 +386,7 @@
                                 {{-- 1. Service Seller --}}
                                 <div class="mb-6">
                                     <span class="text-xs font-semibold text-indigo-500 mb-2 block">Service Seller</span>
-                                    @if($providerBanned)
+                                    @if($providerRestricted)
                                         <div class="flex items-center gap-3 p-2 -ml-2 rounded-lg bg-gray-50 border border-gray-100 opacity-75 cursor-not-allowed">
                                             <div class="relative">
                                                 <img src="{{ $serviceRequest->provider->hu_profile_photo_path ? asset($serviceRequest->provider->hu_profile_photo_path) : 'https://ui-avatars.com/api/?name=' . urlencode($serviceRequest->provider->hu_name) }}" class="w-10 h-10 rounded-full border border-gray-200 grayscale">
@@ -418,7 +416,7 @@
                                 {{-- 2. Requester (Buyer) --}}
                                 <div>
                                     <span class="text-xs font-semibold text-blue-500 mb-2 block">Buyer</span>
-                                    @if($buyerBanned)
+                                    @if($buyerRestricted)
                                         <div class="flex items-center gap-3 p-2 -ml-2 rounded-lg bg-gray-50 border border-gray-100 opacity-75 cursor-not-allowed">
                                             <div class="relative">
                                                 <img src="{{ $serviceRequest->requester->hu_profile_photo_path ? asset($serviceRequest->requester->hu_profile_photo_path) : 'https://ui-avatars.com/api/?name=' . urlencode($serviceRequest->requester->hu_name) }}" class="w-10 h-10 rounded-full border border-gray-200 grayscale">
@@ -453,11 +451,10 @@
                                         $contactPhone = $isProvider ? $serviceRequest->requester->hu_phone : $serviceRequest->provider->hu_phone;
                                     @endphp
                                     
-                                    {{-- If users are suspended, disable actions --}}
-                                    @if($isSuspended)
+                                    @if($isRestricted)
                                         <div class="p-3 bg-red-50 text-red-700 text-sm font-medium rounded-lg border border-red-100 flex items-center gap-2">
                                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-                                            Actions unavailable due to account suspension.
+                                            Actions unavailable because one account is restricted.
                                         </div>
                                     @else
                                         @if ($contactPhone)

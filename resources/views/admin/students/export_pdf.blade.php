@@ -27,7 +27,7 @@
                     <td>{{ $student->hu_email }}</td>
                     <td>{{ $student->hu_phone }}</td>
                     <td>{{ $student->hu_student_id }}</td>
-                    <td>{{ $student->hu_is_suspended ? 'Banned' : ($student->hu_verification_status == 'approved' ? 'Verified' : 'Not Verified') }}</td>
+                    <td>{{ ucfirst($student->moderationStatusKey()) }}</td>
                 </tr>
             @endforeach
         </tbody>

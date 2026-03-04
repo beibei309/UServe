@@ -439,12 +439,19 @@ public function deleteWorkExperienceFile()
                         ->get();
 
         $averageRating = (float) ($user->reviewsReceived()->avg('hr_rating') ?? 0);
+        $reportCount = (int) ($user->hu_reports_count ?? 0);
+        $latestReportReason = ServiceRequest::where('hsr_requester_id', $user->hu_id)
+            ->whereNotNull('hsr_dispute_reason')
+            ->orderByDesc('updated_at')
+            ->value('hsr_dispute_reason');
 
         return view('students.profile', [
             'user' => $user,
             'services' => $services,
             'reviews' => $user->reviewsReceived,
             'averageRating' => round($averageRating, 1),
+            'reportCount' => $reportCount,
+            'latestReportReason' => $latestReportReason,
         ]);
     }
 }

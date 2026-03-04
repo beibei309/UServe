@@ -172,6 +172,33 @@ public function favoriteServices()
         return (bool) $this->hu_is_available;
     }
 
+    public function isHardLocked(): bool
+    {
+        return (bool) ($this->hu_is_suspended || $this->hu_is_blacklisted);
+    }
+
+    public function isSellerRestricted(): bool
+    {
+        return (bool) ($this->isHardLocked() || $this->hu_is_blocked);
+    }
+
+    public function moderationStatusKey(): string
+    {
+        if ($this->hu_is_blacklisted) {
+            return 'blacklisted';
+        }
+
+        if ($this->hu_is_suspended) {
+            return 'suspended';
+        }
+
+        if ($this->hu_is_blocked) {
+            return 'blocked';
+        }
+
+        return 'active';
+    }
+
     public function getTrustBadgeAttribute(): string
     {
         // Staff gets priority badge even if they are community role

@@ -72,10 +72,14 @@
             Active
         </a>
 
-        <!-- BLACKLISTED -->
         <a href="{{ route('admin.community.index', ['status' => 'suspended'] + request()->except('page')) }}"
-            class="{{ $pill }} {{ request('status') == 'blacklisted' ? $active : $inactive }}">
+            class="{{ $pill }} {{ request('status') == 'suspended' ? $active : $inactive }}">
             Suspended
+        </a>
+
+        <a href="{{ route('admin.community.index', ['status' => 'blacklisted'] + request()->except('page')) }}"
+            class="{{ $pill }} {{ request('status') == 'blacklisted' ? $active : $inactive }}">
+            Blacklisted
         </a>
 
     </div>
@@ -135,9 +139,13 @@
                         </td>
 
                         <td class="py-3 px-4 text-sm">
-                            {{-- Check if either flag is true --}}
-                            @if ($user->hu_is_blacklisted || $user->hu_is_suspended)
-                                <span class="px-3 py-1 text-sm bg-red-200 text-red-800 rounded-full">Suspended</span>
+                            @if ($user->hu_is_blacklisted)
+                                <span class="px-3 py-1 text-sm bg-red-200 text-red-800 rounded-full">Blacklisted</span>
+                                @if ($user->hu_blacklist_reason)
+                                    <p class="text-xs text-red-700 mt-1">{{ $user->hu_blacklist_reason }}</p>
+                                @endif
+                            @elseif ($user->hu_is_suspended)
+                                <span class="px-3 py-1 text-sm bg-red-100 text-red-700 rounded-full">Suspended</span>
                                 @if ($user->hu_blacklist_reason)
                                     <p class="text-xs text-red-700 mt-1">{{ $user->hu_blacklist_reason }}</p>
                                 @endif
@@ -189,12 +197,11 @@
         <i class="fa-solid fa-ban"></i>
     </button>
 @else
-    {{-- Show Unblacklist Button if user is Blacklisted OR Suspended --}}
     <form action="{{ route('admin.community.unblacklist', $user->hu_id) }}" method="POST"
         class="inline unblacklist-form">
         @csrf
         <button type="button" onclick="confirmUnblacklist(this)"
-            class="text-green-600 hover:text-green-900 transition" title="Unblacklist">
+            class="text-green-600 hover:text-green-900 transition" title="Reactivate">
             <i class="fa-solid fa-unlock"></i>
         </button>
     </form>
@@ -346,7 +353,7 @@
 
         <div class="bg-white w-full max-w-md p-6 rounded-lg shadow-xl">
 
-            <h2 class="text-xl font-bold mb-4">Suspend User</h2>
+            <h2 class="text-xl font-bold mb-4">Blacklist User</h2>
             <p class="text-gray-600 mb-3">Please provide a reason:</p>
 
             <textarea id="blacklistReason" rows="3" class="w-full border rounded p-2 focus:ring focus:ring-red-300"
@@ -396,7 +403,7 @@
             const reason = document.getElementById("blacklistReason").value.trim();
 
             if (!reason) {
-                alert("Please enter account suspended reason.");
+                alert("Please enter a blacklist reason.");
                 return;
             }
 

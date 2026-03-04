@@ -10,7 +10,7 @@ use App\Models\Review;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
-use App\Mail\WarningMail;
+use App\Mail\ServiceWarningMail;
 use App\Mail\ServiceSuspendedMail;
 use App\Mail\ServiceApprovedMail; 
 use App\Mail\ServiceRejectedMail; 
@@ -127,6 +127,11 @@ class AdminServicesController extends Controller
     // 2. Cari Servis
     $service = StudentService::findOrFail($id);
     $student = $service->user;
+    $limit = (int) config('moderation.service_warning_limit', 3);
+
+    if ((int) $service->hss_warning_count >= $limit) {
+        return back()->with('warning', "Service already reached {$limit}/{$limit} warnings. Suspend if needed.");
+    }
 
     // 3. Update Warning
     $service->hss_warning_count = $service->hss_warning_count + 1;
@@ -141,22 +146,15 @@ class AdminServicesController extends Controller
 
     // 4. Hantar Email
     try {
-        $emailData = [
-            'student_name' => $student->hu_name,
-            'service_name' => $service->hss_title,
-            'reason'       => $request->reason,
-            'count'        => $service->hss_warning_count
-        ];
-
-        Mail::to($student->hu_email)->send(new WarningMail($emailData));
+        Mail::to($student->hu_email)->send(new ServiceWarningMail($service, $request->reason));
 
     } catch (\Exception $e) {
         Log::error('Email warning gagal dihantar: ' . $e->getMessage());
     }
 
     // 5. Response UI
-    if ($service->hss_warning_count >= 3) {
-        return back()->with('warning', 'Student telah mencapai 3/3 warning. Sila suspend jika perlu.');
+    if ($service->hss_warning_count >= $limit) {
+        return back()->with('warning', "Service reached {$limit}/{$limit} warnings. Suspend if needed.");
     }
 
     return back()->with('success', 'Warning berjaya dihantar. Jumlah warning: ' . $service->hss_warning_count);

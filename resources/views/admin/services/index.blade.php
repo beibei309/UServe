@@ -291,8 +291,8 @@
                                 {{-- WARNING --}}
                                 <td class="py-4 px-6 text-center">
                                     <span
-                                        class="font-mono font-bold {{ ($service->hss_warning_count ?? 0) >= 2 ? 'text-red-600' : 'text-gray-700' }}">
-                                        {{ $service->hss_warning_count ?? 0 }}/3
+                                        class="font-mono font-bold {{ ($service->hss_warning_count ?? 0) >= (config('moderation.service_warning_limit', 3) - 1) ? 'text-red-600' : 'text-gray-700' }}">
+                                        {{ $service->hss_warning_count ?? 0 }}/{{ config('moderation.service_warning_limit', 3) }}
                                     </span>
                                 </td>
 
@@ -348,7 +348,7 @@
                                         @endif
 
                                         {{-- IF WARNING 3/3 & NOT YET SUSPENDED --}}
-                                        @if (($service->hss_warning_count ?? 0) >= 3 && $service->hss_approval_status !== 'suspended')
+                                        @if (($service->hss_warning_count ?? 0) >= config('moderation.service_warning_limit', 3) && $service->hss_approval_status !== 'suspended')
                                             <button
                                                 onclick="confirmSuspend('{{ route('admin.services.suspend', $service->hss_id) }}')"
                                                 class="btn-red">

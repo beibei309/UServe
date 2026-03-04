@@ -112,20 +112,25 @@
 
             </div>
 
-            <!-- SECTION: BLACKLIST -->
+            <!-- SECTION: MODERATION -->
             <div class="mb-10">
-                <h2 class="text-xl font-semibold mb-3 text-gray-800">Blacklist Status</h2>
+                <h2 class="text-xl font-semibold mb-3 text-gray-800">Moderation Status</h2>
+                <p class="text-xs text-gray-500 mb-3">
+                    Community management here controls blacklist/reactivation. Seller blocking is managed in Feedback, and student/helper suspension is managed in Student Management.
+                </p>
 
-                @if($user->hu_is_blacklisted)
+                @if($user->hu_is_blacklisted || $user->hu_is_suspended)
                     <div class="p-4 bg-red-100 border border-red-300 rounded-lg mb-4">
-                        <p class="text-red-700 font-semibold">This user is currently blacklisted.</p>
+                        <p class="text-red-700 font-semibold">Current status: {{ ucfirst($user->moderationStatusKey()) }}.</p>
                         <p class="text-red-700 text-sm mt-1"><strong>Reason:</strong> {{ $user->hu_blacklist_reason }}</p>
                     </div>
 
-                    <label class="flex items-center gap-2 font-medium text-gray-700">
-                        <input type="checkbox" name="remove_blacklist" value="1">
-                        Remove blacklist
-                    </label>
+                    @if($user->hu_is_blacklisted || $user->hu_is_suspended)
+                        <label class="flex items-center gap-2 font-medium text-gray-700">
+                            <input type="checkbox" name="remove_blacklist" value="1">
+                            Reactivate account
+                        </label>
+                    @endif
 
                 @else
                     <label class="block font-medium text-gray-700 mb-1">
