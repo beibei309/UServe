@@ -2,10 +2,11 @@
 
 @section('content')
     <div class="max-w-7xl mx-auto">
-        <h1 class="text-3xl font-bold mb-6 text-white">Pending Community Verifications</h1>
+        <h1 class="text-2xl sm:text-3xl font-bold mb-6 text-white">Pending Community Verifications</h1>
 
-        <div class="bg-slate-800 shadow-xl rounded-lg p-6 border border-slate-700">
-            <table class="w-full text-left">
+        <div class="bg-slate-800 shadow-xl rounded-lg p-4 sm:p-6 border border-slate-700">
+            <div class="overflow-x-auto">
+            <table class="w-full text-left min-w-[780px]">
                 <thead>
                     <tr class="bg-slate-900 border-b border-slate-700">
                         <th class="py-3 px-4 text-slate-200 font-semibold">User</th>
@@ -98,6 +99,7 @@
                     @endforelse
                 </tbody>
             </table>
+            </div>
 
             <div class="mt-4">
                 {{ $pending->links() }}

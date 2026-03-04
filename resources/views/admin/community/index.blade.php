@@ -189,8 +189,8 @@
                             @endif
                         </td>
 
-                        <td class="py-4 px-6 text-center whitespace-nowrap">
-                            <div class="flex justify-center gap-3 items-center">
+                        <td class="py-4 px-6 text-center">
+                            <div class="flex flex-wrap justify-center gap-2 sm:gap-3 items-center">
 
                                 {{-- BUTTON: View Reviews --}}
                                 <button onclick="openReviewsModal('reviews-modal-{{ $user->hu_id }}')"

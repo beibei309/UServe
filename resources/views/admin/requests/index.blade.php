@@ -9,10 +9,10 @@
 
         <div class="p-4 rounded-lg shadow-xl mb-6 border transition-all duration-300"
              style="background-color: var(--bg-secondary); border-color: var(--border-color);">
-            <form method="GET" action="{{ route('admin.requests.index') }}" class="flex flex-wrap gap-4">
+            <form method="GET" action="{{ route('admin.requests.index') }}" class="flex flex-wrap gap-3 sm:gap-4">
 
                 {{-- Search Input --}}
-                <div class="flex-1 min-w-[300px]">
+                <div class="flex-1 min-w-0 w-full">
                     <input type="text" name="search" value="{{ request('search') }}"
                         placeholder="Search by requester, provider or service..."
                         class="w-full px-4 py-2 border rounded-lg transition-colors duration-300 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
@@ -20,9 +20,9 @@
                 </div>
 
                 {{-- Status Filter --}}
-                <div>
+                <div class="w-full sm:w-auto">
                     <select name="status"
-                        class="px-4 py-2 border rounded-lg transition-colors duration-300 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
+                        class="w-full sm:w-auto px-4 py-2 border rounded-lg transition-colors duration-300 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
                         style="background-color: var(--bg-tertiary); color: var(--text-primary); border-color: var(--border-color);">
                         <option value="">All Statuses</option>
                         <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
@@ -35,9 +35,9 @@
                 </div>
 
                 {{-- Category Filter --}}
-                <div>
+                <div class="w-full sm:w-auto">
                     <select name="category"
-                        class="px-4 py-2 border rounded-lg transition-colors duration-300 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
+                        class="w-full sm:w-auto px-4 py-2 border rounded-lg transition-colors duration-300 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
                         style="background-color: var(--bg-tertiary); color: var(--text-primary); border-color: var(--border-color);">
                         <option value="">All Categories</option>
                         @foreach ($categories ?? [] as $category)
@@ -313,8 +313,8 @@
 
     {{-- DISPUTE RESOLUTION MODAL --}}
     <div id="disciplineModal"
-        class="fixed inset-0 bg-gray-900 bg-opacity-60 hidden z-50 flex items-center justify-center backdrop-blur-sm p-4">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden">
+        class="fixed inset-0 bg-gray-900 bg-opacity-60 hidden z-50 flex items-start sm:items-center justify-center backdrop-blur-sm p-3 sm:p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[92vh] overflow-hidden flex flex-col">
 
             <div class="bg-gray-900 px-6 py-4 flex justify-between items-center">
                 <h3 class="text-lg font-bold text-white flex items-center gap-2">
@@ -325,10 +325,10 @@
                 </button>
             </div>
 
-            <div class="p-6">
+            <div class="p-5 sm:p-6 overflow-y-auto">
                 <div class="mb-6 bg-red-50 border border-red-100 p-4 rounded-xl">
                     <div class="flex justify-between items-center mb-2">
-                        <h4 class="text-xs font-bold text-red-500 uppercase tracking-wide">Dispute Reason</h4>
+                        <h4 class="text-xs font-bold text-red-500 uppercase tracking-wide">Reported Statement</h4>
                         <div
                             class="flex items-center gap-1 text-xs bg-white border border-red-100 px-2 py-1 rounded-md shadow-sm">
                             <span class="text-gray-400">Reported by:</span>
@@ -338,9 +338,12 @@
                         </div>
                     </div>
                     <p id="discModalReason" class="text-gray-800 text-sm italic font-medium leading-relaxed">...</p>
+                    <p class="text-[11px] text-red-700 mt-2">
+                        This is the reporter claim only. Verify payment proof, timeline, and delivery evidence before assigning fault.
+                    </p>
                 </div>
 
-                <p class="text-sm text-gray-500 mb-4 text-center">Who is at fault? Select a user to apply a penalty.</p>
+                <p class="text-sm text-gray-500 mb-4 text-center">Who is at fault? Select a user and choose action.</p>
 
                 <form id="disciplineForm" method="POST" action="">
     @csrf
@@ -355,12 +358,12 @@
             <div class="flex items-center gap-2 text-xs text-gray-500 mb-4">
                 <span class="bg-gray-100 px-2 py-0.5 rounded">ID: <span id="discReqId"></span></span>
                 <span class="bg-orange-100 text-orange-700 px-2 py-0.5 rounded flex items-center gap-1">
-                    <i class="fa-solid fa-triangle-exclamation"></i> <span id="discReqWarnings">0</span> Warnings
+                    <i class="fa-solid fa-triangle-exclamation"></i> <span id="discReqWarnings">0</span>/{{ config('moderation.user_warning_limit', 3) }} Warnings
                 </span>
             </div>
             <div class="grid grid-cols-2 gap-2">
                 <button type="button" onclick="submitDiscipline('warn', 'requester')" class="text-yellow-500 hover:text-yellow-400 transition border rounded-lg py-2" title="Warn"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Warn</button>
-                <button type="button" onclick="submitDiscipline('ban', 'requester')" class="text-red-600 hover:text-red-900 transition border rounded-lg py-2" title="Ban"><i class="fa-solid fa-ban mr-1"></i> Ban</button>
+                <button type="button" onclick="submitDiscipline('suspend_or_blacklist', 'requester')" class="text-red-600 hover:text-red-900 transition border rounded-lg py-2" title="Suspend or Blacklist"><i class="fa-solid fa-ban mr-1"></i> Suspend / Blacklist</button>
             </div>
         </div>
 
@@ -371,12 +374,12 @@
             <div class="flex items-center gap-2 text-xs text-gray-500 mb-4">
                 <span class="bg-gray-100 px-2 py-0.5 rounded">ID: <span id="discProvId"></span></span>
                 <span class="bg-orange-100 text-orange-700 px-2 py-0.5 rounded flex items-center gap-1">
-                    <i class="fa-solid fa-triangle-exclamation"></i> <span id="discProvWarnings">0</span> Warnings
+                    <i class="fa-solid fa-triangle-exclamation"></i> <span id="discProvWarnings">0</span>/{{ config('moderation.user_warning_limit', 3) }} Warnings
                 </span>
             </div>
             <div class="grid grid-cols-2 gap-2">
                 <button type="button" onclick="submitDiscipline('warn', 'provider')" class="text-yellow-500 hover:text-yellow-400 transition border rounded-lg py-2" title="Warn"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Warn</button>
-                <button type="button" onclick="submitDiscipline('ban', 'provider')" class="text-red-600 hover:text-red-900 transition border rounded-lg py-2" title="Ban"><i class="fa-solid fa-ban mr-1"></i> Ban</button>
+                <button type="button" onclick="submitDiscipline('suspend_or_blacklist', 'provider')" class="text-red-600 hover:text-red-900 transition border rounded-lg py-2" title="Suspend or Blacklist"><i class="fa-solid fa-ban mr-1"></i> Suspend / Blacklist</button>
             </div>
         </div>
     </div>
@@ -384,25 +387,46 @@
     {{-- Admin Note Input (FIXED ID HERE) --}}
     <div class="mt-6">
         <label class="block text-xs font-bold text-gray-500 uppercase mb-1">
-            Warning Message / Ban Reason <span class="text-red-500">*</span>
+            Warning Message / Restriction Reason <span class="text-red-500">*</span>
         </label>
         <textarea 
             name="admin_note" 
             id="adminNoteInput"  {{-- THIS WAS MISSING --}}
             rows="2" 
             class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-red-500 outline-none" 
-            placeholder="Write the warning message here to send to the user..." 
+            placeholder="Write the warning message or suspension/blacklist reason..." 
             required></textarea>
+        <p id="actionPreview" class="hidden text-[11px] mt-2 rounded-md px-2 py-1 border"></p>
     </div>
 </form>
 
-                <div class="mt-4 pt-4 border-t border-gray-100 text-center">
+                <div class="mt-4 pt-4 border-t border-gray-100">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-3">
+                        <form action="" method="POST" id="resumeForm">
+                            @csrf
+                            <input type="hidden" name="action_type" value="resume">
+                            <button type="submit"
+                                class="w-full py-2 bg-indigo-100 hover:bg-indigo-200 text-indigo-800 rounded-lg text-xs font-bold transition-colors">
+                                Close Without Penalty (Resume to Waiting Payment)
+                            </button>
+                        </form>
+                        <form action="" method="POST" id="completePaidForm">
+                            @csrf
+                            <input type="hidden" name="action_type" value="complete_paid">
+                            <button type="submit"
+                                class="w-full py-2 bg-green-100 hover:bg-green-200 text-green-800 rounded-lg text-xs font-bold transition-colors">
+                                Close Without Penalty (Mark Completed & Paid)
+                            </button>
+                        </form>
+                    </div>
+                    <div class="text-center">
                     <form action="" method="POST" id="dismissForm">
                         @csrf
                         <input type="hidden" name="action_type" value="dismiss">
                         <button type="submit" class="text-xs text-gray-400 hover:text-gray-600 underline">Dismiss dispute
-                            without penalty (Mark as Resolved)</button>
+                            without penalty (Mark as Cancelled)</button>
                     </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -475,6 +499,10 @@
 
         let currentRequesterId = null;
         let currentProviderId = null;
+        let currentRequesterRole = null;
+        let currentProviderRole = null;
+        let currentRequesterWarnings = 0;
+        let currentProviderWarnings = 0;
 
         function openDisciplineModal(requestId, reason, requester, provider, reporter) {
             document.getElementById('discModalReason').textContent = reason || 'No reason provided.';
@@ -491,21 +519,30 @@
             document.getElementById('discReqId').textContent = requester.id;
             document.getElementById('discReqWarnings').textContent = requester.warnings;
             currentRequesterId = requester.id;
+            currentRequesterRole = requester.role;
+            currentRequesterWarnings = parseInt(requester.warnings || 0, 10);
 
             document.getElementById('discProvName').textContent = provider.name;
             document.getElementById('discProvId').textContent = provider.id;
             document.getElementById('discProvWarnings').textContent = provider.warnings;
             currentProviderId = provider.id;
+            currentProviderRole = provider.role;
+            currentProviderWarnings = parseInt(provider.warnings || 0, 10);
 
             const baseUrl = "{{ url('admin/requests') }}/" + requestId + "/resolve";
             document.getElementById('disciplineForm').action = baseUrl;
             document.getElementById('dismissForm').action = baseUrl;
+            document.getElementById('resumeForm').action = baseUrl;
+            document.getElementById('completePaidForm').action = baseUrl;
+            document.getElementById('actionPreview').classList.add('hidden');
+            document.getElementById('actionPreview').textContent = '';
 
             document.getElementById('disciplineModal').classList.remove('hidden');
         }
 
         function closeDisciplineModal() {
             document.getElementById('disciplineModal').classList.add('hidden');
+            document.getElementById('actionPreview').classList.add('hidden');
         }
 
         function submitDiscipline(action, target) {
@@ -530,10 +567,38 @@
             const targetId = (target === 'requester') ? currentRequesterId : currentProviderId;
             const targetName = (target === 'requester') ? document.getElementById('discReqName').textContent : document
                 .getElementById('discProvName').textContent;
+            const targetWarnings = (target === 'requester') ? currentRequesterWarnings : currentProviderWarnings;
+            const warningLimit = {{ config('moderation.user_warning_limit', 3) }};
 
-            let confirmMsg = (action === 'ban') ?
-                `Are you sure you want to PERMANENTLY BAN ${targetName}?` :
-                `Send this warning to ${targetName}?`;
+            if (action === 'warn' && targetWarnings >= warningLimit) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Warning Limit Reached',
+                    text: `This user is already at ${warningLimit}/${warningLimit}. Use Suspend/Blacklist for the next action.`,
+                    confirmButtonColor: '#3085d6',
+                });
+                return;
+            }
+
+            const targetRole = (target === 'requester') ? currentRequesterRole : currentProviderRole;
+            const previewEl = document.getElementById('actionPreview');
+            let previewMsg;
+            let confirmMsg;
+
+            if (action === 'suspend_or_blacklist') {
+                const penaltyLabel = (targetRole === 'community') ? 'BLACKLIST' : 'SUSPEND';
+                previewMsg = (targetRole === 'community')
+                    ? 'Preview: Sends blacklist email, sets account to blacklisted, and cancels this request.'
+                    : 'Preview: Sends suspension email, sets account to suspended, and cancels this request.';
+                confirmMsg = `Are you sure you want to ${penaltyLabel} ${targetName}?\n${previewMsg}`;
+            } else {
+                previewMsg = 'Preview: Sends warning email, increments warning count, and resumes this request to Waiting Payment.';
+                confirmMsg = `Send this warning to ${targetName}?\n${previewMsg}`;
+            }
+
+            previewEl.textContent = previewMsg;
+            previewEl.className = 'text-[11px] mt-2 rounded-md px-2 py-1 border bg-indigo-50 border-indigo-200 text-indigo-800';
+            previewEl.classList.remove('hidden');
 
             // 3. Confirm and Submit
             if (confirm(confirmMsg)) {

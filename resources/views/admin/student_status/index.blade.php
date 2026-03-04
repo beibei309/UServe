@@ -4,7 +4,7 @@
 <div class="px-4 sm:px-6">
     
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-        <h1 class="text-3xl font-bold transition-colors duration-300" style="color: var(--text-primary);">Student Status Management</h1>
+        <h1 class="text-2xl sm:text-3xl font-bold transition-colors duration-300" style="color: var(--text-primary);">Student Status Management</h1>
         <a href="{{ route('admin.student_status.create') }}"
             class="px-5 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-medium rounded shadow transition-all duration-300">
             + Assign New Status
@@ -46,7 +46,7 @@
 
             {{-- Reset Button --}}
             <a href="{{ route('admin.student_status.index') }}"
-                class="px-4 py-2 border rounded-md text-center transition-all duration-300 hover:bg-cyan-500 hover:text-white"
+                class="w-full md:w-auto px-4 py-2 border rounded-md text-center transition-all duration-300 hover:bg-cyan-500 hover:text-white"
                 style="background-color: var(--bg-tertiary); color: var(--text-secondary); border-color: var(--border-color);">
                 Reset
             </a>
@@ -70,7 +70,8 @@
     <div class="hidden md:block">
         <div class="shadow-xl rounded-lg border overflow-hidden transition-all duration-300"
              style="background-color: var(--bg-secondary); border-color: var(--border-color);">
-            <table class="w-full text-left border-collapse">
+            <div class="overflow-x-auto">
+            <table class="w-full min-w-[920px] text-left border-collapse">
                 <thead class="text-xs uppercase tracking-wider border-b transition-colors duration-300"
                        style="background-color: var(--bg-tertiary); color: var(--text-secondary); border-color: var(--border-color);">
                     <tr>
@@ -225,6 +226,7 @@
                 @endforelse
             </tbody>
         </table>
+            </div>
         <div class="p-4 transition-colors duration-300" style="background-color: var(--bg-primary); border-top: 1px solid; border-color: var(--border-color);">{{ $students->links() }}</div>
     </div>
 

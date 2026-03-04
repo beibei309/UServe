@@ -2,19 +2,19 @@
 
 @section('content')
 
-<div class="px-6 py-4">
-    <h1 class="text-3xl font-bold mb-6">Manage Reviews, Warnings & Final Action</h1>
-    <p class="text-xs text-gray-500 mb-4">
+<div class="px-2 sm:px-4 lg:px-6 py-4">
+    <h1 class="text-2xl sm:text-3xl font-bold mb-6 transition-colors duration-300" style="color: var(--text-primary);">Manage Reviews, Warnings & Final Action</h1>
+    <p class="text-xs mb-4 transition-colors duration-300" style="color: var(--text-muted);">
         Feedback moderation covers student, community and helper accounts. Warning is shared, final action is role-based.
     </p>
-    <p class="text-xs text-gray-500 mb-4">
+    <p class="text-xs mb-4 transition-colors duration-300" style="color: var(--text-muted);">
         At {{ $userWarningLimit }}/{{ $userWarningLimit }} warnings: helper = {{ $finalActions['helper'] }}, student/community = {{ $finalActions['student'] }}.
     </p>
 
     <form class="mb-6" method="GET" action="{{ route('admin.feedback.index') }}">
-        <div class="flex space-x-4">
+        <div class="flex flex-col sm:flex-row gap-3 sm:gap-4">
             <input type="text" name="search" placeholder="Search by name or email..."
-                   class="p-2 border rounded w-1/3" value="{{ request('search') }}">
+                   class="p-2 border rounded w-full sm:w-80 transition-colors duration-300" style="background-color: var(--bg-secondary); color: var(--text-primary); border-color: var(--border-color);" value="{{ request('search') }}">
             @if ($selectedRole)
                 <input type="hidden" name="role" value="{{ $selectedRole }}">
             @endif
@@ -41,15 +41,16 @@
         @endforeach
     </div>
 
-    <div class="bg-white shadow-lg rounded-lg p-6">
-        <table class="w-full text-left">
-            <thead class="bg-gray-100">
+    <div class="shadow-lg rounded-lg p-4 sm:p-6 border transition-colors duration-300" style="background-color: var(--bg-secondary); border-color: var(--border-color);">
+        <div class="overflow-x-auto">
+        <table class="w-full text-left min-w-[760px]">
+            <thead class="transition-colors duration-300" style="background-color: var(--bg-tertiary);">
                 <tr class="border-b">
-                    <th class="py-3 px-4 text-sm font-medium text-gray-600">User Details</th>
-                    <th class="py-3 px-4 text-sm font-medium text-gray-600">Reviews</th>
-                    <th class="py-3 px-4 text-sm font-medium text-gray-600">Warnings</th>
-                    <th class="py-3 px-4 text-sm font-medium text-gray-600">Status</th>
-                    <th class="py-3 px-4 text-sm font-medium text-gray-600">Actions</th>
+                    <th class="py-3 px-4 text-sm font-medium transition-colors duration-300" style="color: var(--text-secondary);">User Details</th>
+                    <th class="py-3 px-4 text-sm font-medium transition-colors duration-300" style="color: var(--text-secondary);">Reviews</th>
+                    <th class="py-3 px-4 text-sm font-medium transition-colors duration-300" style="color: var(--text-secondary);">Warnings</th>
+                    <th class="py-3 px-4 text-sm font-medium transition-colors duration-300" style="color: var(--text-secondary);">Status</th>
+                    <th class="py-3 px-4 text-sm font-medium transition-colors duration-300" style="color: var(--text-secondary);">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -57,17 +58,17 @@
                     @php
                         $statusKey = $user->moderationStatusKey();
                     @endphp
-                    <tr class="border-b hover:bg-gray-50">
+                    <tr class="border-b transition-colors duration-300" onmouseover="this.style.backgroundColor='var(--hover-bg)'" onmouseout="this.style.backgroundColor='transparent'">
                         <td class="py-3 px-4 text-sm">
-                            <p class="font-bold">{{ $user->hu_name }}</p>
-                            <p class="text-xs text-gray-500">{{ $user->hu_email }} ({{ $user->hu_role }})</p>
+                            <p class="font-bold transition-colors duration-300" style="color: var(--text-primary);">{{ $user->hu_name }}</p>
+                            <p class="text-xs transition-colors duration-300" style="color: var(--text-muted);">{{ $user->hu_email }} ({{ $user->hu_role }})</p>
                         </td>
                         
                         <td class="py-3 px-4 text-sm">
                             <span class="font-semibold {{ ($user->reviews_received_avg_rating ?? 0) < 3.0 ? 'text-red-600' : 'text-green-600' }}">
                                 {{ number_format($user->reviews_received_avg_rating ?? 0, 2) }} / 5.0
                             </span>
-                            <span class="text-xs text-gray-500">({{ $user->reviews_received_count ?? 0 }} reviews)</span>
+                            <span class="text-xs transition-colors duration-300" style="color: var(--text-muted);">({{ $user->reviews_received_count ?? 0 }} reviews)</span>
                             <div class="mt-1">
                                 <a href="{{ route('students.profile', $user->hu_id) }}"
                                     class="text-xs text-blue-600 hover:underline">
@@ -128,6 +129,7 @@
                 @endforeach
             </tbody>
         </table>
+        </div>
 
         {{-- Pagination --}}
         <div class="mt-4">

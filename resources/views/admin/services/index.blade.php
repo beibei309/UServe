@@ -61,10 +61,10 @@
 
         <div class="p-4 rounded-lg shadow-xl mb-6 border transition-all duration-300"
              style="background-color: var(--bg-secondary); border-color: var(--border-color);">
-            <form method="GET" action="{{ route('admin.services.index') }}" class="flex flex-wrap gap-4">
+            <form method="GET" action="{{ route('admin.services.index') }}" class="flex flex-wrap gap-3 sm:gap-4">
 
                 {{-- Search --}}
-                <div class="flex-1 min-w-[250px]">
+                <div class="flex-1 min-w-0 w-full">
                     <input type="text" name="search" placeholder="Search by title, description or student name..."
                         class="w-full px-4 py-2 border rounded-lg transition-colors duration-300 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
                         style="background-color: var(--bg-tertiary); color: var(--text-primary); border-color: var(--border-color);"
@@ -72,8 +72,8 @@
                 </div>
 
                 {{-- Category Filter --}}
-                <div>
-                    <select name="category" class="px-4 py-2 border rounded-lg transition-colors duration-300 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
+                <div class="w-full sm:w-auto">
+                    <select name="category" class="w-full sm:w-auto px-4 py-2 border rounded-lg transition-colors duration-300 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
                             style="background-color: var(--bg-tertiary); color: var(--text-primary); border-color: var(--border-color);">
                         <option value="">All Categories</option>
 
@@ -87,8 +87,8 @@
                     </select>
                 </div>
                 {{-- Rating Filter --}}
-                <div>
-                    <select name="rating" class="px-4 py-2 border rounded-lg transition-colors duration-300 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
+                <div class="w-full sm:w-auto">
+                    <select name="rating" class="w-full sm:w-auto px-4 py-2 border rounded-lg transition-colors duration-300 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
                             style="background-color: var(--bg-tertiary); color: var(--text-primary); border-color: var(--border-color);">
                         <option value="">All Ratings</option>
                         <option value="0-1" {{ request('rating') == '0-1' ? 'selected' : '' }}>0.0 – 1.0 ⭐</option>
@@ -239,9 +239,10 @@
 
                                 {{-- WARNING --}}
                                 <td class="py-4 px-3 text-center">
+                                    @php($serviceWarningLimit = (int) config('moderation.service_warning_limit', 3))
                                     <span
-                                        class="font-mono font-bold text-sm {{ ($service->hss_warning_count ?? 0) >= 2 ? 'text-red-500' : 'text-gray-500' }}">
-                                        {{ $service->hss_warning_count ?? 0 }}/3
+                                        class="font-mono font-bold text-sm {{ ($service->hss_warning_count ?? 0) >= max(1, $serviceWarningLimit - 1) ? 'text-red-500' : 'text-gray-500' }}">
+                                        {{ $service->hss_warning_count ?? 0 }}/{{ $serviceWarningLimit }}
                                     </span>
                                 </td>
 

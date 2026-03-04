@@ -12,7 +12,7 @@
                     <div class="space-y-4">
                         @forelse($reports as $report)
                             <div class="border rounded-lg p-4">
-                                <div class="flex items-center justify-between">
+                                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                                     <div>
                                         <div class="font-semibold">Reporter: {{ optional($report->reporter)->hu_name }} | Target: {{ optional($report->target)->hu_name }}</div>
                                         <div class="text-sm text-gray-600">Reason: {{ $report->hrp_reason }}</div>
@@ -21,7 +21,7 @@
                                     <div class="text-sm">Status: {{ $report->hrp_status }}</div>
                                 </div>
                                 <div class="mt-3">
-                                    <form method="POST" action="{{ url('/admin/reports/'.$report->hrp_id.'/resolve') }}" class="flex items-center gap-2">
+                                    <form method="POST" action="{{ url('/admin/reports/'.$report->hrp_id.'/resolve') }}" class="flex flex-col sm:flex-row sm:items-center gap-2">
                                         @csrf
                                         <select name="status" class="rounded border-gray-300 text-sm">
                                             <option value="warning">Warning</option>
@@ -29,7 +29,7 @@
                                             <option value="resolved">Resolve</option>
                                             <option value="rejected">Reject</option>
                                         </select>
-                                        <input type="text" name="actions_taken" placeholder="Actions taken" class="rounded border-gray-300 text-sm">
+                                        <input type="text" name="actions_taken" placeholder="Actions taken" class="rounded border-gray-300 text-sm w-full sm:w-auto">
                                         <x-primary-button>Update</x-primary-button>
                                     </form>
                                 </div>

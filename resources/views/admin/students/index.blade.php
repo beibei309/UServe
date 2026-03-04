@@ -9,7 +9,7 @@
         <h1 class="text-3xl font-bold mb-4 transition-colors duration-300" style="color: var(--text-primary);">Manage Students</h1>
 
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-5">
-            <form method="GET" class="flex items-center gap-2 w-full md:w-auto">
+            <form method="GET" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full md:w-auto">
                 <input type="text" name="search" placeholder="Search name, email, student ID..."
                     class="w-full md:w-80 px-4 py-2 border rounded-lg text-sm transition-colors duration-300
                       focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"

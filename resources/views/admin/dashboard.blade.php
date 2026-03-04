@@ -4,11 +4,11 @@
     <div class="px-4 md:px-0">
 
         <!-- Title -->
-        <h1 class="text-4xl font-bold transition-colors duration-300" style="color: var(--text-primary);">Dashboard</h1>
+        <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold transition-colors duration-300" style="color: var(--text-primary);">Dashboard</h1>
         <p class="mt-1 font-medium transition-colors duration-300" style="color: var(--text-secondary);">Monitor platform activity and analytics.</p>
 
         <!-- STAT CARDS -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mt-10">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mt-8 sm:mt-10">
 
             <!-- CARD: Total Students -->
             <a href="{{ route('admin.students.index') }}"
@@ -17,7 +17,7 @@
                 <div class="absolute inset-0 bg-gradient-to-r from-cyan-500 to-blue-600 opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
                 <div class="relative z-10">
                     <p class="font-medium text-sm transition-colors duration-300" style="color: var(--text-secondary);">Total Students</p>
-                    <p class="text-5xl font-bold text-cyan-400 mt-4">{{ $totalStudents }}</p>
+                    <p class="text-3xl sm:text-4xl lg:text-5xl font-bold text-cyan-400 mt-4">{{ $totalStudents }}</p>
                 </div>
             </a>
 
@@ -28,7 +28,7 @@
                 <div class="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-600 opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
                 <div class="relative z-10">
                     <p class="font-medium text-sm transition-colors duration-300" style="color: var(--text-secondary);">Total Community Users</p>
-                    <p class="text-5xl font-bold text-purple-400 mt-4">{{ $totalCommunityUsers }}</p>
+                    <p class="text-3xl sm:text-4xl lg:text-5xl font-bold text-purple-400 mt-4">{{ $totalCommunityUsers }}</p>
                 </div>
             </a>
 
@@ -39,7 +39,7 @@
                 <div class="absolute inset-0 bg-gradient-to-r from-pink-500 to-orange-600 opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
                 <div class="relative z-10">
                     <p class="font-medium text-sm transition-colors duration-300" style="color: var(--text-secondary);">Total Services</p>
-                    <p class="text-5xl font-bold text-pink-400 mt-4">{{ $totalServices }}</p>
+                    <p class="text-3xl sm:text-4xl lg:text-5xl font-bold text-pink-400 mt-4">{{ $totalServices }}</p>
                 </div>
             </a>
 
@@ -50,7 +50,7 @@
                 <div class="absolute inset-0 bg-gradient-to-r from-yellow-500 to-orange-600 opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
                 <div class="relative z-10">
                     <p class="font-medium text-sm transition-colors duration-300" style="color: var(--text-secondary);">Pending Requests</p>
-                    <p class="text-5xl font-bold text-yellow-400 mt-4">{{ $pendingRequests }}</p>
+                    <p class="text-3xl sm:text-4xl lg:text-5xl font-bold text-yellow-400 mt-4">{{ $pendingRequests }}</p>
                 </div>
             </a>
 
@@ -58,7 +58,7 @@
 
         @if ($pendingStudents > 0)
             <div
-                class="mt-6 px-6 py-4 rounded-xl flex items-center justify-between border transition-all duration-300"
+                class="mt-6 px-4 sm:px-6 py-4 rounded-xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border transition-all duration-300"
                 style="background-color: rgba(239, 68, 68, 0.1); border-color: #ef4444; color: #f87171;">
                 <div>
                     <strong>⚠ Action Required</strong><br>
@@ -74,7 +74,7 @@
 
         @if ($pendingHelpers > 0)
             <div
-                class="mt-6 px-6 py-4 rounded-xl flex items-center justify-between border transition-all duration-300"
+                class="mt-6 px-4 sm:px-6 py-4 rounded-xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border transition-all duration-300"
                 style="background-color: rgba(245, 158, 11, 0.1); border-color: #f59e0b; color: #fbbf24;">
                 <div>
                     <strong>⚠ Action Required</strong><br>
@@ -90,7 +90,7 @@
 
         @if ($studentsWithoutStatus > 0)
             <div
-                class="mt-6 px-6 py-4 rounded-xl flex items-center justify-between border transition-all duration-300"
+                class="mt-6 px-4 sm:px-6 py-4 rounded-xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border transition-all duration-300"
                 style="background-color: rgba(234, 88, 12, 0.1); border-color: #ea580c; color: #fb923c;">
                 <div>
                     <strong>⚠ Action Required</strong><br>
@@ -105,17 +105,17 @@
         @endif
 
         <!-- CHARTS -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mt-10 sm:mt-12">
 
             <!-- LINE CHART -->
-            <div class="p-8 rounded-2xl shadow-xl border transition-all duration-300"
+            <div class="p-4 sm:p-6 lg:p-8 rounded-2xl shadow-xl border transition-all duration-300"
                  style="background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%); border-color: var(--border-color);">
                 <h2 class="text-lg font-semibold mb-4 transition-colors duration-300" style="color: var(--text-primary);">Monthly Student Registrations</h2>
                 <canvas id="studentChart" height="120"></canvas>
             </div>
 
             <!-- BAR CHART -->
-            <div class="p-8 rounded-2xl shadow-xl border transition-all duration-300"
+            <div class="p-4 sm:p-6 lg:p-8 rounded-2xl shadow-xl border transition-all duration-300"
                  style="background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%); border-color: var(--border-color);">
                 <h2 class="text-lg font-semibold mb-4 transition-colors duration-300" style="color: var(--text-primary);">Services Created Per Month</h2>
                 <canvas id="serviceChart" height="120"></canvas>

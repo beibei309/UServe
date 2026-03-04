@@ -242,12 +242,42 @@
         #loading-indicator {
             backdrop-filter: blur(2px);
         }
+
+        nav[role="navigation"] {
+            color: var(--text-secondary);
+        }
+
+        nav[role="navigation"] p.text-sm {
+            color: var(--text-muted) !important;
+        }
+
+        nav[role="navigation"] .relative.inline-flex.items-center {
+            background-color: var(--bg-secondary) !important;
+            border-color: var(--border-color) !important;
+            color: var(--text-secondary) !important;
+        }
+
+        nav[role="navigation"] a.relative.inline-flex.items-center:hover {
+            background-color: var(--hover-bg) !important;
+            color: var(--text-primary) !important;
+        }
+
+        nav[role="navigation"] span[aria-current="page"] .relative.inline-flex.items-center {
+            background: linear-gradient(90deg, #06b6d4, #2563eb) !important;
+            border-color: transparent !important;
+            color: #ffffff !important;
+        }
+
+        nav[role="navigation"] svg {
+            color: inherit !important;
+            fill: currentColor !important;
+        }
     </style>
 </head>
 
 <body class="font-sans antialiased" data-theme="dark">
 
-    <div class="flex h-screen overflow-hidden">
+    <div class="flex min-h-screen lg:h-screen overflow-hidden">
 
         <aside id="sidebar"
             class="sidebar-transition fixed inset-y-0 left-0 z-30 w-64 shadow-2xl transform -translate-x-full lg:translate-x-0 lg:static lg:inset-0 flex flex-col border-r transition-colors duration-300"
@@ -478,8 +508,13 @@
 
                     <li>
                         <a href="{{ route('admin.feedback.index') }}"
-                            class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors
-                           {{ request()->routeIs('admin.feedback.*') ? 'bg-blue-50 text-blue-700 font-semibold' : 'text-gray-600 hover:bg-gray-100 hover:text-blue-600' }}">
+                            class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors duration-300
+                           {{ request()->routeIs('admin.feedback.*') ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold' : '' }}"
+                           @if(!request()->routeIs('admin.feedback.*'))
+                           style="color: var(--text-secondary);"
+                           onmouseover="this.style.backgroundColor = 'var(--hover-bg)'; this.style.color = 'var(--text-primary)';"
+                           onmouseout="this.style.backgroundColor = 'transparent'; this.style.color = 'var(--text-secondary)';"
+                           @endif>
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 4v-4z">
@@ -545,7 +580,7 @@
 
         <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
 
-            <header class="px-4 sm:px-8 py-4 flex items-center justify-between shadow-md transition-colors duration-300"
+            <header class="px-4 sm:px-6 lg:px-8 py-3 sm:py-4 flex items-center justify-between shadow-md transition-colors duration-300"
                     style="background-color: var(--bg-secondary); border-bottom: 1px solid var(--border-color);">
                 <div class="flex items-center gap-4">
                     <button onclick="toggleSidebar()"
@@ -558,7 +593,7 @@
                                 d="M4 6h16M4 12h16M4 18h16"></path>
                         </svg>
                     </button>
-                    <h2 class="text-lg font-semibold transition-colors duration-300" style="color: var(--text-primary);">Admin Dashboard</h2>
+                    <h2 class="text-base sm:text-lg font-semibold transition-colors duration-300 truncate" style="color: var(--text-primary);">Admin Dashboard</h2>
                 </div>
 
                 <div class="flex items-center gap-4">
@@ -577,7 +612,7 @@
                 </div>
             </header>
 
-            <main id="main-content" class="flex-1 overflow-y-auto p-4 sm:p-8 transition-colors duration-300" style="background-color: var(--bg-primary);">
+            <main id="main-content" class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 transition-colors duration-300" style="background-color: var(--bg-primary);">
                 @yield('content')
             </main>
         </div>
@@ -622,22 +657,21 @@
 
         function updateNavigation() {
             const isDark = document.body.getAttribute('data-theme') === 'dark';
-            const navLinks = document.querySelectorAll('nav a:not(.bg-gradient-to-r)');
-            const buttons = document.querySelectorAll('button:not(.theme-toggle)');
+            const navLinks = document.querySelectorAll('nav a');
             
             // Update navigation link colors
             navLinks.forEach(link => {
-                if (!link.classList.contains('bg-gradient-to-r')) {
-                    link.style.color = isDark ? '#e2e8f0' : '#475569';
-                }
+                const isActive = link.classList.contains('bg-gradient-to-r') || link.classList.contains('text-white');
+                if (isActive) return;
+                link.style.color = isDark ? '#e2e8f0' : '#475569';
             });
             
             // Update submenu buttons
             const submenuButtons = document.querySelectorAll('button[onclick*="toggleSubMenu"]');
             submenuButtons.forEach(button => {
-                if (!button.closest('.bg-gradient-to-r')) {
-                    button.style.color = isDark ? '#e2e8f0' : '#475569';
-                }
+                const isActive = button.classList.contains('text-white') || button.classList.contains('font-semibold');
+                if (isActive) return;
+                button.style.color = isDark ? '#e2e8f0' : '#475569';
             });
         }
 
@@ -679,6 +713,15 @@
             }
         }
 
+        function closeMobileSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobileOverlay');
+            if (window.innerWidth < 1024) {
+                sidebar.classList.add('-translate-x-full');
+                if (overlay) overlay.classList.add('hidden');
+            }
+        }
+
         // Initialize theme on page load
         document.addEventListener('DOMContentLoaded', function() {
             initializeTheme();
@@ -688,6 +731,17 @@
                 if (!localStorage.getItem('admin-theme')) {
                     document.body.setAttribute('data-theme', e.matches ? 'dark' : 'light');
                     updateNavigation();
+                }
+            });
+
+            window.addEventListener('resize', function() {
+                const sidebar = document.getElementById('sidebar');
+                const overlay = document.getElementById('mobileOverlay');
+                if (window.innerWidth >= 1024 && overlay) {
+                    overlay.classList.add('hidden');
+                }
+                if (window.innerWidth < 1024 && !sidebar.classList.contains('-translate-x-full') && overlay) {
+                    overlay.classList.remove('hidden');
                 }
             });
         });
@@ -743,6 +797,7 @@
                     link.origin === window.location.origin) {
                     
                     e.preventDefault();
+                    closeMobileSidebar();
                     navigateTo(link.href);
                 }
             });
@@ -856,6 +911,7 @@
                 navLinks.forEach(link => {
                     link.classList.remove('bg-gradient-to-r', 'from-cyan-500', 'to-blue-600', 'text-white', 'font-semibold');
                     link.style.backgroundColor = '';
+                    link.style.color = '';
                 });
 
                 // Find and highlight the current page navigation item
