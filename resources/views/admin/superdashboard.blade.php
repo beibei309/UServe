@@ -2,45 +2,45 @@
 
 @section('content')
 
-<div class="px-4 md:px-8">
+<div class="px-4 md:px-0">
 
     <!-- HEADER -->
-    <h1 class="text-4xl font-bold text-gray-800">Super Admin Dashboard</h1>
-    <p class="text-gray-500 mt-1">System-wide insights and administrator management.</p>
+    <h1 class="text-4xl font-bold text-white">Super Admin Dashboard</h1>
+    <p class="text-slate-300 mt-1">System-wide insights and administrator management.</p>
 
     <!-- STAT CARDS -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mt-10">
 
         <!-- Students -->
-        <div class="bg-white p-6 rounded-2xl shadow-md hover:shadow-xl transition border border-gray-100">
-            <p class="text-gray-500 font-medium">Total Students</p>
-            <p class="text-5xl font-bold text-blue-600 mt-2">{{ $totalStudents }}</p>
+        <div class="bg-gradient-to-br from-slate-800 to-slate-900 p-6 rounded-2xl shadow-xl hover:shadow-2xl hover:shadow-cyan-500/20 transition border border-slate-700">
+            <p class="text-slate-200 font-medium">Total Students</p>
+            <p class="text-5xl font-bold text-cyan-400 mt-4">{{ $totalStudents }}</p>
         </div>
 
         <!-- Community Users -->
-        <div class="bg-white p-6 rounded-2xl shadow-md hover:shadow-xl transition border border-gray-100">
-            <p class="text-gray-500 font-medium">Community Users</p>
-            <p class="text-5xl font-bold text-purple-600 mt-2">{{ $totalCommunityUsers }}</p>
+        <div class="bg-gradient-to-br from-slate-800 to-slate-900 p-6 rounded-2xl shadow-xl hover:shadow-2xl hover:shadow-purple-500/20 transition border border-slate-700">
+            <p class="text-slate-200 font-medium">Community Users</p>
+            <p class="text-5xl font-bold text-purple-400 mt-4">{{ $totalCommunityUsers }}</p>
         </div>
 
         <!-- Services -->
-        <div class="bg-white p-6 rounded-2xl shadow-md hover:shadow-xl transition border border-gray-100">
-            <p class="text-gray-500 font-medium">All Services</p>
-            <p class="text-5xl font-bold text-pink-600 mt-2">{{ $totalServices }}</p>
+        <div class="bg-gradient-to-br from-slate-800 to-slate-900 p-6 rounded-2xl shadow-xl hover:shadow-2xl hover:shadow-pink-500/20 transition border border-slate-700">
+            <p class="text-slate-200 font-medium">All Services</p>
+            <p class="text-5xl font-bold text-pink-400 mt-4">{{ $totalServices }}</p>
         </div>
 
         <!-- Requests -->
-        <div class="bg-white p-6 rounded-2xl shadow-md hover:shadow-xl transition border border-gray-100">
-            <p class="text-gray-500 font-medium">Pending Requests</p>
-            <p class="text-5xl font-bold text-yellow-600 mt-2">{{ $pendingRequests }}</p>
+        <div class="bg-gradient-to-br from-slate-800 to-slate-900 p-6 rounded-2xl shadow-xl hover:shadow-2xl hover:shadow-yellow-500/20 transition border border-slate-700">
+            <p class="text-slate-200 font-medium">Pending Requests</p>
+            <p class="text-5xl font-bold text-yellow-400 mt-4">{{ $pendingRequests }}</p>
         </div>
     </div>
 
     <!-- MANAGE ADMINS -->
-    <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-100 mt-12">
+    <div class="bg-gradient-to-br from-slate-800 to-slate-900 p-6 rounded-2xl shadow-xl border border-slate-700 mt-12">
 
         <div class="flex justify-between items-center mb-4">
-            <h2 class="text-2xl font-bold text-gray-700">System Administrators</h2>
+            <h2 class="text-2xl font-bold text-white">System Administrators</h2>
 
             <a href="{{ route('admin.super.admins.create') }}"
                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">

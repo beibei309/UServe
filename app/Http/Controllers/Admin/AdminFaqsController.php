@@ -78,6 +78,15 @@ class AdminFaqsController extends Controller
             'hfq_is_active' => !$faq->hfq_is_active
         ]);
 
-        return back();
+        // If AJAX request, return JSON response
+        if (request()->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'FAQ status updated successfully',
+                'is_active' => $faq->hfq_is_active
+            ]);
+        }
+
+        return back()->with('success', 'FAQ status updated successfully');
     }
 }

@@ -1,13 +1,19 @@
 @extends('admin.layout')
 
 @section('content')
-<div class="max-w-5xl mx-auto bg-white rounded-lg shadow-md p-8">
+<div class="px-4 sm:px-6">
+    
+<div class="max-w-5xl mx-auto rounded-lg shadow-md p-8 transition-all duration-300"
+     style="background-color: var(--bg-secondary);">
 
-    <div class="flex justify-between items-center mb-6 border-b pb-4">
-        <h2 class="text-xl font-bold text-gray-800">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 border-b pb-4 transition-colors duration-300"
+         style="border-color: var(--border-color);">
+        <h2 class="text-xl font-bold transition-colors duration-300" style="color: var(--text-primary);">
             {{ isset($category) ? 'Edit Category' : 'Create New Category' }}
         </h2>
-        <a href="{{ route('admin.categories.index') }}" class="text-gray-500 hover:text-gray-700 text-sm flex items-center gap-1">
+        <a href="{{ route('admin.categories.index') }}" 
+           class="hover:text-cyan-400 text-sm flex items-center gap-1 transition-colors duration-300"
+           style="color: var(--text-secondary);">
             &larr; Back to List
         </a>
     </div>
@@ -22,51 +28,60 @@
             
             <div class="space-y-6">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Category Name</label>
+                    <label class="block text-sm font-medium mb-2 transition-colors duration-300" style="color: var(--text-primary);">Category Name</label>
                     <input type="text" name="name" value="{{ old('name', $category->hc_name ?? '') }}" 
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 outline-none" required>
+                           class="w-full px-4 py-2 border rounded-lg outline-none transition-colors duration-300" 
+                           style="background-color: var(--bg-tertiary); border-color: var(--border-color); color: var(--text-primary);"
+                           onfocus="this.style.borderColor = '#06b6d4'; this.style.boxShadow = '0 0 0 2px rgba(6, 182, 212, 0.2)';" required>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Slug</label>
+                    <label class="block text-sm font-medium mb-2 transition-colors duration-300" style="color: var(--text-primary);">Slug</label>
                     <input type="text" name="slug" value="{{ old('slug', $category->hc_slug ?? '') }}" 
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50">
+                           class="w-full px-4 py-2 border rounded-lg transition-colors duration-300"
+                           style="background-color: var(--bg-primary); border-color: var(--border-color); color: var(--text-primary);">
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                    <label class="block text-sm font-medium mb-2 transition-colors duration-300" style="color: var(--text-primary);">Description</label>
                     <textarea name="description" rows="3" 
-                              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 outline-none">{{ old('description', $category->hc_description ?? '') }}</textarea>
+                              class="w-full px-4 py-2 border rounded-lg outline-none transition-colors duration-300"
+                              style="background-color: var(--bg-tertiary); border-color: var(--border-color); color: var(--text-primary);"
+                              onfocus="this.style.borderColor = '#06b6d4'; this.style.boxShadow = '0 0 0 2px rgba(6, 182, 212, 0.2)';">{{ old('description', $category->hc_description ?? '') }}</textarea>
                 </div>
 
-                <div class="flex items-center gap-4">
+                <div class="flex flex-col sm:flex-row items-start sm:items-end gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Color</label>
+                        <label class="block text-sm font-medium mb-2 transition-colors duration-300" style="color: var(--text-primary);">Color</label>
                         <input type="color" name="color" value="{{ old('color', $category->hc_color ?? '#3b82f6') }}" 
-                               class="h-10 w-20 cursor-pointer border rounded-lg p-1">
+                               class="h-10 w-20 cursor-pointer border rounded-lg p-1 transition-colors duration-300"
+                               style="background-color: var(--bg-tertiary); border-color: var(--border-color);">
                     </div>
                     
-                    <div class="flex items-center pt-6">
+                    <div class="flex items-center">
                         <input type="hidden" name="is_active" value="0">
                         <input id="is_active" name="is_active" type="checkbox" value="1" 
                                {{ old('is_active', $category->hc_is_active ?? true) ? 'checked' : '' }}
-                               class="h-5 w-5 text-blue-600 rounded">
-                        <label for="is_active" class="ml-2 text-sm text-gray-900 font-medium">Is Active?</label>
+                               class="h-5 w-5 text-cyan-600 rounded">
+                        <label for="is_active" class="ml-2 text-sm font-medium transition-colors duration-300" style="color: var(--text-primary);">Is Active?</label>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-gray-50 p-6 rounded-xl border border-gray-200">
-                <label class="block text-sm font-bold text-gray-800 mb-4">Select Icon</label>
+            <div class="p-6 rounded-xl border transition-all duration-300"
+                 style="background-color: var(--bg-tertiary); border-color: var(--border-color);">
+                <label class="block text-sm font-bold mb-4 transition-colors duration-300" style="color: var(--text-primary);">Select Icon</label>
                 
                 <div class="mb-4 relative">
-                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center transition-colors duration-300" style="color: var(--text-muted);">
                         <i id="previewIcon" class="{{ old('icon', $category->hc_icon ?? 'fa fa-folder') }}"></i>
                     </span>
                     <input type="text" id="iconInput" name="icon" 
                            value="{{ old('icon', $category->hc_icon ?? '') }}" 
                            placeholder="fa fa-user"
-                           class="w-full pl-10 px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 outline-none text-sm">
+                           class="w-full pl-10 px-4 py-2 border rounded-lg outline-none text-sm transition-colors duration-300"
+                           style="background-color: var(--bg-secondary); border-color: var(--border-color); color: var(--text-primary);"
+                           onfocus="this.style.borderColor = '#06b6d4'; this.style.boxShadow = '0 0 0 2px rgba(6, 182, 212, 0.2)';">
                 </div>
 
                 <div class="grid grid-cols-6 gap-2 max-h-64 overflow-y-auto p-1 custom-scrollbar">
@@ -88,7 +103,10 @@
 
                     @foreach($icons as $icon)
                     <div onclick="selectIcon('{{ $icon }}')" 
-                         class="cursor-pointer h-10 w-10 flex items-center justify-center rounded border bg-white hover:bg-blue-100 hover:text-blue-600 hover:border-blue-400 transition">
+                         class="cursor-pointer h-10 w-10 flex items-center justify-center rounded border hover:text-cyan-500 transition-all duration-300"
+                         style="background-color: var(--bg-secondary); border-color: var(--border-color); color: var(--text-secondary);"
+                         onmouseover="this.style.borderColor = '#06b6d4'; this.style.backgroundColor = 'var(--hover-bg)';"
+                         onmouseout="this.style.borderColor = 'var(--border-color)'; this.style.backgroundColor = 'var(--bg-secondary)';">
                         <i class="{{ $icon }}"></i>
                     </div>
                     @endforeach
@@ -96,14 +114,38 @@
             </div>
         </div>
 
-        <div class="flex justify-end pt-6 border-t mt-6">
-            <button type="submit" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium shadow-md transition">
+        <div class="flex justify-end pt-6 border-t mt-6 transition-colors duration-300"
+             style="border-color: var(--border-color);">
+            <button type="submit" class="px-6 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white rounded-lg text-sm font-medium shadow-md transition-all duration-300">
+                <i class="fa-solid fa-save mr-2"></i>
                 {{ isset($category) ? 'Update Category' : 'Save Category' }}
             </button>
         </div>
 
     </form>
 </div>
+
+</div>
+
+<style>
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 5px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: var(--bg-primary);
+        border-radius: 6px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: var(--text-muted);
+        border-radius: 6px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #06b6d4;
+    }
+</style>
 
 <script>
     function selectIcon(iconClass) {

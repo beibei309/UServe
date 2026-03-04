@@ -116,7 +116,7 @@
                         <a href="{{ route('admin.student_status.index') }}" class="px-6 py-2.5 border border-gray-300 text-gray-700 rounded hover:bg-gray-50 transition">
                             Cancel
                         </a>
-                        <button type="submit" class="bg-blue-600 text-white font-bold py-2.5 px-6 rounded hover:bg-blue-700 transition shadow">
+                        <button type="submit" class="text-blue-400 hover:text-blue-300 transition border rounded px-6 py-2.5">
                             Update Status
                         </button>
                     </div>

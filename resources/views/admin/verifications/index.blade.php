@@ -2,29 +2,29 @@
 
 @section('content')
     <div class="max-w-7xl mx-auto">
-        <h1 class="text-3xl font-bold mb-6 text-gray-800">Pending Community Verifications</h1>
+        <h1 class="text-3xl font-bold mb-6 text-white">Pending Community Verifications</h1>
 
-        <div class="bg-white shadow rounded-lg p-6">
+        <div class="bg-slate-800 shadow-xl rounded-lg p-6 border border-slate-700">
             <table class="w-full text-left">
                 <thead>
-                    <tr class="bg-gray-100">
-                        <th class="py-3 px-4">User</th>
-                        <th class="py-3 px-4">Profile Photo</th>
-                        <th class="py-3 px-4">Live Selfie</th>
-                        <th class="py-3 px-4">Document</th>
-                        <th class="py-3 px-4">Actions</th>
+                    <tr class="bg-slate-900 border-b border-slate-700">
+                        <th class="py-3 px-4 text-slate-200 font-semibold">User</th>
+                        <th class="py-3 px-4 text-slate-200 font-semibold">Profile Photo</th>
+                        <th class="py-3 px-4 text-slate-200 font-semibold">Live Selfie</th>
+                        <th class="py-3 px-4 text-slate-200 font-semibold">Document</th>
+                        <th class="py-3 px-4 text-slate-200 font-semibold">Actions</th>
                     </tr>
                 </thead>
 
-                <tbody>
+                <tbody class="divide-y divide-slate-700">
                     @forelse ($pending as $user)
-                        <tr class="border-b hover:bg-gray-50">
+                        <tr class="border-b border-slate-700 hover:bg-slate-700 transition">
                             <!-- USER INFO -->
                             <td class="py-3 px-4">
                                 <div>
-                                    <p class="font-semibold text-gray-900 text-sm">{{ $user->hu_name }}</p>
-                                    <p class="text-xs text-gray-500">{{ $user->hu_email }}</p>
-                                    <p class="text-xs text-gray-500">{{ $user->hu_phone ?? '-' }}</p>
+                                    <p class="font-semibold text-white text-sm">{{ $user->hu_name }}</p>
+                                    <p class="text-xs text-slate-400">{{ $user->hu_email }}</p>
+                                    <p class="text-xs text-slate-400">{{ $user->hu_phone ?? '-' }}</p>
                                 </div>
                             </td>
 
@@ -35,7 +35,7 @@
                                          class="w-16 h-16 rounded-full object-cover border shadow-sm" 
                                          alt="Profile">
                                 @else
-                                    <span class="text-xs text-gray-400">No photo</span>
+                                    <span class="text-xs text-slate-300">No photo</span>
                                 @endif
                             </td>
 
@@ -48,7 +48,7 @@
                                             View Selfie
                                         </button>
                                         @if($user->hu_verification_note)
-                                            <span class="text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                                            <span class="text-[10px] font-bold text-slate-300 bg-slate-700 px-2 py-0.5 rounded border border-slate-600">
                                                 {{ $user->hu_verification_note }}
                                             </span>
                                         @endif
@@ -72,18 +72,18 @@
 
                             <!-- ACTIONS -->
                             <td class="py-3 px-4">
-                                <div class="flex gap-2">
-                                    <form action="{{ route('admin.verifications.approve', $user->hu_id) }}" method="POST">
+                                <div class="flex justify-end gap-3">
+                                    <form action="{{ route('admin.verifications.approve', $user->hu_id) }}" method="POST" class="inline">
                                         @csrf
-                                        <button class="px-3 py-1.5 bg-green-600 text-white text-xs rounded hover:bg-green-700">
-                                            Approve
+                                        <button type="submit" class="text-green-400 hover:text-green-300 transition" title="Approve">
+                                            <i class="fa-solid fa-check"></i>
                                         </button>
                                     </form>
 
-                                    <form action="{{ route('admin.verifications.reject', $user->hu_id) }}" method="POST">
+                                    <form action="{{ route('admin.verifications.reject', $user->hu_id) }}" method="POST" class="inline">
                                         @csrf
-                                        <button class="px-3 py-1.5 bg-red-600 text-white text-xs rounded hover:bg-red-700">
-                                            Reject
+                                        <button type="submit" class="text-red-600 hover:text-red-900 transition" title="Reject">
+                                            <i class="fa-solid fa-times"></i>
                                         </button>
                                     </form>
                                 </div>

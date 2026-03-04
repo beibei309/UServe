@@ -22,98 +22,100 @@
     alt="{{ $student->hu_name }}"                    class="w-32 h-32 rounded-full object-cover border-4 border-gray-100 shadow-sm" />
             </div>
 
-            <div class="flex-1">
+                <div class="flex-1">
 
-                <div class="flex justify-between items-start">
-                    <div>
-                        <h1 class="text-3xl font-bold">{{ $student->hu_name }}</h1>
-                        <p class="text-gray-500">{{ $student->hu_email }}</p>
+                    <div class="flex flex-col sm:flex-row justify-between items-start gap-4">
+                        <div>
+                            <h1 class="text-3xl font-bold transition-colors duration-300" style="color: var(--text-primary);">{{ $student->hu_name }}</h1>
+                            <p class="transition-colors duration-300" style="color: var(--text-muted);">{{ $student->hu_email }}</p>
+                        </div>
+
+                        {{-- VERIFICATION --}}
+                        @if ($student->hu_verification_status === 'approved')
+                            <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
+                                Verified
+                            </span>
+                        @else
+                            <span class="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm font-medium">
+                                Pending
+                            </span>
+                        @endif
                     </div>
 
-                    {{-- VERIFICATION --}}
-                    @if ($student->hu_verification_status === 'approved')
-                        <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
-                            Verified
-                        </span>
-                    @else
-                        <span class="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm font-medium">
-                            Pending
-                        </span>
+                    {{-- DETAILS --}}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6 text-sm">
+
+                        <div class="space-y-2">
+                            <p><strong style="color: var(--text-primary);">Student ID:</strong> <span style="color: var(--text-secondary);">{{ $student->hu_student_id ?? '-' }}</span></p>
+                            <p><strong style="color: var(--text-primary);">Phone:</strong> <span style="color: var(--text-secondary);">{{ $student->hu_phone ?? '-' }}</span></p>
+                            <p>
+                                <strong style="color: var(--text-primary);">Role:</strong>
+                                @if ($student->hu_role === 'helper')
+                                    <span class="ml-2 px-2 py-0.5 bg-green-100 text-green-700 rounded text-xs font-bold">
+                                        Seller
+                                    </span>
+                                @else
+                                    <span class="ml-2 px-2 py-0.5 rounded text-xs font-bold transition-colors duration-300"
+                                          style="background-color: var(--bg-tertiary); color: var(--text-secondary);">
+                                        Student
+                                    </span>
+                                @endif
+                            </p>
+                        </div>
+
+                        <div class="space-y-2">
+                            <p><strong style="color: var(--text-primary);">Faculty:</strong> <span style="color: var(--text-secondary);">{{ $student->hu_faculty ?? '-' }}</span></p>
+                            <p><strong style="color: var(--text-primary);">Course:</strong> <span style="color: var(--text-secondary);">{{ $student->hu_course ?? '-' }}</span></p>
+                            <p>
+                                <strong style="color: var(--text-primary);">Graduation:</strong>
+                                @if ($student->studentStatus && $student->studentStatus->hss_graduation_date)
+                                    <span style="color: var(--text-secondary);">{{ \Carbon\Carbon::parse($student->studentStatus->hss_graduation_date)->format('d M Y') }}</span>
+                                @else
+                                    <span class="italic transition-colors duration-300" style="color: var(--text-muted);">Not set</span>
+                                @endif
+                            </p>
+                        </div>
+                    </div>
+
+                    {{-- BANNED --}}
+                    @if ($student->hu_is_suspended)
+                        <div class="mt-6 p-4 bg-red-50 border border-red-200 rounded">
+                            <strong class="text-red-700">Student Banned</strong>
+                            <p class="text-sm text-red-600 mt-1">
+                                Reason: {{ $student->hu_blacklist_reason }}
+                            </p>
+                        </div>
                     @endif
                 </div>
 
-                {{-- DETAILS --}}
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6 text-sm">
+                {{-- ACTIONS --}}
+                <div class="flex flex-col sm:flex-row gap-3 mt-4 sm:mt-0">
+                    <a href="{{ route('admin.students.edit', $student->hu_id) }}"
+                        class="text-cyan-400 hover:text-cyan-300 transition-colors duration-300 text-center block py-2">
+                        <i class="fa-solid fa-pen-to-square"></i> Edit Profile
+                    </a>
 
-                    <div class="space-y-2">
-                        <p><strong>Student ID:</strong> {{ $student->hu_student_id ?? '-' }}</p>
-                        <p><strong>Phone:</strong> {{ $student->hu_phone ?? '-' }}</p>
-                        <p>
-                            <strong>Role:</strong>
-                            @if ($student->hu_role === 'helper')
-                                <span class="ml-2 px-2 py-0.5 bg-green-100 text-green-700 rounded text-xs font-bold">
-                                    Seller
-                                </span>
-                            @else
-                                <span class="ml-2 px-2 py-0.5 bg-gray-100 text-gray-700 rounded text-xs font-bold">
-                                    Student
-                                </span>
-                            @endif
-                        </p>
-                    </div>
-
-                    <div class="space-y-2">
-                        <p><strong>Faculty:</strong> {{ $student->hu_faculty ?? '-' }}</p>
-                        <p><strong>Course:</strong> {{ $student->hu_course ?? '-' }}</p>
-                        <p>
-                            <strong>Graduation:</strong>
-                            @if ($student->studentStatus && $student->studentStatus->hss_graduation_date)
-                                {{ \Carbon\Carbon::parse($student->studentStatus->hss_graduation_date)->format('d M Y') }}
-                            @else
-                                <span class="text-gray-400 italic">Not set</span>
-                            @endif
-                        </p>
-                    </div>
-                </div>
-
-                @if ($student->hu_is_blacklisted || $student->hu_is_suspended || $student->hu_is_blocked)
-                    <div class="mt-6 p-4 {{ $student->hu_is_blocked ? 'bg-amber-50 border-amber-200' : 'bg-red-50 border-red-200' }} border rounded">
-                        <strong class="{{ $student->hu_is_blocked ? 'text-amber-700' : 'text-red-700' }}">
-                            {{ ucfirst($student->moderationStatusKey()) }}
-                        </strong>
-                        <p class="text-sm {{ $student->hu_is_blocked ? 'text-amber-700' : 'text-red-600' }} mt-1">
-                            Reason: {{ $student->hu_blacklist_reason ?: 'No specific reason provided.' }}
-                        </p>
-                    </div>
-                @endif
-            </div>
-
-            {{-- ACTIONS --}}
-            <div class="flex flex-col gap-3">
-                <a href="{{ route('admin.students.edit', $student->hu_id) }}"
-                    class="px-4 py-2 border rounded text-sm text-center">
-                    Edit Profile
-                </a>
-
-                @if ($student->hu_is_suspended || $student->hu_is_blacklisted)
-                    <form action="{{ route('admin.students.unban', $student->hu_id) }}" method="POST">
-                        @csrf
-                        <button class="px-4 py-2 bg-green-600 text-white rounded text-sm w-full">
-                            Reactivate
+                    @if ($student->hu_is_suspended)
+                        <form action="{{ route('admin.students.unban', $student->hu_id) }}" method="POST">
+                            @csrf
+                            <button class="text-green-400 hover:text-green-300 transition-colors duration-300 w-full py-2">
+                                <i class="fa-solid fa-unlock"></i> Unban
+                            </button>
+                        </form>
+                    @else
+                        <button onclick="openBanModal({{ $student->hu_id }})"
+                            class="text-red-500 hover:text-red-400 transition-colors duration-300 w-full py-2">
+                            <i class="fa-solid fa-ban"></i> Ban
                         </button>
-                    </form>
-                @else
-                    <button onclick="openBanModal({{ $student->hu_id }})"
-                        class="px-4 py-2 bg-red-600 text-white rounded text-sm">
-                        Suspend
-                    </button>
-                @endif
+                    @endif
+                </div>
             </div>
         </div>
 
         {{-- HELPER VERIFICATION INFO --}}
        @if ($student->hu_role === 'helper')
-    <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden mt-8">
+    <div class="border rounded-xl shadow-sm overflow-hidden mt-8 transition-all duration-300"
+         style="background-color: var(--bg-secondary); border-color: var(--border-color);">
         <div class="bg-emerald-600 px-6 py-3 flex items-center gap-3">
             <i class="fa-solid fa-circle-check text-white text-lg"></i>
             <h2 class="text-white font-semibold tracking-wide">STUDENT SELLER VERIFICATION</h2>
@@ -121,46 +123,46 @@
 
         <div class="p-6">
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                
                 <div class="space-y-6">
                     <div>
-                        <label class="text-xs font-bold text-gray-400 uppercase tracking-widest block mb-2">Verified Since</label>
+                        <label class="text-xs font-bold uppercase tracking-widest block mb-2 transition-colors duration-300" style="color: var(--text-muted);">Verified Since</label>
                         @if ($student->hu_helper_verified_at)
                             <div class="flex items-start gap-3">
                                 <div class="p-2 bg-emerald-50 rounded-lg">
                                     <i class="fa-regular fa-calendar-check text-emerald-600"></i>
                                 </div>
                                 <div>
-                                    <p class="text-gray-900 font-bold">{{ $student->hu_helper_verified_at->format('d M Y') }}</p>
-                                    <p class="text-sm text-gray-500">{{ $student->hu_helper_verified_at->format('h:i A') }}</p>
+                                    <p class="font-bold transition-colors duration-300" style="color: var(--text-primary);">{{ $student->hu_helper_verified_at->format('d M Y') }}</p>
+                                    <p class="text-sm transition-colors duration-300" style="color: var(--text-muted);">{{ $student->hu_helper_verified_at->format('h:i A') }}</p>
                                 </div>
                             </div>
                         @else
-                            <p class="text-gray-400 italic text-sm">No verification date recorded</p>
+                            <p class="italic text-sm transition-colors duration-300" style="color: var(--text-muted);">No verification date recorded</p>
                         @endif
                     </div>
 
                     <div>
-                        <label class="text-xs font-bold text-gray-400 uppercase tracking-widest block mb-2">📍 Last Known Location</label>
+                        <label class="text-xs font-bold uppercase tracking-widest block mb-2 transition-colors duration-300" style="color: var(--text-muted);">📍 Last Known Location</label>
                         @if ($student->hu_latitude && $student->hu_longitude)
-                            <div class="bg-gray-50 rounded-lg p-3 border border-gray-100">
-                                <p class="text-xs font-mono text-gray-600 leading-relaxed">
+                            <div class="rounded-lg p-3 border transition-all duration-300"
+                                 style="background-color: var(--bg-tertiary); border-color: var(--border-color);">
+                                <p class="text-xs font-mono leading-relaxed transition-colors duration-300" style="color: var(--text-secondary);">
                                     {{ $student->address ?? 'Coordinates: ' . number_format($student->hu_latitude, 5) . ', ' . number_format($student->hu_longitude, 5) }}
                                 </p>
                                 <a href="https://www.google.com/maps?q={{ $student->hu_latitude }},{{ $student->hu_longitude }}" 
                                    target="_blank" 
-                                   class="text-xs text-emerald-600 font-bold hover:underline mt-2 inline-block">
+                                   class="text-xs text-emerald-600 font-bold hover:underline mt-2 inline-block transition-colors duration-300">
                                    View on Google Maps →
                                 </a>
                             </div>
                         @else
-                            <p class="text-gray-400 italic text-sm">No GPS data available</p>
+                            <p class="italic text-sm transition-colors duration-300" style="color: var(--text-muted);">No GPS data available</p>
                         @endif
                     </div>
                 </div>
 
-                <div class="lg:border-x lg:px-8 border-gray-100">
-                    <label class="text-xs font-bold text-gray-400 uppercase tracking-widest block mb-3">Live Selfie Identity</label>
+                <div class="lg:border-x lg:px-8 transition-colors duration-300" style="border-color: var(--border-color);">
+                    <label class="text-xs font-bold uppercase tracking-widest block mb-3 transition-colors duration-300" style="color: var(--text-muted);">Live Selfie Identity</label>
                         @if ($student->hu_selfie_media_path)
                         <div class="relative group w-48 mx-auto lg:mx-0">
                             <img src="{{ route('admin.verifications.selfie', $student->hu_id) }}"
@@ -181,18 +183,20 @@
                             </div>
                         @endif
                     @else
-                        <div class="h-48 flex flex-col items-center justify-center bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
-                            <i class="fa-solid fa-camera text-gray-300 text-3xl mb-2"></i>
-                            <p class="text-gray-400 text-xs">No Selfie Uploaded</p>
+                        <div class="h-48 flex flex-col items-center justify-center rounded-xl border-2 border-dashed transition-all duration-300"
+                             style="background-color: var(--bg-tertiary); border-color: var(--border-color);">
+                            <i class="fa-solid fa-camera text-3xl mb-2 transition-colors duration-300" style="color: var(--text-muted);"></i>
+                            <p class="text-xs transition-colors duration-300" style="color: var(--text-muted);">No Selfie Uploaded</p>
                         </div>
                     @endif
                 </div>
 
-                <div class="bg-slate-50 rounded-xl p-5 border border-slate-100">
-                    <label class="text-xs font-bold text-slate-500 uppercase tracking-widest block mb-4">Management</label>
+                <div class="rounded-xl p-5 border transition-all duration-300"
+                     style="background-color: var(--bg-tertiary); border-color: var(--border-color);">
+                    <label class="text-xs font-bold uppercase tracking-widest block mb-4 transition-colors duration-300" style="color: var(--text-muted);">Management</label>
                     
                     <div class="space-y-4">
-                        <p class="text-xs text-slate-500 leading-relaxed">
+                        <p class="text-xs leading-relaxed transition-colors duration-300" style="color: var(--text-secondary);">
                             Revoking status will immediately disable all service listings and hide the seller profile from the S2U marketplace.
                         </p>
                         
@@ -200,7 +204,8 @@
                             @csrf
                             <button type="submit" 
                                     onclick="return confirm('Revoke Seller Status? This user will become a normal student again.')"
-                                    class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white border border-rose-200 text-rose-600 hover:bg-rose-600 hover:text-white font-bold text-xs rounded-lg transition-all shadow-sm">
+                                    class="w-full flex items-center justify-center gap-2 px-4 py-3 border border-rose-200 text-rose-600 hover:bg-rose-600 hover:text-white font-bold text-xs rounded-lg transition-all shadow-sm"
+                                    style="background-color: var(--bg-primary);">
                                 <i class="fa-solid fa-user-slash"></i>
                                 REVOKE SELLER STATUS
                             </button>
@@ -270,9 +275,10 @@
 
         {{-- HELPER PROFILE --}}
         @if ($student->hu_role === 'helper')
-            <div class="bg-white shadow-sm rounded-lg p-6 mt-6 border border-gray-200">
+            <div class="shadow-sm rounded-lg p-6 mt-6 border transition-all duration-300"
+                 style="background-color: var(--bg-secondary); border-color: var(--border-color);">
                 <div class="flex items-center gap-2 mb-4">
-                    <h2 class="text-xl font-semibold">Helper Profile</h2>
+                    <h2 class="text-xl font-semibold transition-colors duration-300" style="color: var(--text-primary);">Helper Profile</h2>
                     <span class="px-2 py-0.5 bg-green-100 text-green-700 text-xs font-bold rounded">
                         Student Seller
                     </span>
@@ -280,11 +286,12 @@
 
                 @if ($student->work_experience_message)
                     <div class="mb-6">
-                        <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                        <h3 class="text-sm font-semibold uppercase tracking-wide mb-2 transition-colors duration-300"
+                            style="color: var(--text-muted);">
                             Experience / Description
                         </h3>
 
-                        <div class="text-gray-700 text-sm leading-relaxed whitespace-pre-line">
+                        <div class="text-sm leading-relaxed whitespace-pre-line transition-colors duration-300" style="color: var(--text-secondary);">
                             {{ $student->work_experience_message }}
                         </div>
                     </div>
@@ -292,11 +299,12 @@
 
                 @if ($student->skills)
                     <div class="mb-6">
-                        <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                        <h3 class="text-sm font-semibold uppercase tracking-wide mb-2 transition-colors duration-300"
+                            style="color: var(--text-muted);">
                             Skills
                         </h3>
 
-                        <ul class="list-disc list-inside space-y-1 text-gray-700 text-sm">
+                        <ul class="list-disc list-inside space-y-1 text-sm transition-colors duration-300" style="color: var(--text-secondary);">
                             @foreach (explode(',', $student->skills) as $skill)
                                 <li>{{ trim($skill) }}</li>
                             @endforeach
@@ -307,7 +315,8 @@
                 {{-- RESUME / CV --}}
                 @if ($student->work_experience_file)
                     <div class="mt-4">
-                        <h3 class="text-sm font-semibold text-gray-600 uppercase mb-2">
+                        <h3 class="text-sm font-semibold uppercase mb-2 transition-colors duration-300"
+                            style="color: var(--text-secondary);">
                             Resume / CV
                         </h3>
 
@@ -325,38 +334,46 @@
         @endif
 
         {{-- ABOUT --}}
-        <div class="bg-white shadow-sm rounded-lg p-6 mt-6 border border-gray-200">
-            <h2 class="text-xl font-semibold mb-3">About</h2>
+        <div class="shadow-sm rounded-lg p-6 mt-6 border transition-all duration-300"
+             style="background-color: var(--bg-secondary); border-color: var(--border-color);">
+            <h2 class="text-xl font-semibold mb-3 transition-colors duration-300" style="color: var(--text-primary);">About</h2>
             @if ($student->hu_bio)
-                <p class="text-gray-700 whitespace-pre-line">{{ $student->hu_bio }}</p>
+                <p class="whitespace-pre-line transition-colors duration-300" style="color: var(--text-secondary);">{{ $student->hu_bio }}</p>
             @else
-                <p class="text-gray-400 italic">No bio provided.</p>
+                <p class="italic transition-colors duration-300" style="color: var(--text-muted);">No bio provided.</p>
             @endif
         </div>
 
         {{-- SYSTEM INFO --}}
-        <div class="bg-white shadow-sm rounded-lg p-6 mt-6 border border-gray-200">
-            <h2 class="text-sm font-bold text-gray-500 uppercase mb-4">Student Information</h2>
+        <div class="shadow-sm rounded-lg p-6 mt-6 border transition-all duration-300"
+             style="background-color: var(--bg-secondary); border-color: var(--border-color);">
+            <h2 class="text-sm font-bold uppercase mb-4 transition-colors duration-300" style="color: var(--text-muted);">Student Information</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                <div><strong>ID:</strong> #{{ $student->hu_id }}</div>
-                <div><strong>Registered:</strong> {{ $student->created_at->format('d M Y') }}</div>
-                <div><strong>Updated:</strong> {{ $student->updated_at->format('d M Y') }}</div>
+                <div><strong style="color: var(--text-primary);">ID:</strong> <span style="color: var(--text-secondary);">#{{ $student->hu_id }}</span></div>
+                <div><strong style="color: var(--text-primary);">Registered:</strong> <span style="color: var(--text-secondary);">{{ $student->created_at->format('d M Y') }}</span></div>
+                <div><strong style="color: var(--text-primary);">Updated:</strong> <span style="color: var(--text-secondary);">{{ $student->updated_at->format('d M Y') }}</span></div>
             </div>
         </div>
     </div>
 
     {{-- BAN MODAL --}}
     <div id="banModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white p-6 rounded-lg w-full max-w-md">
-            <h2 class="text-lg font-bold mb-3">Suspend Student</h2>
+        <div class="p-6 rounded-lg w-full max-w-md transition-all duration-300"
+             style="background-color: var(--bg-primary);">
+            <h2 class="text-lg font-bold mb-3 transition-colors duration-300" style="color: var(--text-primary);">Ban Student</h2>
 
-            <textarea id="banReason" rows="3" class="w-full border rounded p-2 mb-4" placeholder="Reason for suspension..."></textarea>
+            <textarea id="banReason" rows="3" 
+                      class="w-full border rounded p-2 mb-4 transition-colors duration-300" 
+                      style="background-color: var(--bg-secondary); border-color: var(--border-color); color: var(--text-primary);" 
+                      placeholder="Reason for ban..."></textarea>
 
             <form id="banForm" method="POST">@csrf</form>
 
             <div class="flex justify-end gap-2">
-                <button onclick="closeBanModal()" class="px-4 py-2 border rounded">Cancel</button>
-                <button onclick="submitBan()" class="px-4 py-2 bg-red-600 text-white rounded">
+                <button onclick="closeBanModal()" class="hover:text-cyan-400 transition-colors duration-300 border rounded px-4 py-2"
+                        style="color: var(--text-muted); border-color: var(--border-color);">Cancel</button>
+                <button onclick="submitBan()" class="text-red-500 hover:text-red-400 transition-colors duration-300 border rounded px-4 py-2"
+                        style="border-color: var(--border-color);">
                     Confirm
                 </button>
             </div>
