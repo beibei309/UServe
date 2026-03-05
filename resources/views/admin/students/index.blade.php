@@ -110,44 +110,43 @@
 
                             <td class="py-3 px-4">
                                 @if ($student->hu_is_suspended)
-                                    <span class="px-3 py-1 text-xs bg-red-100 text-red-700 rounded-full">Suspended</span>
+                                    <span class="px-3 py-1 text-xs font-bold bg-red-100 text-red-700 rounded-full">Suspended</span>
                                 @elseif ($student->hu_verification_status === 'approved')
-                                        <span class="px-3 py-1 text-xs bg-green-100 text-green-700 rounded-full">Verified</span>
+                                        <span class="px-3 py-1 text-xs font-bold bg-green-100 text-green-700 rounded-full">Verified</span>
                                 @else
                                     <span
-                                        class="px-3 py-1 text-xs bg-yellow-100 text-yellow-700 rounded-full">Pending</span>
+                                        class="px-3 py-1 text-xs font-bold bg-yellow-100 text-yellow-700 rounded-full">Pending</span>
                                 @endif
                             </td>
 
-                            <td class="px-6 py-4 text-right">
-                                <div class="flex justify-end gap-3">
+                            <td class="px-4 py-3 text-center">
+                                <div class="flex items-center justify-center gap-2">
                                     {{-- VIEW --}}
                                     <a href="{{ route('admin.students.view', $student->hu_id) }}"
-                                        class="text-cyan-400 hover:text-cyan-300 transition-colors duration-300" title="View">
+                                        class="inline-flex items-center justify-center w-8 h-8 bg-cyan-100 hover:bg-cyan-200 text-cyan-700 rounded-lg text-xs font-semibold transition-all duration-200" title="View">
                                         <i class="fa-solid fa-eye"></i>
                                     </a>
 
                                     {{-- EDIT --}}
                                     <a href="{{ route('admin.students.edit', $student->hu_id) }}"
-                                        class="text-blue-400 hover:text-blue-300 transition-colors duration-300" title="Edit">
+                                        class="inline-flex items-center justify-center w-8 h-8 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg text-xs font-semibold transition-all duration-200" title="Edit">
                                         <i class="fa-solid fa-pen-to-square"></i>
                                     </a>
 
                                     {{-- BAN / UNBAN --}}
                                     @if ($student->hu_is_suspended)
-                                        {{-- Tambah class 'unban-form' pada form dan 'unban-btn' pada button --}}
                                         <form action="{{ route('admin.students.unban', $student->hu_id) }}" method="POST"
-                                            class="unban-form inline">
+                                            class="unban-form inline-flex">
                                             @csrf
                                             <button type="button"
-                                                class="text-green-400 hover:text-green-300 transition-colors duration-300 unban-btn"
+                                                class="inline-flex items-center justify-center w-8 h-8 bg-green-100 hover:bg-green-200 text-green-700 rounded-lg text-xs font-semibold transition-all duration-200 unban-btn"
                                                 title="Unban">
                                                 <i class="fa-solid fa-unlock"></i>
                                             </button>
                                         </form>
                                     @else
                                         <button type="button" data-ban-open data-student-id="{{ $student->hu_id }}"
-                                            class="text-red-500 hover:text-red-400 transition-colors duration-300" title="Ban">
+                                            class="inline-flex items-center justify-center w-8 h-8 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg text-xs font-semibold transition-all duration-200" title="Ban">
                                             <i class="fa-solid fa-ban"></i>
                                         </button>
                                     @endif
@@ -168,28 +167,76 @@
         </div>
     </div>
 
+    {{-- BAN MODAL --}}
     <div id="banModal"
-        class="hidden fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
-        <div class="w-full max-w-md p-6 rounded-lg shadow-xl transition-all duration-300"
-             style="background-color: var(--bg-primary);">
-            <h2 class="text-xl font-bold mb-4 transition-colors duration-300" style="color: var(--text-primary);">Ban Student</h2>
-            <p class="mb-3 transition-colors duration-300" style="color: var(--text-secondary);">Please provide a reason for banning this student:</p>
-            <textarea id="banReason" rows="3" 
-                      class="w-full border rounded p-2 transition-colors duration-300"
-                      style="background-color: var(--bg-secondary); border-color: var(--border-color); color: var(--text-primary);"
-                      placeholder="Write reason..."></textarea>
+        class="hidden fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-md flex items-center justify-center z-50 p-4">
+        
+        <div class="w-full max-w-lg rounded-2xl shadow-2xl border transition-all duration-500 transform scale-95 hover:scale-100"
+             style="background-color: var(--bg-secondary); border-color: var(--border-color);">
+            
+            {{-- Header --}}
+            <div class="bg-gradient-to-r from-red-600 to-pink-700 px-6 py-6 rounded-t-2xl">
+                <div class="flex items-center gap-4">
+                    <div class="w-16 h-16 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-ban text-white text-2xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-white font-bold text-2xl">Ban Student</h2>
+                        <p class="text-red-100 text-sm">Suspend account access immediately</p>
+                    </div>
+                </div>
+            </div>
 
-            <form id="banForm" method="POST" class="hidden">
-                @csrf
-            </form>
+            {{-- Content --}}
+            <div class="p-8">
+                {{-- Warning Alert --}}
+                <div class="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+                    <div class="flex items-start gap-3">
+                        <div class="w-6 h-6 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <i class="fas fa-exclamation-triangle text-red-600 text-sm"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-red-800 text-sm mb-1">Important Warning</h3>
+                            <p class="text-red-700 text-xs leading-relaxed">
+                                This action will immediately suspend the student's account and prevent access to all services.
+                            </p>
+                        </div>
+                    </div>
+                </div>
 
-            <div class="mt-5 flex justify-end gap-3">
-                <button type="button" data-ban-close
-                        class="hover:text-cyan-400 transition-colors duration-300 border rounded px-4 py-2"
-                        style="color: var(--text-muted); border-color: var(--border-color);">Cancel</button>
-                <button type="button" data-ban-submit
-                        class="text-red-500 hover:text-red-400 transition-colors duration-300 border rounded px-4 py-2"
-                        style="border-color: var(--border-color);">Confirm Ban</button>
+                {{-- Reason Input --}}
+                <div class="mb-8">
+                    <label for="banReason" class="flex items-center gap-2 text-sm font-semibold mb-3 transition-colors duration-300" style="color: var(--text-primary);">
+                        <i class="fas fa-gavel text-red-500"></i>
+                        Reason for Ban <span class="text-red-500">*</span>
+                    </label>
+                    <textarea id="banReason" rows="4" 
+                              class="w-full border rounded-xl px-4 py-3 transition-all duration-300 focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none" 
+                              style="background-color: var(--bg-primary); border-color: var(--border-color); color: var(--text-primary);" 
+                              placeholder="Please provide a detailed and specific reason for this ban..."
+                              required></textarea>
+                    <p class="text-xs mt-2 transition-colors duration-300" style="color: var(--text-muted);">
+                        Be specific and professional. This reason will be visible to the student.
+                    </p>
+                </div>
+
+                <form id="banForm" method="POST" class="hidden">
+                    @csrf
+                </form>
+
+                {{-- Action Buttons --}}
+                <div class="flex gap-4">
+                    <button type="button" data-ban-close
+                            class="flex-1 px-6 py-3 bg-gray-500 hover:bg-gray-600 text-white rounded-xl transition-all duration-300 font-semibold flex items-center justify-center gap-2 shadow-lg">
+                        <i class="fas fa-times"></i>
+                        Cancel
+                    </button>
+                    <button type="button" data-ban-submit
+                            class="flex-1 px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white rounded-xl transition-all duration-300 font-semibold flex items-center justify-center gap-2 shadow-lg">
+                        <i class="fas fa-ban"></i>
+                        Confirm Ban
+                    </button>
+                </div>
             </div>
         </div>
     </div>

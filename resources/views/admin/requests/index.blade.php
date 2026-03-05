@@ -120,7 +120,7 @@
                                 </td>
 
                                 {{-- Status --}}
-                                <td class="py-4 px-3">
+                                <td class="py-4 px-3 text-center">
                                     <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold border {{ $request->status_style }} capitalize">
                                         {{ $request->status_label }}
                                     </span>
@@ -130,14 +130,14 @@
                                 </td>
 
                                 {{-- Actions --}}
-                                <td class="py-4 px-3 text-right">
-                                    <div class="flex items-center justify-end gap-2">
+                                <td class="py-4 px-3">
+                                    <div class="flex items-center justify-center gap-2 flex-wrap">
                                         <button type="button" data-request-open-view
                                             data-request='@json($request)'
                                             data-service='@json($request->studentService)'
                                             data-requester='@json($request->requester)'
                                             data-provider='@json($request->provider)'
-                                            class="text-blue-500 hover:text-blue-700 transition-colors duration-300" title="View">
+                                            class="inline-flex items-center justify-center w-8 h-8 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg text-xs font-semibold transition-all duration-200" title="View">
                                             <i class="fa-solid fa-eye"></i>
                                         </button>
 
@@ -148,14 +148,14 @@
                                                 data-requester-payload='@json($request->requester_payload)'
                                                 data-provider-payload='@json($request->provider_payload)'
                                                 data-reporter-payload='@json($request->reporter_payload)'
-                                                class="bg-red-100 hover:bg-red-200 text-red-700 px-2 py-1 rounded-lg text-xs font-bold transition-colors">
-                                                <i class="fa-solid fa-gavel"></i> Review
+                                                class="inline-flex items-center justify-center w-8 h-8 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg text-xs font-semibold transition-all duration-200" title="Review Dispute">
+                                                <i class="fa-solid fa-gavel"></i>
                                             </button>
                                         @endif
 
                                         <form action="{{ route('admin.requests.destroy', $request->hsr_id) }}" method="POST" data-confirm-message="Delete?" class="inline">
                                             @csrf @method('DELETE')
-                                            <button type="submit" class="text-red-500 hover:text-red-700 transition-colors duration-300" title="Delete">
+                                            <button type="submit" class="inline-flex items-center justify-center w-8 h-8 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg text-xs font-semibold transition-all duration-200" title="Delete">
                                                 <i class="fa-solid fa-trash"></i>
                                             </button>
                                         </form>
@@ -188,85 +188,140 @@
         class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center backdrop-blur-sm p-4">
         <div class="rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden max-h-[90vh] overflow-y-auto transition-all duration-300"
              style="background-color: var(--bg-primary);">
-            <div class="px-6 py-4 border-b flex justify-between items-center sticky top-0 z-10 transition-colors duration-300"
-                 style="background-color: var(--bg-tertiary); border-color: var(--border-color);">
+
+            {{-- Gradient Header --}}
+            <div class="relative bg-gradient-to-r from-cyan-600 to-indigo-700 px-6 py-5 flex justify-between items-center sticky top-0 z-10">
                 <div>
-                    <h3 class="text-lg font-bold transition-colors duration-300" style="color: var(--text-primary);">Request Details</h3>
-                    <p class="text-xs transition-colors duration-300" style="color: var(--text-secondary);">ID: #<span id="viewId"></span></p>
+                    <div class="flex items-center gap-3 mb-1">
+                        <div class="w-10 h-10 rounded-xl bg-white bg-opacity-20 flex items-center justify-center">
+                            <i class="fa-solid fa-file-contract text-white text-lg"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-white">Request Details</h3>
+                    </div>
+                    <p class="text-cyan-200 text-xs ml-13 pl-1">Request ID: #<span id="viewId"></span></p>
                 </div>
                 <button type="button" data-request-close-view
-                    class="rounded-full p-1 shadow-sm border transition-all duration-300"
-                    style="color: var(--text-secondary); background-color: var(--bg-secondary); border-color: var(--border-color);">
+                    class="rounded-full p-2 bg-white bg-opacity-20 hover:bg-opacity-30 transition-all duration-200 text-white">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
-                        </path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
                 </button>
             </div>
-            <div class="p-6 space-y-6">
-                <div class="flex justify-between items-start bg-indigo-50 p-4 rounded-xl border border-indigo-100">
-                    <div>
-                        <h4 id="viewServiceTitle" class="font-bold text-gray-900 text-lg mb-1"></h4>
-                        <span id="viewPackage"
-                            class="text-xs font-semibold bg-white px-2 py-1 rounded border border-indigo-200 text-indigo-700 uppercase tracking-wide"></span>
+
+            <div class="p-6 space-y-5">
+
+                {{-- Service Overview Card --}}
+                <div class="rounded-xl overflow-hidden border transition-colors duration-300" style="border-color: var(--border-color);">
+                    <div class="bg-gradient-to-r from-indigo-500 to-purple-600 px-4 py-3 flex items-center gap-2">
+                        <i class="fa-solid fa-briefcase text-white text-sm"></i>
+                        <span class="text-white text-sm font-semibold uppercase tracking-wide">Service Overview</span>
                     </div>
-                    <div class="text-right">
-                        <p class="text-2xl font-bold text-indigo-700">RM <span id="viewPrice"></span></p>
-                        <span id="viewStatus"
-                            class="inline-block mt-1 px-2.5 py-0.5 rounded-full text-xs font-bold capitalize bg-white border"></span>
+                    <div class="p-4 flex justify-between items-start transition-colors duration-300" style="background-color: var(--bg-secondary);">
+                        <div>
+                            <h4 id="viewServiceTitle" class="font-bold text-lg mb-1 transition-colors duration-300" style="color: var(--text-primary);"></h4>
+                            <span id="viewPackage"
+                                class="text-xs font-semibold px-2 py-1 rounded-md border uppercase tracking-wide transition-colors duration-300"
+                                style="background-color: var(--bg-tertiary); color: var(--text-secondary); border-color: var(--border-color);"></span>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-2xl font-bold text-indigo-500">RM <span id="viewPrice"></span></p>
+                            <span id="viewStatus"
+                                class="inline-block mt-1 px-2.5 py-0.5 rounded-full text-xs font-bold capitalize border"></span>
+                        </div>
                     </div>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="border border-gray-200 rounded-xl p-4">
-                        <p class="text-xs font-bold text-gray-400 uppercase mb-3">Requester (Buyer)</p>
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold"
-                                id="viewReqAvatar"></div>
-                            <div>
-                                <p id="viewReqName" class="font-bold text-sm text-gray-900"></p>
-                                <p id="viewReqEmail" class="text-xs text-gray-500"></p>
-                                <p id="viewReqPhone" class="text-xs text-gray-500 mt-0.5"></p>
+
+                {{-- Parties Involved --}}
+                <div class="rounded-xl overflow-hidden border transition-colors duration-300" style="border-color: var(--border-color);">
+                    <div class="bg-gradient-to-r from-blue-500 to-cyan-600 px-4 py-3 flex items-center gap-2">
+                        <i class="fa-solid fa-users text-white text-sm"></i>
+                        <span class="text-white text-sm font-semibold uppercase tracking-wide">Parties Involved</span>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x transition-colors duration-300"
+                         style="background-color: var(--bg-secondary); divide-color: var(--border-color);">
+                        <div class="p-4">
+                            <p class="text-xs font-bold uppercase mb-3 transition-colors duration-300" style="color: var(--text-muted);">
+                                <i class="fa-solid fa-user-graduate mr-1 text-blue-400"></i> Requester (Buyer)
+                            </p>
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold flex-shrink-0"
+                                    id="viewReqAvatar"></div>
+                                <div>
+                                    <p id="viewReqName" class="font-bold text-sm transition-colors duration-300" style="color: var(--text-primary);"></p>
+                                    <p id="viewReqEmail" class="text-xs transition-colors duration-300" style="color: var(--text-secondary);"></p>
+                                    <p id="viewReqPhone" class="text-xs mt-0.5 transition-colors duration-300" style="color: var(--text-muted);"></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-4">
+                            <p class="text-xs font-bold uppercase mb-3 transition-colors duration-300" style="color: var(--text-muted);">
+                                <i class="fa-solid fa-handshake mr-1 text-emerald-400"></i> Provider (Seller)
+                            </p>
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 font-bold flex-shrink-0"
+                                    id="viewProvAvatar"></div>
+                                <div>
+                                    <p id="viewProvName" class="font-bold text-sm transition-colors duration-300" style="color: var(--text-primary);"></p>
+                                    <p id="viewProvEmail" class="text-xs transition-colors duration-300" style="color: var(--text-secondary);"></p>
+                                    <p id="viewProvPhone" class="text-xs mt-0.5 transition-colors duration-300" style="color: var(--text-muted);"></p>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="border border-gray-200 rounded-xl p-4">
-                        <p class="text-xs font-bold text-gray-400 uppercase mb-3">Provider (Seller)</p>
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-bold"
-                                id="viewProvAvatar"></div>
-                            <div>
-                                <p id="viewProvName" class="font-bold text-sm text-gray-900"></p>
-                                <p id="viewProvEmail" class="text-xs text-gray-500"></p>
-                                <p id="viewProvPhone" class="text-xs text-gray-500 mt-0.5"></p>
+                </div>
+
+                {{-- Schedule & Message --}}
+                <div class="rounded-xl overflow-hidden border transition-colors duration-300" style="border-color: var(--border-color);">
+                    <div class="bg-gradient-to-r from-emerald-500 to-teal-600 px-4 py-3 flex items-center gap-2">
+                        <i class="fa-solid fa-calendar-days text-white text-sm"></i>
+                        <span class="text-white text-sm font-semibold uppercase tracking-wide">Schedule & Message</span>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-0 divide-y md:divide-y-0 md:divide-x transition-colors duration-300"
+                         style="background-color: var(--bg-secondary); divide-color: var(--border-color);">
+                        <div class="p-4 md:col-span-1">
+                            <p class="text-xs font-bold uppercase mb-3 transition-colors duration-300" style="color: var(--text-muted);">Schedule</p>
+                            <div class="space-y-2">
+                                <div class="flex items-center gap-2 text-sm transition-colors duration-300" style="color: var(--text-primary);">
+                                    <i class="fa-regular fa-calendar w-4 text-center text-emerald-500"></i>
+                                    <span id="viewDate"></span>
+                                </div>
+                                <div class="flex items-center gap-2 text-sm transition-colors duration-300" style="color: var(--text-primary);">
+                                    <i class="fa-regular fa-clock w-4 text-center text-teal-500"></i>
+                                    <span id="viewTime"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-4 md:col-span-2">
+                            <p class="text-xs font-bold uppercase mb-3 transition-colors duration-300" style="color: var(--text-muted);">Client Message</p>
+                            <div class="rounded-lg p-3 border text-sm italic min-h-[70px] transition-colors duration-300"
+                                 style="background-color: var(--bg-tertiary); border-color: var(--border-color); color: var(--text-secondary);">
+                                "<span id="viewMessage"></span>"
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="md:col-span-1">
-                        <p class="text-xs font-bold text-gray-400 uppercase mb-2">Schedule</p>
-                        <div class="text-sm font-medium text-gray-900 bg-gray-50 p-3 rounded-lg border border-gray-100">
-                            <div class="mb-2"><i class="fa-regular fa-calendar text-gray-400 mr-2"></i><span
-                                    id="viewDate"></span></div>
-                            <div><i class="fa-regular fa-clock text-gray-400 mr-2"></i><span id="viewTime"></span></div>
-                        </div>
+
+                {{-- Dispute Section (shown only when disputed) --}}
+                <div id="viewDisputeSection" class="hidden rounded-xl overflow-hidden border border-red-300">
+                    <div class="bg-gradient-to-r from-red-500 to-rose-600 px-4 py-3 flex items-center gap-2">
+                        <i class="fa-solid fa-circle-exclamation text-white text-sm"></i>
+                        <span class="text-white text-sm font-semibold uppercase tracking-wide">Dispute Reason</span>
                     </div>
-                    <div class="md:col-span-2">
-                        <p class="text-xs font-bold text-gray-400 uppercase mb-2">Client Message</p>
-                        <div
-                            class="bg-gray-50 p-4 rounded-lg border border-gray-100 text-sm text-gray-700 italic min-h-[80px]">
-                            "<span id="viewMessage"></span>"</div>
+                    <div class="bg-red-50 p-4">
+                        <p id="viewDisputeReason" class="text-sm text-red-700 leading-relaxed"></p>
                     </div>
                 </div>
-                <div id="viewDisputeSection" class="hidden mt-4 bg-red-50 border border-red-200 rounded-xl p-4">
-                    <h4 class="text-sm font-bold text-red-700 flex items-center gap-2 mb-2"><i
-                            class="fa-solid fa-circle-exclamation"></i> Dispute Reason</h4>
-                    <p id="viewDisputeReason" class="text-sm text-red-600"></p>
-                </div>
+
             </div>
-            <div class="bg-gray-50 px-6 py-4 text-right">
+
+            {{-- Footer --}}
+            <div class="px-6 py-4 border-t flex justify-end transition-colors duration-300"
+                 style="background-color: var(--bg-secondary); border-color: var(--border-color);">
                 <button type="button" data-request-close-view
-                    class="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-100 transition">Close</button>
+                    class="px-5 py-2 rounded-lg border font-medium text-sm transition-all duration-200 hover:opacity-80"
+                    style="background-color: var(--bg-tertiary); color: var(--text-primary); border-color: var(--border-color);">
+                    Close
+                </button>
             </div>
         </div>
     </div>

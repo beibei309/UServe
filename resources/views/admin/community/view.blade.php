@@ -1,171 +1,221 @@
 @extends('admin.layout')
 
 @section('content')
-<div class="px-4 sm:px-6">
+    <div class="max-w-6xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
 
-    <div class="max-w-4xl mx-auto">
-
-        <!-- Back Button -->
-        <a href="{{ route('admin.community.index') }}" 
-           class="hover:text-cyan-400 text-sm mb-4 inline-block transition-colors duration-300"
-           style="color: var(--text-secondary);">
-            ← Back to Community List
-        </a>
-
-        <!-- Profile Header -->
-        <div class="shadow rounded-lg p-6 flex flex-col md:flex-row gap-6 items-start md:items-center border transition-all duration-300"
-             style="background-color: var(--bg-secondary); border-color: var(--border-color);">
-
-            <!-- Profile Photo -->
-            <div class="h-32 w-32 rounded-full overflow-hidden border transition-colors duration-300 shrink-0"
-                 style="border-color: var(--border-color);">
-                <img src="{{ $user->profile_image_url }}" class="w-full h-full object-cover" alt="{{ $user->hu_name }}" />
+        {{-- HEADER --}}
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+            <div>
+                <h1 class="text-2xl font-bold transition-colors duration-300" style="color: var(--text-primary);">
+                    Community Member Profile
+                </h1>
+                <p class="text-sm mt-1 transition-colors duration-300" style="color: var(--text-secondary);">
+                    View and manage student community member details
+                </p>
             </div>
-            <div class="flex-1">
-
-                <!-- Name -->
-                <h1 class="text-3xl font-bold transition-colors duration-300" style="color: var(--text-primary);">{{ $user->hu_name }}</h1>
-
-                <!-- Email + Phone -->
-                <p class="transition-colors duration-300" style="color: var(--text-secondary);">{{ $user->hu_email }}</p>
-                <p class="transition-colors duration-300" style="color: var(--text-secondary);">{{ $user->hu_phone ?? 'No phone provided' }}</p>
-
-                <!-- Verification -->
-                <div class="mt-2">
-                    @if ($user->hu_verification_status == 'approved')
-                        <span class="px-3 py-1 text-sm bg-green-100 text-green-700 rounded-full">
-                            Approved
-                        </span>
-                    @elseif($user->hu_verification_status == 'pending')
-                        <span class="px-3 py-1 text-sm bg-yellow-100 text-yellow-700 rounded-full">
-                            Pending
-                        </span>
-                    @else
-                        <span class="px-3 py-1 text-sm bg-red-100 text-red-700 rounded-full">
-                            Rejected
-                        </span>
-                    @endif
-                </div>
-
-                <!-- Blacklist -->
-                @if ($user->hu_is_blacklisted)
-                    <div class="mt-2">
-                        <span class="px-3 py-1 text-sm bg-red-200 text-red-800 rounded-full">
-                           Suspended
-                        </span>
-
-                        <p class="text-sm text-red-700 mt-1">
-                            Reason: {{ $user->hu_blacklist_reason }}
-                        </p>
-                    </div>
-                @endif
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="flex flex-col sm:flex-row gap-2 mt-6 sm:mt-0">
-
-                <!-- Edit -->
-                <a href="{{ route('admin.community.edit', $user->hu_id) }}"
-                    class="px-4 py-2 bg-cyan-500 hover:bg-cyan-600 text-white rounded text-sm text-center transition-colors duration-300">
-                    <i class="fa-solid fa-edit mr-1"></i> Edit User
-                </a>
-
-                <!-- Blacklist / Unblacklist -->
-                @if ($user->hu_is_blacklisted)
-                    <form action="{{ route('admin.community.unblacklist', $user->hu_id) }}" method="POST">
-                        @csrf
-                        <button class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm w-full transition-colors duration-300">
-                            <i class="fa-solid fa-unlock mr-1"></i> Remove Blacklist
-                        </button>
-                    </form>
-                @else
-                    <button type="button" data-blacklist-open data-user-id="{{ $user->hu_id }}"
-                        class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm w-full transition-colors duration-300">
-                        <i class="fa-solid fa-ban mr-1"></i> Suspend User
-                    </button>
-                @endif
-
-            </div>
-
+            <a href="{{ route('admin.community.index') }}"
+               class="bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-400 hover:to-gray-500 text-white px-4 py-2 rounded-lg transition-all duration-300 flex items-center gap-2 whitespace-nowrap">
+                <i class="fas fa-arrow-left"></i>
+                Back to Community
+            </a>
         </div>
 
-        <!-- VERIFICATION DOCUMENTS (New Section) -->
-        <div class="bg-white shadow-sm border border-slate-200 rounded-xl p-6 mt-6">
-            <div class="flex items-center gap-2 mb-6 border-b border-slate-100 pb-4">
-                <div class="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
-                    <i class="fas fa-shield-check text-xl"></i>
+        {{-- Success/Error Messages --}}
+        @if (session('success'))
+            <div class="mb-6 p-4 rounded-xl transition-all duration-300" style="background-color: #d1fae5; color: #065f46; border: 1px solid #a7f3d0;">
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-check-circle"></i>
+                    {{ session('success') }}
                 </div>
-                <h2 class="text-xl font-bold text-slate-800">Verification Assets</h2>
             </div>
+        @endif
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="flex flex-col h-full">
-                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
-                        <i class="fas fa-camera"></i> Live Selfie Check
-                    </h3>
+        {{-- PROFILE HEADER CARD --}}
+        <div class="rounded-xl shadow-xl border transition-all duration-300 mb-8" 
+             style="background-color: var(--bg-secondary); border-color: var(--border-color);">
+            <div class="p-6 sm:p-8">
+                <div class="flex flex-col lg:flex-row gap-8">
+                    
+                    {{-- Profile Photo --}}
+                    <div class="flex-shrink-0 text-center lg:text-left">
+                        <div class="w-32 h-32 lg:w-40 lg:h-40 rounded-full overflow-hidden border-4 shadow-lg mx-auto lg:mx-0 transition-transform hover:scale-105" 
+                             style="border-color: var(--border-color);">
+                            <img src="{{ $user->profile_image_url }}" class="w-full h-full object-cover" alt="{{ $user->hu_name }}" />
+                        </div>
+                    </div>
 
-                    @if ($user->hu_selfie_media_path)
-                        <div
-                            class="relative group border border-slate-200 rounded-xl overflow-hidden bg-slate-50 flex-grow">
-                            <img src="{{ route('admin.verifications.selfie', $user->hu_id) }}"
-                                class="w-full h-72 object-cover transition duration-300 group-hover:scale-105"
-                                alt="Live Selfie">
-
-                            <div
-                                class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                <button type="button" data-selfie-open data-selfie-url="{{ route('admin.verifications.selfie', $user->hu_id) }}"
-                                    class="bg-white text-slate-900 px-4 py-2 rounded-full font-semibold text-sm shadow-xl">
-                                    <i class="fas fa-expand-arrows-alt mr-1"></i> View Full Size
-                                </button>
+                    {{-- Profile Details --}}
+                    <div class="flex-1">
+                        <div class="flex flex-col sm:flex-row justify-between items-start gap-4 mb-6">
+                            <div>
+                                <h2 class="text-3xl font-bold transition-colors duration-300" style="color: var(--text-primary);">
+                                    {{ $user->hu_name }}
+                                </h2>
+                                <p class="text-lg mt-1 transition-colors duration-300" style="color: var(--text-muted);">
+                                    {{ $user->hu_email }}
+                                </p>
+                                <p class="text-sm mt-1 transition-colors duration-300" style="color: var(--text-secondary);">
+                                    {{ $user->hu_phone ?? 'No phone provided' }}
+                                </p>
                             </div>
 
-                            @if ($user->hu_verification_note)
-                                <div
-                                    class="absolute bottom-3 left-3 right-3 bg-amber-50/90 backdrop-blur border border-amber-200 p-2 rounded-lg">
-                                    <p class="text-[10px] uppercase font-bold text-amber-700 leading-tight">Verification
-                                        Challenge</p>
-                                    <p class="text-sm text-amber-900 font-medium">{{ $user->hu_verification_note }}</p>
+                            {{-- Status Badges --}}
+                            <div class="flex flex-col sm:flex-row gap-2">
+                                @if ($user->hu_verification_status == 'approved')
+                                    <span class="px-4 py-2 bg-green-100 text-green-700 rounded-lg text-sm font-medium flex items-center gap-2">
+                                        <i class="fas fa-check-circle"></i>
+                                        Verified
+                                    </span>
+                                @elseif($user->hu_verification_status == 'pending')
+                                    <span class="px-4 py-2 bg-yellow-100 text-yellow-700 rounded-lg text-sm font-medium flex items-center gap-2">
+                                        <i class="fas fa-clock"></i>
+                                        Pending
+                                    </span>
+                                @else
+                                    <span class="px-4 py-2 bg-red-100 text-red-700 rounded-lg text-sm font-medium flex items-center gap-2">
+                                        <i class="fas fa-times-circle"></i>
+                                        Rejected
+                                    </span>
+                                @endif
+                            </div>
+                        </div>
+
+                        {{-- Suspension Status --}}
+                        @if ($user->hu_is_blacklisted)
+                            <div class="mb-6 p-4 rounded-lg border border-red-200" style="background-color: #fee2e2;">
+                                <div class="flex items-start gap-3">
+                                    <i class="fas fa-ban text-red-600 mt-1"></i>
+                                    <div>
+                                        <h3 class="font-bold text-red-700">Account Suspended</h3>
+                                        <p class="text-sm text-red-600 mt-1">
+                                            <strong>Reason:</strong> {{ $user->hu_blacklist_reason }}
+                                        </p>
+                                    </div>
                                 </div>
+                            </div>
+                        @endif
+
+                        {{-- Action Buttons --}}
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <a href="{{ route('admin.community.edit', $user->hu_id) }}"
+                               class="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white px-6 py-3 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 font-medium">
+                                <i class="fas fa-edit"></i>
+                                Edit User
+                            </a>
+
+                            @if ($user->hu_is_blacklisted)
+                                <form action="{{ route('admin.community.unblacklist', $user->hu_id) }}" method="POST" class="flex-1">
+                                    @csrf
+                                    <button type="submit" class="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-400 hover:to-emerald-500 text-white px-6 py-3 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 font-medium">
+                                        <i class="fas fa-unlock"></i>
+                                        Remove Suspension
+                                    </button>
+                                </form>
+                            @else
+                                <button type="button" data-blacklist-open data-user-id="{{ $user->hu_id }}"
+                                        class="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-400 hover:to-red-500 text-white px-6 py-3 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 font-medium">
+                                    <i class="fas fa-ban"></i>
+                                    Suspend User
+                                </button>
                             @endif
                         </div>
-                    @else
-                        <div
-                            class="flex flex-col items-center justify-center h-72 border-2 border-dashed border-slate-200 rounded-xl bg-slate-50 text-slate-400">
-                            <i class="fas fa-user-slash text-4xl mb-2"></i>
-                            <p class="text-sm">No selfie uploaded</p>
-                        </div>
-                    @endif
-                </div>
-
-                <div class="flex flex-col h-full">
-                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
-                        <i class="fas fa-file-invoice"></i> Official Proof Document
-                    </h3>
-
-                    @if ($user->hu_verification_document_path)
-                        <div
-                            class="border border-slate-200 rounded-xl p-6 bg-white flex flex-col items-center justify-center h-72">
-                            <div
-                                class="w-20 h-20 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-4 shadow-inner">
-                                <i class="fas fa-file-alt text-3xl"></i>
-                            </div>
-                            <h4 class="text-slate-900 font-bold">Verification Document</h4>
-                            <p class="text-slate-500 text-xs mb-6">Stored securely in protected local storage</p>
-
-                            <button type="button" data-document-open data-document-url="{{ route('admin.verifications.document', $user->hu_id) }}"
-        class="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white text-sm font-bold rounded-xl w-full justify-center">
-    <i class="fas fa-eye"></i> Preview Document
-</button>
-                        </div>
-                    @else
-                        <div
-                            class="flex flex-col items-center justify-center h-72 border-2 border-dashed border-red-100 rounded-xl bg-red-50 text-red-400">
-                            <i class="fas fa-file-excel text-4xl mb-2"></i>
-                            <p class="text-sm font-medium">No document uploaded</p>
-                        </div>
-                    @endif
+                    </div>
                 </div>
             </div>
+        </div>
+
+        {{-- VERIFICATION DOCUMENTS SECTION --}}
+        <div class="rounded-xl shadow-xl border transition-all duration-300 mb-8" 
+             style="background-color: var(--bg-secondary); border-color: var(--border-color);">
+            
+            {{-- Header --}}
+            <div class="bg-gradient-to-r from-indigo-600 to-purple-700 px-6 py-4 rounded-t-xl">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-shield-check text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-white font-bold text-xl">Verification Assets</h2>
+                        <p class="text-indigo-100 text-sm">Identity verification documents and photos</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-6 sm:p-8">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    
+                    {{-- Live Selfie Section --}}
+                    <div class="flex flex-col">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-camera text-blue-600"></i>
+                            </div>
+                            <h3 class="font-semibold transition-colors duration-300" style="color: var(--text-primary);">Live Selfie Check</h3>
+                        </div>
+
+                        @if ($user->hu_selfie_media_path)
+                            <div class="relative group rounded-xl overflow-hidden border shadow-lg transition-all duration-300 hover:shadow-xl" 
+                                 style="background-color: var(--bg-primary); border-color: var(--border-color);">
+                                <img src="{{ route('admin.verifications.selfie', $user->hu_id) }}"
+                                     class="w-full h-72 object-cover transition-transform duration-300 group-hover:scale-105"
+                                     alt="Live Selfie">
+
+                                <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-300 flex items-center justify-center">
+                                    <button type="button" data-selfie-open data-selfie-url="{{ route('admin.verifications.selfie', $user->hu_id) }}"
+                                            class="bg-white text-slate-900 px-6 py-3 rounded-lg font-semibold text-sm shadow-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                        <i class="fas fa-expand-arrows-alt mr-2"></i> View Full Size
+                                    </button>
+                                </div>
+
+                                @if ($user->hu_verification_note)
+                                    <div class="absolute bottom-3 left-3 right-3 bg-amber-50 bg-opacity-95 backdrop-blur border border-amber-200 p-3 rounded-lg">
+                                        <p class="text-xs font-bold text-amber-700 uppercase tracking-wider">Verification Challenge</p>
+                                        <p class="text-sm text-amber-900 font-medium">{{ $user->hu_verification_note }}</p>
+                                    </div>
+                                @endif
+                            </div>
+                        @else
+                            <div class="flex flex-col items-center justify-center h-72 border-2 border-dashed rounded-xl transition-all duration-300"
+                                 style="background-color: var(--bg-primary); border-color: var(--border-color);">
+                                <i class="fas fa-user-slash text-4xl mb-3 transition-colors duration-300" style="color: var(--text-muted);"></i>
+                                <p class="text-sm font-medium transition-colors duration-300" style="color: var(--text-muted);">No selfie uploaded</p>
+                            </div>
+                        @endif
+                    </div>
+
+                    {{-- Official Document Section --}}
+                    <div class="flex flex-col">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-file-invoice text-green-600"></i>
+                            </div>
+                            <h3 class="font-semibold transition-colors duration-300" style="color: var(--text-primary);">Official Proof Document</h3>
+                        </div>
+
+                        @if ($user->hu_verification_document_path)
+                            <div class="border rounded-xl p-8 flex flex-col items-center justify-center h-72 transition-all duration-300 hover:shadow-lg" 
+                                 style="background-color: var(--bg-primary); border-color: var(--border-color);">
+                                <div class="w-20 h-20 bg-blue-100 rounded-2xl flex items-center justify-center mb-6 shadow-inner">
+                                    <i class="fas fa-file-alt text-blue-600 text-3xl"></i>
+                                </div>
+                                <h4 class="font-bold mb-1 transition-colors duration-300" style="color: var(--text-primary);">Verification Document</h4>
+                                <p class="text-xs mb-6 text-center transition-colors duration-300" style="color: var(--text-muted);">
+                                    Stored securely in protected local storage
+                                </p>
+                                <button type="button" data-document-open data-document-url="{{ route('admin.verifications.document', $user->hu_id) }}"
+                                        class="bg-gradient-to-r from-slate-700 to-slate-900 hover:from-slate-600 hover:to-slate-800 text-white px-6 py-3 rounded-lg transition-all duration-300 flex items-center gap-2 font-medium shadow-lg hover:shadow-xl">
+                                    <i class="fas fa-eye"></i> Preview Document
+                                </button>
+                            </div>
+                        @else
+                            <div class="flex flex-col items-center justify-center h-72 border-2 border-dashed rounded-xl transition-all duration-300"
+                                 style="background-color: #fef2f2; border-color: #fca5a5;">
+                                <i class="fas fa-file-excel text-red-400 text-4xl mb-3"></i>
+                                <p class="text-sm font-medium text-red-500">No document uploaded</p>
+                            </div>
+                        @endif
+                    </div>
+                </div>
 
             <div class="mt-8 border-t border-slate-100 pt-6">
                 <div class="flex justify-between items-center mb-4">
@@ -254,13 +304,66 @@
         </div>
 
 
-        <!-- ACCOUNT INFO -->
-        <div class="bg-white shadow rounded-lg p-6 mt-6">
-            <h2 class="text-xl font-semibold mb-3">Account Information</h2>
-            <p class="text-gray-700"><strong>User ID:</strong> {{ $user->hu_id }}</p>
-            <p class="text-gray-700"><strong>Registered On:</strong> {{ $user->registered_at_display }}</p>
-            <p class="text-gray-700"><strong>Last Updated:</strong> {{ $user->updated_at_display }}</p>
+        {{-- ACCOUNT INFORMATION SECTION --}}
+        <div class="rounded-xl shadow-xl border transition-all duration-300" 
+             style="background-color: var(--bg-secondary); border-color: var(--border-color);">
+            
+            {{-- Header --}}
+            <div class="bg-gradient-to-r from-emerald-600 to-teal-700 px-6 py-4 rounded-t-xl">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-user-alt text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-white font-bold text-xl">Account Information</h2>
+                        <p class="text-emerald-100 text-sm">Registration and activity details</p>
+                    </div>
+                </div>
+            </div>
 
+            <div class="p-6 sm:p-8">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    
+                    <div class="p-6 rounded-xl border transition-all duration-300 hover:shadow-lg" 
+                         style="background-color: var(--bg-primary); border-color: var(--border-color);">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-hashtag text-blue-600 text-lg"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs font-bold uppercase tracking-wider transition-colors duration-300" style="color: var(--text-muted);">User ID</p>
+                                <p class="text-lg font-bold font-mono transition-colors duration-300" style="color: var(--text-primary);">{{ $user->hu_id }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-6 rounded-xl border transition-all duration-300 hover:shadow-lg" 
+                         style="background-color: var(--bg-primary); border-color: var(--border-color);">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-calendar-plus text-green-600 text-lg"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs font-bold uppercase tracking-wider transition-colors duration-300" style="color: var(--text-muted);">Registered On</p>
+                                <p class="text-lg font-bold transition-colors duration-300" style="color: var(--text-primary);">{{ $user->registered_at_display }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-6 rounded-xl border transition-all duration-300 hover:shadow-lg" 
+                         style="background-color: var(--bg-primary); border-color: var(--border-color);">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-clock text-orange-600 text-lg"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs font-bold uppercase tracking-wider transition-colors duration-300" style="color: var(--text-muted);">Last Updated</p>
+                                <p class="text-lg font-bold transition-colors duration-300" style="color: var(--text-primary);">{{ $user->updated_at_display }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
     </div>

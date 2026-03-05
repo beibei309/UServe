@@ -117,74 +117,61 @@
 
                         {{-- STATUS BADGE --}}
                         <td class="py-4 px-6">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $student->status_badge_class }}">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold {{ $student->status_badge_class }}">
                                 {{ $student->status_label }}
                             </span>
                         </td>
 
                         {{-- ACTIONS COLUMN --}}
-                        {{-- ACTIONS COLUMN --}}
-<td class="py-4 px-6 text-right">
-    <div class="flex items-center justify-end gap-3">
+                        <td class="py-4 px-6">
+                            <div class="flex items-center justify-center gap-2">
 
-        @if ($student->studentStatus)
-            @if ($student->show_reminder)
-                {{-- Functional Form to Send Email --}}
-                {{-- Functional Form to Send Email --}}
-<form id="reminder-form-{{ $student->hu_id }}" 
-    action="{{ route('admin.student_status.send_reminder', $student->hu_id) }}" 
-      method="POST" 
-      class="inline-block">
-    @csrf
-    
-    <button type="button"
-        data-reminder-send
-        data-student-id="{{ $student->hu_id }}"
-        data-student-name="{{ $student->hu_name }}"
-        class="text-yellow-500 hover:text-yellow-700 p-1 rounded hover:bg-yellow-50 transition relative group"
-        title="Send Graduation Reminder">
-        
-        {{-- Bell Icon --}}
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9">
-            </path>
-        </svg>
+                                @if ($student->studentStatus)
+                                    @if ($student->show_reminder)
+                                        <form id="reminder-form-{{ $student->hu_id }}"
+                                            action="{{ route('admin.student_status.send_reminder', $student->hu_id) }}"
+                                            method="POST" class="inline-block">
+                                            @csrf
+                                            <button type="button"
+                                                data-reminder-send
+                                                data-student-id="{{ $student->hu_id }}"
+                                                data-student-name="{{ $student->hu_name }}"
+                                                class="relative inline-flex items-center gap-1.5 px-3 py-1.5 bg-yellow-100 hover:bg-yellow-200 text-yellow-700 rounded-lg text-xs font-semibold transition-all duration-200"
+                                                title="Send Graduation Reminder">
+                                                <i class="fa-solid fa-bell text-xs"></i> Remind
+                                                <span class="absolute -top-1 -right-1 flex h-2.5 w-2.5">
+                                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                                    <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
+                                                </span>
+                                            </button>
+                                        </form>
+                                    @endif
 
-        {{-- Ping Indicator --}}
-        <span class="absolute -top-1 -right-1 flex h-2.5 w-2.5">
-            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
-        </span>
-    </button>
-</form>
-            @endif
+                                    <a href="{{ route('admin.student_status.edit', $student->studentStatus->hss_id) }}"
+                                        class="inline-flex items-center justify-center w-8 h-8 bg-cyan-100 hover:bg-cyan-200 text-cyan-700 rounded-lg text-xs font-semibold transition-all duration-200"
+                                        title="Edit">
+                                        <i class="fa-solid fa-pen-to-square"></i>
+                                    </a>
 
-            {{-- EDIT BUTTON --}}
-            <a href="{{ route('admin.student_status.edit', $student->studentStatus->hss_id) }}"
-                class="text-cyan-400 hover:text-cyan-300 transition-colors duration-300 font-medium text-sm">
-                <i class="fa-solid fa-edit"></i>
-            </a>
-
-            {{-- DELETE BUTTON --}}
-            <form action="{{ route('admin.student_status.delete', $student->studentStatus->hss_id) }}"
-                method="POST" class="inline-block"
-                data-confirm-message="Remove status record?">
-                @csrf
-                @method('DELETE')
-                <button class="text-red-500 hover:text-red-400 transition-colors duration-300 ml-3" title="Delete">
-                    <i class="fa-solid fa-trash"></i>
-                </button>
-            </form>
-        @else
-            {{-- ADD BUTTON --}}
-            <a href="{{ route('admin.student_status.create', ['student_id' => $student->hu_id]) }}"
-                class="text-cyan-400 hover:text-cyan-300 transition-colors duration-300 hover:underline">
-                + Add Status
-            </a>
-        @endif
-    </div>
-</td>
+                                    <form action="{{ route('admin.student_status.delete', $student->studentStatus->hss_id) }}"
+                                        method="POST" class="inline-block"
+                                        data-confirm-message="Remove status record?">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit"
+                                            class="inline-flex items-center justify-center w-8 h-8 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg text-xs font-semibold transition-all duration-200"
+                                            title="Delete">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </form>
+                                @else
+                                    <a href="{{ route('admin.student_status.create', ['student_id' => $student->hu_id]) }}"
+                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white rounded-lg text-xs font-semibold transition-all duration-200">
+                                        <i class="fa-solid fa-plus text-xs"></i> Add Status
+                                    </a>
+                                @endif
+                            </div>
+                        </td>
 
                     </tr>
                 @empty
@@ -208,7 +195,7 @@
                         <h3 class="font-medium transition-colors duration-300" style="color: var(--text-primary);">{{ $student->hu_name }}</h3>
                         <p class="text-sm transition-colors duration-300" style="color: var(--text-secondary);">{{ $student->hu_student_id ?? 'No Matric' }}</p>
                     </div>
-                    <span class="px-2.5 py-0.5 rounded-full text-xs font-medium {{ $student->status_badge_class }}">{{ $student->status_label }}</span>
+                    <span class="px-2.5 py-0.5 rounded-full text-xs font-bold {{ $student->status_badge_class }}">{{ $student->status_label }}</span>
                 </div>
                 
                 <div class="grid grid-cols-2 gap-2 text-sm mb-3">
@@ -234,26 +221,29 @@
                     </div>
                 </div>
                 
-                <div class="flex flex-wrap gap-2">
+                <div class="flex flex-wrap gap-2 mt-1">
                     @if ($student->studentStatus)
                         <a href="{{ route('admin.student_status.edit', $student->studentStatus->hss_id) }}"
-                            class="text-cyan-400 hover:text-cyan-300 transition-colors duration-300 text-sm">
-                            <i class="fa-solid fa-edit"></i> Edit
+                            class="inline-flex items-center justify-center w-8 h-8 bg-cyan-100 hover:bg-cyan-200 text-cyan-700 rounded-lg text-xs font-semibold transition-all duration-200"
+                            title="Edit">
+                            <i class="fa-solid fa-pen-to-square"></i>
                         </a>
-                        
+
                         <form action="{{ route('admin.student_status.delete', $student->studentStatus->hss_id) }}"
                             method="POST" class="inline-block"
                             data-confirm-message="Remove status record?">
                             @csrf
                             @method('DELETE')
-                            <button class="text-red-500 hover:text-red-400 transition-colors duration-300 text-sm">
-                                <i class="fa-solid fa-trash"></i> Delete
+                            <button type="submit"
+                                class="inline-flex items-center justify-center w-8 h-8 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg text-xs font-semibold transition-all duration-200"
+                                title="Delete">
+                                <i class="fa-solid fa-trash"></i>
                             </button>
                         </form>
                     @else
                         <a href="{{ route('admin.student_status.create', ['student_id' => $student->hu_id]) }}"
-                            class="text-cyan-400 hover:text-cyan-300 transition-colors duration-300 text-sm">
-                            + Add Status
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white rounded-lg text-xs font-semibold transition-all duration-200">
+                            <i class="fa-solid fa-plus text-xs"></i> Add Status
                         </a>
                     @endif
                 </div>

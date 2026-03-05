@@ -4,6 +4,7 @@ window.UServeAdmin.register('serviceShow', 'adminModuleServiceShowConfig', (conf
     const csrfToken = config.dataset.csrfToken || '';
     const successMessage = config.dataset.successMessage || '';
     const errorMessage = config.dataset.errorMessage || '';
+    const warningMessage = config.dataset.warningMessage || '';
     const warningLimit = parseInt(config.dataset.warningLimit || '3', 10);
 
     window.openWarningModal = function (url) {
@@ -102,6 +103,17 @@ window.UServeAdmin.register('serviceShow', 'adminModuleServiceShowConfig', (conf
             title: 'Error!',
             text: errorMessage,
             timer: 3000,
+            showConfirmButton: false,
+            customClass: { popup: 'rounded-2xl' },
+        });
+    }
+
+    if (warningMessage) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Warning!',
+            text: warningMessage,
+            timer: 4000,
             showConfirmButton: false,
             customClass: { popup: 'rounded-2xl' },
         });

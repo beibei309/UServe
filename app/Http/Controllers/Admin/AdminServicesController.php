@@ -178,12 +178,12 @@ private function resolveServiceImageUrl(?string $path): ?string
 
     $service->save();
 
-    // 4. Hantar Email
+    // 4. Send Email
     try {
         Mail::to($student->hu_email)->send(new ServiceWarningMail($service, $request->reason));
 
     } catch (\Exception $e) {
-        Log::error('Email warning gagal dihantar: ' . $e->getMessage());
+        Log::error('Failed to send warning email: ' . $e->getMessage());
     }
 
     // 5. Response UI
@@ -191,7 +191,7 @@ private function resolveServiceImageUrl(?string $path): ?string
         return back()->with('warning', "Service reached {$limit}/{$limit} warnings. Suspend if needed.");
     }
 
-    return back()->with('success', 'Warning berjaya dihantar. Jumlah warning: ' . $service->hss_warning_count);
+    return back()->with('success', 'Warning issued successfully. Total warnings: ' . $service->hss_warning_count);
 }
 
 public function suspend(StudentService $service)
@@ -199,7 +199,7 @@ public function suspend(StudentService $service)
     $service->hss_approval_status = 'suspended';
     $service->save();
 
-    // Hantar Email
+    // Send Email
     if ($service->user && $service->user->hu_email) {
         Mail::to($service->user->hu_email)->send(new ServiceSuspendedMail($service));
     }

@@ -4,8 +4,8 @@
 
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
             <h1 class="text-2xl font-bold transition-colors duration-300" style="color: var(--text-primary);">Manage FAQs</h1>
-            <a href="{{ route('admin.faqs.create') }}" class="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white px-4 py-2 rounded-lg transition-all duration-300 whitespace-nowrap">
-                + Add FAQ
+            <a href="{{ route('admin.faqs.create') }}" class="inline-flex items-center gap-1.5 px-5 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-medium rounded shadow transition-all duration-300 whitespace-nowrap">
+                <i class="fa-solid fa-plus text-xs"></i> Add FAQ
             </a>
         </div>
 
@@ -25,25 +25,25 @@
                             </div>
 
                             <div class="flex items-center gap-2 flex-shrink-0">
-                                <form method="POST" action="{{ route('admin.faqs.toggle', $faq) }}" class="toggle-form" data-faq-id="{{ $faq->hfq_id }}">
+                                <form method="POST" action="{{ route('admin.faqs.toggle', $faq) }}" class="toggle-form inline-flex" data-faq-id="{{ $faq->hfq_id }}">
                                     @csrf
                                     @method('PATCH')
                                     <button type="submit"
-                                        class="text-xs px-3 py-1 rounded-full toggle-btn transition-colors duration-300 border
-                                        {{ $faq->hfq_is_active ? 'bg-green-100 text-green-800 border-green-200' : 'bg-gray-100 text-gray-600 border-gray-200' }}"
+                                        class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold toggle-btn transition-all duration-200
+                                        {{ $faq->hfq_is_active ? 'bg-green-100 hover:bg-green-200 text-green-700' : 'bg-gray-100 hover:bg-gray-200 text-gray-600' }}"
                                         data-active="{{ $faq->hfq_is_active ? '1' : '0' }}">
                                         {{ $faq->hfq_is_active ? 'Active' : 'Hidden' }}
                                     </button>
                                 </form>
 
-                                <a href="{{ route('admin.faqs.edit', $faq) }}" class="text-cyan-400 hover:text-cyan-300 transition-colors duration-300 p-2" title="Edit">
+                                <a href="{{ route('admin.faqs.edit', $faq) }}" class="inline-flex items-center justify-center w-8 h-8 bg-cyan-100 hover:bg-cyan-200 text-cyan-700 rounded-lg text-xs font-semibold transition-all duration-200" title="Edit">
                                     <i class="fa-solid fa-pen-to-square"></i>
                                 </a>
 
-                                <form method="POST" action="{{ route('admin.faqs.destroy', $faq) }}" class="delete-form inline">
+                                <form method="POST" action="{{ route('admin.faqs.destroy', $faq) }}" class="delete-form inline-flex">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="button" class="text-red-500 hover:text-red-400 transition-colors duration-300 delete-faq-btn p-2" title="Delete">
+                                    <button type="button" class="inline-flex items-center justify-center w-8 h-8 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg text-xs font-semibold transition-all duration-200 delete-faq-btn" title="Delete">
                                         <i class="fa-solid fa-trash"></i>
                                     </button>
                                 </form>
