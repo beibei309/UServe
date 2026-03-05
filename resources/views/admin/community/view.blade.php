@@ -19,24 +19,7 @@
             <!-- Profile Photo -->
             <div class="h-32 w-32 rounded-full overflow-hidden border transition-colors duration-300 shrink-0"
                  style="border-color: var(--border-color);">
-                @php
-                    $path = $user->hu_profile_photo_path;
-                    // 1. Check if external URL
-                    if (Str::startsWith($path, ['http://', 'https://'])) {
-                        $imageUrl = $path;
-                    } 
-                    // 2. Check if file exists in 'storage' (public/storage/...)
-                    elseif ($path && file_exists(public_path('storage/' . $path))) {
-                        $imageUrl = asset('storage/' . $path);
-                    } 
-                    // 3. Fallback: Assume it's in public root (public/...)
-                    elseif ($path) {
-                        $imageUrl = asset($path);
-                    } else {
-                        $imageUrl = asset('uploads/profile/default.png');
-                    }
-                @endphp
-                <img src="{{ $imageUrl }}" class="w-full h-full object-cover" alt="{{ $user->hu_name }}" />
+                <img src="{{ $user->profile_image_url }}" class="w-full h-full object-cover" alt="{{ $user->hu_name }}" />
             </div>
             <div class="flex-1">
 
@@ -96,7 +79,7 @@
                         </button>
                     </form>
                 @else
-                    <button onclick="openBlacklistModal({{ $user->hu_id }})" 
+                    <button type="button" data-blacklist-open data-user-id="{{ $user->hu_id }}"
                         class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm w-full transition-colors duration-300">
                         <i class="fa-solid fa-ban mr-1"></i> Suspend User
                     </button>
@@ -130,7 +113,7 @@
 
                             <div
                                 class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                <button onclick="openSelfieModal('{{ route('admin.verifications.selfie', $user->hu_id) }}')"
+                                <button type="button" data-selfie-open data-selfie-url="{{ route('admin.verifications.selfie', $user->hu_id) }}"
                                     class="bg-white text-slate-900 px-4 py-2 rounded-full font-semibold text-sm shadow-xl">
                                     <i class="fas fa-expand-arrows-alt mr-1"></i> View Full Size
                                 </button>
@@ -169,7 +152,7 @@
                             <h4 class="text-slate-900 font-bold">Verification Document</h4>
                             <p class="text-slate-500 text-xs mb-6">Stored securely in protected local storage</p>
 
-                            <button onclick="document.getElementById('modalDocumentFrame').src='{{ route('admin.verifications.document', $user->hu_id) }}'; document.getElementById('documentModal').classList.remove('hidden')"
+                            <button type="button" data-document-open data-document-url="{{ route('admin.verifications.document', $user->hu_id) }}"
         class="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white text-sm font-bold rounded-xl w-full justify-center">
     <i class="fas fa-eye"></i> Preview Document
 </button>
@@ -224,14 +207,14 @@
         </div>
         <div id="documentModal"
             class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/90 backdrop-blur-md p-4">
-            <div class="absolute inset-0" onclick="closeDocumentModal()"></div>
+            <div class="absolute inset-0" data-document-close></div>
 
             <div class="relative max-w-5xl w-full h-[90vh] bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col">
                 <div class="p-4 border-b flex justify-between items-center bg-slate-50">
                     <h3 class="font-bold text-slate-800 flex items-center gap-2">
                         <i class="fas fa-file-contract text-indigo-600"></i> Proof of Identity Document
                     </h3>
-                    <button onclick="closeDocumentModal()" class="text-slate-400 hover:text-slate-600 transition p-2">
+                    <button type="button" data-document-close class="text-slate-400 hover:text-slate-600 transition p-2">
                         <i class="fas fa-times text-xl"></i>
                     </button>
                 </div>
@@ -241,8 +224,7 @@
                         <div class="animate-spin rounded-full h-10 w-10 border-4 border-slate-200 border-t-indigo-600">
                         </div>
                     </div>
-                    <iframe id="modalDocumentFrame" src="" class="w-full h-full border-none"
-                        onload="document.getElementById('docLoading').classList.add('hidden')"></iframe>
+                    <iframe id="modalDocumentFrame" src="" class="w-full h-full border-none"></iframe>
                 </div>
             </div>
         </div>
@@ -250,10 +232,10 @@
         <div id="selfieModal"
             class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-sm transition-all duration-300">
 
-            <div class="absolute inset-0 cursor-zoom-out" onclick="closeSelfieModal()"></div>
+            <div class="absolute inset-0 cursor-zoom-out" data-selfie-close></div>
 
             <div class="relative max-w-4xl w-full flex flex-col items-center">
-                <button onclick="closeSelfieModal()"
+                <button type="button" data-selfie-close
                     class="absolute -top-14 right-0 md:-right-10 text-white/70 hover:text-white transition-colors flex items-center gap-2">
                     <span class="text-xs font-bold uppercase tracking-widest">Close</span>
                     <i class="fa-solid fa-xmark text-2xl"></i>
@@ -266,10 +248,7 @@
 
                 <div class="mt-4 text-center">
                     <p class="text-white font-medium">Live Selfie Verification</p>
-                    @php
-                        $createdAt = $user->hu_created_at ?? $user->created_at;
-                    @endphp
-                    <p class="text-slate-400 text-xs">Captured on: {{ $createdAt ? \Carbon\Carbon::parse($createdAt)->format('d M Y, H:i A') : '-' }}</p>
+                    <p class="text-slate-400 text-xs">Captured on: {{ $user->captured_at_display }}</p>
                 </div>
             </div>
         </div>
@@ -278,14 +257,9 @@
         <!-- ACCOUNT INFO -->
         <div class="bg-white shadow rounded-lg p-6 mt-6">
             <h2 class="text-xl font-semibold mb-3">Account Information</h2>
-
-            @php
-                $registeredAt = $user->hu_created_at ?? $user->created_at;
-                $updatedAt = $user->hu_updated_at ?? $user->updated_at;
-            @endphp
             <p class="text-gray-700"><strong>User ID:</strong> {{ $user->hu_id }}</p>
-            <p class="text-gray-700"><strong>Registered On:</strong> {{ $registeredAt ? \Carbon\Carbon::parse($registeredAt)->format('d M Y, h:i A') : '-' }}</p>
-            <p class="text-gray-700"><strong>Last Updated:</strong> {{ $updatedAt ? \Carbon\Carbon::parse($updatedAt)->format('d M Y, h:i A') : '-' }}</p>
+            <p class="text-gray-700"><strong>Registered On:</strong> {{ $user->registered_at_display }}</p>
+            <p class="text-gray-700"><strong>Last Updated:</strong> {{ $user->updated_at_display }}</p>
 
         </div>
 
@@ -304,11 +278,11 @@
                 placeholder="Write reason..."></textarea>
 
             <div class="mt-5 flex justify-end gap-3">
-                <button onclick="closeBlacklistModal()" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded">
+                <button type="button" data-blacklist-close class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded">
                     Cancel
                 </button>
 
-                <button onclick="submitBlacklist()" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded">
+                <button type="button" data-blacklist-submit class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded">
                     Confirm
                 </button>
 
@@ -316,136 +290,15 @@
         </div>
     </div>
 
+@endsection
 
-    <script>
-        // --- BLACKLIST MODAL LOGIC ---
-        let selectedUserId = null;
-
-        function openBlacklistModal(id) {
-            selectedUserId = id;
-            document.getElementById("blacklistModal").classList.remove("hidden");
-        }
-
-        function closeBlacklistModal() {
-            document.getElementById("blacklistModal").classList.add("hidden");
-            document.getElementById("blacklistReason").value = "";
-        }
-
-        function submitBlacklist() {
-            const reason = document.getElementById("blacklistReason").value.trim();
-
-            if (!reason) {
-                alert("Please enter account suspended reason.");
-                return;
-            }
-
-            let form = document.createElement("form");
-            form.method = "POST";
-            // Replace PLACEHOLDER with actual ID
-            // NOTE: We used 'selectedUserId' but in View page we might just need {{ $user->hu_id }} 
-            // BUT to keep it consistent with the JS function signature, we'll use the variable.
-            form.action = "{{ route('admin.community.blacklist', 'ID_PLACEHOLDER') }}"
-                .replace('ID_PLACEHOLDER', selectedUserId);
-
-            let token = document.createElement("input");
-            token.type = "hidden";
-            token.name = "_token";
-            token.value = "{{ csrf_token() }}";
-            form.appendChild(token);
-
-            let reasonInput = document.createElement("input");
-            reasonInput.type = "hidden";
-            reasonInput.name = "blacklist_reason";
-            reasonInput.value = reason;
-            form.appendChild(reasonInput);
-
-            document.body.appendChild(form);
-            form.submit();
-        }
-
-        function openDocumentModal(userId) {
-            const modal = document.getElementById('documentModal');
-            const frame = document.getElementById('modalDocumentFrame');
-            const loader = document.getElementById('docLoading');
-
-            loader.classList.remove('hidden');
-            // Point this to secure document route
-            frame.src = `/admin/verifications/${userId}/document`;
-
-            modal.classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeDocumentModal() {
-            const modal = document.getElementById('documentModal');
-            const frame = document.getElementById('modalDocumentFrame');
-            modal.classList.add('hidden');
-            frame.src = ''; // Clear src to stop loading/video
-            document.body.style.overflow = 'auto';
-        }
-
-        function openSelfieModal(imageUrl) {
-            const modal = document.getElementById('selfieModal');
-            const modalImg = document.getElementById('modalSelfieImage');
-
-            // 1. Set the source
-            modalImg.src = imageUrl;
-
-            // 2. Show the modal with a fade-in effect (Tailwind utility)
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-
-            // 3. Lock body scroll
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeSelfieModal() {
-            const modal = document.getElementById('selfieModal');
-
-            // 1. Hide modal
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-
-            // 2. Unlock body scroll
-            document.body.style.overflow = 'auto';
-        }
-
-        // Close on "Escape" key press
-        document.addEventListener('keydown', function(event) {
-            if (event.key === "Escape") {
-                closeSelfieModal();
-            }
-        });
-        document.addEventListener('DOMContentLoaded', function() {
-            // Pastikan data lat/long wujud sebelum run script
-            const lat = {{ $user->hu_latitude ?? 'null' }};
-            const lng = {{ $user->hu_longitude ?? 'null' }};
-
-            if (lat && lng) {
-                // Initialize map
-                const map = L.map('map').setView([lat, lng], 15);
-
-                // Add OpenStreetMap layer
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '© OpenStreetMap contributors'
-                }).addTo(map);
-
-                // Add Marker
-                const userIcon = L.icon({
-                    iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png', // Icon marker
-                    iconSize: [38, 38],
-                    iconAnchor: [19, 38],
-                    popupAnchor: [0, -38]
-                });
-
-                L.marker([lat, lng], {
-                        icon: userIcon
-                    })
-                    .addTo(map)
-                    .bindPopup("<b>{{ $user->hu_name }}</b><br>Location Registered.")
-                    .openPopup();
-            }
-        });
-    </script>
-
+@section('scripts')
+    <div id="adminModuleCommunityViewConfig"
+        data-csrf-token="{{ csrf_token() }}"
+        data-blacklist-route-template="{{ route('admin.community.blacklist', 'ID_PLACEHOLDER') }}"
+        data-user-id="{{ $user->hu_id }}"
+        data-lat="{{ $user->hu_latitude }}"
+        data-lng="{{ $user->hu_longitude }}"
+        data-user-name="{{ $user->hu_name }}"></div>
+    <script src="{{ asset('js/admin-community-view.js') }}"></script>
 @endsection

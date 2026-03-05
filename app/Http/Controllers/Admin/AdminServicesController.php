@@ -14,6 +14,7 @@ use App\Mail\ServiceWarningMail;
 use App\Mail\ServiceSuspendedMail;
 use App\Mail\ServiceApprovedMail; 
 use App\Mail\ServiceRejectedMail; 
+use Illuminate\Support\Str;
 
 // Import the Notification
 use App\Notifications\ServiceStatusNotification;
@@ -21,6 +22,28 @@ use App\Notifications\ServiceStatusNotification;
 
 class AdminServicesController extends Controller
 {
+private function serviceWarningLimit(): int
+{
+    return (int) config('moderation.service_warning_limit', 3);
+}
+
+private function resolveServiceImageUrl(?string $path): ?string
+{
+    if (!$path) {
+        return null;
+    }
+
+    if (Str::startsWith($path, ['http://', 'https://'])) {
+        return $path;
+    }
+
+    if (file_exists(public_path('storage/' . $path))) {
+        return asset('storage/' . $path);
+    }
+
+    return asset($path);
+}
+
  public function index(Request $request)
 {
     $search     = $request->query('search');
@@ -30,6 +53,7 @@ class AdminServicesController extends Controller
     $rating = $request->query('rating');
 
 
+    $serviceWarningLimit = $this->serviceWarningLimit();
     $services = StudentService::with(['user', 'category'])
         ->withAvg('reviews as reviews_avg_rating', 'hr_rating')
         ->withCount('reviews')
@@ -52,6 +76,15 @@ class AdminServicesController extends Controller
         ->latest()
         ->paginate(10)
         ->withQueryString();
+    $services->getCollection()->transform(function (StudentService $service) use ($serviceWarningLimit) {
+        $service->hss_image_url = $this->resolveServiceImageUrl($service->hss_image_path);
+        $service->hss_warning_limit = $serviceWarningLimit;
+        $service->hss_warning_class = (int) ($service->hss_warning_count ?? 0) >= max(1, $serviceWarningLimit - 1)
+            ? 'text-red-500'
+            : 'text-gray-500';
+
+        return $service;
+    });
 
     $categories = Category::orderBy('hc_name')->get();
     $students   = User::where('hu_role', 'helper')->orderBy('hu_name')->get();
@@ -59,7 +92,8 @@ class AdminServicesController extends Controller
     return view('admin.services.index', compact(
         'services',
         'categories',
-        'students'
+        'students',
+        'serviceWarningLimit'
     ));
 }
 
@@ -188,12 +222,16 @@ public function suspend(StudentService $service)
 
     public function show($id)
     {
+        $serviceWarningLimit = $this->serviceWarningLimit();
         $service = StudentService::with(['user', 'category'])
             ->withAvg('reviews as reviews_avg_rating', 'hr_rating')
             ->withCount('reviews')
             ->findOrFail($id);
+        $service->hss_image_url = $this->resolveServiceImageUrl($service->hss_image_path);
+        $service->hss_warning_limit = $serviceWarningLimit;
+        $service->hss_warning_class = (int) ($service->hss_warning_count ?? 0) >= max(1, $serviceWarningLimit - 1) ? 'text-red-500' : '';
 
-        return view('admin.services.show', compact('service'));
+        return view('admin.services.show', compact('service', 'serviceWarningLimit'));
     }
 
     // UNBLOCK Service

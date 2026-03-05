@@ -44,7 +44,7 @@
                             <td class="py-3 px-4">
                                 @if($user->hu_selfie_media_path)
                                     <div class="flex flex-col items-start gap-1">
-                                        <button onclick="openSelfieModal({{ $user->hu_id }})" 
+                                        <button type="button" data-verification-selfie data-user-id="{{ $user->hu_id }}"
                                                 class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-full text-indigo-700 bg-indigo-100 hover:bg-indigo-200">
                                             View Selfie
                                         </button>
@@ -62,7 +62,7 @@
                             <!-- DOCUMENT -->
                             <td class="py-3 px-4">
                                 @if($user->hu_verification_document_path)
-                                    <button onclick="openDocumentModal({{ $user->hu_id }})" 
+                                    <button type="button" data-verification-document data-user-id="{{ $user->hu_id }}"
                                             class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-full text-blue-700 bg-blue-100 hover:bg-blue-200">
                                         View Document
                                     </button>
@@ -107,33 +107,11 @@
         </div>
     </div>
 
-<script>
-function openSelfieModal(userId) {
-    const modal = document.createElement('div');
-    modal.id = 'selfieModal';
-    modal.className = 'fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4';
-    modal.onclick = () => modal.remove();
-    modal.innerHTML = `
-        <div class="relative max-w-4xl max-h-full" onclick="event.stopPropagation()">
-            <button onclick="this.closest('#selfieModal').remove()" class="absolute -top-10 right-0 text-white hover:text-gray-300 text-2xl font-bold">&times;</button>
-            <img src="/admin/verifications/${userId}/selfie" class="max-w-full max-h-[90vh] rounded-lg shadow-2xl" alt="Selfie">
-        </div>
-    `;
-    document.body.appendChild(modal);
-}
+@endsection
 
-function openDocumentModal(userId) {
-    const modal = document.createElement('div');
-    modal.id = 'documentModal';
-    modal.className = 'fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4';
-    modal.onclick = () => modal.remove();
-    modal.innerHTML = `
-        <div class="relative max-w-6xl max-h-full w-full" onclick="event.stopPropagation()">
-            <button onclick="this.closest('#documentModal').remove()" class="absolute -top-10 right-0 text-white hover:text-gray-300 text-2xl font-bold">&times;</button>
-            <iframe src="/admin/verifications/${userId}/document" class="w-full h-[90vh] bg-white rounded-lg shadow-2xl"></iframe>
-        </div>
-    `;
-    document.body.appendChild(modal);
-}
-</script>
+@section('scripts')
+    <div id="adminModuleVerificationsIndexConfig"
+        data-selfie-url-template="{{ route('admin.verifications.selfie', 'USER_ID_PLACEHOLDER') }}"
+        data-document-url-template="{{ route('admin.verifications.document', 'USER_ID_PLACEHOLDER') }}"></div>
+    <script src="{{ asset('js/admin-verifications-index.js') }}"></script>
 @endsection

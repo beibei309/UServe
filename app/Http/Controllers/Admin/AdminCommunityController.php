@@ -9,9 +9,25 @@ use App\Models\User;
 use App\Mail\UserBlacklisted;
 use App\Mail\UserUnblacklisted;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 
 class AdminCommunityController extends Controller
 {
+private function resolveProfileImageUrl(?string $path): string
+{
+    if (!$path) {
+        return asset('uploads/profile/default.png');
+    }
+    if (Str::startsWith($path, ['http://', 'https://'])) {
+        return $path;
+    }
+    if (file_exists(public_path('storage/' . $path))) {
+        return asset('storage/' . $path);
+    }
+    return asset($path);
+}
+
    public function index(Request $request)
 {
     $search = $request->input('search');
@@ -71,6 +87,23 @@ class AdminCommunityController extends Controller
 
     // Keep params in URL
     $communityUsers->appends($request->only('search', 'status', 'rating_range'));
+    $communityUsers->getCollection()->transform(function (User $user) {
+        $user->profile_image_url = $this->resolveProfileImageUrl($user->hu_profile_photo_path);
+        $user->status_label = $user->hu_is_blacklisted || $user->hu_is_suspended
+            ? 'Suspended'
+            : ($user->hu_verification_status === 'approved' ? 'Verified' : 'Not Verified');
+        $user->status_badge_class = $user->hu_is_blacklisted || $user->hu_is_suspended
+            ? 'bg-red-100 text-red-800 border-red-200'
+            : ($user->hu_verification_status === 'approved'
+                ? 'bg-green-100 text-green-800 border-green-200'
+                : 'bg-yellow-100 text-yellow-800 border-yellow-200');
+        $user->reviewsReceived->transform(function ($review) {
+            $review->reviewer_image_url = $this->resolveProfileImageUrl(optional($review->reviewer)->hu_profile_photo_path);
+            $review->replied_at_human = $review->hr_replied_at ? Carbon::parse($review->hr_replied_at)->diffForHumans() : null;
+            return $review;
+        });
+        return $user;
+    });
 
     // Stats
    $stats = [
@@ -88,12 +121,19 @@ class AdminCommunityController extends Controller
 public function view($id)
 {
     $user = User::where('hu_role', 'community')->findOrFail($id);
+    $user->profile_image_url = $this->resolveProfileImageUrl($user->hu_profile_photo_path);
+    $createdAt = $user->hu_created_at ?? $user->created_at;
+    $updatedAt = $user->hu_updated_at ?? $user->updated_at;
+    $user->captured_at_display = $createdAt ? Carbon::parse($createdAt)->format('d M Y, H:i A') : '-';
+    $user->registered_at_display = $createdAt ? Carbon::parse($createdAt)->format('d M Y, h:i A') : '-';
+    $user->updated_at_display = $updatedAt ? Carbon::parse($updatedAt)->format('d M Y, h:i A') : '-';
     return view('admin.community.view', compact('user'));
 }
 
 public function edit($id)
 {
     $user = User::where('hu_role', 'community')->findOrFail($id);
+    $user->profile_image_url = $this->resolveProfileImageUrl($user->hu_profile_photo_path);
     return view('admin.community.edit', compact('user'));
 }
 

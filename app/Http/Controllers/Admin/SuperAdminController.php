@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Admin;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
 
 class SuperAdminController extends Controller
 {
@@ -87,6 +88,12 @@ public function destroy($id)
 
     return redirect()->route('admin.super.admins.index')
                      ->with('success', 'Admin deleted successfully.');
+}
+
+public function createStorageLink()
+{
+    Artisan::call('storage:link');
+    return response('Storage Link Created!');
 }
 
 }

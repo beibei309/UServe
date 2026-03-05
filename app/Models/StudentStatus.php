@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
 class StudentStatus extends Model
 {
@@ -25,5 +26,14 @@ class StudentStatus extends Model
     public function student()
     {
         return $this->belongsTo(User::class, 'hss_student_id', 'hu_id');
+    }
+
+    public function getGraduationDateDisplayAttribute(): string
+    {
+        if (!$this->hss_graduation_date) {
+            return '-';
+        }
+
+        return Carbon::parse($this->hss_graduation_date)->format('d M Y');
     }
 }

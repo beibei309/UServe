@@ -1,9 +1,5 @@
 @extends('admin.layout')
 
-@php
-    use Illuminate\Support\Facades\Storage;
-@endphp
-
 @section('content')
     <div class="px-4 sm:px-6">
         <h1 class="text-3xl font-bold mb-4 transition-colors duration-300" style="color: var(--text-primary);">Manage Students</h1>
@@ -34,48 +30,34 @@
         </div>
 
         <div class="flex flex-wrap gap-2 mb-6">
-            @php
-                $pill = 'px-4 py-2 rounded-full text-sm font-medium transition-all duration-300';
-                $active = 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white';
-                $inactive = 'border';
-            @endphp
-
             <a href="{{ route('admin.students.index', request()->except('status')) }}"
-                class="{{ $pill }} {{ request('status') == null ? $active : $inactive }}"
+                class="px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 {{ request('status') == null ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white' : 'border' }}"
                 @if(request('status') != null)
                 style="color: var(--text-secondary); background-color: var(--bg-tertiary); border-color: var(--border-color);"
-                onmouseover="this.style.backgroundColor = 'var(--hover-bg)';"
-                onmouseout="this.style.backgroundColor = 'var(--bg-tertiary)';"
                 @endif>
                 All
             </a>
 
             <a href="{{ route('admin.students.index', ['status' => 'student'] + request()->except('page')) }}"
-                class="{{ $pill }} {{ request('status') == 'student' ? $active : $inactive }}"
+                class="px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 {{ request('status') == 'student' ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white' : 'border' }}"
                 @if(request('status') != 'student')
                 style="color: var(--text-secondary); background-color: var(--bg-tertiary); border-color: var(--border-color);"
-                onmouseover="this.style.backgroundColor = 'var(--hover-bg)';"
-                onmouseout="this.style.backgroundColor = 'var(--bg-tertiary)';"
                 @endif>
                 Students
             </a>
 
             <a href="{{ route('admin.students.index', ['status' => 'helper'] + request()->except('page')) }}"
-                class="{{ $pill }} {{ request('status') == 'helper' ? $active : $inactive }}"
+                class="px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 {{ request('status') == 'helper' ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white' : 'border' }}"
                 @if(request('status') != 'helper')
                 style="color: var(--text-secondary); background-color: var(--bg-tertiary); border-color: var(--border-color);"
-                onmouseover="this.style.backgroundColor = 'var(--hover-bg)';"
-                onmouseout="this.style.backgroundColor = 'var(--bg-tertiary)';"
                 @endif>
                 Sellers
             </a>
 
             <a href="{{ route('admin.students.index', ['status' => 'banned'] + request()->except('page')) }}"
-                class="{{ $pill }} {{ request('status') == 'banned' ? $active : $inactive }}"
+                class="px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 {{ request('status') == 'banned' ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white' : 'border' }}"
                 @if(request('status') != 'banned')
                 style="color: var(--text-secondary); background-color: var(--bg-tertiary); border-color: var(--border-color);"
-                onmouseover="this.style.backgroundColor = 'var(--hover-bg)';"
-                onmouseout="this.style.backgroundColor = 'var(--bg-tertiary)';"
                 @endif>
                 Suspended
             </a>
@@ -99,10 +81,8 @@
 
                     <tbody>
                         @forelse ($students as $student)
-                            <tr class="border-b transition-colors duration-300"
-                                style="border-color: var(--border-color);"
-                                onmouseover="this.style.backgroundColor = 'var(--hover-bg)';"
-                                onmouseout="this.style.backgroundColor = 'transparent';">
+                            <tr class="border-b transition-colors duration-300 surface-hover"
+                                style="border-color: var(--border-color);">
                                 <td class="py-3 px-4">
                                     <div class="flex items-center gap-3">
                                     <img class="h-10 w-10 rounded-full border transition-colors duration-300"
@@ -166,7 +146,7 @@
                                             </button>
                                         </form>
                                     @else
-                                        <button onclick="openBanModal({{ $student->hu_id }})"
+                                        <button type="button" data-ban-open data-student-id="{{ $student->hu_id }}"
                                             class="text-red-500 hover:text-red-400 transition-colors duration-300" title="Ban">
                                             <i class="fa-solid fa-ban"></i>
                                         </button>
@@ -197,7 +177,6 @@
             <textarea id="banReason" rows="3" 
                       class="w-full border rounded p-2 transition-colors duration-300"
                       style="background-color: var(--bg-secondary); border-color: var(--border-color); color: var(--text-primary);"
-                      onfocus="this.style.borderColor = '#ef4444'; this.style.boxShadow = '0 0 0 2px rgba(239, 68, 68, 0.2)';"
                       placeholder="Write reason..."></textarea>
 
             <form id="banForm" method="POST" class="hidden">
@@ -205,108 +184,21 @@
             </form>
 
             <div class="mt-5 flex justify-end gap-3">
-                <button onclick="closeBanModal()" 
+                <button type="button" data-ban-close
                         class="hover:text-cyan-400 transition-colors duration-300 border rounded px-4 py-2"
                         style="color: var(--text-muted); border-color: var(--border-color);">Cancel</button>
-                <button onclick="submitBan()" 
+                <button type="button" data-ban-submit
                         class="text-red-500 hover:text-red-400 transition-colors duration-300 border rounded px-4 py-2"
                         style="border-color: var(--border-color);">Confirm Ban</button>
             </div>
         </div>
     </div>
 
-    <script>
-        let selectedStudentId = null;
+@endsection
 
-        function openBanModal(id) {
-            selectedStudentId = id;
-            document.getElementById("banModal").classList.remove("hidden");
-        }
-
-        function closeBanModal() {
-            document.getElementById("banModal").classList.add("hidden");
-            document.getElementById("banReason").value = "";
-        }
-
-        function submitBan() {
-            const reason = document.getElementById("banReason").value.trim();
-            if (!reason) {
-                alert("Please enter a ban reason.");
-                return;
-            }
-
-            const form = document.getElementById("banForm");
-            form.action = "{{ route('admin.students.ban', ':id') }}".replace(':id', selectedStudentId);
-            form.innerHTML = `@csrf <input type="hidden" name="blacklist_reason" value="${reason}">`;
-            form.submit();
-        }
-
-        // DELETE CONFIRMATION
-        document.addEventListener('DOMContentLoaded', function() {
-            const deleteButtons = document.querySelectorAll('.delete-student-btn');
-
-            deleteButtons.forEach(button => {
-                button.addEventListener('click', function(e) {
-                    const form = this.closest('form');
-
-                    Swal.fire({
-                        title: 'Are you sure?',
-                        text: "This student record will be permanently deleted!",
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonColor: '#4f46e5',
-                        cancelButtonColor: '#ef4444',
-                        confirmButtonText: 'Yes, delete it!',
-                        cancelButtonText: 'Cancel'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            form.submit();
-                        }
-                    });
-                });
-            });
-        });
-
-       document.addEventListener('DOMContentLoaded', function() {
-    // Select all buttons with the .unban-btn class
-    const unbanButtons = document.querySelectorAll('.unban-btn');
-
-    unbanButtons.forEach(button => {
-        button.addEventListener('click', function(e) {
-            // Find the form associated with this button
-            const form = this.closest('form');
-
-            Swal.fire({
-                title: 'Reactivate student account?',
-                text: "This student will regain access to the system immediately.",
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#10b981', // Green
-                cancelButtonColor: '#6b7280', // Gray
-                confirmButtonText: 'Yes, Reactivate',
-                cancelButtonText: 'Cancel'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    form.submit(); // Submit the form if the admin clicks "Yes"
-                }
-            });
-        });
-    });
-});
-    </script>
-
-    @if (session('success'))
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success!',
-                    text: "{{ session('success') }}",
-                    showConfirmButton: false,
-                    timer: 2000,
-                    iconColor: '#10b981',
-                });
-            });
-        </script>
-    @endif
+@section('scripts')
+    <div id="adminModuleStudentsIndexConfig"
+        data-ban-route-template="{{ route('admin.students.ban', ':id') }}"
+        data-success-message="{{ session('success') }}"></div>
+    <script src="{{ asset('js/admin-students-index.js') }}"></script>
 @endsection

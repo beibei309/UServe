@@ -31,6 +31,15 @@ class AdminFeedbackController extends Controller
             ? 'BLOCK SELLER ACCESS'
             : 'SUSPEND ACCOUNT';
     }
+
+    private function statusBadgeClass(string $statusKey): string
+    {
+        return match ($statusKey) {
+            'active' => 'bg-green-100 text-green-800',
+            'blocked' => 'bg-amber-100 text-amber-800',
+            default => 'bg-red-100 text-red-800',
+        };
+    }
     public function index(Request $request)
     {
         $query = User::whereIn('hu_role', self::FEEDBACK_ROLES)
@@ -53,7 +62,24 @@ class AdminFeedbackController extends Controller
             });
         }
 
+        $userWarningLimit = $this->userWarningLimit();
         $usersWithReviews = $query->paginate(10)->appends($request->only('search', 'role'));
+        $usersWithReviews->getCollection()->transform(function (User $user) use ($userWarningLimit) {
+            $statusKey = $user->moderationStatusKey();
+            $canWarn = $statusKey === 'active' && (int) $user->hu_warning_count < $userWarningLimit;
+
+            $user->feedback_status_key = $statusKey;
+            $user->feedback_status_label = strtoupper($statusKey);
+            $user->feedback_status_badge_class = $this->statusBadgeClass($statusKey);
+            $user->feedback_warning_class = (int) $user->hu_warning_count >= $userWarningLimit ? 'text-red-700' : 'text-yellow-600';
+            $user->feedback_review_class = (float) ($user->reviews_received_avg_rating ?? 0) < 3.0 ? 'text-red-600' : 'text-green-600';
+            $user->feedback_can_warn = $canWarn;
+            $user->feedback_can_enforce = $statusKey === 'active' && !$canWarn;
+            $user->feedback_can_unblock = $statusKey === 'blocked';
+            $user->feedback_next_warning_count = min($userWarningLimit, (int) $user->hu_warning_count + 1);
+
+            return $user;
+        });
 
         $finalActions = collect(self::FEEDBACK_ROLES)->mapWithKeys(fn ($role) => [
             $role => $this->finalActionLabelForRole($role),
@@ -61,7 +87,7 @@ class AdminFeedbackController extends Controller
 
         return view('admin.feedback.index', [
             'usersWithReviews' => $usersWithReviews,
-            'userWarningLimit' => $this->userWarningLimit(),
+            'userWarningLimit' => $userWarningLimit,
             'selectedRole' => $selectedRole,
             'roleOptions' => self::FEEDBACK_ROLES,
             'finalActions' => $finalActions,

@@ -23,19 +23,13 @@
     </form>
 
     <div class="flex flex-wrap gap-2 mb-6">
-        @php
-            $pill = 'px-4 py-2 rounded-full text-sm font-medium transition';
-            $active = 'bg-blue-600 text-white';
-            $inactive = 'bg-gray-100 text-gray-700 hover:bg-gray-200';
-        @endphp
-
         <a href="{{ route('admin.feedback.index', request()->except('role')) }}"
-            class="{{ $pill }} {{ $selectedRole === '' ? $active : $inactive }}">
+            class="px-4 py-2 rounded-full text-sm font-medium transition {{ $selectedRole === '' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
             All
         </a>
         @foreach ($roleOptions as $role)
             <a href="{{ route('admin.feedback.index', array_merge(request()->except('page', 'role'), ['role' => $role])) }}"
-                class="{{ $pill }} {{ $selectedRole === $role ? $active : $inactive }}">
+                class="px-4 py-2 rounded-full text-sm font-medium transition {{ $selectedRole === $role ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
                 {{ ucfirst($role) }}
             </a>
         @endforeach
@@ -55,10 +49,7 @@
             </thead>
             <tbody>
                 @foreach($usersWithReviews as $user)
-                    @php
-                        $statusKey = $user->moderationStatusKey();
-                    @endphp
-                    <tr class="border-b transition-colors duration-300" onmouseover="this.style.backgroundColor='var(--hover-bg)'" onmouseout="this.style.backgroundColor='transparent'">
+                    <tr class="border-b transition-colors duration-300 surface-hover">
                         <td class="py-3 px-4 text-sm">
                             <p class="font-bold transition-colors duration-300" style="color: var(--text-primary);">{{ $user->hu_name }}</p>
                             <p class="text-xs transition-colors duration-300" style="color: var(--text-muted);">{{ $user->hu_email }} ({{ $user->hu_role }})</p>
@@ -78,44 +69,41 @@
                         </td>
                         
                         {{-- Warning Count --}}
-                        <td class="py-3 px-4 text-sm font-semibold {{ $user->hu_warning_count >= $userWarningLimit ? 'text-red-700' : 'text-yellow-600' }}">
+                        <td class="py-3 px-4 text-sm font-semibold {{ $user->feedback_warning_class }}">
                             {{ $user->hu_warning_count }} / {{ $userWarningLimit }}
                         </td>
                         
                         {{-- Block Status --}}
                         <td class="py-3 px-4">
-                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium 
-                                {{ $statusKey === 'active' ? 'bg-green-100 text-green-800' : ($statusKey === 'blocked' ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800') }}"> 
-                                {{ strtoupper($statusKey) }} 
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $user->feedback_status_badge_class }}"> 
+                                {{ $user->feedback_status_label }} 
                             </span> 
                         </td>
                         
                         {{-- Actions: Notify/Block --}}
                         <td class="py-3 px-4 text-sm">
-                            @if ($statusKey === 'active')
-                                @if ($user->hu_warning_count < $userWarningLimit)
+                            @if ($user->feedback_can_warn)
                                     {{-- Form untuk send warning --}}
                                     <form action="{{ route('admin.feedback.warning', $user->hu_id) }}" method="POST" class="inline-block"
-                                        onsubmit="return submitFeedbackActionWithReason(event, this, 'Notify Warning');">
+                                        data-feedback-reason data-action-label="Notify Warning">
                                         @csrf
                                         <input type="hidden" name="reason" value="">
                                         <button type="submit" class="px-3 py-1 bg-yellow-500 text-white text-xs rounded hover:bg-yellow-600 transition-colors">
-                                            Notify Warning ({{ $user->hu_warning_count + 1 }}/{{ $userWarningLimit }})
+                                            Notify Warning ({{ $user->feedback_next_warning_count }}/{{ $userWarningLimit }})
                                         </button>
                                     </form>
-                                @else
+                            @elseif ($user->feedback_can_enforce)
                                     <form action="{{ route('admin.feedback.enforce', $user->hu_id) }}" method="POST" class="inline-block"
-                                        onsubmit="return submitFeedbackActionWithReason(event, this, '{{ $finalActions[$user->hu_role] }}');">
+                                        data-feedback-reason data-action-label="{{ $finalActions[$user->hu_role] }}">
                                         @csrf
                                         <input type="hidden" name="reason" value="">
                                         <button type="submit" class="px-3 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors">
                                             {{ $finalActions[$user->hu_role] }}
                                         </button>
                                     </form>
-                                @endif
-                            @elseif ($statusKey === 'blocked')
+                            @elseif ($user->feedback_can_unblock)
                                 <form action="{{ route('admin.feedback.unblock', $user->hu_id) }}" method="POST" class="inline-block"
-                                    onsubmit="return confirm('Unblock seller access for {{ $user->hu_name }}?');">
+                                    data-confirm-message="Unblock seller access for {{ $user->hu_name }}?">
                                     @csrf
                                     <button type="submit" class="px-3 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 transition-colors">
                                         UNBLOCK SELLER ACCESS
@@ -137,30 +125,9 @@
         </div>
     </div>
 </div>
+@endsection
 
-<script>
-    function submitFeedbackActionWithReason(event, form, actionLabel) {
-        event.preventDefault();
-        const reason = window.prompt(`Please enter reason for ${actionLabel}:`);
-        if (reason === null) {
-            return false;
-        }
-
-        const trimmed = reason.trim();
-        if (!trimmed) {
-            alert('Reason is required.');
-            return false;
-        }
-
-        const reasonInput = form.querySelector('input[name="reason"]');
-        if (!reasonInput) {
-            return false;
-        }
-
-        reasonInput.value = trimmed;
-        form.submit();
-        return true;
-    }
-</script>
-
+@section('scripts')
+    <div id="adminModuleFeedbackConfig"></div>
+    <script src="{{ asset('js/admin-feedback.js') }}"></script>
 @endsection

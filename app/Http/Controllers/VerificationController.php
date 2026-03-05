@@ -14,6 +14,14 @@ class VerificationController extends Controller
     private const MUALLIM_CENTER_LNG = 101.5927;
     private const MUALLIM_RADIUS_KM = 25;
 
+    public function onboardingCommunity()
+    {
+        if (Auth::check() && Auth::user()->hu_verification_status === 'approved') {
+            return redirect()->route('dashboard')->with('info', 'Your account is already verified!');
+        }
+        return view('onboarding.community_verification');
+    }
+
    public function index() {
     $user = Auth::user();
     

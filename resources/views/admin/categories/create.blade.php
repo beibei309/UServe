@@ -31,8 +31,7 @@
                     <label class="block text-sm font-medium mb-2 transition-colors duration-300" style="color: var(--text-primary);">Category Name</label>
                     <input type="text" name="name" value="{{ old('name', $category->hc_name ?? '') }}" 
                            class="w-full px-4 py-2 border rounded-lg outline-none transition-colors duration-300" 
-                           style="background-color: var(--bg-tertiary); border-color: var(--border-color); color: var(--text-primary);"
-                           onfocus="this.style.borderColor = '#06b6d4'; this.style.boxShadow = '0 0 0 2px rgba(6, 182, 212, 0.2)';" required>
+                           style="background-color: var(--bg-tertiary); border-color: var(--border-color); color: var(--text-primary);" required>
                 </div>
 
                 <div>
@@ -46,8 +45,7 @@
                     <label class="block text-sm font-medium mb-2 transition-colors duration-300" style="color: var(--text-primary);">Description</label>
                     <textarea name="description" rows="3" 
                               class="w-full px-4 py-2 border rounded-lg outline-none transition-colors duration-300"
-                              style="background-color: var(--bg-tertiary); border-color: var(--border-color); color: var(--text-primary);"
-                              onfocus="this.style.borderColor = '#06b6d4'; this.style.boxShadow = '0 0 0 2px rgba(6, 182, 212, 0.2)';">{{ old('description', $category->hc_description ?? '') }}</textarea>
+                              style="background-color: var(--bg-tertiary); border-color: var(--border-color); color: var(--text-primary);">{{ old('description', $category->hc_description ?? '') }}</textarea>
                 </div>
 
                 <div class="flex flex-col sm:flex-row items-start sm:items-end gap-4">
@@ -80,33 +78,14 @@
                            value="{{ old('icon', $category->hc_icon ?? '') }}" 
                            placeholder="fa fa-user"
                            class="w-full pl-10 px-4 py-2 border rounded-lg outline-none text-sm transition-colors duration-300"
-                           style="background-color: var(--bg-secondary); border-color: var(--border-color); color: var(--text-primary);"
-                           onfocus="this.style.borderColor = '#06b6d4'; this.style.boxShadow = '0 0 0 2px rgba(6, 182, 212, 0.2)';">
+                           style="background-color: var(--bg-secondary); border-color: var(--border-color); color: var(--text-primary);">
                 </div>
 
                 <div class="grid grid-cols-6 gap-2 max-h-64 overflow-y-auto p-1 custom-scrollbar">
-                    @php
-                        // List of FontAwesome classes
-                        $icons = [
-                            'fa fa-user', 'fa fa-users', 'fa fa-user-circle', 'fa fa-id-card',
-                            'fa fa-home', 'fa fa-building', 'fa fa-store', 'fa fa-laptop-code',
-                            'fa fa-graduation-cap', 'fa fa-book', 'fa fa-pencil', 'fa fa-university',
-                            'fa fa-cog', 'fa fa-cogs', 'fa fa-wrench', 'fa fa-check-circle',
-                            'fa fa-paint-brush', 'fa fa-folder-open', 'fa fa-file', 'fa fa-file-text',
-                            'fa fa-calendar', 'fa fa-bell', 'fa fa-envelope',
-                            'fa fa-comments', 'fa fa-commenting', 'fa fa-search', 'fa fa-filter',
-                            'fa fa-soap', 'fa fa-credit-card', 'fa fa-shopping-cart', 'fa fa-tag',
-                            'fa fa-star', 'fa fa-heart', 'fa fa-thumbs-up', 'fa fa-flag',
-                            'fa fa-globe', 'fa fa-map-marker', 'fa fa-car', 'fa fa-bicycle'
-                        ];
-                    @endphp
-
                     @foreach($icons as $icon)
-                    <div onclick="selectIcon('{{ $icon }}')" 
-                         class="cursor-pointer h-10 w-10 flex items-center justify-center rounded border hover:text-cyan-500 transition-all duration-300"
-                         style="background-color: var(--bg-secondary); border-color: var(--border-color); color: var(--text-secondary);"
-                         onmouseover="this.style.borderColor = '#06b6d4'; this.style.backgroundColor = 'var(--hover-bg)';"
-                         onmouseout="this.style.borderColor = 'var(--border-color)'; this.style.backgroundColor = 'var(--bg-secondary)';">
+                    <div data-icon="{{ $icon }}"
+                         class="icon-option cursor-pointer h-10 w-10 flex items-center justify-center rounded border hover:text-cyan-500 transition-all duration-300"
+                         style="background-color: var(--bg-secondary); border-color: var(--border-color); color: var(--text-secondary);">
                         <i class="{{ $icon }}"></i>
                     </div>
                     @endforeach
@@ -147,17 +126,9 @@
     }
 </style>
 
-<script>
-    function selectIcon(iconClass) {
-        // Update Input
-        document.getElementById('iconInput').value = iconClass;
-        // Update Preview
-        document.getElementById('previewIcon').className = iconClass;
-    }
+@endsection
 
-    // Live preview when typing
-    document.getElementById('iconInput').addEventListener('input', function() {
-        document.getElementById('previewIcon').className = this.value;
-    });
-</script>
+@section('scripts')
+    <div id="adminCategoriesFormConfig"></div>
+    <script src="{{ asset('js/admin-categories-form.js') }}"></script>
 @endsection

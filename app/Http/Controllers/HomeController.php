@@ -128,4 +128,19 @@ public function about()
         return view('about', compact('totalUsers', 'totalServices', 'totalSellers', 'categories'));
     }
 
+    public function serviceApply()
+    {
+        return view('services.apply');
+    }
+
+    public function terms()
+    {
+        return view('legal.terms');
+    }
+
+    public function privacy()
+    {
+        return view('legal.privacy');
+    }
+
 }

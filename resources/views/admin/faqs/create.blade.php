@@ -50,10 +50,8 @@
                     <button type="submit" class="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white px-6 py-2 rounded-lg transition-all duration-300 font-medium">
                         {{ isset($faq) ? 'Update FAQ' : 'Create FAQ' }}
                     </button>
-                    <a href="{{ route('admin.faqs.index') }}" class="px-6 py-2 border rounded-lg transition-all duration-300"
-                       style="color: var(--text-secondary); border-color: var(--border-color);"
-                       onmouseover="this.style.backgroundColor = 'var(--hover-bg)';"
-                       onmouseout="this.style.backgroundColor = 'transparent';">
+                    <a href="{{ route('admin.faqs.index') }}" class="px-6 py-2 border rounded-lg transition-all duration-300 surface-hover"
+                       style="color: var(--text-secondary); border-color: var(--border-color);">
                         Cancel
                     </a>
                 </div>

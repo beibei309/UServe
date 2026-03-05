@@ -29,7 +29,6 @@ use App\Http\Controllers\Admin\AdminCommunityController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminStudentStatusController;
 use App\Http\Controllers\NotificationController;
-use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\Admin\VerificationController as AdminVerificationController;
 
 // -- PUBLIC ROUTES --
@@ -69,12 +68,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/verification/save-location', [VerificationController::class, 'saveLocation'])
         ->name('verification.save_location');
     
-    Route::get('/onboarding/community', function() {
-        if (\Illuminate\Support\Facades\Auth::check() && \Illuminate\Support\Facades\Auth::user()->hu_verification_status === 'approved') {
-            return redirect()->route('dashboard')->with('info', 'Your account is already verified!');
-        }
-        return view('onboarding.community_verification');
-    })->name('onboarding.community.verify');
+    Route::get('/onboarding/community', [VerificationController::class, 'onboardingCommunity'])->name('onboarding.community.verify');
 
     Route::post('/onboarding/community/upload-photo', [VerificationController::class, 'uploadPhoto'])->name('onboarding.community.upload_photo');
     Route::post('/onboarding/community/upload-selfie', [VerificationController::class, 'uploadCommunitySelfie'])->name('onboarding.community.upload_selfie');
@@ -105,9 +99,7 @@ Route::get('/services/{service}/edit', [StudentServiceController::class, 'edit']
 
 Route::get('/student-services/{service}', [StudentServiceController::class, 'show'])->name('student-services.show');
 
-Route::get('/services/apply', function () {
-    return view('services.apply');
-})->middleware(['auth'])->name('services.apply');
+Route::get('/services/apply', [HomeController::class, 'serviceApply'])->middleware(['auth'])->name('services.apply');
 
  Route::get('/service-requests', [ServiceRequestController::class, 'index'])->middleware(['auth'])->name('service-requests.index');
 Route::post('/service-request', [ServiceRequestController::class, 'store'])->middleware(['auth'])->name('service-request.store');
@@ -148,13 +140,9 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
     ->name('dashboard');
 
 // Legal pages
-Route::get('/terms', function () {
-    return view('legal.terms');
-})->name('terms');
+Route::get('/terms', [HomeController::class, 'terms'])->name('terms');
 
-Route::get('/privacy', function () {
-    return view('legal.privacy');
-})->name('privacy');
+Route::get('/privacy', [HomeController::class, 'privacy'])->name('privacy');
 
 Route::middleware('auth')->group(function () {
     // Notifications
@@ -342,17 +330,13 @@ Route::middleware(['auth:admin', 'prevent-back-history'])->prefix('admin')->grou
         Route::post('/admins/{id}/update', [SuperAdminController::class, 'update'])->name('admin.super.admins.update');
         Route::delete('/admins/{id}', [SuperAdminController::class, 'destroy'])->name('admin.super.admins.delete');
 
-        Route::get('/link-storage', function () {
-            Artisan::call('storage:link');
-            return 'Storage Link Created!';
-        });
+        Route::get('/link-storage', [SuperAdminController::class, 'createStorageLink'])->name('admin.super.link_storage');
     });
 
     Route::post('/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
 });
 
 // View Community Verification Document
-Route::get('/view-doc/{id}', function ($id) {
-    $user = \App\Models\User::findOrFail($id);
-    return response()->file(storage_path('app/private/' . $user->hu_verification_document_path));
-})->name('view.doc')->middleware(['auth:admin']);
+Route::get('/view-doc/{id}', [AdminVerificationController::class, 'showDocumentById'])
+    ->name('view.doc')
+    ->middleware(['auth:admin']);

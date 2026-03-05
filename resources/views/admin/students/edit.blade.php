@@ -73,38 +73,22 @@
                         </div>
 
                         <div>
-                            @php
-                                $facultyMap = [
-                                    'FKMT' => 'Fakulti Komputeran dan Meta-Teknologi',
-                                    'FBK' => 'Fakulti Bahasa dan Komunikasi',
-                                    'FPM' => 'Fakulti Pembangunan Manusia',
-                                    'FSMT' => 'Fakulti Sains dan Matematik',
-                                    'FPE' => 'Fakulti Pengurusan dan Ekonomi',
-                                    'FSKIK' => 'Fakulti Seni, Komputeran dan Industri Kreatif',
-                                    'FMUP' => 'Fakulti Muzik dan Seni Persembahan',
-                                    'FSSKJ' => 'Fakulti Sains Sukan dan Kejurulatihan',
-                                    'FTV' => 'Fakulti Teknikal dan Vokasional',
-                                    'FSK' => 'Fakulti Sains Kemanusiaan',
-                                ];
-                                $currentFaculty = old('faculty', $student->hu_faculty);
-                                $currentFaculty = $facultyMap[$currentFaculty] ?? $currentFaculty;
-                            @endphp
                             <label class="block text-sm font-medium text-gray-700 mb-2">
                                 Faculty
                             </label>
 
                             <select name="faculty" class="w-full rounded-lg border-gray-300">
                                 <option value="">Select Faculty</option>
-                                <option value="Fakulti Komputeran dan Meta-Teknologi" {{ $currentFaculty == 'Fakulti Komputeran dan Meta-Teknologi' ? 'selected' : '' }}>Fakulti Komputeran dan Meta-Teknologi</option>
-                                <option value="Fakulti Bahasa dan Komunikasi" {{ $currentFaculty == 'Fakulti Bahasa dan Komunikasi' ? 'selected' : '' }}>Fakulti Bahasa dan Komunikasi</option>
-                                <option value="Fakulti Pembangunan Manusia" {{ $currentFaculty == 'Fakulti Pembangunan Manusia' ? 'selected' : '' }}>Fakulti Pembangunan Manusia</option>
-                                <option value="Fakulti Sains dan Matematik" {{ $currentFaculty == 'Fakulti Sains dan Matematik' ? 'selected' : '' }}>Fakulti Sains dan Matematik</option>
-                                <option value="Fakulti Pengurusan dan Ekonomi" {{ $currentFaculty == 'Fakulti Pengurusan dan Ekonomi' ? 'selected' : '' }}>Fakulti Pengurusan dan Ekonomi</option>
-                                <option value="Fakulti Sains Kemanusiaan" {{ $currentFaculty == 'Fakulti Sains Kemanusiaan' ? 'selected' : '' }}>Fakulti Sains Kemanusiaan</option>
-                                <option value="Fakulti Muzik dan Seni Persembahan" {{ $currentFaculty == 'Fakulti Muzik dan Seni Persembahan' ? 'selected' : '' }}>Fakulti Muzik dan Seni Persembahan</option>
-                                <option value="Fakulti Seni, Komputeran dan Industri Kreatif" {{ $currentFaculty == 'Fakulti Seni, Komputeran dan Industri Kreatif' ? 'selected' : '' }}>Fakulti Seni, Komputeran dan Industri Kreatif</option>
-                                <option value="Fakulti Sains Sukan dan Kejurulatihan" {{ $currentFaculty == 'Fakulti Sains Sukan dan Kejurulatihan' ? 'selected' : '' }}>Fakulti Sains Sukan dan Kejurulatihan</option>
-                                <option value="Fakulti Teknikal dan Vokasional" {{ $currentFaculty == 'Fakulti Teknikal dan Vokasional' ? 'selected' : '' }}>Fakulti Teknikal dan Vokasional</option>
+                                <option value="Fakulti Komputeran dan Meta-Teknologi" {{ old('faculty', $student->faculty_display) == 'Fakulti Komputeran dan Meta-Teknologi' ? 'selected' : '' }}>Fakulti Komputeran dan Meta-Teknologi</option>
+                                <option value="Fakulti Bahasa dan Komunikasi" {{ old('faculty', $student->faculty_display) == 'Fakulti Bahasa dan Komunikasi' ? 'selected' : '' }}>Fakulti Bahasa dan Komunikasi</option>
+                                <option value="Fakulti Pembangunan Manusia" {{ old('faculty', $student->faculty_display) == 'Fakulti Pembangunan Manusia' ? 'selected' : '' }}>Fakulti Pembangunan Manusia</option>
+                                <option value="Fakulti Sains dan Matematik" {{ old('faculty', $student->faculty_display) == 'Fakulti Sains dan Matematik' ? 'selected' : '' }}>Fakulti Sains dan Matematik</option>
+                                <option value="Fakulti Pengurusan dan Ekonomi" {{ old('faculty', $student->faculty_display) == 'Fakulti Pengurusan dan Ekonomi' ? 'selected' : '' }}>Fakulti Pengurusan dan Ekonomi</option>
+                                <option value="Fakulti Sains Kemanusiaan" {{ old('faculty', $student->faculty_display) == 'Fakulti Sains Kemanusiaan' ? 'selected' : '' }}>Fakulti Sains Kemanusiaan</option>
+                                <option value="Fakulti Muzik dan Seni Persembahan" {{ old('faculty', $student->faculty_display) == 'Fakulti Muzik dan Seni Persembahan' ? 'selected' : '' }}>Fakulti Muzik dan Seni Persembahan</option>
+                                <option value="Fakulti Seni, Komputeran dan Industri Kreatif" {{ old('faculty', $student->faculty_display) == 'Fakulti Seni, Komputeran dan Industri Kreatif' ? 'selected' : '' }}>Fakulti Seni, Komputeran dan Industri Kreatif</option>
+                                <option value="Fakulti Sains Sukan dan Kejurulatihan" {{ old('faculty', $student->faculty_display) == 'Fakulti Sains Sukan dan Kejurulatihan' ? 'selected' : '' }}>Fakulti Sains Sukan dan Kejurulatihan</option>
+                                <option value="Fakulti Teknikal dan Vokasional" {{ old('faculty', $student->faculty_display) == 'Fakulti Teknikal dan Vokasional' ? 'selected' : '' }}>Fakulti Teknikal dan Vokasional</option>
                             </select>
 
                             @error('faculty')

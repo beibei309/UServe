@@ -55,103 +55,11 @@
         @endforeach
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Select all delete buttons with our class
-            const deleteButtons = document.querySelectorAll('.delete-faq-btn');
+@endsection
 
-            deleteButtons.forEach(button => {
-                button.addEventListener('click', function(e) {
-                    // Find the parent form
-                    const form = this.closest('form');
-
-                    Swal.fire({
-                        title: 'Are you sure?',
-                        text: "This FAQ will be permanently deleted!",
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonColor: '#4f46e5', // Matches your indigo-600
-                        cancelButtonColor: '#ef4444', // Matches red-500
-                        confirmButtonText: 'Yes, delete it!',
-                        cancelButtonText: 'Cancel'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            form.submit();
-                        }
-                    });
-                });
-            });
-
-            // AJAX Toggle functionality to prevent reordering
-            const toggleForms = document.querySelectorAll('.toggle-form');
-
-            toggleForms.forEach(form => {
-                form.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    
-                    const faqId = this.dataset.faqId;
-                    const button = this.querySelector('.toggle-btn');
-                    const isActive = button.dataset.active === '1';
-                    
-                    // Disable button during request
-                    button.disabled = true;
-                    button.style.opacity = '0.6';
-                    
-                    fetch(this.action, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                            'X-Requested-With': 'XMLHttpRequest'
-                        },
-                        body: JSON.stringify({
-                            _method: 'PATCH'
-                        })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            // Toggle the visual state
-                            if (isActive) {
-                                button.textContent = 'Hidden';
-                                button.className = 'text-xs px-3 py-1 rounded-full toggle-btn transition-colors duration-300 border bg-gray-100 text-gray-600 border-gray-200';
-                                button.dataset.active = '0';
-                            } else {
-                                button.textContent = 'Active';
-                                button.className = 'text-xs px-3 py-1 rounded-full toggle-btn transition-colors duration-300 border bg-green-100 text-green-800 border-green-200';
-                                button.dataset.active = '1';
-                            }
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error!',
-                            text: 'Failed to update FAQ status'
-                        });
-                    })
-                    .finally(() => {
-                        // Re-enable button
-                        button.disabled = false;
-                        button.style.opacity = '1';
-                    });
-                });
-            });
-        });
-    </script>
-    @if(session('success'))
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            Swal.fire({
-                icon: 'success',
-                title: 'Success!',
-                text: "{{ session('success') }}",
-                showConfirmButton: false,
-                timer: 2000, // Closes after 2 seconds
-                iconColor: '#10b981', // Emerald green
-            });
-        });
-    </script>
-@endif
+@section('scripts')
+    <div id="adminModuleFaqsIndexConfig"
+        data-csrf-token="{{ csrf_token() }}"
+        data-success-message="{{ session('success') }}"></div>
+    <script src="{{ asset('js/admin-faqs-index.js') }}"></script>
 @endsection

@@ -32,23 +32,8 @@
                 {{-- IMAGE SECTION --}}
                 <div class="relative">
                     <div class="aspect-video rounded-xl overflow-hidden border transition-colors duration-300" style="border-color: var(--border-color); background-color: var(--bg-primary);">
-                        @if ($service->hss_image_path)
-                            @php
-                                $path = $service->hss_image_path;
-                                // 1. Check if external URL
-                                if (Str::startsWith($path, ['http://', 'https://'])) {
-                                    $imageUrl = $path;
-                                } 
-                                // 2. Check if file exists in 'storage' (public/storage/...)
-                                elseif (file_exists(public_path('storage/' . $path))) {
-                                    $imageUrl = asset('storage/' . $path);
-                                } 
-                                // 3. Fallback: Assume it's in public root (public/...)
-                                else {
-                                    $imageUrl = asset($path);
-                                }
-                            @endphp
-                            <img src="{{ $imageUrl }}" 
+                        @if ($service->hss_image_url)
+                            <img src="{{ $service->hss_image_url }}" 
                                 alt="{{ $service->hss_title }}"
                                  class="w-full h-full object-cover">
                         @else
@@ -117,8 +102,8 @@
                         
                         <div class="p-4 rounded-xl border transition-colors duration-300" style="background-color: var(--bg-primary); border-color: var(--border-color);">
                             <div class="text-sm font-medium transition-colors duration-300" style="color: var(--text-secondary);">Warnings</div>
-                            <div class="text-lg font-semibold {{ ($service->hss_warning_count ?? 0) >= 2 ? 'text-red-500' : '' }}" style="color: {{ ($service->hss_warning_count ?? 0) >= 2 ? '#ef4444' : 'var(--text-primary)' }};">
-                                {{ $service->hss_warning_count ?? 0 }}/3
+                            <div class="text-lg font-semibold {{ $service->hss_warning_class }}" @if(!$service->hss_warning_class) style="color: var(--text-primary);" @endif>
+                                {{ $service->hss_warning_count ?? 0 }}/{{ $serviceWarningLimit }}
                             </div>
                         </div>
                         
@@ -245,17 +230,17 @@
                                 @csrf @method('PATCH')
                                 <button type="submit" 
                                         class="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-400 hover:to-green-500 text-white px-4 py-2 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl inline-flex items-center gap-2"
-                                        onclick="return confirm('Are you sure you want to approve this service?')">
+                                        data-confirm-message="Are you sure you want to approve this service?">
                                     <i class="fas fa-check"></i>Approve Service
                                 </button>
                             </form>
                             
-                            <button onclick="openRejectModal('{{ route('admin.services.reject', $service->hss_id) }}')" 
+                            <button type="button" data-service-open-reject data-url="{{ route('admin.services.reject', $service->hss_id) }}"
                                     class="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-400 hover:to-red-500 text-white px-4 py-2 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl inline-flex items-center gap-2">
                                 <i class="fas fa-times"></i>Reject Service
                             </button>
                             
-                            <button onclick="openWarningModal('{{ route('admin.services.warn', $service->hss_id) }}')" 
+                            <button type="button" data-service-open-warning data-url="{{ route('admin.services.warn', $service->hss_id) }}"
                                     class="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-400 hover:to-orange-500 text-white px-4 py-2 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl inline-flex items-center gap-2">
                                 <i class="fas fa-exclamation-triangle"></i>Issue Warning
                             </button>
@@ -270,7 +255,7 @@
                         </h4>
                         <p class="text-sm text-green-700 mb-4">This service is currently approved and active. You can issue warnings if needed.</p>
                         <div class="flex flex-wrap gap-3">
-                            <button onclick="openWarningModal('{{ route('admin.services.warn', $service->hss_id) }}')" 
+                            <button type="button" data-service-open-warning data-url="{{ route('admin.services.warn', $service->hss_id) }}"
                                     class="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-400 hover:to-orange-500 text-white px-4 py-2 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl inline-flex items-center gap-2">
                                 <i class="fas fa-exclamation-triangle"></i>Issue Warning
                             </button>
@@ -289,7 +274,7 @@
                                 @csrf @method('PATCH')
                                 <button type="submit" 
                                         class="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-400 hover:to-green-500 text-white px-4 py-2 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl inline-flex items-center gap-2"
-                                        onclick="return confirm('Are you sure you want to approve this previously rejected service?')">
+                                        data-confirm-message="Are you sure you want to approve this previously rejected service?">
                                     <i class="fas fa-redo"></i>Reconsider & Approve
                                 </button>
                             </form>
@@ -311,7 +296,7 @@
                         </h4>
                         <p class="text-sm text-gray-700 mb-4">This service has been suspended due to policy violations or warnings. You can reactivate it if appropriate.</p>
                         <div class="flex flex-wrap gap-3">
-                            <button onclick="confirmUnblock('{{ route('admin.services.unblock', $service->hss_id) }}')" 
+                            <button type="button" data-service-unblock data-url="{{ route('admin.services.unblock', $service->hss_id) }}"
                                     class="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-400 hover:to-green-500 text-white px-4 py-2 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl inline-flex items-center gap-2">
                                 <i class="fas fa-unlock"></i>Reactivate Service
                             </button>
@@ -320,14 +305,14 @@
                 @endif
 
                 {{-- Critical Actions --}}
-                @if (($service->hss_warning_count ?? 0) >= 3 && $service->hss_approval_status !== 'suspended')
+                @if (($service->hss_warning_count ?? 0) >= $serviceWarningLimit && $service->hss_approval_status !== 'suspended')
                     <div class="rounded-xl border-2 border-red-300 p-6" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(248, 113, 113, 0.15) 100%);">
                         <h4 class="font-semibold text-red-800 mb-4 flex items-center">
                             <i class="fas fa-exclamation-triangle mr-2"></i>Maximum Warnings Reached
                         </h4>
-                        <p class="text-sm text-red-700 mb-4">This service has reached the maximum number of warnings (3/3). It should be suspended.</p>
+                        <p class="text-sm text-red-700 mb-4">This service has reached the maximum number of warnings ({{ $serviceWarningLimit }}/{{ $serviceWarningLimit }}). It should be suspended.</p>
                         <div class="flex flex-wrap gap-3">
-                            <button onclick="confirmSuspend('{{ route('admin.services.suspend', $service->hss_id) }}')" 
+                            <button type="button" data-service-suspend data-url="{{ route('admin.services.suspend', $service->hss_id) }}"
                                     class="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white px-4 py-2 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl inline-flex items-center gap-2">
                                 <i class="fas fa-ban"></i>Suspend Service
                             </button>
@@ -345,7 +330,7 @@
 {{-- REJECT REASON MODAL --}}
 <div id="rejectModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
     <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-        <div class="fixed inset-0 bg-black bg-opacity-75 transition-opacity" aria-hidden="true" onclick="closeRejectModal()"></div>
+        <div class="fixed inset-0 bg-black bg-opacity-75 transition-opacity" aria-hidden="true" data-service-close-reject></div>
         <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
 
         <div class="inline-block align-bottom rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border"
@@ -375,7 +360,7 @@
                 </div>
                 
                 <div class="border-t px-6 py-4 flex gap-3 justify-end" style="background-color: var(--bg-secondary); border-color: var(--border-color);">
-                    <button type="button" onclick="closeRejectModal()" 
+                    <button type="button" data-service-close-reject
                             class="px-6 py-3 rounded-lg border transition-all duration-300 font-medium"
                             style="background-color: var(--bg-primary); border-color: var(--border-color); color: var(--text-secondary);">
                         Cancel
@@ -393,7 +378,7 @@
 {{-- WARNING MODAL --}}
 <div id="warningModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="warning-modal-title" role="dialog" aria-modal="true">
     <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-        <div class="fixed inset-0 bg-black bg-opacity-75 transition-opacity" aria-hidden="true" onclick="closeWarningModal()"></div>
+        <div class="fixed inset-0 bg-black bg-opacity-75 transition-opacity" aria-hidden="true" data-service-close-warning></div>
         <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
 
         <div class="inline-block align-bottom rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border"
@@ -414,7 +399,7 @@
                             <p class="text-sm transition-colors duration-300 mb-4" style="color: var(--text-secondary);">
                                 Provide a clear explanation for this warning. The student will be notified via email.
                             </p>
-                            <textarea name="warning_reason" rows="4" 
+                            <textarea name="reason" rows="4" 
                                 class="w-full rounded-xl border-2 p-4 transition-all duration-300 focus:ring-2 focus:ring-orange-500 focus:border-orange-500" 
                                 style="background-color: var(--bg-secondary); border-color: var(--border-color); color: var(--text-primary);" 
                                 placeholder="e.g. Late response to customer, Quality issues, Policy reminder..." required></textarea>
@@ -423,7 +408,7 @@
                 </div>
                 
                 <div class="border-t px-6 py-4 flex gap-3 justify-end" style="background-color: var(--bg-secondary); border-color: var(--border-color);">
-                    <button type="button" onclick="closeWarningModal()" 
+                    <button type="button" data-service-close-warning
                             class="px-6 py-3 rounded-lg border transition-all duration-300 font-medium"
                             style="background-color: var(--bg-primary); border-color: var(--border-color); color: var(--text-secondary);">
                         Cancel
@@ -438,142 +423,13 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-    // Warning Modal Functions
-    function openWarningModal(url) {
-        document.getElementById('warningForm').action = url;
-        document.getElementById('warningModal').classList.remove('hidden');
-    }
+@endsection
 
-    function closeWarningModal() {
-        document.getElementById('warningModal').classList.add('hidden');
-    }
-
-    // Reject Modal Functions
-    function openRejectModal(url) {
-        document.getElementById('rejectForm').action = url;
-        document.getElementById('rejectModal').classList.remove('hidden');
-    }
-
-    function closeRejectModal() {
-        document.getElementById('rejectModal').classList.add('hidden');
-    }
-
-    // Suspend Confirmation with Modern SweetAlert
-    function confirmSuspend(url) {
-        Swal.fire({
-            title: 'Suspend Service?',
-            text: "This service will be suspended due to reaching maximum warnings (3/3). This action can be undone later.",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#dc2626',
-            cancelButtonColor: '#6b7280',
-            confirmButtonText: 'Yes, Suspend Service',
-            cancelButtonText: 'Cancel',
-            customClass: {
-                popup: 'rounded-2xl',
-                confirmButton: 'rounded-lg',
-                cancelButton: 'rounded-lg'
-            }
-        }).then((result) => {
-            if (result.isConfirmed) {
-                let form = document.createElement('form');
-                form.method = 'POST';
-                form.action = url;
-                
-                let token = document.createElement('input');
-                token.type = 'hidden';
-                token.name = '_token';
-                token.value = '{{ csrf_token() }}';
-                form.appendChild(token);
-                
-                let methodField = document.createElement('input');
-                methodField.type = 'hidden';
-                methodField.name = '_method';
-                methodField.value = 'PATCH';
-                form.appendChild(methodField);
-                
-                document.body.appendChild(form);
-                form.submit();
-            }
-        });
-    }
-
-    // Unblock/Reactivate Confirmation
-    function confirmUnblock(url) {
-        Swal.fire({
-            title: 'Reactivate Service?',
-            text: "This service will be reactivated and become available again to students.",
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#16a34a',
-            cancelButtonColor: '#6b7280',
-            confirmButtonText: 'Yes, Reactivate',
-            cancelButtonText: 'Cancel',
-            customClass: {
-                popup: 'rounded-2xl',
-                confirmButton: 'rounded-lg',
-                cancelButton: 'rounded-lg'
-            }
-        }).then((result) => {
-            if (result.isConfirmed) {
-                let form = document.createElement('form');
-                form.method = 'POST';
-                form.action = url;
-                
-                let token = document.createElement('input');
-                token.type = 'hidden';
-                token.name = '_token';
-                token.value = '{{ csrf_token() }}';
-                form.appendChild(token);
-                
-                let methodField = document.createElement('input');
-                methodField.type = 'hidden';
-                methodField.name = '_method';
-                methodField.value = 'PATCH';
-                form.appendChild(methodField);
-                
-                document.body.appendChild(form);
-                form.submit();
-            }
-        });
-    }
-
-    // Modern Success/Error Messages
-    @if (session('success'))
-        Swal.fire({
-            icon: 'success',
-            title: 'Success!',
-            text: "{{ session('success') }}",
-            timer: 3000,
-            showConfirmButton: false,
-            customClass: {
-                popup: 'rounded-2xl'
-            }
-        });
-    @endif
-
-    @if (session('error'))
-        Swal.fire({
-            icon: 'error',
-            title: 'Error!',
-            text: "{{ session('error') }}",
-            timer: 3000,
-            showConfirmButton: false,
-            customClass: {
-                popup: 'rounded-2xl'
-            }
-        });
-    @endif
-
-    // Close modals on Escape key
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            closeRejectModal();
-            closeWarningModal();
-        }
-    });
-</script>
-
+@section('scripts')
+    <div id="adminModuleServiceShowConfig"
+        data-csrf-token="{{ csrf_token() }}"
+        data-success-message="{{ session('success') }}"
+        data-error-message="{{ session('error') }}"
+        data-warning-limit="{{ $serviceWarningLimit }}"></div>
+    <script src="{{ asset('js/admin-service-show.js') }}"></script>
 @endsection

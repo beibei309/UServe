@@ -96,7 +96,7 @@
                                 @csrf 
                                 @method('DELETE')
                                 <button type="button" 
-                                        onclick="confirmDelete({{ $category->hc_id }})"
+                                        data-category-delete data-category-id="{{ $category->hc_id }}"
                                         class="text-red-500 hover:text-red-700 transition-colors duration-300" 
                                         title="Delete Category">
                                     <i class="fa-solid fa-trash"></i>
@@ -120,60 +120,11 @@
 
 </div>
 
-{{-- SWEETALERT SCRIPTS --}}
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+@endsection
 
-<script>
-    // 1. Handle Delete Confirmation with Modern Styling
-    function confirmDelete(id) {
-        Swal.fire({
-            title: 'Delete Category?',
-            text: "This action cannot be undone. All services using this category will be affected.",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#dc2626',
-            cancelButtonColor: '#6b7280',
-            confirmButtonText: 'Yes, Delete Category',
-            cancelButtonText: 'Cancel',
-            customClass: {
-                popup: 'rounded-2xl',
-                confirmButton: 'rounded-lg',
-                cancelButton: 'rounded-lg'
-            }
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Submit the form programmatically
-                document.getElementById('delete-form-' + id).submit();
-            }
-        })
-    }
-
-    // 2. Handle Success Message with Modern Toast
-    @if(session('success'))
-        Swal.fire({
-            icon: 'success',
-            title: 'Success!',
-            text: "{{ session('success') }}",
-            timer: 3000,
-            showConfirmButton: false,
-            customClass: {
-                popup: 'rounded-2xl'
-            }
-        });
-    @endif
-
-    @if(session('error'))
-        Swal.fire({
-            icon: 'error',
-            title: 'Error!',
-            text: "{{ session('error') }}",
-            timer: 3000,
-            showConfirmButton: false,
-            customClass: {
-                popup: 'rounded-2xl'
-            }
-        });
-    @endif
-</script>
-
+@section('scripts')
+    <div id="adminCategoriesIndexConfig"
+        data-success-message="{{ session('success') }}"
+        data-error-message="{{ session('error') }}"></div>
+    <script src="{{ asset('js/admin-categories-index.js') }}"></script>
 @endsection

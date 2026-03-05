@@ -48,6 +48,13 @@
 
 ## API Readiness Track (For Muallim Integration)
 
+### Scope Decision (Updated)
+- External app integration does **not** need full admin APIs.
+- Current agreed scope is only data needed by:
+  - `services/index.blade.php`
+  - `services/show.blade.php` (details page)
+- Therefore, API work is narrowed to service listing/detail payloads only and can be scheduled after admin UI/logic cleanup.
+
 ### Phase A: Contract-First
 - Define endpoint contract document:
   - path, method, auth type
@@ -60,14 +67,12 @@
 - For external app integration, introduce token-based auth (Sanctum or Passport).
 - Keep web session auth for current Blade UI.
 
-### Phase C: Endpoint Rollout
-- Start with read endpoints:
-  - service search
-  - helper profile
-  - categories
-- Then write endpoints:
-  - create request
-  - lifecycle actions (accept/reject/in-progress/dispute/finalize)
+### Phase C: Endpoint Rollout (Narrow Scope)
+- Start with read endpoints only for service marketplace app screens:
+  - service listing dataset (for `services/index`)
+  - service detail dataset (for `services/show`)
+  - supporting category/filter metadata if required by listing UI
+- Defer write/action lifecycle endpoints until explicitly needed.
 
 ### Phase D: Operational Readiness
 - Add API versioning (`/api/v1`).
@@ -92,20 +97,71 @@
 
 ## Suggested Implementation Plan (Low Risk)
 
-### Sprint 1
-- Remove Blade model/query calls.
-- Extract dispute modal JS + service request workflow JS to dedicated files.
-- Add one shared status mapper utility.
+### Admin-First Rollout (Start Here)
 
-### Sprint 2
-- Introduce service classes for:
-  - moderation actions
-  - service request transitions
-- Introduce API resources for service/service request.
+#### Phase 1: Admin UI/Logic Boundary Cleanup
+- Scope:
+  - `admin/requests`
+  - `admin/services`
+  - `admin/feedback`
+  - `admin/students` + `admin/community`
+- Actions:
+  - move heavy `@php` blocks from Blade to controller/service prepared view data
+  - extract inline modal/workflow JS to dedicated JS modules per page
+  - keep Blade to rendering and light conditional display only
+- Exit criteria:
+  - no direct query/model construction in admin Blade
+  - no long inline workflow scripts in admin Blade
+  - same behavior parity verified with regression checks
 
-### Sprint 3
-- Add token auth for external integration.
-- Publish first `/api/v1` endpoints and contract docs.
+#### Phase 2: Admin Domain Service Extraction
+- Create service classes and move business rules out of controllers:
+  - `ModerationService`
+  - `ServiceRequestWorkflowService`
+  - `GraduationGovernanceService`
+- Centralize:
+  - warning threshold checks
+  - final action mapping by role
+  - dispute outcome transitions
+- Exit criteria:
+  - controllers become orchestration-only (validate, call service, return response)
+  - moderation transitions are unit-testable independently
+
+#### Phase 3: API-Ready Response Layer (Admin Domain First)
+- Add API Resources / DTO mappers for core admin-managed entities:
+  - User moderation snapshot
+  - Service
+  - Service Request
+- Standardize status labels and transition keys in one mapper.
+- Exit criteria:
+  - web/admin and API share consistent response/status semantics
+  - no duplicated status mapping logic across views/controllers
+
+#### Phase 4: Contract-First Admin API Slice (`/api/v1`)
+- Publish only service listing/detail read endpoints required by external app screens.
+- Keep admin moderation/workflow APIs out of scope for now.
+- Add auth/rate limit/audit only for these scoped endpoints.
+- Exit criteria:
+-  - stable contract docs for listing/detail payloads
+-  - integration test coverage for service list/detail responses
+
+### Execution Order Inside Admin (Small to Large)
+1. `admin/feedback` (small, high clarity)
+2. `admin/services` (medium)
+3. `admin/requests` (complex modal/workflow)
+4. `admin/students` and `admin/community` (policy-heavy, cross-cutting)
+
+### Sprint Mapping
+- **Sprint 1**: Phase 1 for `feedback + services`
+- **Sprint 2**: Phase 1 for `requests` + start Phase 2 services
+- **Sprint 3**: Finish Phase 2 + Phase 3 base resources/mappers
+- **Sprint 4**: Optional scoped `/api/v1` service list/detail endpoints (only if needed)
+
+### Admin-First Guardrails
+- Keep existing routes and UX intact while refactoring internals.
+- Refactor one admin module at a time; no cross-module mixed PRs.
+- Every moved rule must have at least one test or regression assertion.
+- No new business logic inside Blade during this rollout.
 
 ## Complexity and Effort
 - Complexity: medium.

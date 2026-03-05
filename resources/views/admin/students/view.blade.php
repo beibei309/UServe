@@ -14,10 +14,6 @@
         <div class="bg-white shadow-sm rounded-lg p-6 flex flex-col md:flex-row gap-6 border border-gray-200">
 
             <div class="shrink-0">
-                @php
-                    use Illuminate\Support\Facades\Storage;
-                @endphp
-
                 <img   src="{{ asset($student->hu_profile_photo_path) }}" 
     alt="{{ $student->hu_name }}"                    class="w-32 h-32 rounded-full object-cover border-4 border-gray-100 shadow-sm" />
             </div>
@@ -68,8 +64,8 @@
                             <p><strong style="color: var(--text-primary);">Course:</strong> <span style="color: var(--text-secondary);">{{ $student->hu_course ?? '-' }}</span></p>
                             <p>
                                 <strong style="color: var(--text-primary);">Graduation:</strong>
-                                @if ($student->studentStatus && $student->studentStatus->hss_graduation_date)
-                                    <span style="color: var(--text-secondary);">{{ \Carbon\Carbon::parse($student->studentStatus->hss_graduation_date)->format('d M Y') }}</span>
+                                @if ($student->graduation_date_display)
+                                    <span style="color: var(--text-secondary);">{{ $student->graduation_date_display }}</span>
                                 @else
                                     <span class="italic transition-colors duration-300" style="color: var(--text-muted);">Not set</span>
                                 @endif
@@ -103,7 +99,7 @@
                             </button>
                         </form>
                     @else
-                        <button onclick="openBanModal({{ $student->hu_id }})"
+                        <button type="button" data-ban-open data-student-id="{{ $student->hu_id }}"
                             class="text-red-500 hover:text-red-400 transition-colors duration-300 w-full py-2">
                             <i class="fa-solid fa-ban"></i> Ban
                         </button>
@@ -169,7 +165,7 @@
                                  class="w-48 h-60 rounded-xl object-cover border-4 border-white shadow-md transition-transform group-hover:scale-[1.02]"
                                  alt="Live Selfie">
                             
-                            <button onclick="openSelfieModal('{{ route('admin.verifications.selfie', $student->hu_id) }}')"
+                            <button type="button" data-selfie-open data-selfie-url="{{ route('admin.verifications.selfie', $student->hu_id) }}"
                                     class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all rounded-xl flex items-center justify-center">
                                 <span class="bg-white px-3 py-1 rounded-full text-xs font-bold shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
                                     Click to Enlarge
@@ -203,7 +199,7 @@
                         <form action="{{ route('admin.students.revoke_helper', $student->hu_id) }}" method="POST">
                             @csrf
                             <button type="submit" 
-                                    onclick="return confirm('Revoke Seller Status? This user will become a normal student again.')"
+                                    data-confirm-message="Revoke Seller Status? This user will become a normal student again."
                                     class="w-full flex items-center justify-center gap-2 px-4 py-3 border border-rose-200 text-rose-600 hover:bg-rose-600 hover:text-white font-bold text-xs rounded-lg transition-all shadow-sm"
                                     style="background-color: var(--bg-primary);">
                                 <i class="fa-solid fa-user-slash"></i>
@@ -220,10 +216,10 @@
 <div id="selfieModal" 
      class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-sm p-4 transition-all duration-300">
     
-    <div class="absolute inset-0 cursor-pointer" onclick="closeSelfieModal()"></div>
+    <div class="absolute inset-0 cursor-pointer" data-selfie-close></div>
 
     <div class="relative max-w-4xl w-full flex flex-col items-center">
-        <button onclick="closeSelfieModal()" 
+        <button type="button" data-selfie-close
                 class="absolute -top-12 right-0 text-white hover:text-gray-300 flex items-center gap-2 font-bold tracking-widest text-xs">
             <i class="fa-solid fa-xmark text-xl"></i> CLOSE
         </button>
@@ -234,45 +230,6 @@
         <p class="text-white mt-4 text-xs font-medium tracking-widest uppercase opacity-70">Identity Verification Image</p>
     </div>
 </div>
-<script>
-    function openSelfieModal(imageUrl) {
-        const modal = document.getElementById('selfieModal');
-        const modalImg = document.getElementById('modalSelfieImage');
-
-        if (modal && modalImg) {
-            // 1. Set the source of the modal image to the URL provided
-            modalImg.src = imageUrl; 
-            
-            // 2. Remove the 'hidden' class to show it
-            modal.classList.remove('hidden');
-            
-            // 3. Prevent the background page from scrolling
-            document.body.style.overflow = 'hidden'; 
-        }
-    }
-
-    function closeSelfieModal() {
-        const modal = document.getElementById('selfieModal');
-        if (modal) {
-            // 1. Add the 'hidden' class back
-            modal.classList.add('hidden');
-            
-            // 2. Re-enable background scrolling
-            document.body.style.overflow = 'auto';
-            
-            // 3. Clear the image src to save memory
-            document.getElementById('modalSelfieImage').src = '';
-        }
-    }
-
-    // Close the modal if the admin presses the "Escape" key
-    document.addEventListener('keydown', function(event) {
-        if (event.key === "Escape") {
-            closeSelfieModal();
-        }
-    });
-</script>
-
         {{-- HELPER PROFILE --}}
         @if ($student->hu_role === 'helper')
             <div class="shadow-sm rounded-lg p-6 mt-6 border transition-all duration-300"
@@ -370,9 +327,9 @@
             <form id="banForm" method="POST">@csrf</form>
 
             <div class="flex justify-end gap-2">
-                <button onclick="closeBanModal()" class="hover:text-cyan-400 transition-colors duration-300 border rounded px-4 py-2"
+                <button type="button" data-ban-close class="hover:text-cyan-400 transition-colors duration-300 border rounded px-4 py-2"
                         style="color: var(--text-muted); border-color: var(--border-color);">Cancel</button>
-                <button onclick="submitBan()" class="text-red-500 hover:text-red-400 transition-colors duration-300 border rounded px-4 py-2"
+                <button type="button" data-ban-submit class="text-red-500 hover:text-red-400 transition-colors duration-300 border rounded px-4 py-2"
                         style="border-color: var(--border-color);">
                     Confirm
                 </button>
@@ -380,59 +337,11 @@
         </div>
     </div>
 
-    <script>
-        let selectedStudentId = null;
+@endsection
 
-        function openBanModal(id) {
-            selectedStudentId = id;
-            document.getElementById('banModal').classList.remove('hidden');
-        }
-
-        function closeBanModal() {
-            document.getElementById('banModal').classList.add('hidden');
-            document.getElementById('banReason').value = '';
-        }
-
-        function submitBan() {
-            const reason = document.getElementById('banReason').value.trim();
-            if (!reason) return alert('Please enter a reason.');
-
-            const form = document.getElementById('banForm');
-            // Use route() to handle base paths correctly
-            form.action = "{{ route('admin.students.ban', 'ID_PLACEHOLDER') }}"
-                          .replace('ID_PLACEHOLDER', selectedStudentId);
-
-
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = 'blacklist_reason';
-            input.value = reason;
-            form.appendChild(input);
-
-            form.submit();
-        }
-
-        // Helper Selfie Modal
-        function openHelperSelfieModal(studentId) {
-            const modal = document.createElement('div');
-            modal.id = 'helperSelfieModal';
-            modal.className = 'fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4';
-            modal.onclick = () => modal.remove();
-
-            modal.innerHTML = `
-        <div class="relative max-w-4xl max-h-full" onclick="event.stopPropagation()">
-            <button onclick="this.closest('#helperSelfieModal').remove()" 
-                    class="absolute -top-10 right-0 text-white hover:text-gray-300 text-2xl font-bold">
-                ×
-            </button>
-            <img src="/admin/students/${studentId}/selfie" 
-                 class="max-w-full max-h-[90vh] rounded-lg shadow-2xl" 
-                 alt="Helper Verification Selfie">
-        </div>
-    `;
-
-            document.body.appendChild(modal);
-        }
-    </script>
-
+@section('scripts')
+    <div id="adminModuleStudentsViewConfig"
+        data-ban-route-template="{{ route('admin.students.ban', 'ID_PLACEHOLDER') }}"
+        data-selfie-base-url="{{ url('/admin/students') }}"></div>
+    <script src="{{ asset('js/admin-students-view.js') }}"></script>
 @endsection

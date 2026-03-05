@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\StudentService;
+use Illuminate\Support\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
@@ -86,6 +87,10 @@ class AdminStudentController extends Controller
         ->whereIn('hu_role', ['student', 'helper'])
         ->findOrFail($id);
 
+    $student->graduation_date_display = optional($student->studentStatus)->hss_graduation_date
+        ? Carbon::parse($student->studentStatus->hss_graduation_date)->format('d M Y')
+        : null;
+
     return view('admin.students.view', compact('student'));
 }
 
@@ -93,8 +98,20 @@ class AdminStudentController extends Controller
     // show EDIT STUDENT page
     public function edit($id)
 {
-        $student = User::whereIn('hu_role', ['student', 'helper'])
-        ->findOrFail($id);
+    $student = User::whereIn('hu_role', ['student', 'helper'])->findOrFail($id);
+    $facultyMap = [
+        'FKMT' => 'Fakulti Komputeran dan Meta-Teknologi',
+        'FBK' => 'Fakulti Bahasa dan Komunikasi',
+        'FPM' => 'Fakulti Pembangunan Manusia',
+        'FSMT' => 'Fakulti Sains dan Matematik',
+        'FPE' => 'Fakulti Pengurusan dan Ekonomi',
+        'FSKIK' => 'Fakulti Seni, Komputeran dan Industri Kreatif',
+        'FMUP' => 'Fakulti Muzik dan Seni Persembahan',
+        'FSSKJ' => 'Fakulti Sains Sukan dan Kejurulatihan',
+        'FTV' => 'Fakulti Teknikal dan Vokasional',
+        'FSK' => 'Fakulti Sains Kemanusiaan',
+    ];
+    $student->faculty_display = $facultyMap[$student->hu_faculty] ?? $student->hu_faculty;
 
     return view('admin.students.edit', compact('student'));
 }

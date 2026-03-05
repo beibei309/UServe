@@ -103,8 +103,7 @@
                                     id="status"
                                     required
                                     class="w-full border rounded-md shadow-sm p-2.5 transition-colors duration-300"
-                                    style="background-color: var(--bg-tertiary); border-color: var(--border-color); color: var(--text-primary);"
-                                    onfocus="this.style.borderColor = '#06b6d4'; this.style.boxShadow = '0 0 0 2px rgba(6, 182, 212, 0.2)';">
+                                    style="background-color: var(--bg-tertiary); border-color: var(--border-color); color: var(--text-primary);">
                                 <option value="" disabled selected>
                                     -- Select Academic Status --
                                 </option>
@@ -133,8 +132,7 @@
     <select name="semester"
             id="semester"
             class="w-full border rounded-md shadow-sm p-2.5 transition-colors duration-300"
-            style="background-color: var(--bg-tertiary); border-color: var(--border-color); color: var(--text-primary);"
-            onfocus="this.style.borderColor = '#06b6d4'; this.style.boxShadow = '0 0 0 2px rgba(6, 182, 212, 0.2)';">
+            style="background-color: var(--bg-tertiary); border-color: var(--border-color); color: var(--text-primary);">
         <option value="" style="background-color: var(--bg-tertiary); color: var(--text-primary);">-- Select Semester --</option>
 
         @for ($i = 1; $i <= 8; $i++)
@@ -167,8 +165,7 @@
                             <input type="date"
                                    name="graduation_date"
                                    class="w-full border rounded-md shadow-sm p-2.5 transition-colors duration-300"
-                                   style="background-color: var(--bg-tertiary); border-color: var(--border-color); color: var(--text-primary);"
-                                   onfocus="this.style.borderColor = '#06b6d4'; this.style.boxShadow = '0 0 0 2px rgba(6, 182, 212, 0.2)';">
+                                   style="background-color: var(--bg-tertiary); border-color: var(--border-color); color: var(--text-primary);">
 
                             @error('graduation_date')
                                 <p class="text-red-400 text-xs mt-1">{{ $message }}</p>
@@ -196,46 +193,9 @@
 
 </div>
 
-{{-- TOGGLE SCRIPT --}}
-<script>
-document.addEventListener('DOMContentLoaded', function () {
+@endsection
 
-    const status = document.getElementById('status');
-    const semesterBox = document.getElementById('semester-container');
-    const semester = document.getElementById('semester');
-    const dateBox = document.getElementById('graduation-date-container');
-
-    function toggleFields() {
-        const value = status.value;
-
-        // ===== SEMESTER RULES =====
-        if (value === 'Graduated') {
-            semester.value = 'Final';
-            semester.disabled = true;
-            semesterBox.classList.add('opacity-60');
-        } 
-        else if (value === 'Dismissed') {
-            semester.value = 'N/A';
-            semester.disabled = true;
-            semesterBox.classList.add('opacity-60');
-        } 
-        else {
-            semester.disabled = false;
-            semester.value = '';
-            semesterBox.classList.remove('opacity-60');
-        }
-
-        // ===== DATE RULES =====
-        if (value === 'Dismissed') {
-            dateBox.style.display = 'none';
-        } else {
-            dateBox.style.display = 'block';
-        }
-    }
-
-    toggleFields();
-    status.addEventListener('change', toggleFields);
-});
-</script>
-
+@section('scripts')
+    <div id="adminStudentStatusFormConfig" data-mode="create"></div>
+    <script src="{{ asset('js/admin-student-status-form.js') }}"></script>
 @endsection

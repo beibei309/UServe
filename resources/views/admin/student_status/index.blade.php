@@ -19,13 +19,12 @@
                 <input type="text" name="search" value="{{ request('search') }}"
                     placeholder="Search by Name or Matric No..."
                     class="w-full border rounded-md px-4 py-2 transition-colors duration-300"
-                    style="background-color: var(--bg-secondary); border-color: var(--border-color); color: var(--text-primary);"
-                    onfocus="this.style.borderColor = '#06b6d4'; this.style.boxShadow = '0 0 0 1px #06b6d4';">
+                    style="background-color: var(--bg-secondary); border-color: var(--border-color); color: var(--text-primary);">
             </div>
 
             {{-- Graduation Filter Dropdown --}}
             <div class="w-full md:w-64">
-                <select name="grad_filter" onchange="this.form.submit()"
+                <select name="grad_filter" data-auto-submit-filter
                     class="w-full border rounded-md px-4 py-2 transition-colors duration-300"
                     style="background-color: var(--bg-secondary); border-color: var(--border-color); color: var(--text-primary);">
                     <option value="">All Graduation Dates</option>
@@ -100,46 +99,27 @@
 
                             {{-- SEMESTER --}}
                             <td class="py-4 px-6 transition-colors duration-300" style="color: var(--text-secondary);">
-                                @if ($student->studentStatus && $student->studentStatus->hss_status === 'Graduated')
-                                    <span class="italic transition-colors duration-300" style="color: var(--text-muted);">-</span>
+                                @if ($student->semester_display === '-')
+                                    <span class="italic transition-colors duration-300" style="color: var(--text-muted);">{{ $student->semester_display }}</span>
                                 @else
-                                    {{ $student->studentStatus->hss_semester ?? '-' }}
+                                    {{ $student->semester_display }}
                                 @endif
                             </td>
 
                             {{-- GRADUATION DATE --}}
                             <td class="py-4 px-6 transition-colors duration-300" style="color: var(--text-secondary);">
-                                @if ($student->studentStatus && $student->studentStatus->hss_graduation_date)
-                                    {{ \Carbon\Carbon::parse($student->studentStatus->hss_graduation_date)->format('d M Y') }}
+                                @if ($student->graduation_date_display === '-')
+                                    <span class="italic transition-colors duration-300" style="color: var(--text-muted);">{{ $student->graduation_date_display }}</span>
                                 @else
-                                    <span class="italic transition-colors duration-300" style="color: var(--text-muted);">-</span>
+                                    {{ $student->graduation_date_display }}
                                 @endif
                             </td>
 
                         {{-- STATUS BADGE --}}
                         <td class="py-4 px-6">
-                            @php $status = strtolower($student->studentStatus->hss_status ?? ''); @endphp
-
-                            @if ($status == 'active')
-                                <span
-                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Active</span>
-                            @elseif($status == 'probation')
-                                <span
-                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Probation</span>
-                            @elseif($status == 'graduated')
-                                <span
-                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Graduated</span>
-                            @elseif($status == 'deferred')
-                                <span
-                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Deferred</span>
-                            @elseif($status == '')
-                                <span
-                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-400">Not
-                                    Set</span>
-                            @else
-                                <span
-                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">{{ ucfirst($status) }}</span>
-                            @endif
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $student->status_badge_class }}">
+                                {{ $student->status_label }}
+                            </span>
                         </td>
 
                         {{-- ACTIONS COLUMN --}}
@@ -148,21 +128,7 @@
     <div class="flex items-center justify-end gap-3">
 
         @if ($student->studentStatus)
-            
-            {{-- 1. REMINDER BUTTON (LOGIC ADDED) --}}
-            @php
-                $gradDate = \Carbon\Carbon::parse($student->studentStatus->hss_graduation_date);
-                $now = now();
-                $threeMonthsLimit = now()->addMonths(3);
-                
-                // Show ONLY if: Date exists AND is in future AND is within next 3 months
-                $showReminder = !empty($student->studentStatus->hss_graduation_date) 
-                                && $student->studentStatus->hss_status !== 'Graduated'
-                                && $gradDate->gte($now) 
-                                && $gradDate->lte($threeMonthsLimit);
-            @endphp
-
-            @if ($showReminder)
+            @if ($student->show_reminder)
                 {{-- Functional Form to Send Email --}}
                 {{-- Functional Form to Send Email --}}
 <form id="reminder-form-{{ $student->hu_id }}" 
@@ -171,8 +137,10 @@
       class="inline-block">
     @csrf
     
-    <button type="button" 
-        onclick="confirmSendReminder({{ $student->hu_id }}, '{{ addslashes($student->hu_name) }}')"
+    <button type="button"
+        data-reminder-send
+        data-student-id="{{ $student->hu_id }}"
+        data-student-name="{{ $student->hu_name }}"
         class="text-yellow-500 hover:text-yellow-700 p-1 rounded hover:bg-yellow-50 transition relative group"
         title="Send Graduation Reminder">
         
@@ -201,7 +169,7 @@
             {{-- DELETE BUTTON --}}
             <form action="{{ route('admin.student_status.delete', $student->studentStatus->hss_id) }}"
                 method="POST" class="inline-block"
-                onsubmit="return confirm('Remove status record?');">
+                data-confirm-message="Remove status record?">
                 @csrf
                 @method('DELETE')
                 <button class="text-red-500 hover:text-red-400 transition-colors duration-300 ml-3" title="Delete">
@@ -240,41 +208,27 @@
                         <h3 class="font-medium transition-colors duration-300" style="color: var(--text-primary);">{{ $student->hu_name }}</h3>
                         <p class="text-sm transition-colors duration-300" style="color: var(--text-secondary);">{{ $student->hu_student_id ?? 'No Matric' }}</p>
                     </div>
-                    
-                    @php $status = strtolower($student->studentStatus->hss_status ?? ''); @endphp
-                    @if ($status == 'active')
-                        <span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Active</span>
-                    @elseif($status == 'probation')
-                        <span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Probation</span>
-                    @elseif($status == 'graduated')
-                        <span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Graduated</span>
-                    @elseif($status == 'deferred')
-                        <span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Deferred</span>
-                    @elseif($status == '')
-                        <span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-400">Not Set</span>
-                    @else
-                        <span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">{{ ucfirst($status) }}</span>
-                    @endif
+                    <span class="px-2.5 py-0.5 rounded-full text-xs font-medium {{ $student->status_badge_class }}">{{ $student->status_label }}</span>
                 </div>
                 
                 <div class="grid grid-cols-2 gap-2 text-sm mb-3">
                     <div>
                         <span class="font-medium transition-colors duration-300" style="color: var(--text-primary);">Semester:</span>
                         <span class="transition-colors duration-300" style="color: var(--text-secondary);">
-                            @if ($student->studentStatus && $student->studentStatus->hss_status === 'Graduated')
-                                <span class="italic">-</span>
+                            @if ($student->semester_display === '-')
+                                <span class="italic">{{ $student->semester_display }}</span>
                             @else
-                                {{ $student->studentStatus->hss_semester ?? '-' }}
+                                {{ $student->semester_display }}
                             @endif
                         </span>
                     </div>
                     <div>
                         <span class="font-medium transition-colors duration-300" style="color: var(--text-primary);">Graduation:</span>
                         <span class="transition-colors duration-300" style="color: var(--text-secondary);">
-                            @if ($student->studentStatus && $student->studentStatus->hss_graduation_date)
-                                {{ \Carbon\Carbon::parse($student->studentStatus->hss_graduation_date)->format('d M Y') }}
+                            @if ($student->graduation_date_display === '-')
+                                <span class="italic">{{ $student->graduation_date_display }}</span>
                             @else
-                                <span class="italic">-</span>
+                                {{ $student->graduation_date_display }}
                             @endif
                         </span>
                     </div>
@@ -289,7 +243,7 @@
                         
                         <form action="{{ route('admin.student_status.delete', $student->studentStatus->hss_id) }}"
                             method="POST" class="inline-block"
-                            onsubmit="return confirm('Remove status record?');">
+                            data-confirm-message="Remove status record?">
                             @csrf
                             @method('DELETE')
                             <button class="text-red-500 hover:text-red-400 transition-colors duration-300 text-sm">
@@ -312,35 +266,9 @@
         
         <div class="mt-4">{{ $students->links() }}</div>
     </div>
-    <script>
-    function confirmSendReminder(studentId, studentName) {
-        Swal.fire({
-            title: 'Send Graduation Reminder?',
-            text: `Are you sure you want to send an email reminder to ${studentName}?`,
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#eab308', // Yellow-500 to match your UI
-            cancelButtonColor: '#6b7280', // Gray
-            confirmButtonText: 'Yes, send email',
-            cancelButtonText: 'Cancel',
-            reverseButtons: true,
-            borderRadius: '0.5rem' // Optional: Match Tailwind rounded corners
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Show a loading state immediately after confirming
-                Swal.fire({
-                    title: 'Sending...',
-                    text: 'Please wait while we send the email.',
-                    allowOutsideClick: false,
-                    didOpen: () => {
-                        Swal.showLoading();
-                    }
-                });
+@endsection
 
-                // Submit the form programmatically
-                document.getElementById('reminder-form-' + studentId).submit();
-            }
-        });
-    }
-</script>
+@section('scripts')
+    <div id="adminStudentStatusIndexConfig"></div>
+    <script src="{{ asset('js/admin-student-status-index.js') }}"></script>
 @endsection

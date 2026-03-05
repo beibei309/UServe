@@ -72,7 +72,7 @@
 
                                 <form action="{{ route('admin.super.admins.delete', $admin->ha_id) }}"
                                   method="POST"
-                                  onsubmit="return confirm('Delete this admin?');">
+                                  data-confirm-message="Delete this admin?">
                                 @csrf
                                 @method('DELETE')
                                 <button class="text-red-600 hover:underline">

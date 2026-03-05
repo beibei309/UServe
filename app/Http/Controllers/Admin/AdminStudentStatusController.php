@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use App\Mail\GraduationReminderMail;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Carbon;
 use App\Notifications\StudyDurationReminder; // Make sure this import exists
 
 class AdminStudentStatusController extends Controller
@@ -53,6 +54,39 @@ class AdminStudentStatusController extends Controller
             ->paginate(10);
 
         $students->appends($request->all());
+        $statusBadgeClasses = [
+            'active' => 'bg-green-100 text-green-800',
+            'probation' => 'bg-red-100 text-red-800',
+            'graduated' => 'bg-blue-100 text-blue-800',
+            'deferred' => 'bg-yellow-100 text-yellow-800',
+            '' => 'bg-gray-100 text-gray-400',
+        ];
+        $today = now();
+        $threeMonthsLimit = now()->addMonths(3);
+
+        $students->getCollection()->transform(function (User $student) use ($statusBadgeClasses, $today, $threeMonthsLimit) {
+            $studentStatus = $student->studentStatus;
+            $statusRaw = strtolower((string) optional($studentStatus)->hss_status);
+            $student->status_key = $statusRaw;
+            $student->status_label = $statusRaw === '' ? 'Not Set' : ucfirst($statusRaw);
+            $student->status_badge_class = $statusBadgeClasses[$statusRaw] ?? 'bg-gray-100 text-gray-800';
+            $student->semester_display = $studentStatus && $studentStatus->hss_status === 'Graduated'
+                ? '-'
+                : ($studentStatus->hss_semester ?? '-');
+
+            $graduationDateRaw = optional($studentStatus)->hss_graduation_date;
+            $student->graduation_date_display = $graduationDateRaw
+                ? Carbon::parse($graduationDateRaw)->format('d M Y')
+                : '-';
+
+            $student->show_reminder = false;
+            if ($graduationDateRaw && $studentStatus->hss_status !== 'Graduated') {
+                $gradDate = Carbon::parse($graduationDateRaw);
+                $student->show_reminder = $gradDate->gte($today) && $gradDate->lte($threeMonthsLimit);
+            }
+
+            return $student;
+        });
 
         return view('admin.student_status.index', compact('students'));
     }

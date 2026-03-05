@@ -67,7 +67,7 @@
                                     @if($admin->ha_role !== 'superadmin')
                                         <form action="{{ route('admin.super.admins.delete', $admin->ha_id) }}"
                                               method="POST"
-                                              onsubmit="return confirm('Delete admin account?');"
+                                              data-confirm-message="Delete admin account?"
                                               class="inline">
                                             @csrf
                                             @method('DELETE')

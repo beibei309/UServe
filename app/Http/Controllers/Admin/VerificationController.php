@@ -31,6 +31,15 @@ class VerificationController extends Controller
         return response()->file(Storage::disk('local')->path($user->hu_verification_document_path));
     }
 
+    public function showDocumentById($id)
+    {
+        $user = User::findOrFail($id);
+        if (!$user->hu_verification_document_path || !Storage::disk('local')->exists($user->hu_verification_document_path)) {
+            abort(404, 'Document not found.');
+        }
+        return response()->file(Storage::disk('local')->path($user->hu_verification_document_path));
+    }
+
     public function showSelfie(User $user)
     {
         if (!$user->hu_selfie_media_path || !Storage::disk('local')->exists($user->hu_selfie_media_path)) {

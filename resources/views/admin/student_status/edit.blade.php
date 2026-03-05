@@ -78,10 +78,9 @@
                                     class="w-full border-gray-300 rounded-md shadow-sm p-2.5 focus:ring-blue-500 focus:border-blue-500 bg-white">
                                 <option value="" disabled selected>-- Select Semester --</option>
                                 @for ($i = 1; $i <= 12; $i++)
-                                    @php $val = "Semester $i"; @endphp
-                                    <option value="{{ $val }}" 
-                                        {{ old('semester', $status->hss_semester) == $val ? 'selected' : '' }}>
-                                        {{ $val }}
+                                    <option value="Semester {{ $i }}"
+                                        {{ old('semester', $status->hss_semester) == "Semester $i" ? 'selected' : '' }}>
+                                        Semester {{ $i }}
                                     </option>
                                 @endfor
                                 <option value="Extended" {{ old('semester', $status->hss_semester) == 'Extended' ? 'selected' : '' }}>Extended</option>
@@ -127,41 +126,9 @@
     </form>
 </div>
 
-{{-- SCRIPT TO HANDLE TOGGLING --}}
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const statusDropdown = document.getElementById('status');
-        const semesterContainer = document.getElementById('semester-container');
-        const dateContainer = document.getElementById('graduation-date-container');
+@endsection
 
-        function toggleFields() {
-            const status = statusDropdown.value;
-
-            // 1. Logic for SEMESTER Field
-            if (status === 'Graduated' || status === 'Dismissed') {
-                // No semester needed for Graduated or Dismissed students
-                if(semesterContainer) semesterContainer.style.display = 'none';
-            } else {
-                // Show semester for Active, Probation, Deferred
-                if(semesterContainer) semesterContainer.style.display = 'block';
-            }
-
-            // 2. Logic for DATE Field
-            if (status === 'Dismissed') {
-                // Hide date only if Dismissed
-                if(dateContainer) dateContainer.style.display = 'none';
-            } else {
-                // SHOW date for everyone else (Active to set Expected Date, Graduated for Actual Date)
-                if(dateContainer) dateContainer.style.display = 'block';
-            }
-        }
-
-        // Run on page load (to set initial state based on DB value)
-        toggleFields();
-
-        // Run whenever user changes the dropdown
-        statusDropdown.addEventListener('change', toggleFields);
-    });
-</script>
-
+@section('scripts')
+    <div id="adminStudentStatusFormConfig" data-mode="edit"></div>
+    <script src="{{ asset('js/admin-student-status-form.js') }}"></script>
 @endsection

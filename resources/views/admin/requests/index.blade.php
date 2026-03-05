@@ -75,27 +75,15 @@
 
                             {{-- Request Details --}}
                             <td class="py-4 px-3">
-                                        @php
-                                            $selectedPackage = $request->hsr_selected_package;
-                                            $selectedPackageLabel = is_array($selectedPackage)
-                                                ? implode(', ', array_filter($selectedPackage))
-                                                : ($selectedPackage ?? '');
-
-                                            $selectedDates = $request->hsr_selected_dates;
-                                            $selectedDateValues = is_array($selectedDates)
-                                                ? array_values(array_filter($selectedDates))
-                                                : (filled($selectedDates) ? [$selectedDates] : []);
-                                            $firstSelectedDate = $selectedDateValues[0] ?? null;
-                                        @endphp
                                         <div class="flex items-center gap-3">
                                             <div class="h-8 w-8 rounded-lg bg-cyan-100 flex items-center justify-center text-cyan-700 font-bold text-sm">
-                                                {{ substr($request->studentService->hss_title, 0, 1) }}
+                                                {{ $request->service_initial }}
                                             </div>
                                             <div>
                                                 <div class="text-sm font-semibold transition-colors duration-300" style="color: var(--text-primary);">
                                                     {{ Str::limit($request->studentService->hss_title, 25) }}</div>
                                                 <div class="text-xs transition-colors duration-300" style="color: var(--text-secondary);">
-                                                    <span class="capitalize text-cyan-600 font-medium">{{ $selectedPackageLabel !== '' ? $selectedPackageLabel : '—' }}</span>
+                                                    <span class="capitalize text-cyan-600 font-medium">{{ $request->selected_package_label !== '' ? $request->selected_package_label : '—' }}</span>
                                                     • RM {{ number_format($request->hsr_offered_price, 2) }}
                                                 </div>
                                             </div>
@@ -119,33 +107,22 @@
                                 {{-- Schedule --}}
                                 <td class="py-4 px-3">
                                     <div class="text-sm transition-colors duration-300" style="color: var(--text-primary);">
-                                        {{ $firstSelectedDate ? \Carbon\Carbon::parse($firstSelectedDate)->format('d M Y') : 'Not set' }}
+                                        {{ $request->first_selected_date_display }}
                                     </div>
-                                    @if (count($selectedDateValues) > 1)
+                                    @if (count($request->selected_date_values) > 1)
                                         <div class="text-xs text-cyan-600">
-                                            +{{ count($selectedDateValues) - 1 }} more date(s)
+                                            +{{ count($request->selected_date_values) - 1 }} more date(s)
                                         </div>
                                     @endif
                                     <div class="text-xs transition-colors duration-300" style="color: var(--text-secondary);">
-                                        {{ \Carbon\Carbon::parse($request->created_at)->diffForHumans() }}
+                                        {{ $request->created_at_human }}
                                     </div>
                                 </td>
 
                                 {{-- Status --}}
                                 <td class="py-4 px-3">
-                                    @php
-                                        $statusStyles = [
-                                            'pending' => 'bg-yellow-100 text-yellow-800 border-yellow-200',
-                                            'in_progress' => 'bg-blue-100 text-blue-800 border-blue-200',
-                                            'completed' => 'bg-green-100 text-green-800 border-green-200',
-                                            'disputed' => 'bg-red-100 text-red-800 border-red-200 animate-pulse',
-                                            'cancelled' => 'bg-gray-100 text-gray-600 border-gray-200',
-                                            'rejected' => 'bg-gray-100 text-gray-600 border-gray-200',
-                                        ];
-                                        $style = $statusStyles[$request->hsr_status] ?? 'bg-gray-100 text-gray-600 border-gray-200';
-                                    @endphp
-                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold border {{ $style }} capitalize">
-                                        {{ str_replace('_', ' ', $request->hsr_status) }}
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold border {{ $request->status_style }} capitalize">
+                                        {{ $request->status_label }}
                                     </span>
                                     @if ($request->hsr_status === 'disputed')
                                         <div class="text-[10px] text-red-600 font-medium mt-1">Admin Action Required</div>
@@ -155,43 +132,28 @@
                                 {{-- Actions --}}
                                 <td class="py-4 px-3 text-right">
                                     <div class="flex items-center justify-end gap-2">
-                                        <button onclick='openViewModal(@json($request), @json($request->studentService), @json($request->requester), @json($request->provider))'
+                                        <button type="button" data-request-open-view
+                                            data-request='@json($request)'
+                                            data-service='@json($request->studentService)'
+                                            data-requester='@json($request->requester)'
+                                            data-provider='@json($request->provider)'
                                             class="text-blue-500 hover:text-blue-700 transition-colors duration-300" title="View">
                                             <i class="fa-solid fa-eye"></i>
                                         </button>
 
                                         @if ($request->hsr_status === 'disputed')
-                                            @php
-                                                $reporterName = 'Unknown';
-                                                $reporterRole = 'System';
-
-                                                if ($request->hsr_reported_by) {
-                                                    $reporterUser = \App\Models\User::find($request->hsr_reported_by);
-                                                    if ($reporterUser) {
-                                                        $reporterName = $reporterUser->hu_name;
-                                                        if ($request->hsr_reported_by == $request->hsr_requester_id) {
-                                                            $reporterRole = 'Buyer';
-                                                        } elseif ($request->hsr_reported_by == $request->hsr_provider_id) {
-                                                            $reporterRole = 'Seller';
-                                                        } else {
-                                                            $reporterRole = 'Admin';
-                                                        }
-                                                    }
-                                                }
-                                            @endphp
-                                            <button onclick="openDisciplineModal(
-                                                '{{ $request->hsr_id }}', 
-                                                '{{ addslashes($request->hsr_dispute_reason) }}', 
-                                                { id: '{{ $request->requester->hu_id }}', name: '{{ $request->requester->hu_name }}', warnings: '{{ $request->requester->hu_warning_count }}' },
-                                                { id: '{{ $request->provider->hu_id }}', name: '{{ $request->provider->hu_name }}', warnings: '{{ $request->provider->hu_warning_count }}' },
-                                                { name: '{{ $reporterName }}', role: '{{ $reporterRole }}' } 
-                                            )"
+                                            <button type="button" data-request-open-discipline
+                                                data-request-id="{{ $request->hsr_id }}"
+                                                data-dispute-reason='@json($request->hsr_dispute_reason)'
+                                                data-requester-payload='@json($request->requester_payload)'
+                                                data-provider-payload='@json($request->provider_payload)'
+                                                data-reporter-payload='@json($request->reporter_payload)'
                                                 class="bg-red-100 hover:bg-red-200 text-red-700 px-2 py-1 rounded-lg text-xs font-bold transition-colors">
                                                 <i class="fa-solid fa-gavel"></i> Review
                                             </button>
                                         @endif
 
-                                        <form action="{{ route('admin.requests.destroy', $request->hsr_id) }}" method="POST" onsubmit="return confirm('Delete?');" class="inline">
+                                        <form action="{{ route('admin.requests.destroy', $request->hsr_id) }}" method="POST" data-confirm-message="Delete?" class="inline">
                                             @csrf @method('DELETE')
                                             <button type="submit" class="text-red-500 hover:text-red-700 transition-colors duration-300" title="Delete">
                                                 <i class="fa-solid fa-trash"></i>
@@ -232,11 +194,9 @@
                     <h3 class="text-lg font-bold transition-colors duration-300" style="color: var(--text-primary);">Request Details</h3>
                     <p class="text-xs transition-colors duration-300" style="color: var(--text-secondary);">ID: #<span id="viewId"></span></p>
                 </div>
-                <button onclick="closeViewModal()"
+                <button type="button" data-request-close-view
                     class="rounded-full p-1 shadow-sm border transition-all duration-300"
-                    style="color: var(--text-secondary); background-color: var(--bg-secondary); border-color: var(--border-color);"
-                    onmouseover="this.style.color = 'var(--text-primary)';"
-                    onmouseout="this.style.color = 'var(--text-secondary)';">
+                    style="color: var(--text-secondary); background-color: var(--bg-secondary); border-color: var(--border-color);">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
                         </path>
@@ -305,7 +265,7 @@
                 </div>
             </div>
             <div class="bg-gray-50 px-6 py-4 text-right">
-                <button onclick="closeViewModal()"
+                <button type="button" data-request-close-view
                     class="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-100 transition">Close</button>
             </div>
         </div>
@@ -320,7 +280,7 @@
                 <h3 class="text-lg font-bold text-white flex items-center gap-2">
                     <i class="fa-solid fa-shield-halved text-red-500"></i> Resolve Dispute & Discipline
                 </h3>
-                <button onclick="closeDisciplineModal()" class="text-gray-400 hover:text-white transition-colors">
+                <button type="button" data-request-close-discipline class="text-gray-400 hover:text-white transition-colors">
                     <i class="fa-solid fa-xmark text-xl"></i>
                 </button>
             </div>
@@ -358,12 +318,12 @@
             <div class="flex items-center gap-2 text-xs text-gray-500 mb-4">
                 <span class="bg-gray-100 px-2 py-0.5 rounded">ID: <span id="discReqId"></span></span>
                 <span class="bg-orange-100 text-orange-700 px-2 py-0.5 rounded flex items-center gap-1">
-                    <i class="fa-solid fa-triangle-exclamation"></i> <span id="discReqWarnings">0</span>/{{ config('moderation.user_warning_limit', 3) }} Warnings
+                    <i class="fa-solid fa-triangle-exclamation"></i> <span id="discReqWarnings">0</span>/{{ $warningLimit }} Warnings
                 </span>
             </div>
             <div class="grid grid-cols-2 gap-2">
-                <button type="button" onclick="submitDiscipline('warn', 'requester')" class="text-yellow-500 hover:text-yellow-400 transition border rounded-lg py-2" title="Warn"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Warn</button>
-                <button type="button" onclick="submitDiscipline('suspend_or_blacklist', 'requester')" class="text-red-600 hover:text-red-900 transition border rounded-lg py-2" title="Suspend or Blacklist"><i class="fa-solid fa-ban mr-1"></i> Suspend / Blacklist</button>
+                <button type="button" data-request-discipline-submit data-action="warn" data-target-role="requester" class="text-yellow-500 hover:text-yellow-400 transition border rounded-lg py-2" title="Warn"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Warn</button>
+                <button type="button" data-request-discipline-submit data-action="suspend_or_blacklist" data-target-role="requester" class="text-red-600 hover:text-red-900 transition border rounded-lg py-2" title="Suspend or Blacklist"><i class="fa-solid fa-ban mr-1"></i> Suspend / Blacklist</button>
             </div>
         </div>
 
@@ -374,12 +334,12 @@
             <div class="flex items-center gap-2 text-xs text-gray-500 mb-4">
                 <span class="bg-gray-100 px-2 py-0.5 rounded">ID: <span id="discProvId"></span></span>
                 <span class="bg-orange-100 text-orange-700 px-2 py-0.5 rounded flex items-center gap-1">
-                    <i class="fa-solid fa-triangle-exclamation"></i> <span id="discProvWarnings">0</span>/{{ config('moderation.user_warning_limit', 3) }} Warnings
+                    <i class="fa-solid fa-triangle-exclamation"></i> <span id="discProvWarnings">0</span>/{{ $warningLimit }} Warnings
                 </span>
             </div>
             <div class="grid grid-cols-2 gap-2">
-                <button type="button" onclick="submitDiscipline('warn', 'provider')" class="text-yellow-500 hover:text-yellow-400 transition border rounded-lg py-2" title="Warn"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Warn</button>
-                <button type="button" onclick="submitDiscipline('suspend_or_blacklist', 'provider')" class="text-red-600 hover:text-red-900 transition border rounded-lg py-2" title="Suspend or Blacklist"><i class="fa-solid fa-ban mr-1"></i> Suspend / Blacklist</button>
+                <button type="button" data-request-discipline-submit data-action="warn" data-target-role="provider" class="text-yellow-500 hover:text-yellow-400 transition border rounded-lg py-2" title="Warn"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Warn</button>
+                <button type="button" data-request-discipline-submit data-action="suspend_or_blacklist" data-target-role="provider" class="text-red-600 hover:text-red-900 transition border rounded-lg py-2" title="Suspend or Blacklist"><i class="fa-solid fa-ban mr-1"></i> Suspend / Blacklist</button>
             </div>
         </div>
     </div>
@@ -432,180 +392,11 @@
         </div>
     </div>
 
-    <script>
-        function openViewModal(req, service, requester, provider) {
-            const reqId = req.hsr_id ?? req.id;
-            const serviceTitle = service?.hss_title ?? service?.title ?? 'Unknown Service';
-            const selectedPackage = req.hsr_selected_package ?? req.selected_package;
-            const packageLabel = Array.isArray(selectedPackage)
-                ? (selectedPackage[0] ?? 'Custom')
-                : (selectedPackage ?? 'Custom');
-            const offeredPrice = req.hsr_offered_price ?? req.offered_price ?? 0;
-            const status = req.hsr_status ?? req.status ?? 'pending';
-            const requesterName = requester?.hu_name ?? requester?.name ?? 'Unknown';
-            const providerName = provider?.hu_name ?? provider?.name ?? 'Unknown';
-            const requesterEmail = requester?.hu_email ?? requester?.email ?? '-';
-            const providerEmail = provider?.hu_email ?? provider?.email ?? '-';
-            const requesterPhone = requester?.hu_phone ?? requester?.phone ?? null;
-            const providerPhone = provider?.hu_phone ?? provider?.phone ?? null;
-            const selectedDates = req.hsr_selected_dates ?? req.selected_dates;
-            const dateLabel = Array.isArray(selectedDates) ? (selectedDates[0] ?? null) : selectedDates;
-            const startTime = req.hsr_start_time ?? req.start_time;
-            const endTime = req.hsr_end_time ?? req.end_time;
-            const message = req.hsr_message ?? req.message;
-            const disputeReason = req.hsr_dispute_reason ?? req.dispute_reason;
+@endsection
 
-            document.getElementById('viewId').textContent = reqId;
-            document.getElementById('viewServiceTitle').textContent = serviceTitle;
-            document.getElementById('viewPackage').textContent = packageLabel;
-            document.getElementById('viewPrice').textContent = parseFloat(offeredPrice || 0).toFixed(2);
-
-            const statusSpan = document.getElementById('viewStatus');
-            statusSpan.textContent = status.replace('_', ' ');
-            statusSpan.className = `inline-block mt-1 px-3 py-1 rounded-full text-xs font-bold capitalize border `;
-            if (status === 'completed') statusSpan.classList.add('bg-green-100', 'text-green-700', 'border-green-200');
-            else if (status === 'pending') statusSpan.classList.add('bg-yellow-100', 'text-yellow-700',
-                'border-yellow-200');
-            else if (status === 'disputed') statusSpan.classList.add('bg-red-100', 'text-red-700', 'border-red-200');
-            else statusSpan.classList.add('bg-gray-100', 'text-gray-700', 'border-gray-200');
-
-            document.getElementById('viewReqAvatar').textContent = requesterName.charAt(0);
-            document.getElementById('viewReqName').textContent = requesterName;
-            document.getElementById('viewReqEmail').textContent = requesterEmail;
-            document.getElementById('viewReqPhone').textContent = requesterPhone || 'No Phone';
-
-            document.getElementById('viewProvAvatar').textContent = providerName.charAt(0);
-            document.getElementById('viewProvName').textContent = providerName;
-            document.getElementById('viewProvEmail').textContent = providerEmail;
-            document.getElementById('viewProvPhone').textContent = providerPhone || 'No Phone';
-
-            document.getElementById('viewDate').textContent = dateLabel || 'Flexible';
-            document.getElementById('viewTime').textContent = (startTime || '??') + ' - ' + (endTime || '??');
-            document.getElementById('viewMessage').textContent = message || 'No additional message.';
-
-            const disputeDiv = document.getElementById('viewDisputeSection');
-            if (status === 'disputed') {
-                disputeDiv.classList.remove('hidden');
-                document.getElementById('viewDisputeReason').textContent = disputeReason || 'No reason provided';
-            } else {
-                disputeDiv.classList.add('hidden');
-            }
-            document.getElementById('viewDetailModal').classList.remove('hidden');
-        }
-
-        function closeViewModal() {
-            document.getElementById('viewDetailModal').classList.add('hidden');
-        }
-
-        let currentRequesterId = null;
-        let currentProviderId = null;
-        let currentRequesterRole = null;
-        let currentProviderRole = null;
-        let currentRequesterWarnings = 0;
-        let currentProviderWarnings = 0;
-
-        function openDisciplineModal(requestId, reason, requester, provider, reporter) {
-            document.getElementById('discModalReason').textContent = reason || 'No reason provided.';
-
-            if (reporter) {
-                document.getElementById('discReporterName').textContent = reporter.name;
-                document.getElementById('discReporterRole').textContent = `(${reporter.role})`;
-            } else {
-                document.getElementById('discReporterName').textContent = 'Unknown';
-                document.getElementById('discReporterRole').textContent = '';
-            }
-
-            document.getElementById('discReqName').textContent = requester.name;
-            document.getElementById('discReqId').textContent = requester.id;
-            document.getElementById('discReqWarnings').textContent = requester.warnings;
-            currentRequesterId = requester.id;
-            currentRequesterRole = requester.role;
-            currentRequesterWarnings = parseInt(requester.warnings || 0, 10);
-
-            document.getElementById('discProvName').textContent = provider.name;
-            document.getElementById('discProvId').textContent = provider.id;
-            document.getElementById('discProvWarnings').textContent = provider.warnings;
-            currentProviderId = provider.id;
-            currentProviderRole = provider.role;
-            currentProviderWarnings = parseInt(provider.warnings || 0, 10);
-
-            const baseUrl = "{{ url('admin/requests') }}/" + requestId + "/resolve";
-            document.getElementById('disciplineForm').action = baseUrl;
-            document.getElementById('dismissForm').action = baseUrl;
-            document.getElementById('resumeForm').action = baseUrl;
-            document.getElementById('completePaidForm').action = baseUrl;
-            document.getElementById('actionPreview').classList.add('hidden');
-            document.getElementById('actionPreview').textContent = '';
-
-            document.getElementById('disciplineModal').classList.remove('hidden');
-        }
-
-        function closeDisciplineModal() {
-            document.getElementById('disciplineModal').classList.add('hidden');
-            document.getElementById('actionPreview').classList.add('hidden');
-        }
-
-        function submitDiscipline(action, target) {
-            // 1. VALIDATION: Check if message is written
-            const noteInput = document.getElementById('adminNoteInput');
-            const noteValue = noteInput.value.trim();
-
-            if (!noteValue) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Message Required',
-                    text: 'Please write a warning message or reason in the text box before proceeding.',
-                    confirmButtonColor: '#3085d6',
-                }).then(() => {
-                    // Focus the textarea so they know where to write
-                    setTimeout(() => noteInput.focus(), 300);
-                });
-                return; // Stop execution
-            }
-
-            // 2. Identify Target
-            const targetId = (target === 'requester') ? currentRequesterId : currentProviderId;
-            const targetName = (target === 'requester') ? document.getElementById('discReqName').textContent : document
-                .getElementById('discProvName').textContent;
-            const targetWarnings = (target === 'requester') ? currentRequesterWarnings : currentProviderWarnings;
-            const warningLimit = {{ config('moderation.user_warning_limit', 3) }};
-
-            if (action === 'warn' && targetWarnings >= warningLimit) {
-                Swal.fire({
-                    icon: 'info',
-                    title: 'Warning Limit Reached',
-                    text: `This user is already at ${warningLimit}/${warningLimit}. Use Suspend/Blacklist for the next action.`,
-                    confirmButtonColor: '#3085d6',
-                });
-                return;
-            }
-
-            const targetRole = (target === 'requester') ? currentRequesterRole : currentProviderRole;
-            const previewEl = document.getElementById('actionPreview');
-            let previewMsg;
-            let confirmMsg;
-
-            if (action === 'suspend_or_blacklist') {
-                const penaltyLabel = (targetRole === 'community') ? 'BLACKLIST' : 'SUSPEND';
-                previewMsg = (targetRole === 'community')
-                    ? 'Preview: Sends blacklist email, sets account to blacklisted, and cancels this request.'
-                    : 'Preview: Sends suspension email, sets account to suspended, and cancels this request.';
-                confirmMsg = `Are you sure you want to ${penaltyLabel} ${targetName}?\n${previewMsg}`;
-            } else {
-                previewMsg = 'Preview: Sends warning email, increments warning count, and resumes this request to Waiting Payment.';
-                confirmMsg = `Send this warning to ${targetName}?\n${previewMsg}`;
-            }
-
-            previewEl.textContent = previewMsg;
-            previewEl.className = 'text-[11px] mt-2 rounded-md px-2 py-1 border bg-indigo-50 border-indigo-200 text-indigo-800';
-            previewEl.classList.remove('hidden');
-
-            // 3. Confirm and Submit
-            if (confirm(confirmMsg)) {
-                document.getElementById('inputActionType').value = action;
-                document.getElementById('inputTargetUserId').value = targetId;
-                document.getElementById('disciplineForm').submit();
-            }
-        }
-    </script>
+@section('scripts')
+    <div id="adminModuleRequestsConfig"
+        data-warning-limit="{{ $warningLimit }}"
+        data-resolve-base-url="{{ url('admin/requests') }}"></div>
+    <script src="{{ asset('js/admin-requests.js') }}"></script>
 @endsection

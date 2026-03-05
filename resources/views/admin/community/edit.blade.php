@@ -28,19 +28,7 @@
                 <div class="flex flex-col sm:flex-row items-start sm:items-center gap-6">
                 <div class="h-24 w-24 rounded-full overflow-hidden border shadow transition-colors duration-300"
                      style="border-color: var(--border-color);">
-                    @php
-                        $path = $user->hu_profile_photo_path;
-                        if (Str::startsWith($path, ['http://', 'https://'])) {
-                            $imageUrl = $path;
-                        } elseif ($path && file_exists(public_path('storage/' . $path))) {
-                            $imageUrl = asset('storage/' . $path);
-                        } elseif ($path) {
-                            $imageUrl = asset($path);
-                        } else {
-                            $imageUrl = asset('uploads/profile/default.png');
-                        }
-                    @endphp
-                    <img src="{{ $imageUrl }}" class="w-full h-full object-cover rounded-full" alt="Profile" />
+                    <img src="{{ $user->profile_image_url }}" class="w-full h-full object-cover rounded-full" alt="Profile" />
                 </div>
                     <input type="file" name="profile_photo" 
                            class="border p-2 rounded-lg w-full text-sm transition-colors duration-300"
@@ -57,8 +45,7 @@
                     <label class="block font-medium mb-1 transition-colors duration-300" style="color: var(--text-primary);">Name</label>
                     <input type="text" name="name" value="{{ old('name', $user->hu_name) }}"
                            class="border p-3 rounded-lg w-full transition-colors duration-300"
-                           style="background-color: var(--bg-tertiary); border-color: var(--border-color); color: var(--text-primary);"
-                           onfocus="this.style.borderColor = '#06b6d4'; this.style.boxShadow = '0 0 0 2px rgba(6, 182, 212, 0.2)';" required>
+                           style="background-color: var(--bg-tertiary); border-color: var(--border-color); color: var(--text-primary);" required>
                 </div>
 
                 <!-- Email -->
@@ -66,8 +53,7 @@
                     <label class="block font-medium mb-1 transition-colors duration-300" style="color: var(--text-primary);">Email</label>
                     <input type="email" name="email" value="{{ old('email', $user->hu_email) }}"
                            class="border p-3 rounded-lg w-full transition-colors duration-300"
-                           style="background-color: var(--bg-tertiary); border-color: var(--border-color); color: var(--text-primary);"
-                           onfocus="this.style.borderColor = '#06b6d4'; this.style.boxShadow = '0 0 0 2px rgba(6, 182, 212, 0.2)';" required>
+                           style="background-color: var(--bg-tertiary); border-color: var(--border-color); color: var(--text-primary);" required>
                 </div>
 
                 <!-- Phone -->
@@ -75,8 +61,7 @@
                     <label class="block font-medium mb-1 transition-colors duration-300" style="color: var(--text-primary);">Phone</label>
                     <input type="text" name="phone" value="{{ old('phone', $user->hu_phone) }}"
                            class="border p-3 rounded-lg w-full transition-colors duration-300"
-                           style="background-color: var(--bg-tertiary); border-color: var(--border-color); color: var(--text-primary);"
-                           onfocus="this.style.borderColor = '#06b6d4'; this.style.boxShadow = '0 0 0 2px rgba(6, 182, 212, 0.2)';">
+                           style="background-color: var(--bg-tertiary); border-color: var(--border-color); color: var(--text-primary);">
                 </div>
 
                 <div class="mb-4">
@@ -84,7 +69,6 @@
                     <textarea name="bio" rows="3"
                               class="border p-3 rounded-lg w-full transition-colors duration-300"
                               style="background-color: var(--bg-tertiary); border-color: var(--border-color); color: var(--text-primary);"
-                              onfocus="this.style.borderColor = '#06b6d4'; this.style.boxShadow = '0 0 0 2px rgba(6, 182, 212, 0.2)';"
                               placeholder="Optional bio">{{ old('bio', $user->hu_bio) }}</textarea>
                 </div>
             </div>            
@@ -95,8 +79,7 @@
 
                 <select name="verification_status"
         class="border p-3 rounded-lg w-full transition-colors duration-300"
-        style="background-color: var(--bg-tertiary); border-color: var(--border-color); color: var(--text-primary);"
-        onfocus="this.style.borderColor = '#06b6d4'; this.style.boxShadow = '0 0 0 2px rgba(6, 182, 212, 0.2)';">
+        style="background-color: var(--bg-tertiary); border-color: var(--border-color); color: var(--text-primary);">
 
     {{-- Pending (disabled if already approved) --}}
     <option value="pending"
@@ -150,7 +133,6 @@
                     <textarea name="blacklist_reason" rows="3"
                               class="border p-3 rounded-lg w-full transition-colors duration-300"
                               style="background-color: var(--bg-tertiary); border-color: var(--border-color); color: var(--text-primary);"
-                              onfocus="this.style.borderColor = '#ef4444'; this.style.boxShadow = '0 0 0 2px rgba(239, 68, 68, 0.2)';"
                               placeholder="Enter reason to blacklist this user...">{{ old('blacklist_reason') }}</textarea>
                 @endif
             </div>
