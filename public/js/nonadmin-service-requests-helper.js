@@ -61,7 +61,13 @@
         proofFallback.classList.add('hidden');
         proofImage.src = '';
         proofPdf.src = '';
-        proofLink.href = fileUrl;
+        proofLink.href = typeof fileUrl === 'string' && fileUrl.trim() !== '' ? fileUrl : '#';
+
+        if (typeof fileUrl !== 'string' || fileUrl.trim() === '') {
+            proofFallback.classList.remove('hidden');
+            proofModal.classList.remove('hidden');
+            return;
+        }
 
         let extension = '';
         try {
@@ -88,6 +94,30 @@
         }
 
         proofModal.classList.remove('hidden');
+    }
+
+    function submitManualFinalize(requestId, outcome) {
+        const form = document.getElementById(`finalize-form-${requestId}`);
+        const outcomeInput = document.getElementById(`finalize-outcome-${requestId}`);
+        if (!form || !outcomeInput) {
+            Swal.fire('Error', 'Finalize action form not found.', 'error');
+            return;
+        }
+
+        outcomeInput.value = outcome;
+        Swal.fire({
+            title: 'Confirm payment manually?',
+            text: 'This will mark the order as completed and set payment as paid.',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#16a34a',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Yes, confirm',
+            cancelButtonText: 'Cancel',
+        }).then((result) => {
+            if (!result.isConfirmed) return;
+            form.submit();
+        });
     }
 
     function submitDecision(outcome) {
@@ -403,6 +433,12 @@
         const openProof = event.target.closest('[data-open-proof]');
         if (openProof) {
             openProofModal(openProof.dataset.proofUrl, openProof.dataset.openProof);
+            return;
+        }
+
+        const finalize = event.target.closest('[data-finalize-order]');
+        if (finalize) {
+            submitManualFinalize(finalize.dataset.finalizeOrder, finalize.dataset.outcome || 'paid');
             return;
         }
 
