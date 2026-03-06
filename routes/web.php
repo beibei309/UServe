@@ -1,35 +1,33 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\HelpController;
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\ReviewController;
-use App\Http\Controllers\SearchController;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\FavoriteController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\AvailabilityController;
-use App\Http\Controllers\StudentsController;
-use App\Http\Controllers\VerificationController;
-use App\Http\Controllers\StudentServiceController;
-use App\Http\Controllers\ReportController;
-use App\Http\Controllers\ServiceRequestController;
-use App\Http\Controllers\Admin\SuperAdminController;
-use App\Http\Controllers\Admin\AdminFeedbackController;
-use App\Http\Controllers\Admin\ReportAdminController;
-use App\Http\Controllers\Admin\UserAdminController;
-use App\Http\Controllers\Pages\AdminPageController;
 use App\Http\Controllers\Admin\AdminAuthController;
-use App\Http\Controllers\Admin\AdminStudentController;
-use App\Http\Controllers\Admin\AdminRequestController;
-use App\Http\Controllers\Admin\AdminServicesController;
 use App\Http\Controllers\Admin\AdminCategoryController;
-use App\Http\Controllers\Admin\AdminFaqsController;
 use App\Http\Controllers\Admin\AdminCommunityController;
 use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\AdminFaqsController;
+use App\Http\Controllers\Admin\AdminFeedbackController;
+use App\Http\Controllers\Admin\AdminRequestController;
+use App\Http\Controllers\Admin\AdminServicesController;
+use App\Http\Controllers\Admin\AdminStudentController;
 use App\Http\Controllers\Admin\AdminStudentStatusController;
-use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\Admin\SuperAdminController;
 use App\Http\Controllers\Admin\VerificationController as AdminVerificationController;
+use App\Http\Controllers\AvailabilityController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\FavoriteController;
+use App\Http\Controllers\HelpController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\Pages\AdminPageController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\SearchController;
+use App\Http\Controllers\ServiceRequestController;
+use App\Http\Controllers\StudentsController;
+use App\Http\Controllers\StudentServiceController;
+use App\Http\Controllers\VerificationController;
+use Illuminate\Support\Facades\Route;
 
 // -- PUBLIC ROUTES --
 Route::get('/', [HomeController::class, 'home'])->name('home');
@@ -48,10 +46,9 @@ Route::get('/students/edit-profile', [StudentsController::class, 'edit'])->middl
 Route::patch('/students/edit-profile', [StudentsController::class, 'update'])->middleware(['auth'])->name('students.update');
 Route::delete('/students/profile/delete-file', [App\Http\Controllers\StudentsController::class, 'deleteWorkExperienceFile'])->middleware(['auth'])->name('students.delete-file');
 
-
 // -- AUTHENTICATED ROUTES --
 Route::middleware(['auth'])->group(function () {
-    
+
     // Route untuk paparkan page verification
     Route::get('/onboarding/students', [VerificationController::class, 'index'])
         ->name('onboarding.students');
@@ -67,15 +64,12 @@ Route::middleware(['auth'])->group(function () {
     // Route untuk Save Location Data
     Route::post('/verification/save-location', [VerificationController::class, 'saveLocation'])
         ->name('verification.save_location');
-    
+
     Route::get('/onboarding/community', [VerificationController::class, 'onboardingCommunity'])->name('onboarding.community.verify');
 
     Route::post('/onboarding/community/upload-photo', [VerificationController::class, 'uploadPhoto'])->name('onboarding.community.upload_photo');
     Route::post('/onboarding/community/upload-selfie', [VerificationController::class, 'uploadCommunitySelfie'])->name('onboarding.community.upload_selfie');
     Route::post('/onboarding/community/submit-doc', [VerificationController::class, 'submitDoc'])->name('onboarding.community.submit_doc');
-        
-        
-        
 
 });
 
@@ -96,12 +90,11 @@ Route::get('/services/{service}/edit', [StudentServiceController::class, 'edit']
     ->middleware(['auth'])
     ->name('services.edit');
 
-
 Route::get('/student-services/{service}', [StudentServiceController::class, 'show'])->name('student-services.show');
 
 Route::get('/services/apply', [HomeController::class, 'serviceApply'])->middleware(['auth'])->name('services.apply');
 
- Route::get('/service-requests', [ServiceRequestController::class, 'index'])->middleware(['auth'])->name('service-requests.index');
+Route::get('/service-requests', [ServiceRequestController::class, 'index'])->middleware(['auth'])->name('service-requests.index');
 Route::post('/service-request', [ServiceRequestController::class, 'store'])->middleware(['auth'])->name('service-request.store');
 
 // Service Request routes
@@ -114,26 +107,26 @@ Route::middleware(['auth'])->group(function () {
     // start work
     Route::post('/service-requests/{serviceRequest}/mark-in-progress', [ServiceRequestController::class, 'markInProgress'])->name('service-requests.mark-in-progress');
     // finished work
-    Route::post('/service-requests/{serviceRequest}/mark-work-finished',[ServiceRequestController::class, 'markWorkFinished'])->name('service-requests.mark-work-finished');
+    Route::post('/service-requests/{serviceRequest}/mark-work-finished', [ServiceRequestController::class, 'markWorkFinished'])->name('service-requests.mark-work-finished');
     Route::post('/service-requests/{serviceRequest}/buyer-confirm-payment', [ServiceRequestController::class, 'buyerConfirmPayment'])->name('service-requests.buyer-confirm-payment');
-    Route::post('/service-requests/{serviceRequest}/finalize', [App\Http\Controllers\ServiceRequestController::class, 'finalizeOrder'])->name('service-requests.finalize');    
+    Route::post('/service-requests/{serviceRequest}/finalize', [App\Http\Controllers\ServiceRequestController::class, 'finalizeOrder'])->name('service-requests.finalize');
     Route::post('/service-requests/{id}/mark-paid', [ServiceRequestController::class, 'markAsPaid'])->name('service-requests.mark-paid');
-    Route::post('/service-requests/{serviceRequest}/report', [ServiceRequestController::class, 'report']) ->name('service-requests.report');
+    Route::post('/service-requests/{serviceRequest}/report', [ServiceRequestController::class, 'report'])->name('service-requests.report');
     Route::post('/service-requests/{id}/cancel-dispute', [ServiceRequestController::class, 'cancelDispute'])
-    ->name('service-requests.cancel-dispute');
+        ->name('service-requests.cancel-dispute');
     Route::post('/service-requests/{id}/report-issue', [App\Http\Controllers\ServiceRequestController::class, 'reportIssue'])->name('service-requests.report-issue');
- 
+
     Route::post('/service-requests/{serviceRequest}/mark-completed', [ServiceRequestController::class, 'markCompleted'])->name('service-requests.mark-completed');
     Route::post('/service-requests/{serviceRequest}/cancel', [ServiceRequestController::class, 'cancel'])->name('service-requests.cancel');
 });
 Route::get('/services/{id}', [StudentServiceController::class, 'details'])->name('services.details');
 
-    // routes/web.php
+// routes/web.php
 
 Route::post('/switch-mode', [App\Http\Controllers\DashboardController::class, 'switchMode'])
     ->name('switch.mode')
     ->middleware('auth');
-    
+
 // after login
 Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
@@ -149,10 +142,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::match(['get', 'post'], '/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
     Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.markAllRead');
-    
+
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/profile/staff-email/verify/{id}/{hash}', [ProfileController::class, 'verifyStaffEmail'])
+        ->middleware(['signed', 'throttle:6,1'])
+        ->name('profile.staff.verify');
 });
 
 // UI pages
@@ -164,7 +160,6 @@ Route::get('/students/{user}/profile', [StudentsController::class, 'profile'])->
 Route::middleware(['auth'])->group(function () {
     Route::post('/availability/toggle', [AvailabilityController::class, 'toggle'])->name('availability.toggle');
     Route::post('/availability/update-settings', [AvailabilityController::class, 'updateSettings'])->name('availability.updateSettings');
-
 
     Route::post('/reviews', [ReviewController::class, 'store'])->name('reviews.store');
     Route::post('/reviews/{id}/reply', [ReviewController::class, 'reply'])->name('reviews.reply');
@@ -190,22 +185,19 @@ Route::middleware(['auth'])->group(function () {
         ->name('favorites.index');
 });
 
-
-
 // Public JSON endpoints
 Route::get('/students/{user}', [StudentServiceController::class, 'storefront']);
 Route::get('/search/services', [SearchController::class, 'services']);
 
 require __DIR__.'/auth.php';
 
-
-/// Admin Login (public)
+// / Admin Login (public)
 Route::get('/admin/login', [AdminAuthController::class, 'showLogin'])->name('admin.login');
 Route::post('/admin/login', [AdminAuthController::class, 'login'])->name('admin.login.submit');
-    
+
 // Protected Admin Routes - Requires admin authentication
 Route::middleware(['auth:admin', 'prevent-back-history'])->prefix('admin')->group(function () {
-    
+
     // ========================================
     // ADMIN DASHBOARD
     // ========================================
@@ -216,15 +208,15 @@ Route::middleware(['auth:admin', 'prevent-back-history'])->prefix('admin')->grou
     // ========================================
     // View pending community verifications (document + selfie uploads)
     Route::get('/verifications', [AdminPageController::class, 'verifications'])->name('admin.verifications.page');
-    
+
     // Community Verification Actions
     Route::post('/verifications/{user}/approve', [AdminVerificationController::class, 'approve'])->name('admin.verifications.approve');
     Route::post('/verifications/{user}/reject', [AdminVerificationController::class, 'reject'])->name('admin.verifications.reject');
-    
+
     // View uploaded documents
     Route::get('/verifications/{user}/document', [AdminVerificationController::class, 'showDocument'])->name('admin.verifications.document');
     Route::get('/verifications/{user}/selfie', [AdminVerificationController::class, 'showSelfie'])->name('admin.verifications.selfie');
-    
+
     // ========================================
     // STUDENT MANAGEMENT
     // ========================================
@@ -233,7 +225,7 @@ Route::middleware(['auth:admin', 'prevent-back-history'])->prefix('admin')->grou
     Route::get('/students/{id}/edit', [AdminStudentController::class, 'edit'])->name('admin.students.edit');
     Route::put('/students/{id}/update', [AdminStudentController::class, 'update'])->name('admin.students.update');
     Route::delete('/students/{id}', [AdminStudentController::class, 'destroy'])->name('admin.students.destroy');
-    
+
     // Student Actions (Ban/Unban/Role)
     Route::post('/students/{id}/ban', [AdminStudentController::class, 'ban'])->name('admin.students.ban');
     Route::post('/students/{id}/unban', [AdminStudentController::class, 'unban'])->name('admin.students.unban');
