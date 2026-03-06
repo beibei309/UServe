@@ -11,11 +11,6 @@
     <div class="py-6">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
 
-            @php
-                // Default status tab is 'pending'
-                $defaultStatusTab = request('tab', 'pending');
-            @endphp
-
             <div id="received-content" class="sr-tab-content">
                 <div class="overflow-hidden rounded-2xl border border-gray-100 bg-gradient-to-b from-white to-slate-50/50 shadow-sm">
                     <div class="p-6 text-gray-800">
@@ -39,7 +34,7 @@
 
                                 {{-- 2. Filter by Category (Takes up 3 columns) --}}
                                 <div class="md:col-span-3">
-                                    <select name="category" onchange="this.form.submit()"
+                                    <select name="category" data-auto-submit-filter
                                         class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-custom-teal focus:border-custom-teal text-sm text-gray-700 bg-white">
                                         <option value="">-- All Categories --</option>
                                         @foreach ($categories as $category)
@@ -53,7 +48,7 @@
 
                                 {{-- 3. Filter by Service Type (Takes up 3 columns) --}}
                                 <div class="md:col-span-3">
-                                    <select name="service_type" onchange="this.form.submit()"
+                                    <select name="service_type" data-auto-submit-filter
                                         class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-custom-teal focus:border-custom-teal text-sm text-gray-700 bg-white">
                                         <option value="">-- All My Services --</option>
                                         {{-- Assuming you pass a variable $serviceTypes from controller --}}
@@ -68,7 +63,7 @@
 
                                 {{-- 4. Filter by Status (Replaces Sort) (Takes up 2 columns) --}}
                                 <div class="md:col-span-2">
-                                    <select name="status" onchange="this.form.submit()"
+                                    <select name="status" data-auto-submit-filter
                                         class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-custom-teal focus:border-custom-teal text-sm text-gray-700 bg-white">
                                         <option value="">-- Status --</option>
                                         <option value="waiting_payment"
@@ -99,15 +94,15 @@
 
                         <div class="mb-6">
                             <div class="flex space-x-4 border-b border-gray-200">
-                                <button onclick="showStatusTab('pending')" id="pending-tab"
+                                <button type="button" data-status-tab="pending" id="pending-tab"
                                     class="sr-status-tab-button py-2 px-4 text-sm font-medium {{ $defaultStatusTab === 'pending' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-500 hover:text-custom-teal' }} focus:outline-none">
                                     Pending
                                 </button>
-                                <button onclick="showStatusTab('in-progress')" id="in-progress-tab"
+                                <button type="button" data-status-tab="in-progress" id="in-progress-tab"
                                     class="sr-status-tab-button py-2 px-4 text-sm font-medium {{ $defaultStatusTab === 'in-progress' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-500 hover:text-custom-teal' }} focus:outline-none">
                                     In Progress
                                 </button>
-                                <button onclick="showStatusTab('completed')" id="completed-tab"
+                                <button type="button" data-status-tab="completed" id="completed-tab"
                                     class="sr-status-tab-button py-2 px-4 text-sm font-medium {{ $defaultStatusTab === 'completed' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-500 hover:text-custom-teal' }} focus:outline-none">
                                     Completed
                                 </button>
@@ -128,26 +123,8 @@
     @else
         <div class="space-y-6">
             @foreach ($receivedRequests->where('hsr_status', 'pending') as $request)
-                @php
-                    // Data Setup
-                    $service = $request->studentService;
-                    $selectedPackage = is_array($request->hsr_selected_package)
-                        ? ($request->hsr_selected_package[0] ?? 'basic')
-                        : ($request->hsr_selected_package ?? 'basic');
-                    $packageLabel = trim(str_replace('"', '', (string) $selectedPackage));
-                    $packageLabel = $packageLabel !== '' ? $packageLabel : 'Custom';
-                    $pkgType = strtolower($packageLabel);
-                    $pkgDescription = $service->{$pkgType . '_description'} ?? null;
-                    $pkgDuration = $service->{$pkgType . '_duration'} ?? null;
-                    $pkgFrequency = $service->{$pkgType . '_frequency'} ?? null;
-                    
-                    $dates = $request->hsr_selected_dates;
-                    $firstDate = is_array($dates) ? $dates[0] : $dates;
-                    $dateCount = is_array($dates) ? count($dates) : 1;
-                @endphp
-
                 <div class="sr-request-item group relative overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:shadow-md hover:border-indigo-300"
-                    data-category="{{ optional($service->category)->hc_name ?? 'Other' }}">
+                    data-category="{{ optional(optional($request->studentService)->category)->hc_name ?? 'Other' }}">
                     
                     <div class="absolute top-0 left-0 right-0 h-1 bg-indigo-500"></div>
 
@@ -164,18 +141,18 @@
                                 <h4 class="text-lg font-bold text-gray-900 leading-tight">
                                     {{ optional($request->studentService)->hss_title ?? 'Custom Request' }}
                                 </h4>
-                                @if(optional($service)->category)
-                      <div class="mt-2 inline-flex items-center gap-1.5 rounded-md px-2 py-1" style="color:{{ $service->category->hc_color }}; background-color: {{ $service->category->hc_color }}10; border: 1px solid {{ $service->category->hc_color }};">
+                                @if(optional(optional($request->studentService)->category))
+                      <div class="mt-2 inline-flex items-center gap-1.5 rounded-md px-2 py-1" style="color:{{ $request->studentService->category->hc_color }}; background-color: {{ $request->studentService->category->hc_color }}10; border: 1px solid {{ $request->studentService->category->hc_color }};">
                                     <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                                     </svg>
                                     <span class="text-xs font-medium">
-                                        {{ $service->category->hc_name }}
+                                        {{ $request->studentService->category->hc_name }}
                                     </span>
                                 </div>
                         @endif
                                 <p class="text-xs text-gray-400 mt-1">
-                                    Received {{ $request->created_at->diffForHumans() }}
+                                    Received {{ $request->ui_created_human }}
                                 </p>
                             </div>
                             
@@ -185,7 +162,7 @@
                                         RM {{ number_format($request->hsr_offered_price, 2) }}
                                     </div>
                                     <div class="text-xs font-medium text-gray-500 uppercase tracking-wide">
-                                        {{ $packageLabel }} Package
+                                        {{ $request->ui_package_label }} Package
                                     </div>
                                 @endif
                             </div>
@@ -211,7 +188,7 @@
                                 </div>
                             </div>
 
-                            @if ($request->hsr_selected_dates)
+                            @if ($request->ui_first_date_display)
                             <div class="flex items-start gap-3">
                                 <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-50 text-blue-600">
                                     <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -221,9 +198,9 @@
                                 <div>
                                     <p class="text-xs font-medium text-gray-500 uppercase">Requested Date</p>
                                     <p class="text-sm font-semibold text-gray-900">
-                                        {{ \Carbon\Carbon::parse($firstDate)->format('M j, Y') }}
-                                        @if ($dateCount > 1)
-                                            <span class="text-xs font-normal text-gray-500 ml-1">(+{{ $dateCount - 1 }} days)</span>
+                                        {{ $request->ui_first_date_display }}
+                                        @if ($request->ui_date_count > 1)
+                                            <span class="text-xs font-normal text-gray-500 ml-1">(+{{ $request->ui_date_count - 1 }} days)</span>
                                         @endif
                                     </p>
                                 </div>
@@ -239,9 +216,9 @@
                                 <div>
                                     <p class="text-xs font-medium text-gray-500 uppercase">Requirements</p>
                                     <p class="text-sm font-semibold text-gray-900">
-                                        {{ $pkgDuration ? $pkgDuration . ' Hrs' : 'N/A' }} 
+                                        {{ $request->ui_pkg_duration ? $request->ui_pkg_duration . ' Hrs' : 'N/A' }} 
                                         <span class="text-gray-300 mx-1">|</span> 
-                                        {{ $pkgFrequency ? ucfirst($pkgFrequency) : 'One-time' }}
+                                        {{ $request->ui_pkg_frequency ? ucfirst($request->ui_pkg_frequency) : 'One-time' }}
                                     </p>
                                 </div>
                             </div>
@@ -262,7 +239,7 @@
 
                             <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
                                 
-                                <button onclick="openRejectModal({{ $request->hsr_id }})" class="w-full sm:w-auto inline-flex justify-center items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 bg-white border border-red-200 rounded-lg hover:bg-red-50 hover:border-red-300 transition-colors focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
+                                <button type="button" data-open-reject="{{ $request->hsr_id }}" class="w-full sm:w-auto inline-flex justify-center items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 bg-white border border-red-200 rounded-lg hover:bg-red-50 hover:border-red-300 transition-colors focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
                                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                     </svg>
@@ -270,7 +247,7 @@
                                 </button>
                                 <form id="reject-form-{{ $request->hsr_id }}" action="{{ route('service-requests.reject', $request->hsr_id) }}" method="POST" class="hidden">@csrf</form>
 
-                                <button onclick="acceptRequest({{ $request->hsr_id }})" class="w-full sm:w-auto inline-flex justify-center items-center gap-2 px-6 py-2 text-sm font-bold text-white bg-indigo-600 rounded-lg shadow-sm hover:bg-indigo-700 hover:shadow-md transition-all focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                <button type="button" data-accept-request="{{ $request->hsr_id }}" class="w-full sm:w-auto inline-flex justify-center items-center gap-2 px-6 py-2 text-sm font-bold text-white bg-indigo-600 rounded-lg shadow-sm hover:bg-indigo-700 hover:shadow-md transition-all focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
                                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                     </svg>
@@ -301,50 +278,31 @@
     @else
         <div class="space-y-6">
             @foreach ($receivedRequests->whereIn('hsr_status', ['accepted', 'in_progress', 'waiting_payment', 'disputed']) as $request)
-                @php
-                    // 1. Data Setup
-                    $service = $request->studentService;
-                    $displayId = str_pad($request->hsr_id, 5, '0', STR_PAD_LEFT);
-                    $selectedPackage = is_array($request->hsr_selected_package)
-                        ? ($request->hsr_selected_package[0] ?? 'custom')
-                        : ($request->hsr_selected_package ?? 'custom');
-                    $packageLabel = trim(str_replace('"', '', (string) $selectedPackage));
-                    $packageLabel = $packageLabel !== '' ? $packageLabel : 'Custom';
+                <div class="sr-request-item group relative overflow-hidden rounded-2xl border bg-white shadow-sm transition-all duration-300 hover:shadow-md {{ $request->ui_helper_inprogress_theme['border'] }}"
+                    data-category="{{ optional(optional($request->studentService)->category)->hc_name ?? 'Other' }}">
                     
-                    // 2. Dynamic Styling based on Status
-                    $statusTheme = match ($request->hsr_status) {
-                        'disputed' => ['color' => 'red', 'border' => 'border-red-200', 'bg' => 'bg-red-500'],
-                        'waiting_payment' => ['color' => 'yellow', 'border' => 'border-yellow-200', 'bg' => 'bg-yellow-400'],
-                        'in_progress' => ['color' => 'blue', 'border' => 'border-blue-200', 'bg' => 'bg-blue-500'],
-                        default => ['color' => 'gray', 'border' => 'border-gray-200', 'bg' => 'bg-gray-400'], // accepted
-                    };
-                @endphp
-
-                <div class="sr-request-item group relative overflow-hidden rounded-2xl border bg-white shadow-sm transition-all duration-300 hover:shadow-md {{ $statusTheme['border'] }}"
-                    data-category="{{ optional($service->category)->hc_name ?? 'Other' }}">
-                    
-                    <div class="absolute top-0 left-0 right-0 h-1 {{ $statusTheme['bg'] }}"></div>
+                    <div class="absolute top-0 left-0 right-0 h-1 {{ $request->ui_helper_inprogress_theme['bg'] }}"></div>
 
                     <div class="p-5 sm:p-6">
                         
                         <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mb-4">
                             <div class="flex-1">
                                 <div class="flex items-center gap-3 mb-2">
-                                    <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide bg-{{ $statusTheme['color'] }}-50 text-{{ $statusTheme['color'] }}-700 border border-{{ $statusTheme['color'] }}-100">
+                                    <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide bg-{{ $request->ui_helper_inprogress_theme['color'] }}-50 text-{{ $request->ui_helper_inprogress_theme['color'] }}-700 border border-{{ $request->ui_helper_inprogress_theme['color'] }}-100">
                                         {{ $request->formatted_status }}
                                     </span>
-                                    <span class="text-xs text-gray-400 font-mono">#{{ $displayId }}</span>
+                                    <span class="text-xs text-gray-400 font-mono">#{{ $request->ui_display_id }}</span>
                                 </div>
                                 <h4 class="text-lg font-bold text-gray-900 leading-tight group-hover:text-indigo-600 transition-colors">
                                     {{ optional($request->studentService)->hss_title ?? 'Custom Request' }}
                                 </h4>
-                                @if(optional($service)->category)
-                      <div class="mt-2 inline-flex items-center gap-1.5 rounded-md px-2 py-1" style="color:{{ $service->category->hc_color }}; background-color: {{ $service->category->hc_color }}10; border: 1px solid {{ $service->category->hc_color }};">
+                                @if(optional(optional($request->studentService)->category))
+                      <div class="mt-2 inline-flex items-center gap-1.5 rounded-md px-2 py-1" style="color:{{ $request->studentService->category->hc_color }}; background-color: {{ $request->studentService->category->hc_color }}10; border: 1px solid {{ $request->studentService->category->hc_color }};">
                                     <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                                     </svg>
                                     <span class="text-xs font-medium">
-                                        {{ $service->category->hc_name }}
+                                        {{ $request->studentService->category->hc_name }}
                                     </span>
                                 </div>
                         @endif
@@ -357,7 +315,7 @@
                                         RM {{ number_format($request->hsr_offered_price, 2) }}
                                     </span>
                                     <div class="text-xs font-medium text-gray-400 uppercase tracking-wide">
-                                          {{ $packageLabel }} Package
+                                          {{ $request->ui_package_label }} Package
                                     </div>
                                 </div>
                             @endif
@@ -394,12 +352,16 @@
                                                 <svg class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                                 <span class="font-bold text-sm">Payment Proof Uploaded</span>
                                             </div>
-                                            
+
                                             {{-- Button: Normal Width --}}
-                                            <button onclick="openProofModal('{{ asset('storage/' . $request->hsr_payment_proof) }}', {{ $request->hsr_id }})" 
-                                                class="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-blue-700 transition-all">
-                                                Check Proof
-                                            </button>
+                                            @if ($request->ui_has_payment_proof)
+                                                <button type="button" data-open-proof="{{ $request->hsr_id }}" data-proof-url="{{ $request->ui_payment_proof_url }}"
+                                                    class="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-blue-700 transition-all">
+                                                    Check Proof
+                                                </button>
+                                            @else
+                                                <span class="text-xs font-semibold text-red-600">Proof file is missing</span>
+                                            @endif
                                         </div>
                                     </div>
 
@@ -411,7 +373,7 @@
                                         </div>
                                         
                                         {{-- Button: Normal Width --}}
-                                        <button onclick="finalizeOrder({{ $request->hsr_id }}, 'paid')"
+                                        <button type="button" data-finalize-order="{{ $request->hsr_id }}" data-outcome="paid"
                                             class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-yellow-300 bg-white text-xs font-bold text-yellow-700 hover:bg-yellow-50 transition-all">
                                             Mark Paid Manually
                                         </button>
@@ -432,7 +394,7 @@
                                     <form id="cancel-dispute-form-{{ $request->hsr_id }}" action="{{ route('service-requests.cancel-dispute', $request->hsr_id) }}" method="POST">
                                         @csrf
                                         {{-- Button: Normal Width --}}
-                                        <button type="button" onclick="confirmCancelDispute({{ $request->hsr_id }})"
+                                        <button type="button" data-cancel-dispute="{{ $request->hsr_id }}"
                                             class="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-white border border-red-200 text-xs font-bold text-red-600 hover:bg-red-50 transition-all shadow-sm">
                                             Resolve & Complete
                                         </button>
@@ -442,7 +404,7 @@
                             {{-- 3. ACCEPTED (Start Work) --}}
                             @elseif ($request->hsr_status === 'accepted')
                                 {{-- Button: Normal Width --}}
-                                <button onclick="markInProgress({{ $request->hsr_id }})"
+                                <button type="button" data-mark-progress="{{ $request->hsr_id }}"
                                     class="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-bold text-white shadow-md hover:bg-blue-700 transition-all">
                                     <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                     Start Work
@@ -452,7 +414,7 @@
                             {{-- 4. IN PROGRESS (Finish Work) --}}
                             @elseif ($request->hsr_status === 'in_progress')
                                 {{-- Button: Normal Width --}}
-                                <button onclick="markWorkFinished({{ $request->hsr_id }})"
+                                <button type="button" data-mark-finished="{{ $request->hsr_id }}"
                                     class="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-bold text-white shadow-md hover:bg-indigo-700 transition-all">
                                     <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
                                     Finish Work
@@ -476,7 +438,7 @@
 
                                 {{-- Short Square Button: Report (Only if needed) --}}
                                 @if ($request->isWorkFinished() && $request->hsr_status !== 'disputed')
-                                    <button onclick="openDisputeModal({{ $request->hsr_id }})" class="h-[34px] w-[34px] flex items-center justify-center rounded-lg border border-red-200 bg-white text-red-500 hover:bg-red-50 transition-colors" title="Report Issue">
+                                    <button type="button" data-open-dispute="{{ $request->hsr_id }}" class="h-[34px] w-[34px] flex items-center justify-center rounded-lg border border-red-200 bg-white text-red-500 hover:bg-red-50 transition-colors" title="Report Issue">
                                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
                                     </button>
                                     <form id="dispute-form-{{ $request->hsr_id }}" action="{{ route('service-requests.report', $request->hsr_id) }}" method="POST" class="hidden">@csrf<input type="hidden" name="reason" id="dispute-reason-{{ $request->hsr_id }}"></form>
@@ -505,67 +467,31 @@
     @else
         <div class="space-y-6">
             @foreach ($receivedRequests->whereIn('hsr_status', ['completed', 'cancelled', 'rejected']) as $request)
-                @php
-                    // 1. Data Setup
-                    $service = $request->studentService;
-                    $displayId = str_pad($request->hsr_id, 5, '0', STR_PAD_LEFT);
-                    $selectedPackage = is_array($request->hsr_selected_package)
-                        ? ($request->hsr_selected_package[0] ?? 'custom')
-                        : ($request->hsr_selected_package ?? 'custom');
-                    $packageLabel = trim(str_replace('"', '', (string) $selectedPackage));
-                    $packageLabel = $packageLabel !== '' ? $packageLabel : 'Custom';
-
-                    // 2. Styling Logic
-                    $theme = match ($request->hsr_status) {
-                        'completed' => [
-                            'border' => 'border-green-200 hover:border-green-300',
-                            'strip' => 'bg-green-500',
-                            'badge' => 'bg-green-100 text-green-700',
-                            'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />'
-                        ],
-                        'cancelled' => [
-                            'border' => 'border-gray-200 hover:border-gray-300',
-                            'strip' => 'bg-gray-400',
-                            'badge' => 'bg-gray-100 text-gray-600',
-                            'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />'
-                        ],
-                        'rejected' => [
-                            'border' => 'border-red-200 hover:border-red-300',
-                            'strip' => 'bg-red-500',
-                            'badge' => 'bg-red-100 text-red-700',
-                            'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />'
-                        ],
-                        default => [
-                            'border' => 'border-gray-200', 'strip' => 'bg-gray-400', 'badge' => 'bg-gray-100 text-gray-600', 'icon' => ''
-                        ]
-                    };
-                @endphp
-
-                <div class="sr-request-item group relative overflow-hidden rounded-2xl border bg-white shadow-sm transition-all duration-300 hover:shadow-md {{ $theme['border'] }}"
-                    data-category="{{ optional($service->category)->hc_name ?? 'Other' }}">
+                <div class="sr-request-item group relative overflow-hidden rounded-2xl border bg-white shadow-sm transition-all duration-300 hover:shadow-md {{ $request->ui_helper_completed_theme['border'] }}"
+                    data-category="{{ optional(optional($request->studentService)->category)->hc_name ?? 'Other' }}">
                     
-                    <div class="absolute top-0 left-0 right-0 h-1 {{ $theme['strip'] }}"></div>
+                    <div class="absolute top-0 left-0 right-0 h-1 {{ $request->ui_helper_completed_theme['strip'] }}"></div>
 
                     <div class="p-5 sm:p-6">
                         
                         <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mb-4">
                             <div class="flex-1">
                                 <div class="flex items-center gap-3 mb-2">
-                                    <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide {{ $theme['badge'] }}">
+                                    <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide {{ $request->ui_helper_completed_theme['badge'] }}">
                                         {{ strtoupper($request->hsr_status) }}
                                     </span>
-                                    <span class="text-xs text-gray-400 font-mono">#{{ $displayId }}</span>
+                                    <span class="text-xs text-gray-400 font-mono">#{{ $request->ui_display_id }}</span>
                                 </div>
                                 <h4 class="text-lg font-bold text-gray-900 leading-tight">
                                     {{ optional($request->studentService)->hss_title ?? 'Custom Request' }}
                                 </h4>
-                                @if(optional($service)->category)
-                      <div class="mt-2 inline-flex items-center gap-1.5 rounded-md px-2 py-1" style="color:{{ $service->category->hc_color }}; background-color: {{ $service->category->hc_color }}10; border: 1px solid {{ $service->category->hc_color }};">
+                                @if(optional(optional($request->studentService)->category))
+                      <div class="mt-2 inline-flex items-center gap-1.5 rounded-md px-2 py-1" style="color:{{ $request->studentService->category->hc_color }}; background-color: {{ $request->studentService->category->hc_color }}10; border: 1px solid {{ $request->studentService->category->hc_color }};">
                                     <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                                     </svg>
                                     <span class="text-xs font-medium">
-                                        {{ $service->category->hc_name }}
+                                        {{ $request->studentService->category->hc_name }}
                                     </span>
                                 </div>
                         @endif
@@ -579,7 +505,7 @@
                                         RM {{ number_format($request->hsr_offered_price, 2) }}
                                     </span>
                                     <div class="text-xs font-medium text-gray-400 uppercase tracking-wide">
-                                          {{ $packageLabel }} Package
+                                          {{ $request->ui_package_label }} Package
                                     </div>
                                 </div>
                             @endif
@@ -633,27 +559,27 @@
                             <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
                                 
                                 {{-- 1. Buyer's Review (Incoming) --}}
-                                @if ($request->reviewForHelper)
-                                    <button onclick='openReviewModal(@json($request->reviewForHelper), "{{ $request->requester->hu_name }}")' 
+                                @if ($request->ui_review_for_helper)
+                                    <button type="button" data-open-buyer-review='@json($request->ui_review_for_helper)' data-reviewer-name="{{ $request->requester->hu_name }}"
                                         class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-yellow-700 bg-yellow-50 hover:bg-yellow-100 border border-yellow-200 transition-all">
                                         <div class="flex gap-0.5 text-yellow-500">
                                             @for ($i = 1; $i <= 5; $i++)
-                                                <i class="{{ $i <= $request->reviewForHelper->hr_rating ? 'fas' : 'far' }} fa-star text-xs"></i>
+                                                <i class="{{ $i <= $request->ui_review_for_helper->hr_rating ? 'fas' : 'far' }} fa-star text-xs"></i>
                                             @endfor
                                         </div>
-                                        <span>{{ $request->reviewForHelper->hr_reply ? 'See Reply' : 'Reply' }}</span>
+                                        <span>{{ $request->ui_review_for_helper->hr_reply ? 'See Reply' : 'Reply' }}</span>
                                     </button>
                                 @elseif($request->hsr_status === 'completed')
                                     <span class="text-xs text-gray-400 italic py-2">Waiting for buyer review...</span>
                                 @endif
 
                                 {{-- 2. Seller's Review (Outgoing) --}}
-                                @if ($request->reviewByHelper)
+                                @if ($request->ui_reviewed_by_auth)
                                     <div class="inline-flex items-center justify-center gap-2 px-3 py-2 text-xs font-medium rounded-lg bg-green-50 text-green-700 border border-green-200">
                                         <i class="fas fa-check"></i> You rated buyer
                                     </div>
                                 @elseif($request->hsr_status === 'completed')
-                                    <button onclick="openSellerReviewModal({{ $request->hsr_id }})" 
+                                    <button type="button" data-open-seller-review="{{ $request->hsr_id }}"
                                         class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm transition-all hover:shadow-md">
                                         <i class="fas fa-star"></i> Rate Buyer
                                     </button>
@@ -680,7 +606,7 @@
                                 {{-- Header --}}
                                 <div class="flex justify-between items-center p-4 border-b">
                                     <h3 class="text-lg font-bold text-gray-900">Verify Payment Proof</h3>
-                                    <button onclick="closeProofModal()"
+                                    <button type="button" data-close-proof
                                         class="text-gray-400 hover:text-gray-600 transition-colors">
                                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -721,7 +647,7 @@
 
                                 {{-- Footer: Decisions --}}
                                 <div class="p-4 border-t bg-gray-50 rounded-b-xl flex gap-3 shrink-0">
-                                    <button onclick="submitDecision('unpaid_problem')"
+                                    <button type="button" data-submit-decision="unpaid_problem"
                                         class="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-white border border-red-200 text-red-600 rounded-lg font-semibold hover:bg-red-50 transition-colors">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -730,7 +656,7 @@
                                         Reject / Report
                                     </button>
 
-                                    <button onclick="submitDecision('paid')"
+                                    <button type="button" data-submit-decision="paid"
                                         class="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700 shadow-md transition-colors">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -762,7 +688,7 @@
                                             <div class="flex items-center justify-between">
                                                 <h3 class="text-base font-semibold leading-6 text-white" id="modal-title">
                                                     Buyer Review</h3>
-                                                <button type="button" onclick="closeReviewModal()"
+                                                <button type="button" data-close-review
                                                     class="text-indigo-200 hover:text-white">
                                                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24"
                                                         stroke="currentColor">
@@ -853,7 +779,7 @@
                                                 <h3 class="text-base font-semibold leading-6 text-white">
                                                     Rate This Buyer
                                                 </h3>
-                                                <button type="button" onclick="closeSellerReviewModal()"
+                                                <button type="button" data-close-seller-review
                                                     class="text-indigo-200 hover:text-white focus:outline-none">
                                                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24"
                                                         stroke="currentColor">
@@ -866,7 +792,7 @@
 
                                         {{-- Modal Body --}}
                                         <div class="px-4 pt-5 pb-4 sm:p-6">
-                                            <form id="sellerReviewForm" onsubmit="submitSellerReview(event)">
+                                            <form id="sellerReviewForm">
                                                 <input type="hidden" name="service_request_id"
                                                     id="sellerReviewRequestId">
                                                 <input type="hidden" name="rating" id="sellerReviewRating">
@@ -878,8 +804,7 @@
                                                     <div class="flex justify-center gap-2 text-2xl cursor-pointer">
                                                         @for ($i = 1; $i <= 5; $i++)
                                                             <i class="far fa-star text-gray-300 hover:text-yellow-400 transition-colors seller-star-input"
-                                                                data-value="{{ $i }}"
-                                                                onclick="setSellerRating({{ $i }})"></i>
+                                                                data-value="{{ $i }}" data-set-seller-rating="{{ $i }}"></i>
                                                         @endfor
                                                     </div>
                                                     <p class="text-xs text-red-500 mt-1 hidden" id="ratingError">Please
@@ -903,7 +828,7 @@
                                                         class="inline-flex w-full justify-center rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 sm:col-start-2">
                                                         Submit Review
                                                     </button>
-                                                    <button type="button" onclick="closeSellerReviewModal()"
+                                                    <button type="button" data-close-seller-review
                                                         class="mt-3 inline-flex w-full justify-center rounded-lg bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:col-start-1 sm:mt-0">
                                                         Cancel
                                                     </button>
@@ -915,530 +840,17 @@
                             </div>
                         </div>
 
-                        <script>
-                            function openReviewModal(review, requesterName) {
-                                // 1. Populate Buyer Review
-                                document.getElementById('modalRequesterName').innerText = requesterName;
-                                document.getElementById('modalComment').innerText = review.hr_comment || review.comment || 'No textual comment provided.';
-                                const reviewCreatedAt = review.created_at || review.hr_created_at;
-                                document.getElementById('modalDate').innerText = reviewCreatedAt ? new Date(reviewCreatedAt).toLocaleDateString(undefined, {
-                                    year: 'numeric',
-                                    month: 'long',
-                                    day: 'numeric'
-                                }) : 'Unknown date';
-
-                                // Generate Stars
-                                let starsHtml = '';
-                                for (let i = 1; i <= 5; i++) {
-                                    starsHtml += `<i class="${i <= (review.hr_rating || review.rating || 0) ? 'fas' : 'far'} fa-star"></i>`;
-                                }
-                                document.getElementById('modalStars').innerHTML = starsHtml;
-
-                                // 2. Handle Reply State
-                                const replyForm = document.getElementById('replyForm');
-                                const viewReplyContainer = document.getElementById('viewReplyContainer');
-
-                                if (review.hr_reply || review.reply) {
-                                    replyForm.classList.add('hidden');
-                                    viewReplyContainer.classList.remove('hidden');
-                                    document.getElementById('modalReplyText').innerText = review.hr_reply || review.reply;
-                                    const repliedAt = review.hr_replied_at || review.replied_at;
-                                    document.getElementById('modalRepliedAt').innerText = repliedAt ? new Date(repliedAt).toLocaleDateString() : 'Unknown date';
-                                } else {
-                                    viewReplyContainer.classList.add('hidden');
-                                    replyForm.classList.remove('hidden');
-                                    const reviewId = review.hr_id || review.id;
-                                    if (!reviewId) {
-                                        Swal.fire({ icon: 'error', title: 'Invalid review', text: 'Unable to find review ID for reply.' });
-                                        return;
-                                    }
-                                    replyForm.action = "{{ url('reviews') }}/" + reviewId + "/reply";
-
-                                }
-
-                                document.getElementById('reviewModal').classList.remove('hidden');
-                            }
-
-                            function finalizeOrder(id, outcome) {
-                                // 1. Define Text based on outcome
-                                let title = outcome === 'paid' ? 'Mark as Paid & Complete?' : 'Report Unpaid?';
-                                let text = outcome === 'paid' ?
-                                    "By proceeding, you confirm that the payment has been received. This action is irreversible and cannot be changed later." :
-                                    "This will close the order as Unpaid. Are you sure?";
-                                let btnColor = outcome === 'paid' ? '#16a34a' : '#dc2626';
-
-                                // 2. Show Confirmation
-                                Swal.fire({
-                                    title: title,
-                                    text: text,
-                                    icon: 'warning',
-                                    showCancelButton: true,
-                                    confirmButtonColor: btnColor,
-                                    confirmButtonText: 'Yes, Proceed'
-                                }).then((result) => {
-                                    if (result.isConfirmed) {
-                                        // 3. Set the hidden input value ('paid' or 'unpaid_problem')
-                                        document.getElementById('finalize-outcome-' + id).value = outcome;
-
-                                        // 4. Submit the form
-                                        document.getElementById('finalize-form-' + id).submit();
-                                    }
-                                });
-                            }
-
-                            function openDisputeModal(requestId) {
-                                Swal.fire({
-                                    title: 'Report / Dispute Transaction',
-                                    html: `
-                <div class="text-left text-sm text-gray-600 mb-4">
-                    Please select a reason for reporting this buyer:
-                </div>
-                
-                <div class="flex flex-col gap-3 text-left">
-                    <label class="flex items-start gap-3 cursor-pointer p-2 hover:bg-gray-50 rounded border border-transparent hover:border-gray-200">
-                        <input type="radio" name="dispute_reason" value="Buyer did not confirm payment after services complete" class="mt-1" onchange="toggleOtherField(false)">
-                        <span>Buyer did not confirm payment after services complete</span>
-                    </label>
-
-                    <label class="flex items-start gap-3 cursor-pointer p-2 hover:bg-gray-50 rounded border border-transparent hover:border-gray-200">
-                        <input type="radio" name="dispute_reason" value="Buyer is unresponsive (Ghosting)" class="mt-1" onchange="toggleOtherField(false)">
-                        <span>Buyer is unresponsive (Ghosting)</span>
-                    </label>
-
-                    <label class="flex items-start gap-3 cursor-pointer p-2 hover:bg-gray-50 rounded border border-transparent hover:border-gray-200">
-                        <input type="radio" name="dispute_reason" value="Buyer refuses to pay the agreed amount" class="mt-1" onchange="toggleOtherField(false)">
-                        <span>Buyer refuses to pay the agreed amount</span>
-                    </label>
-
-                    <label class="flex items-start gap-3 cursor-pointer p-2 hover:bg-gray-50 rounded border border-transparent hover:border-gray-200">
-                        <input type="radio" name="dispute_reason" value="Buyer is demanding extra work not in agreement" class="mt-1" onchange="toggleOtherField(false)">
-                        <span>Buyer is demanding extra work not in agreement</span>
-                    </label>
-
-                    <label class="flex items-start gap-3 cursor-pointer p-2 hover:bg-gray-50 rounded border border-transparent hover:border-gray-200">
-                        <input type="radio" name="dispute_reason" value="Inappropriate behavior from buyer" class="mt-1" onchange="toggleOtherField(false)">
-                        <span>Inappropriate behavior from buyer</span>
-                    </label>
-
-                    <label class="flex items-start gap-3 cursor-pointer p-2 hover:bg-gray-50 rounded border border-transparent hover:border-gray-200">
-                        <input type="radio" name="dispute_reason" value="other" class="mt-1" onchange="toggleOtherField(true)">
-                        <span class="font-semibold">Other (Specify below)</span>
-                    </label>
-                </div>
-
-                <textarea id="swal-other-reason" class="swal2-textarea hidden" placeholder="Please describe the issue in detail..." style="display:none; margin-top: 15px; font-size: 0.9em;"></textarea>
-            `,
-                                    showCancelButton: true,
-                                    confirmButtonText: 'Submit Report',
-                                    confirmButtonColor: '#d33',
-                                    cancelButtonColor: '#3085d6',
-                                    focusConfirm: false,
-                                    preConfirm: () => {
-                                        const selectedOption = document.querySelector('input[name="dispute_reason"]:checked');
-                                        const otherText = document.getElementById('swal-other-reason').value;
-
-                                        if (!selectedOption) {
-                                            Swal.showValidationMessage('Please select a reason');
-                                            return false;
-                                        }
-
-                                        if (selectedOption.value === 'other') {
-                                            if (!otherText.trim()) {
-                                                Swal.showValidationMessage('Please specify the reason for "Other"');
-                                                return false;
-                                            }
-                                            return otherText; // Return the typed text
-                                        }
-
-                                        return selectedOption.value; // Return the predefined text
-                                    }
-                                }).then((result) => {
-                                    if (result.isConfirmed) {
-                                        // 1. Put the result into the hidden input
-                                        document.getElementById('dispute-reason-' + requestId).value = result.value;
-
-                                        // 2. Submit the form
-                                        document.getElementById('dispute-form-' + requestId).submit();
-                                    }
-                                });
-                            }
-
-                            // Helper function to show/hide the textarea
-                            function toggleOtherField(show) {
-                                const textArea = document.getElementById('swal-other-reason');
-                                if (show) {
-                                    textArea.style.display = 'block';
-                                    textArea.focus();
-                                } else {
-                                    textArea.style.display = 'none';
-                                }
-                            }
-
-                            function confirmCancelDispute(requestId) {
-                                Swal.fire({
-                                    title: 'Are you sure?',
-                                    text: "This will withdraw your report and immediately mark the order as Completed.",
-                                    icon: 'warning',
-                                    showCancelButton: true,
-                                    confirmButtonColor: '#10B981', // Green color
-                                    cancelButtonColor: '#d33', // Red color
-                                    confirmButtonText: 'Yes, Complete Order',
-                                    cancelButtonText: 'No'
-                                }).then((result) => {
-                                    if (result.isConfirmed) {
-                                        // Submit the specific form based on ID
-                                        document.getElementById('cancel-dispute-form-' + requestId).submit();
-                                    }
-                                });
-                            }
-
-                            // 1. OPEN PROOF MODAL
-                            function openProofModal(fileUrl, requestId) {
-                                const modal = document.getElementById('proofModal');
-                                const img = document.getElementById('proofImage');
-                                const pdf = document.getElementById('proofPdf');
-                                const fallback = document.getElementById('proofFallback');
-                                const link = document.getElementById('proofLink');
-                                const form = document.getElementById('finalizeOrderForm');
-
-                                // Set Form Action Dynamically
-                                // Ensure you have this route defined: Route::post('/service-requests/{id}/finalize', ...)
-                               form.action = "{{ url('service-requests') }}/" + requestId + "/finalize";
-
-                                // Reset viewers
-                                img.classList.add('hidden');
-                                pdf.classList.add('hidden');
-                                fallback.classList.add('hidden');
-                                img.src = '';
-                                pdf.src = '';
-                                link.href = fileUrl;
-
-                                // Detect extension robustly (handles uppercase + query strings)
-                                let ext = '';
-                                try {
-                                    const cleanPath = new URL(fileUrl, window.location.origin).pathname;
-                                    const parts = cleanPath.split('.');
-                                    ext = parts.length > 1 ? parts.pop().toLowerCase() : '';
-                                } catch (e) {
-                                    ext = (fileUrl.split('?')[0].split('.').pop() || '').toLowerCase();
-                                }
-
-                                const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'];
-                                const isImage = imageExts.includes(ext);
-                                const isPdf = ext === 'pdf';
-
-                                if (isImage) {
-                                    img.onerror = function() {
-                                        img.classList.add('hidden');
-                                        fallback.classList.remove('hidden');
-                                    };
-                                    img.src = fileUrl;
-                                    img.classList.remove('hidden');
-                                } else if (isPdf) {
-                                    pdf.src = fileUrl;
-                                    pdf.classList.remove('hidden');
-                                } else {
-                                    fallback.classList.remove('hidden');
-                                }
-
-                                modal.classList.remove('hidden');
-                            }
-
-                            // 2. CLOSE MODAL
-                            function closeProofModal() {
-                                document.getElementById('proofModal').classList.add('hidden');
-                                document.getElementById('proofImage').src = '';
-                                document.getElementById('proofPdf').src = '';
-                            }
-
-                            // 3. SUBMIT DECISION (Paid or Unpaid)
-                            function submitDecision(outcome) {
-                                const form = document.getElementById('finalizeOrderForm');
-                                const input = document.getElementById('finalizeOutcome');
-
-                                input.value = outcome; // 'paid' or 'unpaid_problem'
-
-                                let title = outcome === 'paid' ? 'Confirm Payment?' : 'Report Issue?';
-                                let text = outcome === 'paid' ?
-                                    'This will complete the order.' :
-                                    'This will flag the order as unpaid. Are you sure?';
-                                let color = outcome === 'paid' ? '#16a34a' : '#dc2626';
-
-                                // SweetAlert Confirmation
-                                Swal.fire({
-                                    title: title,
-                                    text: text,
-                                    icon: outcome === 'paid' ? 'question' : 'warning',
-                                    showCancelButton: true,
-                                    confirmButtonColor: color,
-                                    confirmButtonText: 'Yes, Proceed'
-                                }).then((result) => {
-                                    if (result.isConfirmed) {
-                                        form.submit();
-                                    }
-                                });
-                            }
-
-                            function closeReviewModal() {
-                                document.getElementById('reviewModal').classList.add('hidden');
-                            }
-
-                            function openSellerReviewModal(requestId) {
-                                // Reset form
-                                document.getElementById('sellerReviewForm').reset();
-                                document.getElementById('sellerReviewRequestId').value = requestId;
-                                document.getElementById('sellerReviewRating').value = '';
-                                document.getElementById('ratingError').classList.add('hidden');
-
-                                // Reset Stars visual
-                                document.querySelectorAll('.seller-star-input').forEach(star => {
-                                    star.classList.remove('fas', 'text-yellow-400');
-                                    star.classList.add('far', 'text-gray-300');
-                                });
-
-                                document.getElementById('sellerReviewModal').classList.remove('hidden');
-                            }
-
-                            function closeSellerReviewModal() {
-                                document.getElementById('sellerReviewModal').classList.add('hidden');
-                            }
-
-                            function setSellerRating(rating) {
-                                document.getElementById('sellerReviewRating').value = rating;
-                                document.getElementById('ratingError').classList.add('hidden');
-
-                                const stars = document.querySelectorAll('.seller-star-input');
-                                stars.forEach(star => {
-                                    const val = parseInt(star.getAttribute('data-value'));
-                                    if (val <= rating) {
-                                        star.classList.remove('far', 'text-gray-300');
-                                        star.classList.add('fas', 'text-yellow-400');
-                                    } else {
-                                        star.classList.remove('fas', 'text-yellow-400');
-                                        star.classList.add('far', 'text-gray-300');
-                                    }
-                                });
-                            }
-
-                            function submitSellerReview(event) {
-                                event.preventDefault();
-                                const rating = document.getElementById('sellerReviewRating').value;
-                                const requestId = document.getElementById('sellerReviewRequestId').value;
-                                const comment = document.getElementById('sellerComment').value;
-
-                                if (!rating) {
-                                    document.getElementById('ratingError').classList.remove('hidden');
-                                    return;
-                                }
-
-                                Swal.fire({
-                                    title: 'Submitting Review...',
-                                    allowOutsideClick: false,
-                                    didOpen: () => Swal.showLoading()
-                                });
-
-                                // Send AJAX Request to your existing Controller
-                                fetch("{{ route('reviews.store') }}", {
-                                        method: "POST",
-                                        headers: {
-                                            "Content-Type": "application/json",
-                                            "X-CSRF-TOKEN": "{{ csrf_token() }}",
-                                            "Accept": "application/json"
-                                        },
-                                        body: JSON.stringify({
-                                            service_request_id: requestId,
-                                            rating: rating,
-                                            comment: comment
-                                        })
-                                    })
-                                    .then(response => response.json())
-                                    .then(data => {
-                                        if (data.success) {
-                                            closeSellerReviewModal();
-                                            Swal.fire({
-                                                title: 'Review Submitted!',
-                                                text: 'Thank you for rating the Buyer.',
-                                                icon: 'success',
-                                                timer: 1500,
-                                                showConfirmButton: false
-                                            }).then(() => {
-                                                location.reload();
-                                            });
-                                        } else {
-                                            Swal.fire('Error', data.message || 'Could not submit review', 'error');
-                                        }
-                                    })
-                                    .catch(error => {
-                                        console.error(error);
-                                        Swal.fire('Error', 'An unexpected error occurred.', 'error');
-                                    });
-                            }
-
-                            function openRejectModal(requestId) {
-                                Swal.fire({
-                                    title: 'Reject Request?',
-                                    text: "Please provide a reason for the requester.",
-                                    input: 'textarea', // Creates a text box
-                                    inputPlaceholder: 'e.g. I am fully booked on this date...',
-                                    inputAttributes: {
-                                        'aria-label': 'Type your rejection reason here'
-                                    },
-                                    showCancelButton: true,
-                                    confirmButtonColor: '#d33',
-                                    cancelButtonColor: '#3085d6',
-                                    confirmButtonText: 'Yes, Reject it',
-                                    preConfirm: (reason) => {
-                                        if (!reason) {
-                                            Swal.showValidationMessage('You must provide a reason!')
-                                        }
-                                        return reason; // Returns the text value
-                                    }
-                                }).then((result) => {
-                                    if (result.isConfirmed) {
-                                        // 1. Get the form
-                                        const form = document.getElementById('reject-form-' + requestId);
-
-                                        // 2. Create a hidden input for the reason
-                                        const input = document.createElement('input');
-                                        input.type = 'hidden';
-                                        input.name = 'rejection_reason';
-                                        input.value = result.value; // The text from SweetAlert
-
-                                        // 3. Append and Submit
-                                        form.appendChild(input);
-                                        form.submit();
-                                    }
-                                });
-                            }
-                        </script>
-
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-    <script>
-        // 1. Tab Switching Logic
-        function showStatusTab(status) {
-            // Hide all tab contents
-            document.querySelectorAll('.sr-status-tab-content').forEach(content => {
-                content.classList.add('hidden');
-            });
-
-            // Reset all tab buttons
-            document.querySelectorAll('.sr-status-tab-button').forEach(button => {
-                button.classList.remove('text-indigo-600', 'border-b-2', 'border-indigo-600');
-                button.classList.add('text-gray-500', 'hover:text-custom-teal');
-            });
-
-            // Show active content
-            const targetContent = document.getElementById(status + '-content');
-            if (targetContent) targetContent.classList.remove('hidden');
-
-            // Highlight active button
-            const targetButton = document.getElementById(status + '-tab');
-            if (targetButton) {
-                targetButton.classList.remove('text-gray-500', 'hover:text-custom-teal');
-                targetButton.classList.add('text-indigo-600', 'border-b-2', 'border-indigo-600');
-            }
-        }
-
-        // Search function
-        document.addEventListener('DOMContentLoaded', function() {
-            const searchInput = document.getElementById('request-search');
-
-            if (searchInput) {
-                searchInput.addEventListener('input', function() {
-                    const query = this.value.toLowerCase().trim();
-
-                    // Select all request cards across all tabs
-                    const items = document.querySelectorAll('.sr-request-item');
-
-                    items.forEach(item => {
-                        // Get the text content of the card (Title, Name, Status, etc.)
-                        const text = item.textContent.toLowerCase();
-
-                        // Show or Hide based on match
-                        if (text.includes(query)) {
-                            item.style.display = ''; // Reset to default (show)
-                        } else {
-                            item.style.display = 'none'; // Hide
-                        }
-                    });
-                });
-            }
-        });
-
-        // 2. Action Triggers
-        async function acceptRequest(id) {
-            confirmAction(id, 'accept', 'Accept Request?', 'You can start working on this service once accepted.',
-                '#16a34a', 'Yes, Accept');
-        }
-
-        async function rejectRequest(id) {
-            confirmAction(id, 'reject', 'Reject Request?', 'The requester will be notified.', '#dc2626', 'Yes, Reject');
-        }
-
-        async function markInProgress(id) {
-            confirmAction(id, 'progress', 'Start Work?', 'The status will change to In Progress.', '#2563eb',
-                'Yes, Start');
-        }
-
-        async function markWorkFinished(id) {
-            confirmAction(id, 'finish-work', 'Finish Work?',
-                'This will notify Buyer the work is done and waiting for payment.', '#2563eb',
-                'Yes, Finish');
-        }
-
-        async function markCompleted(id) {
-            confirmAction(id, 'completed', 'Mark as Completed?', 'This will notify the Buyer the work is done.',
-                '#4f46e5', 'Yes, Complete');
-        }
-
-        // 3. Reusable SweetAlert & Fetch Logic
-        function confirmAction(id, type, title, text, confirmColor, confirmText) {
-            Swal.fire({
-                title: title,
-                text: text,
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: confirmColor,
-                cancelButtonColor: '#6b7280',
-                confirmButtonText: confirmText,
-                cancelButtonText: 'Cancel',
-                reverseButtons: true
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    const formId = `${type}-form-${id}`;
-                    const form = document.getElementById(formId);
-
-                    if (!form) {
-                        Swal.fire('Error', 'Form not found for this action.', 'error');
-                        return;
-                    }
-
-                    // Show loading state
-                    Swal.fire({
-                        title: 'Processing...',
-                        allowOutsideClick: false,
-                        didOpen: () => Swal.showLoading()
-                    });
-
-                    // Directly submit the form instead of using fetch
-                    form.submit();
-                }
-            });
-        }
-
-        // 4. Initialize Tabs on Load
-        document.addEventListener('DOMContentLoaded', function() {
-            // Check URL for 'tab' parameter or default to 'pending'
-            const urlParams = new URLSearchParams(window.location.search);
-            const activeTab = urlParams.get('tab') || '{{ $defaultStatusTab }}';
-            showStatusTab(activeTab);
-        });
-    </script>
+    <div id="serviceRequestsHelperConfig"
+        data-default-status-tab="{{ $defaultStatusTab }}"
+        data-finalize-url-template="{{ url('/service-requests/__ID__/finalize') }}"
+        data-reviews-store-url="{{ route('reviews.store') }}"
+        data-reviews-reply-url-template="{{ url('/reviews/__ID__/reply') }}"></div>
+    @push('scripts')
+        <script src="{{ asset('js/nonadmin-service-requests-helper.js') }}"></script>
+    @endpush
 @endsection

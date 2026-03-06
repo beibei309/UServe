@@ -1,28 +1,5 @@
 @auth
-    @php
-        $user = auth()->user();
-        $isRestricted = $user->hu_is_blocked || $user->hu_is_suspended || $user->hu_is_blacklisted;
-        $isCommunityUnverified =
-            $user->hu_role === 'community' &&
-            $user->hu_verification_status !== 'approved' &&
-            !$isRestricted &&
-            $user->hasVerifiedEmail();
-
-        $isOnCommunityOnboarding = request()->routeIs('onboarding.community.*');
-        $isPending = $user->hu_verification_status === 'pending';
-        $hasFiles = !empty($user->hu_verification_document_path) && !empty($user->hu_selfie_media_path);
-        $reviewInProgress = $isPending && $hasFiles;
-
-        $title = $reviewInProgress ? 'Verification in Progress' : 'Verification Required';
-        $message = $reviewInProgress
-            ? 'Your submitted document and selfie are currently being reviewed by the admin team.'
-            : 'To keep the platform safe, please complete your community verification before continuing.';
-        $reason = $user->hu_verification_note ?: ($reviewInProgress
-            ? 'Status: Pending admin review.'
-            : 'Proof of residency and selfie are required.');
-    @endphp
-
-    @if($isCommunityUnverified && !$isOnCommunityOnboarding)
+    @if($verificationModalData['isCommunityUnverified'] && !$verificationModalData['isOnCommunityOnboarding'])
         <div class="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/80 backdrop-blur-sm p-4 animate-in fade-in duration-300">
             <div class="bg-white border border-slate-200 rounded-2xl shadow-2xl max-w-md w-full p-8 text-center relative overflow-hidden">
                 <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-indigo-500 to-blue-600"></div>
@@ -33,16 +10,16 @@
                     </svg>
                 </div>
 
-                <h2 class="text-2xl font-bold text-slate-900 mb-3">{{ $title }}</h2>
-                <p class="text-slate-600 mb-6 leading-relaxed">{{ $message }}</p>
+                <h2 class="text-2xl font-bold text-slate-900 mb-3">{{ $verificationModalData['title'] }}</h2>
+                <p class="text-slate-600 mb-6 leading-relaxed">{{ $verificationModalData['message'] }}</p>
 
                 <div class="bg-indigo-50 p-4 rounded-xl text-left border border-indigo-100 mb-6">
                     <p class="text-xs font-bold text-indigo-600 uppercase tracking-wide">Reason</p>
-                    <p class="text-sm text-slate-800 italic mt-1">"{{ $reason }}"</p>
+                    <p class="text-sm text-slate-800 italic mt-1">"{{ $verificationModalData['reason'] }}"</p>
                 </div>
 
                 <div class="space-y-3">
-                    @if(!$reviewInProgress)
+                    @if(!$verificationModalData['reviewInProgress'])
                         <a href="{{ route('onboarding.community.verify') }}"
                             class="block w-full bg-indigo-600 text-white font-bold py-3.5 px-6 rounded-xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 active:scale-[0.99]">
                             Complete Verification Now

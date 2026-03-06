@@ -127,6 +127,11 @@ public function favoriteServices()
     )->withTimestamps();
 }
 
+    public function favorites()
+    {
+        return $this->hasMany(Favorite::class, 'hf_user_id', 'hu_id');
+    }
+
     public function notifications(): MorphMany
     {
         return $this->morphMany(DatabaseNotification::class, 'hn_notifiable')
@@ -170,6 +175,33 @@ public function favoriteServices()
     public function isAvailable(): bool
     {
         return (bool) $this->hu_is_available;
+    }
+
+    public function isHardLocked(): bool
+    {
+        return (bool) ($this->hu_is_suspended || $this->hu_is_blacklisted);
+    }
+
+    public function isSellerRestricted(): bool
+    {
+        return (bool) ($this->isHardLocked() || $this->hu_is_blocked);
+    }
+
+    public function moderationStatusKey(): string
+    {
+        if ($this->hu_is_blacklisted) {
+            return 'blacklisted';
+        }
+
+        if ($this->hu_is_suspended) {
+            return 'suspended';
+        }
+
+        if ($this->hu_is_blocked) {
+            return 'blocked';
+        }
+
+        return 'active';
     }
 
     public function getTrustBadgeAttribute(): string

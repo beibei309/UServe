@@ -24,34 +24,38 @@
                 <p class="mt-2 text-sm text-gray-500">Join the community to connect, learn, and earn.</p>
             </div>
 
-            <form method="POST" action="{{ route('register') }}" class="space-y-5" x-data="{ role: '{{ old('role', 'student') }}', communityType: '{{ old('community_type', 'public') }}' }">
+            <form method="POST" action="{{ route('register') }}" class="space-y-5" id="registerForm">
                 @csrf
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-3">I am registering as:</label>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <label class="relative flex flex-col p-4 bg-white border rounded-xl cursor-pointer transition-all hover:shadow-md"
-                            :class="role === 'student' ? 'border-indigo-600 ring-1 ring-indigo-600 bg-indigo-50/50' : 'border-gray-200 hover:border-gray-300'">
-                            <input type="radio" name="role" value="student" x-model="role" class="sr-only">
+                        <label class="relative flex flex-col p-4 bg-white border rounded-xl cursor-pointer transition-all hover:shadow-md {{ $registerUi['is_student_selected'] ? 'border-indigo-600 ring-1 ring-indigo-600 bg-indigo-50/50' : 'border-gray-200 hover:border-gray-300' }}"
+                            data-role-card="student"
+                            data-active-class="border-indigo-600 ring-1 ring-indigo-600 bg-indigo-50/50"
+                            data-inactive-class="border-gray-200 hover:border-gray-300">
+                            <input type="radio" name="role" value="student" class="sr-only" {{ $registerUi['is_student_selected'] ? 'checked' : '' }}>
                             <span class="flex items-center gap-2 mb-1">
                                 <span class="font-semibold text-gray-900">Student</span>
                                 <span class="bg-indigo-100 text-indigo-700 text-[10px] font-bold px-2 py-0.5 rounded-full">UPSI</span>
                             </span>
                             <span class="text-xs text-gray-500">I want to offer services or find help.</span>
-                            <div x-show="role === 'student'" class="absolute top-4 right-4 text-indigo-600">
+                            <div data-role-check="student" class="absolute top-4 right-4 text-indigo-600 {{ $registerUi['is_student_selected'] ? '' : 'hidden' }}">
                                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
                             </div>
                         </label>
 
-                        <label class="relative flex flex-col p-4 bg-white border rounded-xl cursor-pointer transition-all hover:shadow-md"
-                            :class="role === 'community' ? 'border-indigo-600 ring-1 ring-indigo-600 bg-indigo-50/50' : 'border-gray-200 hover:border-gray-300'">
-                            <input type="radio" name="role" value="community" x-model="role" class="sr-only">
+                        <label class="relative flex flex-col p-4 bg-white border rounded-xl cursor-pointer transition-all hover:shadow-md {{ $registerUi['is_community_selected'] ? 'border-indigo-600 ring-1 ring-indigo-600 bg-indigo-50/50' : 'border-gray-200 hover:border-gray-300' }}"
+                            data-role-card="community"
+                            data-active-class="border-indigo-600 ring-1 ring-indigo-600 bg-indigo-50/50"
+                            data-inactive-class="border-gray-200 hover:border-gray-300">
+                            <input type="radio" name="role" value="community" class="sr-only" {{ $registerUi['is_community_selected'] ? 'checked' : '' }}>
                             <span class="flex items-center gap-2 mb-1">
                                 <span class="font-semibold text-gray-900">Community</span>
                                 <span class="bg-yellow-100 text-yellow-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Public/Staff</span>
                             </span>
                             <span class="text-xs text-gray-500">I want to hire students for tasks.</span>
-                            <div x-show="role === 'community'" class="absolute top-4 right-4 text-indigo-600">
+                            <div data-role-check="community" class="absolute top-4 right-4 text-indigo-600 {{ $registerUi['is_community_selected'] ? '' : 'hidden' }}">
                                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
                             </div>
                         </label>
@@ -62,7 +66,7 @@
                 <div class="space-y-4">
                     <div>
                         <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                        <input id="name" type="text" name="name" :value="old('name')" required autofocus autocomplete="name"
+                        <input id="name" type="text" name="name" value="{{ old('name') }}" required autofocus autocomplete="name"
                             class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-colors"
                             placeholder="John Doe">
                         <x-input-error :messages="$errors->get('name')" class="mt-1 text-red-500 text-xs" />
@@ -70,7 +74,7 @@
 
                     <div>
                         <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-                        <input id="email" type="email" name="email" :value="old('email')" required autocomplete="username"
+                        <input id="email" type="email" name="email" value="{{ old('email') }}" required autocomplete="username"
                             class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-colors"
                             placeholder="email@mail.com">
                         <x-input-error :messages="$errors->get('email')" class="mt-1 text-red-500 text-xs" />
@@ -79,14 +83,13 @@
                     
                 </div>
 
-                <div x-show="role === 'student'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0"
-                     class="bg-indigo-50 p-4 rounded-xl border border-indigo-100 space-y-4">
+                <div data-role-section="student" class="bg-indigo-50 p-4 rounded-xl border border-indigo-100 space-y-4 {{ $registerUi['show_student_section'] ? '' : 'hidden' }}">
                     
                     <h3 class="text-xs font-bold text-indigo-800 uppercase tracking-wider mb-2">Student Verification</h3>
                     
                     <div>
                         <label for="student_id" class="block text-sm font-medium text-gray-700 mb-1">Student ID</label>
-                        <input id="student_id" type="text" name="student_id" :value="old('student_id')" 
+                        <input id="student_id" type="text" name="student_id" value="{{ old('student_id') }}" 
                             class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
                             placeholder="D202XXXXXX">
                         <x-input-error :messages="$errors->get('student_id')" class="mt-1 text-red-500 text-xs" />
@@ -101,14 +104,13 @@
                 </div>
                 <div>
                         <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                        <input id="phone" type="tel" name="phone" :value="old('phone')" required
+                        <input id="phone" type="tel" name="phone" value="{{ old('phone') }}" required
                             class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-colors"
                             placeholder="0123456789">
                         <x-input-error :messages="$errors->get('phone')" class="mt-1 text-red-500 text-xs" />
                     </div>
 
-                <div x-show="role === 'community'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0"
-                     class="bg-yellow-50 p-4 rounded-xl border border-yellow-100 space-y-4">
+                <div data-role-section="community" class="bg-yellow-50 p-4 rounded-xl border border-yellow-100 space-y-4 {{ $registerUi['show_community_section'] ? '' : 'hidden' }}">
                     
                     <h3 class="text-xs font-bold text-yellow-800 uppercase tracking-wider mb-2">Community Details</h3>
 
@@ -116,11 +118,11 @@
                         <span class="block text-sm font-medium text-gray-700 mb-2">I am a:</span>
                         <div class="flex gap-4">
                             <label class="flex items-center gap-2 cursor-pointer">
-                                <input type="radio" name="community_type" value="public" x-model="communityType" class="text-indigo-600 focus:ring-indigo-500">
+                                <input type="radio" name="community_type" value="public" class="text-indigo-600 focus:ring-indigo-500" {{ $registerUi['initial_community_type'] === 'public' ? 'checked' : '' }}>
                                 <span class="text-sm text-gray-700">Public User</span>
                             </label>
                             <label class="flex items-center gap-2 cursor-pointer">
-                                <input type="radio" name="community_type" value="staff" x-model="communityType" class="text-indigo-600 focus:ring-indigo-500">
+                                <input type="radio" name="community_type" value="staff" class="text-indigo-600 focus:ring-indigo-500" {{ $registerUi['initial_community_type'] === 'staff' ? 'checked' : '' }}>
                                 <span class="text-sm text-gray-700">UPSI Staff</span>
                             </label>
                         </div>
@@ -129,8 +131,8 @@
                     <div class="flex items-start gap-3 bg-white/60 p-3 rounded-lg border border-yellow-200">
                         <svg class="w-5 h-5 text-yellow-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>
                         <p class="text-xs text-yellow-800 leading-snug">
-                            <span x-show="communityType === 'staff'">Staff: Use your <b>@upsi.edu.my</b> email above for auto-verification.</span>
-                            <span x-show="communityType === 'public'">Public: You will need to upload proof of ID/Residence.</span>
+                            <span data-community-message="staff" class="{{ $registerUi['initial_community_type'] === 'staff' ? '' : 'hidden' }}">Staff: Use your <b>@upsi.edu.my</b> email above for auto-verification.</span>
+                            <span data-community-message="public" class="{{ $registerUi['initial_community_type'] === 'public' ? '' : 'hidden' }}">Public: You will need to upload proof of ID/Residence.</span>
                         </p>
                     </div>
                 </div>
@@ -186,4 +188,8 @@
             </a>
         </div>
     </div>
+    <div id="registerConfig"
+        data-initial-role="{{ $registerUi['initial_role'] }}"
+        data-initial-community-type="{{ $registerUi['initial_community_type'] }}"></div>
+    <script src="{{ asset('js/nonadmin-auth-register.js') }}"></script>
 </x-guest-layout>

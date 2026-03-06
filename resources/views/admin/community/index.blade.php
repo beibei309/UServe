@@ -44,10 +44,8 @@
 
                 @if (request('search') || request('rating_range'))
                     <a href="{{ route('admin.community.index', ['status' => request('status')]) }}"
-                        class="px-3 py-3 border rounded-xl text-sm transition-all duration-300 hover:shadow-md"
+                        class="px-3 py-3 border rounded-xl text-sm transition-all duration-300 hover:shadow-md surface-hover"
                         style="color: var(--text-secondary); background-color: var(--bg-tertiary); border-color: var(--border-color);"
-                        onmouseover="this.style.backgroundColor = 'var(--hover-bg)';"
-                        onmouseout="this.style.backgroundColor = 'var(--bg-tertiary)';"
                         title="Clear Filters">
                         <i class="fa-solid fa-xmark"></i>
                     </a>
@@ -65,42 +63,29 @@
 
         <!-- FILTER PILLS -->
         <div class="flex flex-wrap gap-3 mb-8">
-
-            @php
-                $pill = 'px-6 py-3 rounded-xl text-sm font-medium transition-all duration-300 shadow-lg';
-                $active = 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-cyan-500/25 hover:shadow-xl';
-                $inactive = 'border shadow-md hover:shadow-lg';
-            @endphp
-
             <!-- ALL -->
             <a href="{{ route('admin.community.index', request()->except('status')) }}"
-                class="{{ $pill }} {{ request('status') == null ? $active : $inactive }}"
+                class="px-6 py-3 rounded-xl text-sm font-medium transition-all duration-300 shadow-lg {{ request('status') == null ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-cyan-500/25 hover:shadow-xl' : 'border shadow-md hover:shadow-lg' }}"
                 @if(request('status') != null)
                 style="color: var(--text-secondary); background-color: var(--bg-tertiary); border-color: var(--border-color);"
-                onmouseover="this.style.backgroundColor = 'var(--hover-bg)';"
-                onmouseout="this.style.backgroundColor = 'var(--bg-tertiary)';"
                 @endif>
                 All
             </a>
 
             <!-- ACTIVE -->
             <a href="{{ route('admin.community.index', ['status' => 'active'] + request()->except('page')) }}"
-                class="{{ $pill }} {{ request('status') == 'active' ? $active : $inactive }}"
+                class="px-6 py-3 rounded-xl text-sm font-medium transition-all duration-300 shadow-lg {{ request('status') == 'active' ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-cyan-500/25 hover:shadow-xl' : 'border shadow-md hover:shadow-lg' }}"
                 @if(request('status') != 'active')
                 style="color: var(--text-secondary); background-color: var(--bg-tertiary); border-color: var(--border-color);"
-                onmouseover="this.style.backgroundColor = 'var(--hover-bg)';"
-                onmouseout="this.style.backgroundColor = 'var(--bg-tertiary)';"
                 @endif>
                 Active
             </a>
 
             <!-- BLACKLISTED -->
             <a href="{{ route('admin.community.index', ['status' => 'suspended'] + request()->except('page')) }}"
-                class="{{ $pill }} {{ request('status') == 'blacklisted' ? $active : $inactive }}"
+                class="px-6 py-3 rounded-xl text-sm font-medium transition-all duration-300 shadow-lg {{ request('status') == 'blacklisted' ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-cyan-500/25 hover:shadow-xl' : 'border shadow-md hover:shadow-lg' }}"
                 @if(request('status') != 'blacklisted')
                 style="color: var(--text-secondary); background-color: var(--bg-tertiary); border-color: var(--border-color);"
-                onmouseover="this.style.backgroundColor = 'var(--hover-bg)';"
-                onmouseout="this.style.backgroundColor = 'var(--bg-tertiary)';"
                 @endif>
                 Suspended
             </a>
@@ -126,14 +111,12 @@
 
                 <tbody>
                     @foreach ($communityUsers as $user)
-                        <tr class="border-b transition-all duration-300 hover:shadow-lg"
-                            style="border-color: var(--border-color);"
-                            onmouseover="this.style.backgroundColor = 'var(--hover-bg)';"
-                            onmouseout="this.style.backgroundColor = 'transparent';">
+                        <tr class="border-b transition-all duration-300 hover:shadow-lg surface-hover"
+                            style="border-color: var(--border-color);">
 
                         <td class="py-4 px-6">
                             <div class="flex items-center gap-4">
-                                <img src="{{ $user->hu_profile_photo_path ? asset($user->hu_profile_photo_path) : asset('uploads/profile/default.png') }}"
+                                <img src="{{ $user->profile_image_url }}"
                                     class="w-12 h-12 rounded-full object-cover border-2 transition-colors duration-300 shadow-md"
                                     style="border-color: var(--border-color);">
                                 <div>
@@ -172,35 +155,23 @@
                         </td>
 
                         <td class="py-4 px-6 text-center">
-                            {{-- Check if either flag is true --}}
-                            @if ($user->hu_is_blacklisted || $user->hu_is_suspended)
-                                <span class="inline-flex items-center px-3 py-1 text-sm font-medium bg-red-100 text-red-800 border border-red-200 rounded-full">Suspended</span>
-                                @if ($user->hu_blacklist_reason)
-                                    <p class="text-xs text-red-600 mt-1">{{ $user->hu_blacklist_reason }}</p>
-                                @endif
-                            @elseif($user->hu_verification_status == 'approved')
-                                <span class="inline-flex items-center px-3 py-1 text-sm font-medium bg-green-100 text-green-800 border border-green-200 rounded-full">
-                                    Verified
-                                </span>
-                            @else
-                                <span class="inline-flex items-center px-3 py-1 text-sm font-medium bg-yellow-100 text-yellow-800 border border-yellow-200 rounded-full">
-                                    Not Verified
-                                </span>
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold {{ $user->status_badge_class }}">{{ $user->status_label }}</span>
+                            @if (($user->hu_is_blacklisted || $user->hu_is_suspended) && $user->hu_blacklist_reason)
+                                <p class="text-xs text-red-600 mt-1">{{ $user->hu_blacklist_reason }}</p>
                             @endif
                         </td>
 
-                        <td class="py-4 px-6 text-center whitespace-nowrap">
-                            <div class="flex justify-center gap-3 items-center">
+                        <td class="py-4 px-6 text-center">
+                            <div class="flex flex-wrap justify-center gap-2 items-center">
 
                                 {{-- BUTTON: View Reviews --}}
-                                <button onclick="openReviewsModal('reviews-modal-{{ $user->hu_id }}')"
-                                    class="text-yellow-500 hover:text-yellow-400 transition-colors duration-300 relative group p-2 rounded-lg hover:bg-yellow-50"
+                                <button type="button" data-reviews-open data-modal-id="reviews-modal-{{ $user->hu_id }}"
+                                    class="inline-flex items-center justify-center w-8 h-8 bg-yellow-100 hover:bg-yellow-200 text-yellow-700 rounded-lg text-xs font-semibold transition-all duration-200 relative"
                                     title="Read Reviews">
                                     <i class="fa-solid fa-star-half-stroke"></i>
                                     @if ($user->reviews_received_count > 0)
                                         <span class="absolute -top-1 -right-1 flex h-2 w-2">
-                                            <span
-                                                class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
+                                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
                                             <span class="relative inline-flex rounded-full h-2 w-2 bg-yellow-500"></span>
                                         </span>
                                     @endif
@@ -208,30 +179,28 @@
 
                                 {{-- VIEW --}}
                                 <a href="{{ route('admin.community.view', $user->hu_id) }}"
-                                    class="text-cyan-500 hover:text-cyan-400 transition-colors duration-300 p-2 rounded-lg hover:bg-cyan-50" title="View">
+                                    class="inline-flex items-center justify-center w-8 h-8 bg-cyan-100 hover:bg-cyan-200 text-cyan-700 rounded-lg text-xs font-semibold transition-all duration-200" title="View">
                                     <i class="fa-solid fa-eye"></i>
                                 </a>
 
                                 {{-- EDIT --}}
                                 <a href="{{ route('admin.community.edit', $user->hu_id) }}"
-                                    class="text-blue-500 hover:text-blue-400 transition-colors duration-300 p-2 rounded-lg hover:bg-blue-50" title="Edit">
+                                    class="inline-flex items-center justify-center w-8 h-8 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg text-xs font-semibold transition-all duration-200" title="Edit">
                                     <i class="fa-solid fa-pen-to-square"></i>
                                 </a>
 
                                 {{-- BLACKLIST / UNBLACKLIST --}}
                                 @if (!$user->hu_is_blacklisted && !$user->hu_is_suspended)
-                                    {{-- Show Blacklist Button if user is active --}}
-                                    <button onclick="openBlacklistModal({{ $user->hu_id }})"
-                                        class="text-red-500 hover:text-red-400 transition-colors duration-300 p-2 rounded-lg hover:bg-red-50" title="Blacklist">
+                                    <button type="button" data-blacklist-open data-user-id="{{ $user->hu_id }}"
+                                        class="inline-flex items-center justify-center w-8 h-8 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg text-xs font-semibold transition-all duration-200" title="Blacklist">
                                         <i class="fa-solid fa-ban"></i>
                                     </button>
                                 @else
-                                    {{-- Show Unblacklist Button if user is Blacklisted OR Suspended --}}
                                     <form action="{{ route('admin.community.unblacklist', $user->hu_id) }}" method="POST"
-                                        class="inline unblacklist-form">
+                                        class="inline-flex unblacklist-form">
                                         @csrf
-                                        <button type="button" onclick="confirmUnblacklist(this)"
-                                            class="text-green-500 hover:text-green-400 transition-colors duration-300 p-2 rounded-lg hover:bg-green-50" title="Unblacklist">
+                                        <button type="button" data-unblacklist-confirm
+                                            class="inline-flex items-center justify-center w-8 h-8 bg-green-100 hover:bg-green-200 text-green-700 rounded-lg text-xs font-semibold transition-all duration-200" title="Unblacklist">
                                             <i class="fa-solid fa-unlock"></i>
                                         </button>
                                     </form>
@@ -242,7 +211,7 @@
                                 aria-labelledby="modal-title" role="dialog" aria-modal="true">
 
                                 <div class="fixed inset-0 bg-black bg-opacity-75 transition-opacity backdrop-blur-sm"
-                                    onclick="closeReviewsModal('reviews-modal-{{ $user->hu_id }}')"></div>
+                                    data-reviews-close data-modal-id="reviews-modal-{{ $user->hu_id }}"></div>
 
                                 <div class="fixed inset-0 z-10 overflow-y-auto">
                                     <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
@@ -259,7 +228,7 @@
                                                     Reviews for <span class="text-cyan-400">{{ $user->hu_name }}</span>
                                                 </h3>
                                                 <button type="button"
-                                                    onclick="closeReviewsModal('reviews-modal-{{ $user->hu_id }}')"
+                                                    data-reviews-close data-modal-id="reviews-modal-{{ $user->hu_id }}"
                                                     class="hover:text-cyan-400 transition-colors duration-300"
                                                     style="color: var(--text-muted);">
                                                     <i class="fa-solid fa-xmark text-xl"></i>
@@ -279,20 +248,8 @@
                                                                 style="background-color: var(--bg-tertiary); border-color: var(--border-color);">
 
                                                                 <div class="flex-shrink-0">
-                                                                    @php
-                                                                        $reviewerPath = $review->reviewer->hu_profile_photo_path ?? null;
-                                                                        if ($reviewerPath && \Illuminate\Support\Str::startsWith($reviewerPath, ['http://', 'https://'])) {
-                                                                            $reviewerImage = $reviewerPath;
-                                                                        } elseif ($reviewerPath && file_exists(public_path('storage/' . $reviewerPath))) {
-                                                                            $reviewerImage = asset('storage/' . $reviewerPath);
-                                                                        } elseif ($reviewerPath) {
-                                                                            $reviewerImage = asset($reviewerPath);
-                                                                        } else {
-                                                                            $reviewerImage = asset('uploads/profile/default.png');
-                                                                        }
-                                                                    @endphp
                                                                     <img class="h-10 w-10 rounded-full object-cover"
-                                                                        src="{{ $reviewerImage }}"
+                                                                        src="{{ $review->reviewer_image_url }}"
                                                                         alt="">
                                                                 </div>
 
@@ -333,7 +290,7 @@
                                                                             <p class="text-xs transition-colors duration-300" style="color: var(--text-secondary);">
                                                                                 {{ $review->hr_reply }}</p>
                                                                             <span class="text-[10px] transition-colors duration-300" style="color: var(--text-muted);">
-                                                                                {{ \Carbon\Carbon::parse($review->hr_replied_at)->diffForHumans() }}
+                                                                                {{ $review->replied_at_human }}
                                                                             </span>
                                                                         </div>
                                                                     @endif
@@ -361,7 +318,7 @@
                                             <div class="px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6 border-t transition-colors duration-300"
                                                  style="background-color: var(--bg-tertiary); border-color: var(--border-color);">
                                                 <button type="button"
-                                                    onclick="closeReviewsModal('reviews-modal-{{ $user->hu_id }}')"
+                                                    data-reviews-close data-modal-id="reviews-modal-{{ $user->hu_id }}"
                                                     class="mt-3 inline-flex w-full justify-center rounded-md px-3 py-2 text-sm font-semibold shadow-sm ring-1 ring-inset sm:mt-0 sm:w-auto transition-colors duration-300"
                                                     style="background-color: var(--bg-primary); color: var(--text-primary); border-color: var(--border-color);">
                                                     Close
@@ -402,17 +359,16 @@
             <textarea id="blacklistReason" rows="3" 
                       class="w-full border rounded p-2 transition-colors duration-300"
                       style="background-color: var(--bg-tertiary); border-color: var(--border-color); color: var(--text-primary);"
-                      onfocus="this.style.borderColor = '#ef4444'; this.style.boxShadow = '0 0 0 2px rgba(239, 68, 68, 0.2)';"
                       placeholder="Write reason..."></textarea>
 
             <div class="mt-5 flex justify-end gap-3">
-                <button onclick="closeBlacklistModal()" 
+                <button type="button" data-blacklist-close
                         class="px-4 py-2 rounded transition-colors duration-300 hover:text-cyan-400"
                         style="background-color: var(--bg-tertiary); color: var(--text-secondary);">
                     Cancel
                 </button>
 
-                <button onclick="submitBlacklist()" 
+                <button type="button" data-blacklist-submit
                         class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded transition-colors duration-300">
                     Confirm
                 </button>
@@ -421,87 +377,12 @@
         </div>
     </div>
 
+@endsection
 
-    <script>
-        const csrfToken = "{{ csrf_token() }}";
-        let selectedUserId = null;
-
-        function openReviewsModal(modalId) {
-            document.getElementById(modalId).classList.remove('hidden');
-            // Prevent background scrolling
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeReviewsModal(modalId) {
-            document.getElementById(modalId).classList.add('hidden');
-            // Restore background scrolling
-            document.body.style.overflow = 'auto';
-        }
-
-        function openBlacklistModal(id) {
-            selectedUserId = id;
-            document.getElementById("blacklistModal").classList.remove("hidden");
-        }
-
-        function closeBlacklistModal() {
-            document.getElementById("blacklistModal").classList.add("hidden");
-            document.getElementById("blacklistReason").value = "";
-        }
-
-        function submitBlacklist() {
-            const reason = document.getElementById("blacklistReason").value.trim();
-
-            if (!reason) {
-                alert("Please enter account suspended reason.");
-                return;
-            }
-
-            let form = document.createElement("form");
-            form.method = "POST";
-            form.action = "{{ route('admin.community.blacklist', 'ID_PLACEHOLDER') }}"
-                .replace('ID_PLACEHOLDER', selectedUserId);
-
-            let token = document.createElement("input");
-            token.type = "hidden";
-            token.name = "_token";
-            token.value = "{{ csrf_token() }}";
-            form.appendChild(token);
-
-            let reasonInput = document.createElement("input");
-            reasonInput.type = "hidden";
-            reasonInput.name = "blacklist_reason";
-            reasonInput.value = reason;
-            form.appendChild(reasonInput);
-
-            document.body.appendChild(form);
-            form.submit();
-        }
-
-        @if (session('success'))
-            Swal.fire({
-                icon: 'success',
-                title: 'Success!',
-                text: "{{ session('success') }}",
-                timer: 3000,
-                showConfirmButton: false
-            });
-        @endif
-
-        function confirmUnblacklist(button) {
-            Swal.fire({
-                title: 'Are you sure?',
-                text: "This user will regain access to the platform.",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#10b981',
-                cancelButtonColor: '#6b7280',
-                confirmButtonText: 'Yes, Reactivate user account.'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    button.closest('form').submit();
-                }
-            });
-        }
-    </script>
-
+@section('scripts')
+    <div id="adminModuleCommunityIndexConfig"
+        data-csrf-token="{{ csrf_token() }}"
+        data-blacklist-route-template="{{ route('admin.community.blacklist', 'ID_PLACEHOLDER') }}"
+        data-success-message="{{ session('success') }}"></div>
+    <script src="{{ asset('js/admin-community-index.js') }}"></script>
 @endsection

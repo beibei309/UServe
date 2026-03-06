@@ -19,8 +19,8 @@
     </style>
 </head>
 
-<body class="min-h-screen flex items-center justify-center">
-    <div class="w-full h-screen flex">
+<body class="min-h-screen">
+    <div class="w-full min-h-screen lg:h-screen flex flex-col lg:flex-row">
         <!-- LEFT SIDE - GRADIENT -->
         <div class="hidden lg:flex lg:w-1/2 gradient-bg flex items-center justify-center relative overflow-hidden">
             <div class="absolute inset-0 opacity-20">
@@ -34,16 +34,16 @@
         </div>
 
         <!-- RIGHT SIDE - LOGIN FORM -->
-        <div class="w-full lg:w-1/2 bg-slate-900 flex items-center justify-center p-8 sm:p-12">
-            <div class="w-full max-w-md">
+        <div class="w-full lg:w-1/2 bg-slate-900 flex items-center justify-center p-4 sm:p-6 lg:p-12 min-h-screen lg:min-h-0">
+            <div class="w-full max-w-md bg-slate-900 rounded-2xl sm:rounded-none border border-slate-800 sm:border-0 p-4 sm:p-0">
                 
                 <!-- HEADER -->
-                <div class="mb-12">
-                    <div class="flex items-center gap-3 mb-8">
-                        <div class="w-10 h-10 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-lg"></div>
-                        <span class="text-white text-2xl font-bold">UServe</span>
+                <div class="mb-8 sm:mb-12">
+                    <div class="flex items-center gap-3 mb-6 sm:mb-8">
+                        <div class="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-lg"></div>
+                        <span class="text-white text-xl sm:text-2xl font-bold">UServe</span>
                     </div>
-                    <h2 class="text-white text-3xl font-bold mb-2">Welcome Back!</h2>
+                    <h2 class="text-white text-2xl sm:text-3xl font-bold mb-2">Welcome Back!</h2>
                     <p class="text-slate-400 text-sm">Sign in to your admin account</p>
                 </div>
 
@@ -70,7 +70,7 @@
                     <div class="mb-6">
                         <label class="block text-slate-300 text-sm font-medium mb-3">Email</label>
                         <input type="email" name="email" value="{{ old('email') }}"
-                            class="w-full px-4 py-3 bg-slate-800 border border-slate-700 text-white rounded-lg placeholder-slate-500 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition @error('email') border-red-500 @enderror"
+                            class="w-full px-4 py-2.5 sm:py-3 bg-slate-800 border border-slate-700 text-white rounded-lg placeholder-slate-500 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition @error('email') border-red-500 @enderror"
                             placeholder="admin@example.com" required autofocus>
                         @error('email')
                             <p class="text-red-400 text-xs mt-2">{{ $message }}</p>
@@ -82,10 +82,9 @@
                         <label class="block text-slate-300 text-sm font-medium mb-3">Password</label>
                         <div class="relative">
                             <input type="password" name="password" id="password"
-                                class="w-full px-4 py-3 bg-slate-800 border border-slate-700 text-white rounded-lg placeholder-slate-500 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition pr-12 @error('password') border-red-500 @enderror"
+                                class="w-full px-4 py-2.5 sm:py-3 bg-slate-800 border border-slate-700 text-white rounded-lg placeholder-slate-500 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition pr-12 @error('password') border-red-500 @enderror"
                                 placeholder="••••••••" required>
-                            <button type="button" class="password-toggle absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-300 transition"
-                                onclick="togglePasswordVisibility()">
+                            <button type="button" id="passwordToggle" class="password-toggle absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-300 transition">
                                 <svg id="eyeIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
@@ -98,7 +97,7 @@
                     </div>
 
                     <!-- FORGOT PASSWORD LINK -->
-                    <div class="mb-8 text-right">
+                    <div class="mb-6 sm:mb-8 text-right">
                         <a href="{{ route('password.request') }}" class="text-cyan-400 hover:text-cyan-300 text-sm font-medium transition">
                             Forgot Password?
                         </a>
@@ -106,13 +105,13 @@
 
                     <!-- SIGN IN BUTTON -->
                     <button type="submit"
-                        class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-semibold py-3 rounded-lg shadow-lg hover:shadow-cyan-500/50 transition duration-300 mb-6">
+                        class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-semibold py-2.5 sm:py-3 rounded-lg shadow-lg hover:shadow-cyan-500/50 transition duration-300 mb-6">
                         Sign In
                     </button>
                 </form>
 
                 <!-- FOOTER LINKS -->
-                <div class="flex items-center justify-center gap-4 text-xs text-slate-400 pt-6 border-t border-slate-800">
+                <div class="flex flex-wrap items-center justify-center gap-3 sm:gap-4 text-xs text-slate-400 pt-5 sm:pt-6 border-t border-slate-800">
                     <a href="#" class="hover:text-slate-300 transition">Terms of Use</a>
                     <span>•</span>
                     <a href="#" class="hover:text-slate-300 transition">Privacy Policy</a>
@@ -122,20 +121,7 @@
         </div>
     </div>
 
-    <script>
-        function togglePasswordVisibility() {
-            const password = document.getElementById('password');
-            const eyeIcon = document.getElementById('eyeIcon');
-            
-            if (password.type === 'password') {
-                password.type = 'text';
-                eyeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>';
-            } else {
-                password.type = 'password';
-                eyeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>';
-            }
-        }
-    </script>
+    <script src="{{ asset('js/admin-login.js') }}"></script>
 
 </body>
 </html>

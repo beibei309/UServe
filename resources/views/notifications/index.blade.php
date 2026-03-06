@@ -9,7 +9,7 @@
                     <p class="mt-1 text-sm text-gray-500">Stay updated with your latest activities.</p>
                 </div>
 
-                @if(auth()->user()->unreadNotifications->count() > 0)
+                @if($hasUnreadNotifications)
                     <form action="{{ route('notifications.markAllRead') }}" method="POST">
                         @csrf
                         <button type="submit"
@@ -28,43 +28,13 @@
                 @if($notifications->count() > 0)
                     <ul role="list" class="divide-y divide-gray-100">
                         @foreach($notifications as $notification)
-                            @php
-                                $isUnread = !$notification->read_at;
-                                $iconClass = 'bg-gray-100 text-gray-500';
-                                $icon = '<i class="fa-solid fa-bell"></i>';
-                                
-                                // Determine Icon based on Notification Type
-                                switch ($notification->type) {
-                                    case 'App\Notifications\NewServiceRequest':
-                                        $iconClass = 'bg-blue-100 text-blue-600';
-                                        $icon = '<i class="fa-solid fa-calendar-plus"></i>';
-                                        break;
-                                    case 'App\Notifications\ServiceRequestStatusUpdated':
-                                        if (str_contains(strtolower($notification->data['message'] ?? ''), 'accepted')) {
-                                            $iconClass = 'bg-green-100 text-green-600';
-                                            $icon = '<i class="fa-solid fa-check"></i>';
-                                        } elseif (str_contains(strtolower($notification->data['message'] ?? ''), 'rejected')) {
-                                            $iconClass = 'bg-red-100 text-red-600';
-                                            $icon = '<i class="fa-solid fa-xmark"></i>';
-                                        } else {
-                                            $iconClass = 'bg-indigo-100 text-indigo-600';
-                                            $icon = '<i class="fa-solid fa-info"></i>';
-                                        }
-                                        break;
-                                    case 'App\Notifications\AdminWarningNotification':
-                                        $iconClass = 'bg-red-50 text-red-600 ring-4 ring-red-50';
-                                        $icon = '<i class="fa-solid fa-triangle-exclamation"></i>';
-                                        break;
-                                }
-                            @endphp
-
-                            <li class="group {{ $isUnread ? 'bg-indigo-50/40' : 'bg-white' }} hover:bg-gray-50 transition duration-200 ease-in-out">
+                            <li class="group {{ $notification->ui_is_unread ? 'bg-indigo-50/40' : 'bg-white' }} hover:bg-gray-50 transition duration-200 ease-in-out">
                                 <div class="px-6 py-5">
                                     <div class="flex items-start gap-4">
                                         
                                         <!-- Icon -->
-                                        <div class="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full {{ $iconClass }} shadow-sm">
-                                            {!! $icon !!}
+                                        <div class="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full {{ $notification->ui_icon_class }} shadow-sm">
+                                            {!! $notification->ui_icon !!}
                                         </div>
 
                                         <!-- Content -->
@@ -74,7 +44,7 @@
                                                     {{ $notification->data['title'] ?? 'Notification' }}
                                                 </p>
                                                 <div class="flex items-center">
-                                                    @if($isUnread)
+                                                    @if($notification->ui_is_unread)
                                                         <span class="inline-block w-2.5 h-2.5 bg-indigo-600 rounded-full mr-3 animate-pulse"></span>
                                                     @endif
                                                     <p class="text-xs text-gray-400">
@@ -98,7 +68,7 @@
                                                         </svg>
                                                     </a>
                                                 @else
-                                                     @if($isUnread)
+                                                     @if($notification->ui_is_unread)
                                                         <form action="{{ route('notifications.read', $notification->hn_id) }}" method="POST" class="inline-block">
                                                             @csrf
                                                             <button type="submit" class="text-xs font-medium text-gray-500 hover:text-indigo-600 transition-colors flex items-center gap-1">

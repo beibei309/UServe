@@ -14,6 +14,41 @@ class VerificationController extends Controller
     private const MUALLIM_CENTER_LNG = 101.5927;
     private const MUALLIM_RADIUS_KM = 25;
 
+    public function onboardingCommunity()
+    {
+        $user = Auth::user();
+        if ($user && $user->hu_verification_status === 'approved') {
+            return redirect()->route('dashboard')->with('info', 'Your account is already verified!');
+        }
+        $status = $user->hu_verification_status ?? 'pending';
+        $hasVerificationDocument = !empty($user->hu_verification_document_path);
+        $isPendingReview = $status === 'pending' && $hasVerificationDocument;
+        $isRejected = $status === 'rejected';
+        $showVerificationSteps = $status !== 'pending' || !$hasVerificationDocument || $isRejected;
+        $locationVerified = !empty($user->hu_location_verified_at);
+        $hasProfilePhoto = !empty($user->hu_profile_photo_path);
+        $hasSelfie = !empty($user->hu_selfie_media_path);
+        $communityVerificationUi = [
+            'is_pending_review' => $isPendingReview,
+            'is_rejected' => $isRejected,
+            'show_steps' => $showVerificationSteps,
+            'location_verified' => $locationVerified,
+            'step1_card_class' => $locationVerified ? 'opacity-70 pointer-events-none' : '',
+            'step1_badge_class' => $locationVerified ? 'bg-green-100 text-green-600' : 'bg-indigo-100 text-indigo-600',
+            'step1_badge_text' => $locationVerified ? '✓' : '1',
+            'step2_card_class' => $locationVerified ? '' : 'opacity-50 pointer-events-none',
+            'profile_preview_url' => $hasProfilePhoto
+                ? asset($user->hu_profile_photo_path)
+                : 'https://ui-avatars.com/api/?name=' . urlencode($user->hu_name ?? 'User'),
+            'step3_card_class' => $hasProfilePhoto ? '' : 'opacity-50 pointer-events-none',
+            'selfie_status_text' => $hasSelfie ? 'Selfie Uploaded! ✅' : '',
+            'step4_card_class' => $hasSelfie ? '' : 'opacity-50 pointer-events-none',
+        ];
+        return view('onboarding.community_verification', [
+            'communityVerificationUi' => $communityVerificationUi,
+        ]);
+    }
+
    public function index() {
     $user = Auth::user();
     
@@ -85,14 +120,20 @@ class VerificationController extends Controller
     }
 
     // 5. Pass variables to the view
+    $studentsVerificationUi = [
+        'profile_preview_url' => $user->hu_profile_photo_path
+            ? asset($user->hu_profile_photo_path)
+            : 'https://ui-avatars.com/api/?name=' . urlencode($user->hu_name ?? 'User'),
+    ];
     return view('onboarding.students_verification', compact(
-        'isEligible', 
-        'statusMessage', 
-        'statusColor', 
-        'reason', 
+        'isEligible',
+        'statusMessage',
+        'statusColor',
+        'reason',
         'matricNo',
-        'gradDateDisplay'
-    )); 
+        'gradDateDisplay',
+        'studentsVerificationUi'
+    ));
 }
 
    public function uploadPhoto(Request $request)

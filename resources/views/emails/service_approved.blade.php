@@ -1,22 +1,33 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Service Approved</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; background: #ffffff; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .header { border-bottom: 2px solid #10b981; padding-bottom: 15px; margin-bottom: 20px; }
+        .header h1 { color: #059669; margin: 0; font-size: 24px; }
+        .content { color: #333333; line-height: 1.6; }
+        .notice-box { background-color: #ecfdf5; border-left: 4px solid #10b981; padding: 15px; margin: 20px 0; color: #065f46; }
+        .button { display: inline-block; background-color: #4F46E5; color: #ffffff; text-decoration: none; padding: 10px 18px; border-radius: 6px; margin-top: 8px; }
+        .footer { margin-top: 30px; font-size: 12px; color: #666666; text-align: center; }
+    </style>
 </head>
-<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-    <h2>Great News, {{ $service->user->hu_name }}!</h2>
-    
-    <p>We are pleased to inform you that your service listing, <strong>{{ $service->hss_title }}</strong>, has been approved by our admin team.</p>
-    
-    <p>It is now visible to all students on the platform.</p>
-    
-    <p>
-        {{-- Check if you have a named route for 'services.show', otherwise remove the link --}}
-        <a href="{{ url('/services/' . $service->hss_id) }}" style="background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
-            View Your Service
-        </a>
-    </p>
-    
-    <p>Good luck with your sales!<br>The S2U Team</p>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Service Approved</h1>
+        </div>
+        <div class="content">
+            <p>Dear {{ $service->user->hu_name }},</p>
+            <p>Your service listing has been approved:</p>
+            <div class="notice-box">
+                <strong>{{ $service->hss_title }}</strong>
+            </div>
+            <a class="button" href="{{ url('/services/' . $service->hss_id) }}">View Your Service</a>
+        </div>
+        <div class="footer">
+            <p>&copy; {{ date('Y') }} UPSI Connect. All rights reserved.</p>
+        </div>
+    </div>
 </body>
 </html>

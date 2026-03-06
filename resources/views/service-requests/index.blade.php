@@ -5,15 +5,8 @@
         </h2>
     </x-slot>
 
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
     <div class="py-6">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            @php
-                $defaultStatusTab = request('tab', 'pending');
-            @endphp
-
             <div id="sent-content" class="sr-tab-content">
                 <div class="overflow-hidden rounded-2xl border border-gray-100 bg-gradient-to-b from-white to-slate-50/50 shadow-sm">
                     <div class="p-6 text-gray-800">
@@ -47,17 +40,6 @@
                                         </svg>
                                     </div>
 
-                                    {{-- Extract unique categories from requests automatically --}}
-                                    @php
-                                        $uniqueCategories = $sentRequests
-                                            ->map(function ($request) {
-                                                return optional($request->studentService->category)->hc_name ?? 'Other';
-                                            })
-                                            ->unique()
-                                            ->sort()
-                                            ->values();
-                                    @endphp
-
                                     <select id="category-filter"
                                         class="block w-full pl-10 pr-10 py-2.5 border border-gray-200 rounded-xl leading-5 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm shadow-sm appearance-none cursor-pointer">
                                         <option value="">All Categories</option>
@@ -80,15 +62,15 @@
 
                         <div class="mb-6">
                             <div class="flex space-x-4 border-b border-gray-200">
-                                <button onclick="showStatusTab('pending')" id="pending-tab"
+                                <button data-status-tab="pending" id="pending-tab"
                                     class="sr-status-tab-button py-2 px-4 text-sm font-medium {{ $defaultStatusTab === 'pending' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-500 hover:text-custom-teal' }} focus:outline-none">
                                     Pending
                                 </button>
-                                <button onclick="showStatusTab('in-progress')" id="in-progress-tab"
+                                <button data-status-tab="in-progress" id="in-progress-tab"
                                     class="sr-status-tab-button py-2 px-4 text-sm font-medium {{ $defaultStatusTab === 'in-progress' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-500 hover:text-custom-teal' }} focus:outline-none">
                                     In Progress
                                 </button>
-                                <button onclick="showStatusTab('completed')" id="completed-tab"
+                                <button data-status-tab="completed" id="completed-tab"
                                     class="sr-status-tab-button py-2 px-4 text-sm font-medium {{ $defaultStatusTab === 'completed' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-500 hover:text-custom-teal' }} focus:outline-none">
                                     Completed
                                 </button>
@@ -123,44 +105,12 @@
                             @else
                                 <div class="space-y-6">
                                     @foreach ($sentRequests->where('hsr_status', 'pending') as $request)
-                                        @php
-                                            // Data Setup
-                                            $service = $request->studentService;
-                                            $selectedPackage = is_array($request->hsr_selected_package)
-                                                ? ($request->hsr_selected_package[0] ?? 'basic')
-                                                : ($request->hsr_selected_package ?? 'basic');
-                                            $pkgType = strtolower((string) $selectedPackage);
-                                            $pkgDuration = $service->{$pkgType . '_duration'} ?? null;
-                                            $pkgFrequency = $service->{$pkgType . '_frequency'} ?? null;
-
-                                            // Logic for display dates
-                                            $dates = $request->hsr_selected_dates;
-
-                                            if (is_string($dates)) {
-                                                $decodedDates = json_decode($dates, true);
-                                                if (json_last_error() === JSON_ERROR_NONE) {
-                                                    $dates = $decodedDates;
-                                                }
-                                            }
-
-                                            if ($dates instanceof \Carbon\Carbon) {
-                                                $firstDate = $dates->toDateString();
-                                                $dateCount = 1;
-                                            } else {
-                                                $firstDate = is_array($dates) ? ($dates[0] ?? null) : $dates;
-                                                $dateCount = is_array($dates) ? count($dates) : ($firstDate ? 1 : 0);
-                                            }
-
-                                            // CHECK IF SELLER BANNED
-                                            $isSellerBanned = $request->provider->hu_is_suspended == 1 || $request->provider->hu_is_blacklisted == 1;
-                                        @endphp
-
                                         <div
-                                            class="sr-request-item group relative overflow-hidden rounded-2xl border {{ $isSellerBanned ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-white hover:border-yellow-300' }} shadow-sm transition-all duration-300 hover:shadow-md"
-                                            data-category="{{ optional($service->category)->hc_name ?? 'Other' }}">
+                                            class="sr-request-item group relative overflow-hidden rounded-2xl border {{ $request->ui_is_seller_restricted ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-white hover:border-yellow-300' }} shadow-sm transition-all duration-300 hover:shadow-md"
+                                            data-category="{{ optional(optional($request->studentService)->category)->hc_name ?? 'Other' }}">
 
                                             <div
-                                                class="absolute top-0 left-0 right-0 h-1 {{ $isSellerBanned ? 'bg-red-500' : 'bg-gradient-to-r from-yellow-400 to-orange-300' }}">
+                                                class="absolute top-0 left-0 right-0 h-1 {{ $request->ui_is_seller_restricted ? 'bg-red-500' : 'bg-gradient-to-r from-yellow-400 to-orange-300' }}">
                                             </div>
 
                                             <div class="p-5 sm:p-6">
@@ -168,10 +118,10 @@
                                                     class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mb-6">
                                                     <div class="flex-1">
                                                         <div class="flex items-center gap-3 mb-2">
-                                                            @if ($isSellerBanned)
+                                                            @if ($request->ui_is_seller_restricted)
                                                                 <span
                                                                     class="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-bold text-red-700">
-                                                                    SELLER SUSPENDED
+                                                                    SELLER RESTRICTED
                                                                 </span>
                                                             @else
                                                                 <span
@@ -184,13 +134,13 @@
                                                         </div>
 
                                                         <h4
-                                                            class="text-lg font-bold {{ $isSellerBanned ? 'text-gray-500 line-through' : 'text-gray-900' }} group-hover:text-yellow-600 transition-colors leading-tight">
+                                                            class="text-lg font-bold {{ $request->ui_is_seller_restricted ? 'text-gray-500 line-through' : 'text-gray-900' }} group-hover:text-yellow-600 transition-colors leading-tight">
                                                             {{ optional($request->studentService)->hss_title ?? 'Custom Request' }}
                                                         </h4>
 
-                                                        @if (optional($service)->category && !$isSellerBanned)
+                                                        @if (optional(optional($request->studentService)->category) && !$request->ui_is_seller_restricted)
                                                             <div class="mt-2 inline-flex items-center gap-1.5 rounded-md px-2 py-1"
-                                                                style="color:{{ $service->category->hc_color }}; background-color: {{ $service->category->hc_color }}10; border: 1px solid {{ $service->category->hc_color }};">
+                                                                style="color:{{ $request->studentService->category->hc_color }}; background-color: {{ $request->studentService->category->hc_color }}10; border: 1px solid {{ $request->studentService->category->hc_color }};">
                                                                 <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24"
                                                                     stroke="currentColor">
                                                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -198,25 +148,25 @@
                                                                         d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                                                                 </svg>
                                                                 <span class="text-xs font-medium">
-                                                                    {{ $service->category->hc_name }}
+                                                                    {{ $request->studentService->category->hc_name }}
                                                                 </span>
                                                             </div>
                                                         @endif
 
                                                         <p class="text-xs text-gray-400 mt-2">
-                                                            Sent {{ $request->created_at->diffForHumans() }}
+                                                            Sent {{ $request->ui_created_human }}
                                                         </p>
                                                     </div>
 
                                                     <div class="text-left sm:text-right mt-2 sm:mt-0">
                                                         @if ($request->hsr_offered_price)
                                                             <div
-                                                                class="text-2xl font-bold {{ $isSellerBanned ? 'text-gray-400' : 'text-gray-900' }}">
+                                                                class="text-2xl font-bold {{ $request->ui_is_seller_restricted ? 'text-gray-400' : 'text-gray-900' }}">
                                                                 RM {{ number_format($request->hsr_offered_price, 2) }}
                                                             </div>
                                                             <div
                                                                 class="text-xs font-medium text-gray-500 uppercase tracking-wide">
-                                                                {{ is_array($request->hsr_selected_package) ? ($request->hsr_selected_package[0] ?? 'Custom') : (trim((string) $request->hsr_selected_package) !== '' ? str_replace('"', '', (string) $request->hsr_selected_package) : 'Custom') }}
+                                                                {{ $request->ui_package_label }}
                                                                 Package
                                                             </div>
                                                         @endif
@@ -224,7 +174,7 @@
                                                 </div>
 
                                                 {{-- Hide details if banned to keep it clean --}}
-                                                @if (!$isSellerBanned)
+                                                @if (!$request->ui_is_seller_restricted)
                                                     <div class="h-px w-full bg-gray-100 my-4"></div>
 
                                                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
@@ -247,7 +197,7 @@
                                                             </div>
                                                         </div>
 
-                                                        @if ($firstDate)
+                                                        @if ($request->ui_first_date_display)
                                                             <div class="flex items-start gap-3">
                                                                 <div
                                                                     class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-50 text-blue-600">
@@ -262,10 +212,10 @@
                                                                     <p class="text-xs font-medium text-gray-500 uppercase">
                                                                         Start Date</p>
                                                                     <p class="text-sm font-semibold text-gray-900">
-                                                                        {{ \Carbon\Carbon::parse($firstDate)->format('M j, Y') }}
-                                                                        @if ($dateCount > 1)
+                                                                        {{ $request->ui_first_date_display }}
+                                                                        @if ($request->ui_date_count > 1)
                                                                             <span
-                                                                                class="text-xs font-normal text-gray-500 ml-1">(+{{ $dateCount - 1 }}
+                                                                                class="text-xs font-normal text-gray-500 ml-1">(+{{ $request->ui_date_count - 1 }}
                                                                                 days)</span>
                                                                         @endif
                                                                     </p>
@@ -287,16 +237,16 @@
                                                                 <p class="text-xs font-medium text-gray-500 uppercase">
                                                                     Details</p>
                                                                 <p class="text-sm font-semibold text-gray-900">
-                                                                    {{ $pkgDuration ? $pkgDuration . ' Hrs' : 'N/A' }}
+                                                                    {{ $request->ui_pkg_duration ? $request->ui_pkg_duration . ' Hrs' : 'N/A' }}
                                                                     <span class="text-gray-300 mx-1">|</span>
-                                                                    {{ $pkgFrequency ? ucfirst($pkgFrequency) : 'One-time' }}
+                                                                    {{ $request->ui_pkg_frequency ? ucfirst($request->ui_pkg_frequency) : 'One-time' }}
                                                                 </p>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 @endif
 
-                                                @if ($request->hsr_message && !$isSellerBanned)
+                                                @if ($request->hsr_message && !$request->ui_is_seller_restricted)
                                                     <div class="rounded-lg bg-gray-50 p-4 border border-gray-100 mb-6">
                                                         <p class="text-xs font-bold text-gray-400 uppercase mb-1">Your
                                                             Note</p>
@@ -308,7 +258,7 @@
                                                 <div
                                                     class="flex flex-col-reverse sm:flex-row items-center justify-between gap-4 pt-2">
                                                     <div class="flex items-center gap-4 w-full sm:w-auto">
-                                                        @if ($isSellerBanned)
+                                                        @if ($request->ui_is_seller_restricted)
                                                             {{-- BANNED STATE: No Cancel button (visually cancelled) --}}
                                                             <span
                                                                 class="inline-flex items-center gap-2 text-sm font-bold text-red-600 bg-red-50 px-3 py-2 rounded-lg border border-red-100 w-full sm:w-auto justify-center">
@@ -321,7 +271,7 @@
                                                                 Service Cancelled
                                                             </span>
                                                         @else
-                                                            <button onclick="cancelRequest({{ $request->hsr_id }})"
+                                                            <button data-cancel-request="{{ $request->hsr_id }}"
                                                                 class="w-full sm:w-auto inline-flex justify-center items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 bg-white border border-red-200 rounded-lg hover:bg-red-50 hover:border-red-300 transition-colors focus:ring-2 focus:ring-offset-1 focus:ring-red-500">
                                                                 Cancel
                                                             </button>
@@ -337,7 +287,7 @@
                                                     </div>
 
                                                     {{-- Only show WhatsApp if NOT banned --}}
-                                                    @if (!$isSellerBanned)
+                                                    @if (!$request->ui_is_seller_restricted)
                                                         <div class="flex gap-3 w-full sm:w-auto">
                                                             <a href="{{ route('service-requests.show', $request) }}"
                                                                 class="w-full sm:hidden text-center text-sm font-medium text-gray-500 hover:text-gray-900 border border-gray-200 rounded-lg py-2">
@@ -387,56 +337,10 @@
                             @else
                                 <div class="space-y-6">
                                     @foreach ($sentRequests->whereIn('hsr_status', ['accepted', 'in_progress', 'waiting_payment', 'disputed']) as $request)
-                                        @php
-                                            // --- SETUP DATA ---
-                                            $isSellerBanned = $request->provider->hu_is_suspended == 1 || $request->provider->hu_is_blacklisted == 1;
-                                            $service = $request->studentService;
-
-                                            // Date Parsing
-                                            $dates = $request->hsr_selected_dates;
-                                            if (is_string($dates)) {
-                                                $decoded = json_decode($dates, true);
-                                                $dateList = is_array($decoded) ? $decoded : [$dates];
-                                            } else {
-                                                $dateList = is_array($dates) ? $dates : [$dates];
-                                            }
-                                            $firstServiceDate = \Carbon\Carbon::parse($dateList[0]);
-                                            $hasDatePassed = now()
-                                                ->startOfDay()
-                                                ->gte($firstServiceDate->startOfDay());
-
-                                            // STYLING LOGIC
-                                            if ($isSellerBanned) {
-                                                // BANNED STYLING
-                                                $badgeColors = 'border-red-200 bg-red-100 text-red-700';
-                                                $cardBorder = 'border-red-300 bg-red-50 hover:border-red-400';
-                                                $stripeColor = 'bg-red-500';
-                                                $statusText = 'SELLER SUSPENDED';
-                                            } else {
-                                                // NORMAL STYLING
-                                                $statusText = strtoupper(str_replace('_', ' ', $request->hsr_status));
-                                                $badgeColors = match ($request->hsr_status) {
-                                                    'disputed' => 'border-red-200 bg-red-50 text-red-700',
-                                                    'waiting_payment' => 'border-yellow-200 bg-yellow-50 text-yellow-700',
-                                                    default => 'border-blue-200 bg-blue-50 text-blue-700',
-                                                };
-                                                $cardBorder = match ($request->hsr_status) {
-                                                    'disputed' => 'border-red-200 hover:border-red-300 bg-white',
-                                                    'waiting_payment' => 'border-yellow-200 hover:border-yellow-300 bg-white',
-                                                    default => 'border-blue-100 hover:border-blue-200 bg-white',
-                                                };
-                                                $stripeColor = match ($request->hsr_status) {
-                                                    'disputed' => 'bg-red-500',
-                                                    'waiting_payment' => 'bg-yellow-500',
-                                                    default => 'bg-blue-500',
-                                                };
-                                            }
-                                        @endphp
-
                                         <div
-                                            class="sr-request-item group relative overflow-hidden rounded-2xl border bg-white shadow-sm transition-all duration-300 hover:shadow-md {{ $cardBorder }}"
-                                            data-category="{{ optional($service->category)->hc_name ?? 'Other' }}">
-                                            <div class="absolute top-0 left-0 right-0 h-1 {{ $stripeColor }}"></div>
+                                            class="sr-request-item group relative overflow-hidden rounded-2xl border bg-white shadow-sm transition-all duration-300 hover:shadow-md {{ $request->ui_inprogress_style['card'] }}"
+                                            data-category="{{ optional(optional($request->studentService)->category)->hc_name ?? 'Other' }}">
+                                            <div class="absolute top-0 left-0 right-0 h-1 {{ $request->ui_inprogress_style['stripe'] }}"></div>
                                             <div class="p-5 sm:p-6">
                                                 {{-- Top Header Section --}}
                                                 <div
@@ -444,18 +348,18 @@
                                                     <div class="flex-1">
                                                         <div class="flex items-center gap-3 mb-2">
                                                             <span
-                                                                class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold {{ $badgeColors }}">
-                                                                {{ $statusText }}
+                                                                class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold {{ $request->ui_inprogress_style['badge'] }}">
+                                                                {{ $request->ui_inprogress_style['status_text'] }}
                                                             </span>
                                                             <span class="text-xs text-gray-400">#{{ $request->hsr_id }}</span>
                                                         </div>
                                                         <h4
-                                                            class="text-lg font-bold {{ $isSellerBanned ? 'text-gray-500 line-through' : 'text-gray-900' }} group-hover:text-blue-600 transition-colors leading-tight">
-                                                            {{ optional($service)->hss_title ?? 'Custom Request' }}
+                                                            class="text-lg font-bold {{ $request->ui_is_seller_restricted ? 'text-gray-500 line-through' : 'text-gray-900' }} group-hover:text-blue-600 transition-colors leading-tight">
+                                                            {{ optional($request->studentService)->hss_title ?? 'Custom Request' }}
                                                         </h4>
-                                                        @if (optional($service)->category && !$isSellerBanned)
+                                                        @if (optional(optional($request->studentService)->category) && !$request->ui_is_seller_restricted)
                                                             <div class="mt-2 inline-flex items-center gap-1.5 rounded-md px-2 py-1"
-                                                                style="color:{{ $service->category->hc_color }}; background-color: {{ $service->category->hc_color }}10; border: 1px solid {{ $service->category->hc_color }};">
+                                                                style="color:{{ $request->studentService->category->hc_color }}; background-color: {{ $request->studentService->category->hc_color }}10; border: 1px solid {{ $request->studentService->category->hc_color }};">
                                                                 <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24"
                                                                     stroke="currentColor">
                                                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -463,22 +367,22 @@
                                                                         d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                                                                 </svg>
                                                                 <span class="text-xs font-medium">
-                                                                    {{ $service->category->hc_name }}
+                                                                    {{ $request->studentService->category->hc_name }}
                                                                 </span>
                                                             </div>
                                                         @endif
                                                         <p class="text-xs text-gray-400 mt-2">Started
-                                                            {{ $request->updated_at->diffForHumans() }}</p>
+                                                            {{ $request->ui_updated_human }}</p>
                                                     </div>
                                                     <div class="text-left sm:text-right mt-2 sm:mt-0">
                                                         @if ($request->hsr_offered_price)
                                                             <div
-                                                                class="text-2xl font-bold {{ $isSellerBanned ? 'text-gray-400' : 'text-gray-900' }}">
+                                                                class="text-2xl font-bold {{ $request->ui_is_seller_restricted ? 'text-gray-400' : 'text-gray-900' }}">
                                                                 RM {{ number_format($request->hsr_offered_price, 2) }}
                                                             </div>
                                                             <div
                                                                 class="text-xs font-medium text-gray-400 uppercase tracking-wide">
-                                                                {{ is_array($request->hsr_selected_package) ? ($request->hsr_selected_package[0] ?? 'Custom') : (trim((string) $request->hsr_selected_package) !== '' ? str_replace('"', '', (string) $request->hsr_selected_package) : 'Custom') }}
+                                                                {{ $request->ui_package_label }}
                                                                 Package
                                                             </div>
                                                         @endif
@@ -488,7 +392,7 @@
                                                 <div class="h-px w-full bg-gray-100 my-4"></div>
 
                                                 {{-- Details Grid - Only show if valid --}}
-                                                @if (!$isSellerBanned)
+                                                @if (!$request->ui_is_seller_restricted)
                                                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
                                                         {{-- Provider --}}
                                                         <div class="flex items-start gap-3">
@@ -524,8 +428,8 @@
                                                                 <p class="text-xs font-medium text-gray-500 uppercase">
                                                                     Service Date</p>
                                                                 <p class="text-sm font-semibold text-gray-900">
-                                                                    {{ $firstServiceDate->format('M j, Y') }}
-                                                                    @if ($hasDatePassed)
+                                                                    {{ $request->ui_first_date_display ?? '-' }}
+                                                                    @if ($request->ui_has_date_passed)
                                                                         <span
                                                                             class="text-xs text-orange-500 font-normal ml-1">(Passed)</span>
                                                                     @endif
@@ -543,7 +447,7 @@
                                                     {{-- LEFT SIDE: Cancel & Report --}}
                                                     <div class="flex items-center gap-4 w-full sm:w-auto">
 
-                                                        @if ($isSellerBanned)
+                                                        @if ($request->ui_is_seller_restricted)
                                                             {{-- Banned State: Show cancelled text --}}
                                                             <span
                                                                 class="inline-flex items-center gap-2 text-sm font-bold text-red-600 bg-red-50 px-3 py-2 rounded-lg border border-red-100 w-full sm:w-auto justify-center">
@@ -558,7 +462,7 @@
                                                         @else
                                                             {{-- 1. Cancel Button (Only if NOT waiting payment/disputed/completed) --}}
                                                             @if (!in_array($request->hsr_status, ['waiting_payment', 'disputed', 'completed', 'canceled']))
-                                                                <button onclick="cancelRequest({{ $request->hsr_id }})"
+                                                                <button data-cancel-request="{{ $request->hsr_id }}"
                                                                     class="text-sm font-medium text-red-600 hover:text-red-700 hover:underline">
                                                                     Cancel Request
                                                                 </button>
@@ -570,8 +474,8 @@
                                                             @endif
 
                                                             {{-- 2. REPORT ISSUE BUTTON --}}
-                                                            @if (in_array($request->hsr_status, ['accepted', 'in_progress']) && $hasDatePassed && !$request->hsr_dispute_reason)
-                                                                <button onclick="openReportModal({{ $request->hsr_id }})"
+                                                            @if (in_array($request->hsr_status, ['accepted', 'in_progress']) && $request->ui_has_date_passed && !$request->hsr_dispute_reason)
+                                                                <button data-open-report="{{ $request->hsr_id }}"
                                                                     class="inline-flex items-center gap-1 text-sm font-medium text-orange-600 hover:text-orange-800 bg-orange-50 hover:bg-orange-100 px-3 py-1.5 rounded-lg border border-orange-200 transition-colors">
                                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor"
                                                                         viewBox="0 0 24 24">
@@ -600,7 +504,7 @@
                                                     </div>
 
                                                     {{-- RIGHT SIDE: Actions (Payment & Contact) --}}
-                                                    @if (!$isSellerBanned)
+                                                    @if (!$request->ui_is_seller_restricted)
                                                         <div class="flex gap-3 w-full sm:w-auto">
 
                                                             {{-- 1. PAY NOW BUTTON --}}
@@ -622,8 +526,8 @@
                                                                         Verifying Payment
                                                                     </button>
                                                                 @else
-                                                                    <button
-                                                                        onclick="openPaymentModal({{ $request->hsr_id }}, '{{ number_format($request->hsr_offered_price, 2) }}')"
+                                                                    <button data-open-payment="{{ $request->hsr_id }}"
+                                                                        data-payment-price="{{ number_format($request->hsr_offered_price, 2) }}"
                                                                         class="flex-1 sm:flex-none inline-flex justify-center items-center gap-2 px-6 py-2 text-sm font-bold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 shadow-sm transition-all hover:-translate-y-0.5">
                                                                         <svg class="w-4 h-4" fill="none"
                                                                             stroke="currentColor" viewBox="0 0 24 24">
@@ -657,25 +561,6 @@
                                 </div>
                             @endif
                         </div>
-                        <script>
-                            function openReportModal(requestId) {
-                                // Set the form action dynamically
-                                const form = document.getElementById('reportForm');
-                                // Ensure this route exists in your web.php
-                                form.action = `/service-requests/${requestId}/report-issue`;
-
-                                document.getElementById('reportModal').classList.remove('hidden');
-                            }
-
-                            function closeReportModal() {
-                                document.getElementById('reportModal').classList.add('hidden');
-                            }
-
-                            function submitReport() {
-                                document.getElementById('reportForm').submit();
-                            }
-                        </script>
-
                         <div id="completed-content"
                             class="sr-status-tab-content {{ $defaultStatusTab === 'completed' ? '' : 'hidden' }}">
                             @if ($sentRequests->whereIn('hsr_status', ['completed', 'cancelled', 'rejected'])->isEmpty())
@@ -695,77 +580,11 @@
                             @else
                                 <div class="space-y-6">
                                     @foreach ($sentRequests->whereIn('hsr_status', ['completed', 'cancelled', 'rejected']) as $request)
-                                        @php
-                                            // 1. Data Setup
-                                            $service = $request->studentService;
-                                            $selectedPackage = is_array($request->hsr_selected_package)
-                                                ? ($request->hsr_selected_package[0] ?? 'basic')
-                                                : ($request->hsr_selected_package ?? 'basic');
-                                            $pkgType = strtolower((string) $selectedPackage);
-                                            $pkgDuration = $service->{$pkgType . '_duration'} ?? null;
-                                            $pkgFrequency = $service->{$pkgType . '_frequency'} ?? null;
-
-                                            $dates = $request->hsr_selected_dates;
-
-                                            if (is_string($dates)) {
-                                                $decodedDates = json_decode($dates, true);
-                                                if (json_last_error() === JSON_ERROR_NONE) {
-                                                    $dates = $decodedDates;
-                                                }
-                                            }
-
-                                            if ($dates instanceof \Carbon\Carbon) {
-                                                $firstDate = $dates->toDateString();
-                                            } else {
-                                                $firstDate = is_array($dates) ? ($dates[0] ?? null) : $dates;
-                                            }
-
-                                            // 2. Theme Logic
-                                            $theme = match ($request->hsr_status) {
-                                                'completed' => [
-                                                    'border' => 'border-green-200 hover:border-green-300',
-                                                    'strip' => 'bg-green-500',
-                                                    'badge' => 'bg-green-100 text-green-700',
-                                                    'icon_bg' => 'bg-green-50',
-                                                    'icon_text' => 'text-green-600',
-                                                    'icon' =>
-                                                        '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />',
-                                                ],
-                                                'cancelled' => [
-                                                    'border' => 'border-gray-200 hover:border-gray-300',
-                                                    'strip' => 'bg-gray-400',
-                                                    'badge' => 'bg-gray-100 text-gray-600',
-                                                    'icon_bg' => 'bg-gray-50',
-                                                    'icon_text' => 'text-gray-500',
-                                                    'icon' =>
-                                                        '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />',
-                                                ],
-                                                'rejected' => [
-                                                    'border' => 'border-red-200 hover:border-red-300',
-                                                    'strip' => 'bg-red-500',
-                                                    'badge' => 'bg-red-100 text-red-700',
-                                                    'icon_bg' => 'bg-red-50',
-                                                    'icon_text' => 'text-red-600',
-                                                    'icon' =>
-                                                        '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />',
-                                                ],
-                                                default => [
-                                                    // Fallback
-                                                    'border' => 'border-gray-200',
-                                                    'strip' => 'bg-gray-400',
-                                                    'badge' => 'bg-gray-100 text-gray-600',
-                                                    'icon_bg' => 'bg-gray-50',
-                                                    'icon_text' => 'text-gray-500',
-                                                    'icon' => '',
-                                                ],
-                                            };
-                                        @endphp
-
                                         <div
-                                            class="sr-request-item group relative overflow-hidden rounded-2xl border bg-white shadow-sm transition-all duration-300 hover:shadow-md {{ $theme['border'] }}"
-                                            data-category="{{ optional($service->category)->hc_name ?? 'Other' }}">
+                                            class="sr-request-item group relative overflow-hidden rounded-2xl border bg-white shadow-sm transition-all duration-300 hover:shadow-md {{ $request->ui_completed_theme['border'] }}"
+                                            data-category="{{ optional(optional($request->studentService)->category)->hc_name ?? 'Other' }}">
 
-                                            <div class="absolute top-0 left-0 right-0 h-1 {{ $theme['strip'] }}">
+                                            <div class="absolute top-0 left-0 right-0 h-1 {{ $request->ui_completed_theme['strip'] }}">
                                             </div>
 
                                             <div class="p-5 sm:p-6">
@@ -774,7 +593,7 @@
                                                     <div class="flex-1">
                                                         <div class="flex items-center gap-3 mb-2">
                                                             <span
-                                                                class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold {{ $theme['badge'] }}">
+                                                                class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold {{ $request->ui_completed_theme['badge'] }}">
                                                                 {{ strtoupper($request->hsr_status) }}
                                                             </span>
                                                             <span
@@ -785,9 +604,9 @@
                                                             {{ optional($request->studentService)->hss_title ?? 'Custom Request' }}
                                                         </h4>
 
-                                                        @if (optional($service)->category)
+                                                        @if (optional(optional($request->studentService)->category))
                                                             <div class="mt-2 inline-flex items-center gap-1.5 rounded-md px-2 py-1"
-                                                                style="color:{{ $service->category->hc_color }}; background-color: {{ $service->category->hc_color }}10; border: 1px solid {{ $service->category->hc_color }};">
+                                                                style="color:{{ $request->studentService->category->hc_color }}; background-color: {{ $request->studentService->category->hc_color }}10; border: 1px solid {{ $request->studentService->category->hc_color }};">
                                                                 <svg class="h-3 w-3" fill="none"
                                                                     viewBox="0 0 24 24" stroke="currentColor">
                                                                     <path stroke-linecap="round"
@@ -795,7 +614,7 @@
                                                                         d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                                                                 </svg>
                                                                 <span class="text-xs font-medium">
-                                                                    {{ $service->category->hc_name }}
+                                                                    {{ $request->studentService->category->hc_name }}
                                                                 </span>
                                                             </div>
                                                         @endif
@@ -809,7 +628,7 @@
                                                             </div>
                                                             <div
                                                                 class="text-xs font-medium text-gray-400 uppercase tracking-wide">
-                                                                {{ is_array($request->hsr_selected_package) ? ($request->hsr_selected_package[0] ?? 'Custom') : (trim((string) $request->hsr_selected_package) !== '' ? str_replace('"', '', (string) $request->hsr_selected_package) : 'Custom') }}
+                                                                {{ $request->ui_package_label }}
                                                                 Package
                                                             </div>
                                                         @endif
@@ -839,10 +658,10 @@
 
                                                     <div class="flex items-start gap-3">
                                                         <div
-                                                            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full {{ $theme['icon_bg'] }} {{ $theme['icon_text'] }}">
+                                                            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full {{ $request->ui_completed_theme['icon_bg'] }} {{ $request->ui_completed_theme['icon_text'] }}">
                                                             <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                                                                 stroke="currentColor">
-                                                                {!! $theme['icon'] !!}
+                                                                {!! $request->ui_completed_theme['icon'] !!}
                                                             </svg>
                                                         </div>
                                                         <div>
@@ -850,7 +669,7 @@
                                                                 {{ $request->hsr_status === 'completed' ? 'Completed On' : 'Updated On' }}
                                                             </p>
                                                             <p class="text-sm font-semibold text-gray-700">
-                                                                {{ $request->updated_at->format('M j, Y') }}
+                                                                {{ $request->ui_updated_date }}
                                                             </p>
                                                         </div>
                                                     </div>
@@ -869,9 +688,9 @@
                                                             <p class="text-xs font-medium text-gray-500 uppercase">
                                                                 Details</p>
                                                             <p class="text-sm font-semibold text-gray-700">
-                                                                {{ $pkgDuration ? $pkgDuration . ' Hrs' : 'Custom' }}
+                                                                {{ $request->ui_pkg_duration ? $request->ui_pkg_duration . ' Hrs' : 'Custom' }}
                                                                 <span class="text-gray-300 mx-1">|</span>
-                                                                {{ $pkgFrequency ? ucfirst($pkgFrequency) : 'N/A' }}
+                                                                {{ $request->ui_pkg_frequency ? ucfirst($request->ui_pkg_frequency) : 'N/A' }}
                                                             </p>
                                                         </div>
                                                     </div>
@@ -891,9 +710,8 @@
 
                                                     @if (
                                                         $request->isCompleted() &&
-                                                            !$request->reviews()->where('hr_reviewer_id', auth()->id())->exists())
-                                                        <button
-                                                            onclick="openReviewModal({{ $request->hsr_id }}, '{{ $request->provider->hu_name }}')"
+                                                            !$request->ui_reviewed_by_auth)
+                                                        <button data-open-review="{{ $request->hsr_id }}"
                                                             class="w-full md:w-auto inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 hover:shadow-md transition-all focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
                                                             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24"
                                                                 stroke="currentColor">
@@ -941,7 +759,7 @@
             {{-- Modal Header --}}
             <div class="flex items-center justify-between mb-4 border-b border-gray-100 pb-3">
                 <h3 class="text-lg font-bold text-gray-900">Confirm Payment</h3>
-                <button onclick="closePaymentModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                <button type="button" data-close-payment class="text-gray-400 hover:text-gray-600 transition-colors">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M6 18L18 6M6 6l12 12"></path>
@@ -983,7 +801,7 @@
                                 <p class="text-[10px] text-gray-400">JPG, PNG or PDF (MAX. 2MB)</p>
                             </div>
                             <input id="dropzone-file" name="payment_proof" type="file" class="hidden"
-                                accept="image/*,application/pdf" onchange="previewFile()" />
+                                accept="image/*,application/pdf" />
                         </label>
                     </div>
                     {{-- File Name Preview --}}
@@ -993,7 +811,7 @@
 
                 {{-- Actions --}}
                 <div class="flex gap-3">
-                    <button type="button" onclick="closePaymentModal()"
+                    <button type="button" data-close-payment
                         class="flex-1 px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">
                         Cancel
                     </button>
@@ -1012,7 +830,7 @@
             <div class="mt-3">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-lg font-medium text-gray-900">Rate & Review</h3>
-                    <button onclick="closeReviewModal()" class="text-gray-400 hover:text-gray-600">
+                    <button type="button" data-close-review class="text-gray-400 hover:text-gray-600">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M6 18L18 6M6 6l12 12"></path>
@@ -1028,7 +846,7 @@
                         <label class="block text-sm font-medium text-gray-700 mb-2">Rating</label>
                         <div class="flex space-x-1 justify-center">
                             @for ($i = 1; $i <= 5; $i++)
-                                <button type="button" onclick="setRating({{ $i }})"
+                                <button type="button" data-set-rating="{{ $i }}"
                                     class="star-button text-3xl text-gray-300 hover:text-yellow-400 focus:outline-none transition-colors">★</button>
                             @endfor
                         </div>
@@ -1043,7 +861,7 @@
                     </div>
 
                     <div class="flex space-x-3 pt-4">
-                        <button type="button" onclick="closeReviewModal()"
+                        <button type="button" data-close-review
                             class="flex-1 px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">Cancel</button>
                         <button type="submit"
                             class="flex-1 px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">Submit</button>
@@ -1054,283 +872,14 @@
     </div>
 
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            showStatusTab('{{ $defaultStatusTab }}');
-        });
-
-        // Tab Switching
-        function showStatusTab(status) {
-            document.querySelectorAll('.sr-status-tab-content').forEach(content => content.classList.add('hidden'));
-            document.querySelectorAll('.sr-status-tab-button').forEach(button => {
-                button.classList.remove('text-indigo-600', 'border-b-2', 'border-indigo-600');
-                button.classList.add('text-gray-500', 'hover:text-custom-teal');
-            });
-
-            document.getElementById(status + '-content').classList.remove('hidden');
-            const activeTab = document.getElementById(status + '-tab');
-            activeTab.classList.remove('text-gray-500', 'hover:text-custom-teal');
-            activeTab.classList.add('text-indigo-600', 'border-b-2', 'border-indigo-600');
-        }
-
-        // Action: Cancel Request
-        function cancelRequest(id) {
-            Swal.fire({
-                title: "Cancel Request?",
-                text: "Are you sure you want to cancel this request?",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#dc2626",
-                cancelButtonColor: "#6b7280",
-                confirmButtonText: "Yes, cancel it"
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    const form = document.getElementById('cancel-form-' + id);
-                    if (form) {
-                        Swal.fire({
-                            title: 'Cancelling...',
-                            allowOutsideClick: false,
-                            didOpen: () => Swal.showLoading()
-                        });
-                        form.submit();
-                    }
-                }
-            });
-        }
-
-        function confirmPaymentSent(id) {
-            // 1. Get the specific form
-            const form = document.getElementById('buyer-pay-form-' + id);
-
-            // 2. Check if a file was selected (just for custom message, not logic)
-            const fileInput = form.querySelector('input[type="file"]');
-            const hasFile = fileInput && fileInput.files.length > 0;
-
-            let text = "The seller will be notified to verify your payment.";
-            if (hasFile) {
-                text = "The seller will receive your payment proof and verify it.";
-            }
-
-            Swal.fire({
-                title: 'Confirm Payment?',
-                text: text,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#4F46E5',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Yes, Notify Seller'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    form.submit(); // Submits the form including the file
-                }
-            });
-        }
-
-        // Review Modal Logic
-        // 1. Open Modal & Set Dynamic Action URL
-        function openPaymentModal(requestId, price) {
-            const form = document.getElementById('paymentProofForm');
-            const priceSpan = document.getElementById('paymentModalPrice');
-            const modal = document.getElementById('paymentModal');
-
-            // Dynamically set the route using the ID
-            // Note: This matches the route defined in your web.php
-            form.action = "{{ url('service-requests') }}/" + requestId + "/buyer-confirm-payment";
-
-            // Set the price text
-            priceSpan.innerText = price;
-
-            // Show Modal
-            modal.classList.remove('hidden');
-        }
-
-        // 2. Close Modal
-        function closePaymentModal() {
-            const modal = document.getElementById('paymentModal');
-            const form = document.getElementById('paymentProofForm');
-            const filePreview = document.getElementById('fileNamePreview');
-
-            modal.classList.add('hidden');
-            form.reset(); // Clear the file input
-            filePreview.classList.add('hidden');
-            filePreview.innerText = '';
-        }
-
-        // 3. Simple File Name Preview (UX Improvement)
-        function previewFile() {
-            const input = document.getElementById('dropzone-file');
-            const preview = document.getElementById('fileNamePreview');
-
-            if (input.files && input.files[0]) {
-                preview.innerText = "Selected: " + input.files[0].name;
-                preview.classList.remove('hidden');
-            }
-        }
-
-        // 4. Close Modal if clicking outside (Optional)
-        window.onclick = function(event) {
-            const modal = document.getElementById('paymentModal');
-            if (event.target == modal) {
-                closePaymentModal();
-            }
-        }
-
-        function openReviewModal(id, name) {
-            document.getElementById('reviewServiceRequestId').value = id;
-            document.getElementById('reviewModal').classList.remove('hidden');
-        }
-
-        function closeReviewModal() {
-            document.getElementById('reviewModal').classList.add('hidden');
-            document.getElementById('reviewForm').reset();
-            resetStars();
-        }
-
-        function setRating(rating) {
-            document.getElementById('rating').value = rating;
-            document.querySelectorAll('.star-button').forEach((star, index) => {
-                if (index < rating) {
-                    star.classList.remove('text-gray-300');
-                    star.classList.add('text-yellow-400');
-                } else {
-                    star.classList.remove('text-yellow-400');
-                    star.classList.add('text-gray-300');
-                }
-            });
-        }
-
-        function resetStars() {
-            document.querySelectorAll('.star-button').forEach(s => {
-                s.classList.remove('text-yellow-400');
-                s.classList.add('text-gray-300');
-            });
-        }
-
-
-        // Submit Review
-        document.getElementById('reviewForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const formData = new FormData(this);
-            const btn = this.querySelector('button[type="submit"]');
-            btn.disabled = true;
-            btn.innerText = "Submitting...";
-
-            try {
-                const res = await fetch('{{ url('/reviews') }}', {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        'Accept': 'application/json'
-                    }
-                });
-                const data = await res.json();
-                if (data.success) {
-                    closeReviewModal();
-                    Swal.fire("Thank You!", "Your review has been submitted.", "success").then(() => location
-                        .reload());
-                } else {
-                    throw new Error(data.error || 'Failed');
-                }
-            } catch (err) {
-                Swal.fire("Error", err.message, "error");
-            } finally {
-                btn.disabled = false;
-                btn.innerText = "Submit";
-            }
-        });
-
-        // Search Filter
-        document.getElementById('request-search').addEventListener('input', function() {
-            const query = this.value.toLowerCase();
-            document.querySelectorAll('.sr-status-tab-content:not(.hidden) .sr-request-item').forEach(item => {
-                const text = item.textContent.toLowerCase();
-                item.style.display = text.includes(query) ? '' : 'none';
-            });
-        });
-
-        const searchInput = document.getElementById('request-search');
-        const categoryFilter = document.getElementById('category-filter');
-
-        function filterItems() {
-            const query = searchInput.value.toLowerCase();
-            const selectedCategory = categoryFilter.value; // Don't lowerCase this yet, match exact value
-
-            // 1. Identify which tab is currently visible
-            const activeTabContent = document.querySelector('.sr-status-tab-content:not(.hidden)');
-
-            if (!activeTabContent) return;
-
-            // 2. Select items only within the active tab
-            const items = activeTabContent.querySelectorAll('.sr-request-item');
-
-            items.forEach(item => {
-                // Get text content for search
-                const text = item.textContent.toLowerCase();
-                // Get category data attribute
-                const itemCategory = item.getAttribute('data-category');
-
-                // Check Matches
-                const matchesSearch = text.includes(query);
-                const matchesCategory = selectedCategory === "" || itemCategory === selectedCategory;
-
-                // Toggle Visibility
-                if (matchesSearch && matchesCategory) {
-                    item.style.display = '';
-                } else {
-                    item.style.display = 'none';
-                }
-            });
-        }
-
-        // Attach Event Listeners
-        searchInput.addEventListener('input', filterItems);
-        categoryFilter.addEventListener('change', filterItems);
-
-        // Hook into tab switching to re-apply filters when changing tabs
-        const originalShowStatusTab = window.showStatusTab; // Save old function if defined strictly globally
-        window.showStatusTab = function(status) {
-            // Run original tab switch logic (from previous code)
-            document.querySelectorAll('.sr-status-tab-content').forEach(content => content.classList.add('hidden'));
-            document.querySelectorAll('.sr-status-tab-button').forEach(button => {
-                button.classList.remove('text-indigo-600', 'border-b-2', 'border-indigo-600');
-                button.classList.add('text-gray-500', 'hover:text-custom-teal');
-            });
-            document.getElementById(status + '-content').classList.remove('hidden');
-            const activeTab = document.getElementById(status + '-tab');
-            activeTab.classList.remove('text-gray-500', 'hover:text-custom-teal');
-            activeTab.classList.add('text-indigo-600', 'border-b-2', 'border-indigo-600');
-
-            // Re-run filter immediately so the new tab respects current search/category inputs
-            filterItems();
-        };
-    </script>
-    @if (session('success'))
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                Swal.fire({
-                    title: 'Success!',
-                    text: "{{ session('success') }}",
-                    icon: 'success',
-                    confirmButtonColor: '#4F46E5',
-                    confirmButtonText: 'OK'
-                });
-            });
-        </script>
-    @endif
-
-    @if ($errors->any())
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                Swal.fire({
-                    title: 'Error!',
-                    text: 'Please check your input or file format.',
-                    icon: 'error',
-                    confirmButtonColor: '#d33'
-                });
-            });
-        </script>
-    @endif
-
-
+    <div id="serviceRequestsIndexConfig"
+        data-default-status-tab="{{ $defaultStatusTab }}"
+        data-review-url="{{ url('/reviews') }}"
+        data-report-url-template="{{ url('/service-requests/__ID__/report-issue') }}"
+        data-payment-url-template="{{ url('/service-requests/__ID__/buyer-confirm-payment') }}"
+        data-success-message="{{ session('success', '') }}"
+        data-error-message="{{ $errors->any() ? 'Please check your input or file format.' : '' }}"></div>
+    @push('scripts')
+        <script src="{{ asset('js/nonadmin-service-requests-index.js') }}"></script>
+    @endpush
 </x-app-layout>

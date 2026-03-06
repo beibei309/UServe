@@ -30,9 +30,8 @@
                         @endif
                     </div>
 
-                    <div class="pt-20 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
-                        {{-- Left Side: User Info --}}
-                        <div>
+                    <div class="pt-20 flex flex-col md:flex-row justify-between items-start gap-6">
+                        <div class="min-w-0">
                             <h1 class="text-3xl font-black text-slate-900">{{ $user->hu_name }}</h1>
                             <p class="text-slate-500 font-medium mt-1">
                                 Member since {{ optional($user->created_at ?? $user->hu_created_at)->format('F Y') ?? 'N/A' }}
@@ -45,44 +44,54 @@
                             @endif
                         </div>
 
-                        {{-- Right Side: Metrics (Rating & Reports) --}}
-                        <div class="flex flex-wrap items-center gap-3">
-                            
-                            {{-- NEW: Report Count Badge (Only shows if > 0) --}}
-                          @if(($user->reports_count ?? 0) > 0)
-                                <div class="flex items-start gap-3 bg-red-50 px-4 py-3 rounded-xl border border-red-100 max-w-sm">
-                                    <div class="mt-0.5">
-                                        {{-- Icon changed to indicate Payment Issue --}}
-                                        <i class="fas fa-file-invoice-dollar text-red-600 text-lg"></i>
+                        <div class="w-full md:flex-1">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 w-full max-w-2xl">
+                                @if(($reportCount ?? 0) > 0)
+                                    <div class="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 shadow-sm">
+                                        <div class="flex items-start gap-3">
+                                            <i class="fas fa-file-invoice-dollar text-red-600 text-base mt-0.5"></i>
+                                            <div class="min-w-0">
+                                                <p class="text-[10px] font-bold text-red-800 uppercase tracking-widest mb-1">
+                                                    Report Notice
+                                                </p>
+                                                <p class="text-sm text-red-700 leading-snug">
+                                                    This account has been reported <span class="font-black">{{ $reportCount }} time(s)</span>.
+                                                </p>
+                                                @if (!empty($latestReportReason))
+                                                    <p class="text-xs text-red-700 leading-snug mt-1">
+                                                        Latest reason: {{ \Illuminate\Support\Str::limit($latestReportReason, 90) }}
+                                                    </p>
+                                                @else
+                                                    <p class="text-xs text-red-700 leading-snug mt-1">
+                                                        Report reason is under admin review.
+                                                    </p>
+                                                @endif
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <p class="text-[10px] font-bold text-red-800 uppercase tracking-widest mb-1">
-                                            Report
-                                        </p>
-                                        <p class="text-xs text-red-700 leading-snug">
-                                            This account has been reported <span class="font-black">{{ $user->reports_count }} time(s)</span> for failing to settle payments for completed services.
-                                        </p>
-                                    </div>
-                                </div>
-                            @endif
+                                @endif
 
-                            {{-- Rating Summary Badge --}}
-                            <div class="flex items-center gap-4 bg-slate-50 px-5 py-3 rounded-2xl border border-slate-100">
-                                <div class="text-center">
-                                    <div class="text-3xl font-black text-slate-900 leading-none">
-                                        {{ number_format($averageRating, 1) }}</div>
-                                    <div class="flex text-yellow-400 text-[10px] justify-center mt-1">
-                                        @for ($i = 1; $i <= 5; $i++)
-                                            <i class="{{ $i <= round($averageRating) ? 'fas' : 'far' }} fa-star"></i>
-                                        @endfor
+                                <div class="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-3 {{ ($reportCount ?? 0) > 0 ? '' : 'md:col-span-2 md:max-w-sm' }}">
+                                <div class="flex items-center gap-4">
+                                    <div class="text-center min-w-[72px]">
+                                        <div class="text-3xl font-black text-slate-900 leading-none">
+                                            {{ number_format($averageRating, 1) }}</div>
+                                        <div class="flex text-yellow-400 text-[10px] justify-center mt-1">
+                                            @for ($i = 1; $i <= 5; $i++)
+                                                <i class="{{ $i <= round($averageRating) ? 'fas' : 'far' }} fa-star"></i>
+                                            @endfor
+                                        </div>
+                                    </div>
+                                    <div class="h-8 w-px bg-slate-200"></div>
+                                    <div class="text-sm font-bold text-slate-600 uppercase tracking-wide">
+                                        {{ $totalReviews }} Reviews
                                     </div>
                                 </div>
-                                <div class="h-8 w-px bg-slate-200"></div>
-                                <div class="text-sm font-bold text-slate-500 uppercase tracking-wide">
-                                    {{ $totalReviews }} Reviews
+                                <div class="mt-2 text-xs text-slate-500">
+                                    Based on completed service reviews
                                 </div>
                             </div>
-
+                            </div>
                         </div>
                     </div>
                 </div>

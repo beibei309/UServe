@@ -51,8 +51,7 @@
 
                         <div class="flex items-center gap-3">
                             @auth
-                                @php $viewer = $viewer; @endphp
-                                @if($viewer->hu_id !== $provider->hu_id && $viewer->isCommunity() && $provider->isStudent())
+                                @if($canContactProvider)
                                     <a href="{{ route('chat.request', ['user' => $provider->hu_id]) }}"
                                        class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium text-white {{ $provider->hu_is_available ? 'bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500' : 'bg-gray-400 cursor-not-allowed' }} focus:outline-none focus:ring-2 transition-colors"
                                        {{ !$provider->hu_is_available ? 'aria-disabled=true' : '' }}>
@@ -61,7 +60,7 @@
                                         </svg>
                                         {{ $provider->hu_is_available ? 'Send Message' : 'Currently Unavailable' }}
                                     </a>
-                                    <x-favorite-button :user-id="$provider->hu_id" :is-favorited="$viewer->favorites()->where('hf_favorited_user_id', $provider->hu_id)->exists()" />
+                                    <x-favorite-button :user-id="$provider->hu_id" :is-favorited="$isProviderFavorited ?? false" />
                                 @endif
                             @else
                                 <a href="{{ route('login') }}" class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors">Login to Contact</a>

@@ -9,10 +9,10 @@
 
         <div class="p-4 rounded-lg shadow-xl mb-6 border transition-all duration-300"
              style="background-color: var(--bg-secondary); border-color: var(--border-color);">
-            <form method="GET" action="{{ route('admin.requests.index') }}" class="flex flex-wrap gap-4">
+            <form method="GET" action="{{ route('admin.requests.index') }}" class="flex flex-wrap gap-3 sm:gap-4">
 
                 {{-- Search Input --}}
-                <div class="flex-1 min-w-[300px]">
+                <div class="flex-1 min-w-0 w-full">
                     <input type="text" name="search" value="{{ request('search') }}"
                         placeholder="Search by requester, provider or service..."
                         class="w-full px-4 py-2 border rounded-lg transition-colors duration-300 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
@@ -20,9 +20,9 @@
                 </div>
 
                 {{-- Status Filter --}}
-                <div>
+                <div class="w-full sm:w-auto">
                     <select name="status"
-                        class="px-4 py-2 border rounded-lg transition-colors duration-300 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
+                        class="w-full sm:w-auto px-4 py-2 border rounded-lg transition-colors duration-300 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
                         style="background-color: var(--bg-tertiary); color: var(--text-primary); border-color: var(--border-color);">
                         <option value="">All Statuses</option>
                         <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
@@ -35,9 +35,9 @@
                 </div>
 
                 {{-- Category Filter --}}
-                <div>
+                <div class="w-full sm:w-auto">
                     <select name="category"
-                        class="px-4 py-2 border rounded-lg transition-colors duration-300 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
+                        class="w-full sm:w-auto px-4 py-2 border rounded-lg transition-colors duration-300 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
                         style="background-color: var(--bg-tertiary); color: var(--text-primary); border-color: var(--border-color);">
                         <option value="">All Categories</option>
                         @foreach ($categories ?? [] as $category)
@@ -75,27 +75,15 @@
 
                             {{-- Request Details --}}
                             <td class="py-4 px-3">
-                                        @php
-                                            $selectedPackage = $request->hsr_selected_package;
-                                            $selectedPackageLabel = is_array($selectedPackage)
-                                                ? implode(', ', array_filter($selectedPackage))
-                                                : ($selectedPackage ?? '');
-
-                                            $selectedDates = $request->hsr_selected_dates;
-                                            $selectedDateValues = is_array($selectedDates)
-                                                ? array_values(array_filter($selectedDates))
-                                                : (filled($selectedDates) ? [$selectedDates] : []);
-                                            $firstSelectedDate = $selectedDateValues[0] ?? null;
-                                        @endphp
                                         <div class="flex items-center gap-3">
                                             <div class="h-8 w-8 rounded-lg bg-cyan-100 flex items-center justify-center text-cyan-700 font-bold text-sm">
-                                                {{ substr($request->studentService->hss_title, 0, 1) }}
+                                                {{ $request->service_initial }}
                                             </div>
                                             <div>
                                                 <div class="text-sm font-semibold transition-colors duration-300" style="color: var(--text-primary);">
                                                     {{ Str::limit($request->studentService->hss_title, 25) }}</div>
                                                 <div class="text-xs transition-colors duration-300" style="color: var(--text-secondary);">
-                                                    <span class="capitalize text-cyan-600 font-medium">{{ $selectedPackageLabel !== '' ? $selectedPackageLabel : '—' }}</span>
+                                                    <span class="capitalize text-cyan-600 font-medium">{{ $request->selected_package_label !== '' ? $request->selected_package_label : '—' }}</span>
                                                     • RM {{ number_format($request->hsr_offered_price, 2) }}
                                                 </div>
                                             </div>
@@ -119,33 +107,22 @@
                                 {{-- Schedule --}}
                                 <td class="py-4 px-3">
                                     <div class="text-sm transition-colors duration-300" style="color: var(--text-primary);">
-                                        {{ $firstSelectedDate ? \Carbon\Carbon::parse($firstSelectedDate)->format('d M Y') : 'Not set' }}
+                                        {{ $request->first_selected_date_display }}
                                     </div>
-                                    @if (count($selectedDateValues) > 1)
+                                    @if (count($request->selected_date_values) > 1)
                                         <div class="text-xs text-cyan-600">
-                                            +{{ count($selectedDateValues) - 1 }} more date(s)
+                                            +{{ count($request->selected_date_values) - 1 }} more date(s)
                                         </div>
                                     @endif
                                     <div class="text-xs transition-colors duration-300" style="color: var(--text-secondary);">
-                                        {{ \Carbon\Carbon::parse($request->created_at)->diffForHumans() }}
+                                        {{ $request->created_at_human }}
                                     </div>
                                 </td>
 
                                 {{-- Status --}}
-                                <td class="py-4 px-3">
-                                    @php
-                                        $statusStyles = [
-                                            'pending' => 'bg-yellow-100 text-yellow-800 border-yellow-200',
-                                            'in_progress' => 'bg-blue-100 text-blue-800 border-blue-200',
-                                            'completed' => 'bg-green-100 text-green-800 border-green-200',
-                                            'disputed' => 'bg-red-100 text-red-800 border-red-200 animate-pulse',
-                                            'cancelled' => 'bg-gray-100 text-gray-600 border-gray-200',
-                                            'rejected' => 'bg-gray-100 text-gray-600 border-gray-200',
-                                        ];
-                                        $style = $statusStyles[$request->hsr_status] ?? 'bg-gray-100 text-gray-600 border-gray-200';
-                                    @endphp
-                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold border {{ $style }} capitalize">
-                                        {{ str_replace('_', ' ', $request->hsr_status) }}
+                                <td class="py-4 px-3 text-center">
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold border {{ $request->status_style }} capitalize">
+                                        {{ $request->status_label }}
                                     </span>
                                     @if ($request->hsr_status === 'disputed')
                                         <div class="text-[10px] text-red-600 font-medium mt-1">Admin Action Required</div>
@@ -153,47 +130,32 @@
                                 </td>
 
                                 {{-- Actions --}}
-                                <td class="py-4 px-3 text-right">
-                                    <div class="flex items-center justify-end gap-2">
-                                        <button onclick='openViewModal(@json($request), @json($request->studentService), @json($request->requester), @json($request->provider))'
-                                            class="text-blue-500 hover:text-blue-700 transition-colors duration-300" title="View">
+                                <td class="py-4 px-3">
+                                    <div class="flex items-center justify-center gap-2 flex-wrap">
+                                        <button type="button" data-request-open-view
+                                            data-request='@json($request)'
+                                            data-service='@json($request->studentService)'
+                                            data-requester='@json($request->requester)'
+                                            data-provider='@json($request->provider)'
+                                            class="inline-flex items-center justify-center w-8 h-8 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg text-xs font-semibold transition-all duration-200" title="View">
                                             <i class="fa-solid fa-eye"></i>
                                         </button>
 
                                         @if ($request->hsr_status === 'disputed')
-                                            @php
-                                                $reporterName = 'Unknown';
-                                                $reporterRole = 'System';
-
-                                                if ($request->hsr_reported_by) {
-                                                    $reporterUser = \App\Models\User::find($request->hsr_reported_by);
-                                                    if ($reporterUser) {
-                                                        $reporterName = $reporterUser->hu_name;
-                                                        if ($request->hsr_reported_by == $request->hsr_requester_id) {
-                                                            $reporterRole = 'Buyer';
-                                                        } elseif ($request->hsr_reported_by == $request->hsr_provider_id) {
-                                                            $reporterRole = 'Seller';
-                                                        } else {
-                                                            $reporterRole = 'Admin';
-                                                        }
-                                                    }
-                                                }
-                                            @endphp
-                                            <button onclick="openDisciplineModal(
-                                                '{{ $request->hsr_id }}', 
-                                                '{{ addslashes($request->hsr_dispute_reason) }}', 
-                                                { id: '{{ $request->requester->hu_id }}', name: '{{ $request->requester->hu_name }}', warnings: '{{ $request->requester->hu_warning_count }}' },
-                                                { id: '{{ $request->provider->hu_id }}', name: '{{ $request->provider->hu_name }}', warnings: '{{ $request->provider->hu_warning_count }}' },
-                                                { name: '{{ $reporterName }}', role: '{{ $reporterRole }}' } 
-                                            )"
-                                                class="bg-red-100 hover:bg-red-200 text-red-700 px-2 py-1 rounded-lg text-xs font-bold transition-colors">
-                                                <i class="fa-solid fa-gavel"></i> Review
+                                            <button type="button" data-request-open-discipline
+                                                data-request-id="{{ $request->hsr_id }}"
+                                                data-dispute-reason='@json($request->hsr_dispute_reason)'
+                                                data-requester-payload='@json($request->requester_payload)'
+                                                data-provider-payload='@json($request->provider_payload)'
+                                                data-reporter-payload='@json($request->reporter_payload)'
+                                                class="inline-flex items-center justify-center w-8 h-8 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg text-xs font-semibold transition-all duration-200" title="Review Dispute">
+                                                <i class="fa-solid fa-gavel"></i>
                                             </button>
                                         @endif
 
-                                        <form action="{{ route('admin.requests.destroy', $request->hsr_id) }}" method="POST" onsubmit="return confirm('Delete?');" class="inline">
+                                        <form action="{{ route('admin.requests.destroy', $request->hsr_id) }}" method="POST" data-confirm-message="Delete?" class="inline">
                                             @csrf @method('DELETE')
-                                            <button type="submit" class="text-red-500 hover:text-red-700 transition-colors duration-300" title="Delete">
+                                            <button type="submit" class="inline-flex items-center justify-center w-8 h-8 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg text-xs font-semibold transition-all duration-200" title="Delete">
                                                 <i class="fa-solid fa-trash"></i>
                                             </button>
                                         </form>
@@ -226,109 +188,162 @@
         class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center backdrop-blur-sm p-4">
         <div class="rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden max-h-[90vh] overflow-y-auto transition-all duration-300"
              style="background-color: var(--bg-primary);">
-            <div class="px-6 py-4 border-b flex justify-between items-center sticky top-0 z-10 transition-colors duration-300"
-                 style="background-color: var(--bg-tertiary); border-color: var(--border-color);">
+
+            {{-- Gradient Header --}}
+            <div class="relative bg-gradient-to-r from-cyan-600 to-indigo-700 px-6 py-5 flex justify-between items-center sticky top-0 z-10">
                 <div>
-                    <h3 class="text-lg font-bold transition-colors duration-300" style="color: var(--text-primary);">Request Details</h3>
-                    <p class="text-xs transition-colors duration-300" style="color: var(--text-secondary);">ID: #<span id="viewId"></span></p>
+                    <div class="flex items-center gap-3 mb-1">
+                        <div class="w-10 h-10 rounded-xl bg-white bg-opacity-20 flex items-center justify-center">
+                            <i class="fa-solid fa-file-contract text-white text-lg"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-white">Request Details</h3>
+                    </div>
+                    <p class="text-cyan-200 text-xs ml-13 pl-1">Request ID: #<span id="viewId"></span></p>
                 </div>
-                <button onclick="closeViewModal()"
-                    class="rounded-full p-1 shadow-sm border transition-all duration-300"
-                    style="color: var(--text-secondary); background-color: var(--bg-secondary); border-color: var(--border-color);"
-                    onmouseover="this.style.color = 'var(--text-primary)';"
-                    onmouseout="this.style.color = 'var(--text-secondary)';">
+                <button type="button" data-request-close-view
+                    class="rounded-full p-2 bg-white bg-opacity-20 hover:bg-opacity-30 transition-all duration-200 text-white">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
-                        </path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
                 </button>
             </div>
-            <div class="p-6 space-y-6">
-                <div class="flex justify-between items-start bg-indigo-50 p-4 rounded-xl border border-indigo-100">
-                    <div>
-                        <h4 id="viewServiceTitle" class="font-bold text-gray-900 text-lg mb-1"></h4>
-                        <span id="viewPackage"
-                            class="text-xs font-semibold bg-white px-2 py-1 rounded border border-indigo-200 text-indigo-700 uppercase tracking-wide"></span>
+
+            <div class="p-6 space-y-5">
+
+                {{-- Service Overview Card --}}
+                <div class="rounded-xl overflow-hidden border transition-colors duration-300" style="border-color: var(--border-color);">
+                    <div class="bg-gradient-to-r from-indigo-500 to-purple-600 px-4 py-3 flex items-center gap-2">
+                        <i class="fa-solid fa-briefcase text-white text-sm"></i>
+                        <span class="text-white text-sm font-semibold uppercase tracking-wide">Service Overview</span>
                     </div>
-                    <div class="text-right">
-                        <p class="text-2xl font-bold text-indigo-700">RM <span id="viewPrice"></span></p>
-                        <span id="viewStatus"
-                            class="inline-block mt-1 px-2.5 py-0.5 rounded-full text-xs font-bold capitalize bg-white border"></span>
+                    <div class="p-4 flex justify-between items-start transition-colors duration-300" style="background-color: var(--bg-secondary);">
+                        <div>
+                            <h4 id="viewServiceTitle" class="font-bold text-lg mb-1 transition-colors duration-300" style="color: var(--text-primary);"></h4>
+                            <span id="viewPackage"
+                                class="text-xs font-semibold px-2 py-1 rounded-md border uppercase tracking-wide transition-colors duration-300"
+                                style="background-color: var(--bg-tertiary); color: var(--text-secondary); border-color: var(--border-color);"></span>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-2xl font-bold text-indigo-500">RM <span id="viewPrice"></span></p>
+                            <span id="viewStatus"
+                                class="inline-block mt-1 px-2.5 py-0.5 rounded-full text-xs font-bold capitalize border"></span>
+                        </div>
                     </div>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="border border-gray-200 rounded-xl p-4">
-                        <p class="text-xs font-bold text-gray-400 uppercase mb-3">Requester (Buyer)</p>
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold"
-                                id="viewReqAvatar"></div>
-                            <div>
-                                <p id="viewReqName" class="font-bold text-sm text-gray-900"></p>
-                                <p id="viewReqEmail" class="text-xs text-gray-500"></p>
-                                <p id="viewReqPhone" class="text-xs text-gray-500 mt-0.5"></p>
+
+                {{-- Parties Involved --}}
+                <div class="rounded-xl overflow-hidden border transition-colors duration-300" style="border-color: var(--border-color);">
+                    <div class="bg-gradient-to-r from-blue-500 to-cyan-600 px-4 py-3 flex items-center gap-2">
+                        <i class="fa-solid fa-users text-white text-sm"></i>
+                        <span class="text-white text-sm font-semibold uppercase tracking-wide">Parties Involved</span>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x transition-colors duration-300"
+                         style="background-color: var(--bg-secondary); divide-color: var(--border-color);">
+                        <div class="p-4">
+                            <p class="text-xs font-bold uppercase mb-3 transition-colors duration-300" style="color: var(--text-muted);">
+                                <i class="fa-solid fa-user-graduate mr-1 text-blue-400"></i> Requester (Buyer)
+                            </p>
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold flex-shrink-0"
+                                    id="viewReqAvatar"></div>
+                                <div>
+                                    <p id="viewReqName" class="font-bold text-sm transition-colors duration-300" style="color: var(--text-primary);"></p>
+                                    <p id="viewReqEmail" class="text-xs transition-colors duration-300" style="color: var(--text-secondary);"></p>
+                                    <p id="viewReqPhone" class="text-xs mt-0.5 transition-colors duration-300" style="color: var(--text-muted);"></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-4">
+                            <p class="text-xs font-bold uppercase mb-3 transition-colors duration-300" style="color: var(--text-muted);">
+                                <i class="fa-solid fa-handshake mr-1 text-emerald-400"></i> Provider (Seller)
+                            </p>
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 font-bold flex-shrink-0"
+                                    id="viewProvAvatar"></div>
+                                <div>
+                                    <p id="viewProvName" class="font-bold text-sm transition-colors duration-300" style="color: var(--text-primary);"></p>
+                                    <p id="viewProvEmail" class="text-xs transition-colors duration-300" style="color: var(--text-secondary);"></p>
+                                    <p id="viewProvPhone" class="text-xs mt-0.5 transition-colors duration-300" style="color: var(--text-muted);"></p>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="border border-gray-200 rounded-xl p-4">
-                        <p class="text-xs font-bold text-gray-400 uppercase mb-3">Provider (Seller)</p>
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-bold"
-                                id="viewProvAvatar"></div>
-                            <div>
-                                <p id="viewProvName" class="font-bold text-sm text-gray-900"></p>
-                                <p id="viewProvEmail" class="text-xs text-gray-500"></p>
-                                <p id="viewProvPhone" class="text-xs text-gray-500 mt-0.5"></p>
+                </div>
+
+                {{-- Schedule & Message --}}
+                <div class="rounded-xl overflow-hidden border transition-colors duration-300" style="border-color: var(--border-color);">
+                    <div class="bg-gradient-to-r from-emerald-500 to-teal-600 px-4 py-3 flex items-center gap-2">
+                        <i class="fa-solid fa-calendar-days text-white text-sm"></i>
+                        <span class="text-white text-sm font-semibold uppercase tracking-wide">Schedule & Message</span>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-0 divide-y md:divide-y-0 md:divide-x transition-colors duration-300"
+                         style="background-color: var(--bg-secondary); divide-color: var(--border-color);">
+                        <div class="p-4 md:col-span-1">
+                            <p class="text-xs font-bold uppercase mb-3 transition-colors duration-300" style="color: var(--text-muted);">Schedule</p>
+                            <div class="space-y-2">
+                                <div class="flex items-center gap-2 text-sm transition-colors duration-300" style="color: var(--text-primary);">
+                                    <i class="fa-regular fa-calendar w-4 text-center text-emerald-500"></i>
+                                    <span id="viewDate"></span>
+                                </div>
+                                <div class="flex items-center gap-2 text-sm transition-colors duration-300" style="color: var(--text-primary);">
+                                    <i class="fa-regular fa-clock w-4 text-center text-teal-500"></i>
+                                    <span id="viewTime"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-4 md:col-span-2">
+                            <p class="text-xs font-bold uppercase mb-3 transition-colors duration-300" style="color: var(--text-muted);">Client Message</p>
+                            <div class="rounded-lg p-3 border text-sm italic min-h-[70px] transition-colors duration-300"
+                                 style="background-color: var(--bg-tertiary); border-color: var(--border-color); color: var(--text-secondary);">
+                                "<span id="viewMessage"></span>"
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="md:col-span-1">
-                        <p class="text-xs font-bold text-gray-400 uppercase mb-2">Schedule</p>
-                        <div class="text-sm font-medium text-gray-900 bg-gray-50 p-3 rounded-lg border border-gray-100">
-                            <div class="mb-2"><i class="fa-regular fa-calendar text-gray-400 mr-2"></i><span
-                                    id="viewDate"></span></div>
-                            <div><i class="fa-regular fa-clock text-gray-400 mr-2"></i><span id="viewTime"></span></div>
-                        </div>
+
+                {{-- Dispute Section (shown only when disputed) --}}
+                <div id="viewDisputeSection" class="hidden rounded-xl overflow-hidden border border-red-300">
+                    <div class="bg-gradient-to-r from-red-500 to-rose-600 px-4 py-3 flex items-center gap-2">
+                        <i class="fa-solid fa-circle-exclamation text-white text-sm"></i>
+                        <span class="text-white text-sm font-semibold uppercase tracking-wide">Dispute Reason</span>
                     </div>
-                    <div class="md:col-span-2">
-                        <p class="text-xs font-bold text-gray-400 uppercase mb-2">Client Message</p>
-                        <div
-                            class="bg-gray-50 p-4 rounded-lg border border-gray-100 text-sm text-gray-700 italic min-h-[80px]">
-                            "<span id="viewMessage"></span>"</div>
+                    <div class="bg-red-50 p-4">
+                        <p id="viewDisputeReason" class="text-sm text-red-700 leading-relaxed"></p>
                     </div>
                 </div>
-                <div id="viewDisputeSection" class="hidden mt-4 bg-red-50 border border-red-200 rounded-xl p-4">
-                    <h4 class="text-sm font-bold text-red-700 flex items-center gap-2 mb-2"><i
-                            class="fa-solid fa-circle-exclamation"></i> Dispute Reason</h4>
-                    <p id="viewDisputeReason" class="text-sm text-red-600"></p>
-                </div>
+
             </div>
-            <div class="bg-gray-50 px-6 py-4 text-right">
-                <button onclick="closeViewModal()"
-                    class="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-100 transition">Close</button>
+
+            {{-- Footer --}}
+            <div class="px-6 py-4 border-t flex justify-end transition-colors duration-300"
+                 style="background-color: var(--bg-secondary); border-color: var(--border-color);">
+                <button type="button" data-request-close-view
+                    class="px-5 py-2 rounded-lg border font-medium text-sm transition-all duration-200 hover:opacity-80"
+                    style="background-color: var(--bg-tertiary); color: var(--text-primary); border-color: var(--border-color);">
+                    Close
+                </button>
             </div>
         </div>
     </div>
 
     {{-- DISPUTE RESOLUTION MODAL --}}
     <div id="disciplineModal"
-        class="fixed inset-0 bg-gray-900 bg-opacity-60 hidden z-50 flex items-center justify-center backdrop-blur-sm p-4">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden">
+        class="fixed inset-0 bg-gray-900 bg-opacity-60 hidden z-50 flex items-start sm:items-center justify-center backdrop-blur-sm p-3 sm:p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[92vh] overflow-hidden flex flex-col">
 
             <div class="bg-gray-900 px-6 py-4 flex justify-between items-center">
                 <h3 class="text-lg font-bold text-white flex items-center gap-2">
                     <i class="fa-solid fa-shield-halved text-red-500"></i> Resolve Dispute & Discipline
                 </h3>
-                <button onclick="closeDisciplineModal()" class="text-gray-400 hover:text-white transition-colors">
+                <button type="button" data-request-close-discipline class="text-gray-400 hover:text-white transition-colors">
                     <i class="fa-solid fa-xmark text-xl"></i>
                 </button>
             </div>
 
-            <div class="p-6">
+            <div class="p-5 sm:p-6 overflow-y-auto">
                 <div class="mb-6 bg-red-50 border border-red-100 p-4 rounded-xl">
                     <div class="flex justify-between items-center mb-2">
-                        <h4 class="text-xs font-bold text-red-500 uppercase tracking-wide">Dispute Reason</h4>
+                        <h4 class="text-xs font-bold text-red-500 uppercase tracking-wide">Reported Statement</h4>
                         <div
                             class="flex items-center gap-1 text-xs bg-white border border-red-100 px-2 py-1 rounded-md shadow-sm">
                             <span class="text-gray-400">Reported by:</span>
@@ -338,9 +353,12 @@
                         </div>
                     </div>
                     <p id="discModalReason" class="text-gray-800 text-sm italic font-medium leading-relaxed">...</p>
+                    <p class="text-[11px] text-red-700 mt-2">
+                        This is the reporter claim only. Verify payment proof, timeline, and delivery evidence before assigning fault.
+                    </p>
                 </div>
 
-                <p class="text-sm text-gray-500 mb-4 text-center">Who is at fault? Select a user to apply a penalty.</p>
+                <p class="text-sm text-gray-500 mb-4 text-center">Who is at fault? Select a user and choose action.</p>
 
                 <form id="disciplineForm" method="POST" action="">
     @csrf
@@ -355,12 +373,12 @@
             <div class="flex items-center gap-2 text-xs text-gray-500 mb-4">
                 <span class="bg-gray-100 px-2 py-0.5 rounded">ID: <span id="discReqId"></span></span>
                 <span class="bg-orange-100 text-orange-700 px-2 py-0.5 rounded flex items-center gap-1">
-                    <i class="fa-solid fa-triangle-exclamation"></i> <span id="discReqWarnings">0</span> Warnings
+                    <i class="fa-solid fa-triangle-exclamation"></i> <span id="discReqWarnings">0</span>/{{ $warningLimit }} Warnings
                 </span>
             </div>
             <div class="grid grid-cols-2 gap-2">
-                <button type="button" onclick="submitDiscipline('warn', 'requester')" class="text-yellow-500 hover:text-yellow-400 transition border rounded-lg py-2" title="Warn"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Warn</button>
-                <button type="button" onclick="submitDiscipline('ban', 'requester')" class="text-red-600 hover:text-red-900 transition border rounded-lg py-2" title="Ban"><i class="fa-solid fa-ban mr-1"></i> Ban</button>
+                <button type="button" data-request-discipline-submit data-action="warn" data-target-role="requester" class="text-yellow-500 hover:text-yellow-400 transition border rounded-lg py-2" title="Warn"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Warn</button>
+                <button type="button" data-request-discipline-submit data-action="suspend_or_blacklist" data-target-role="requester" class="text-red-600 hover:text-red-900 transition border rounded-lg py-2" title="Suspend or Blacklist"><i class="fa-solid fa-ban mr-1"></i> Suspend / Blacklist</button>
             </div>
         </div>
 
@@ -371,12 +389,12 @@
             <div class="flex items-center gap-2 text-xs text-gray-500 mb-4">
                 <span class="bg-gray-100 px-2 py-0.5 rounded">ID: <span id="discProvId"></span></span>
                 <span class="bg-orange-100 text-orange-700 px-2 py-0.5 rounded flex items-center gap-1">
-                    <i class="fa-solid fa-triangle-exclamation"></i> <span id="discProvWarnings">0</span> Warnings
+                    <i class="fa-solid fa-triangle-exclamation"></i> <span id="discProvWarnings">0</span>/{{ $warningLimit }} Warnings
                 </span>
             </div>
             <div class="grid grid-cols-2 gap-2">
-                <button type="button" onclick="submitDiscipline('warn', 'provider')" class="text-yellow-500 hover:text-yellow-400 transition border rounded-lg py-2" title="Warn"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Warn</button>
-                <button type="button" onclick="submitDiscipline('ban', 'provider')" class="text-red-600 hover:text-red-900 transition border rounded-lg py-2" title="Ban"><i class="fa-solid fa-ban mr-1"></i> Ban</button>
+                <button type="button" data-request-discipline-submit data-action="warn" data-target-role="provider" class="text-yellow-500 hover:text-yellow-400 transition border rounded-lg py-2" title="Warn"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Warn</button>
+                <button type="button" data-request-discipline-submit data-action="suspend_or_blacklist" data-target-role="provider" class="text-red-600 hover:text-red-900 transition border rounded-lg py-2" title="Suspend or Blacklist"><i class="fa-solid fa-ban mr-1"></i> Suspend / Blacklist</button>
             </div>
         </div>
     </div>
@@ -384,163 +402,56 @@
     {{-- Admin Note Input (FIXED ID HERE) --}}
     <div class="mt-6">
         <label class="block text-xs font-bold text-gray-500 uppercase mb-1">
-            Warning Message / Ban Reason <span class="text-red-500">*</span>
+            Warning Message / Restriction Reason <span class="text-red-500">*</span>
         </label>
         <textarea 
             name="admin_note" 
             id="adminNoteInput"  {{-- THIS WAS MISSING --}}
             rows="2" 
             class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-red-500 outline-none" 
-            placeholder="Write the warning message here to send to the user..." 
+            placeholder="Write the warning message or suspension/blacklist reason..." 
             required></textarea>
+        <p id="actionPreview" class="hidden text-[11px] mt-2 rounded-md px-2 py-1 border"></p>
     </div>
 </form>
 
-                <div class="mt-4 pt-4 border-t border-gray-100 text-center">
+                <div class="mt-4 pt-4 border-t border-gray-100">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-3">
+                        <form action="" method="POST" id="resumeForm">
+                            @csrf
+                            <input type="hidden" name="action_type" value="resume">
+                            <button type="submit"
+                                class="w-full py-2 bg-indigo-100 hover:bg-indigo-200 text-indigo-800 rounded-lg text-xs font-bold transition-colors">
+                                Close Without Penalty (Resume to Waiting Payment)
+                            </button>
+                        </form>
+                        <form action="" method="POST" id="completePaidForm">
+                            @csrf
+                            <input type="hidden" name="action_type" value="complete_paid">
+                            <button type="submit"
+                                class="w-full py-2 bg-green-100 hover:bg-green-200 text-green-800 rounded-lg text-xs font-bold transition-colors">
+                                Close Without Penalty (Mark Completed & Paid)
+                            </button>
+                        </form>
+                    </div>
+                    <div class="text-center">
                     <form action="" method="POST" id="dismissForm">
                         @csrf
                         <input type="hidden" name="action_type" value="dismiss">
                         <button type="submit" class="text-xs text-gray-400 hover:text-gray-600 underline">Dismiss dispute
-                            without penalty (Mark as Resolved)</button>
+                            without penalty (Mark as Cancelled)</button>
                     </form>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <script>
-        function openViewModal(req, service, requester, provider) {
-            const reqId = req.hsr_id ?? req.id;
-            const serviceTitle = service?.hss_title ?? service?.title ?? 'Unknown Service';
-            const selectedPackage = req.hsr_selected_package ?? req.selected_package;
-            const packageLabel = Array.isArray(selectedPackage)
-                ? (selectedPackage[0] ?? 'Custom')
-                : (selectedPackage ?? 'Custom');
-            const offeredPrice = req.hsr_offered_price ?? req.offered_price ?? 0;
-            const status = req.hsr_status ?? req.status ?? 'pending';
-            const requesterName = requester?.hu_name ?? requester?.name ?? 'Unknown';
-            const providerName = provider?.hu_name ?? provider?.name ?? 'Unknown';
-            const requesterEmail = requester?.hu_email ?? requester?.email ?? '-';
-            const providerEmail = provider?.hu_email ?? provider?.email ?? '-';
-            const requesterPhone = requester?.hu_phone ?? requester?.phone ?? null;
-            const providerPhone = provider?.hu_phone ?? provider?.phone ?? null;
-            const selectedDates = req.hsr_selected_dates ?? req.selected_dates;
-            const dateLabel = Array.isArray(selectedDates) ? (selectedDates[0] ?? null) : selectedDates;
-            const startTime = req.hsr_start_time ?? req.start_time;
-            const endTime = req.hsr_end_time ?? req.end_time;
-            const message = req.hsr_message ?? req.message;
-            const disputeReason = req.hsr_dispute_reason ?? req.dispute_reason;
+@endsection
 
-            document.getElementById('viewId').textContent = reqId;
-            document.getElementById('viewServiceTitle').textContent = serviceTitle;
-            document.getElementById('viewPackage').textContent = packageLabel;
-            document.getElementById('viewPrice').textContent = parseFloat(offeredPrice || 0).toFixed(2);
-
-            const statusSpan = document.getElementById('viewStatus');
-            statusSpan.textContent = status.replace('_', ' ');
-            statusSpan.className = `inline-block mt-1 px-3 py-1 rounded-full text-xs font-bold capitalize border `;
-            if (status === 'completed') statusSpan.classList.add('bg-green-100', 'text-green-700', 'border-green-200');
-            else if (status === 'pending') statusSpan.classList.add('bg-yellow-100', 'text-yellow-700',
-                'border-yellow-200');
-            else if (status === 'disputed') statusSpan.classList.add('bg-red-100', 'text-red-700', 'border-red-200');
-            else statusSpan.classList.add('bg-gray-100', 'text-gray-700', 'border-gray-200');
-
-            document.getElementById('viewReqAvatar').textContent = requesterName.charAt(0);
-            document.getElementById('viewReqName').textContent = requesterName;
-            document.getElementById('viewReqEmail').textContent = requesterEmail;
-            document.getElementById('viewReqPhone').textContent = requesterPhone || 'No Phone';
-
-            document.getElementById('viewProvAvatar').textContent = providerName.charAt(0);
-            document.getElementById('viewProvName').textContent = providerName;
-            document.getElementById('viewProvEmail').textContent = providerEmail;
-            document.getElementById('viewProvPhone').textContent = providerPhone || 'No Phone';
-
-            document.getElementById('viewDate').textContent = dateLabel || 'Flexible';
-            document.getElementById('viewTime').textContent = (startTime || '??') + ' - ' + (endTime || '??');
-            document.getElementById('viewMessage').textContent = message || 'No additional message.';
-
-            const disputeDiv = document.getElementById('viewDisputeSection');
-            if (status === 'disputed') {
-                disputeDiv.classList.remove('hidden');
-                document.getElementById('viewDisputeReason').textContent = disputeReason || 'No reason provided';
-            } else {
-                disputeDiv.classList.add('hidden');
-            }
-            document.getElementById('viewDetailModal').classList.remove('hidden');
-        }
-
-        function closeViewModal() {
-            document.getElementById('viewDetailModal').classList.add('hidden');
-        }
-
-        let currentRequesterId = null;
-        let currentProviderId = null;
-
-        function openDisciplineModal(requestId, reason, requester, provider, reporter) {
-            document.getElementById('discModalReason').textContent = reason || 'No reason provided.';
-
-            if (reporter) {
-                document.getElementById('discReporterName').textContent = reporter.name;
-                document.getElementById('discReporterRole').textContent = `(${reporter.role})`;
-            } else {
-                document.getElementById('discReporterName').textContent = 'Unknown';
-                document.getElementById('discReporterRole').textContent = '';
-            }
-
-            document.getElementById('discReqName').textContent = requester.name;
-            document.getElementById('discReqId').textContent = requester.id;
-            document.getElementById('discReqWarnings').textContent = requester.warnings;
-            currentRequesterId = requester.id;
-
-            document.getElementById('discProvName').textContent = provider.name;
-            document.getElementById('discProvId').textContent = provider.id;
-            document.getElementById('discProvWarnings').textContent = provider.warnings;
-            currentProviderId = provider.id;
-
-            const baseUrl = "{{ url('admin/requests') }}/" + requestId + "/resolve";
-            document.getElementById('disciplineForm').action = baseUrl;
-            document.getElementById('dismissForm').action = baseUrl;
-
-            document.getElementById('disciplineModal').classList.remove('hidden');
-        }
-
-        function closeDisciplineModal() {
-            document.getElementById('disciplineModal').classList.add('hidden');
-        }
-
-        function submitDiscipline(action, target) {
-            // 1. VALIDATION: Check if message is written
-            const noteInput = document.getElementById('adminNoteInput');
-            const noteValue = noteInput.value.trim();
-
-            if (!noteValue) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Message Required',
-                    text: 'Please write a warning message or reason in the text box before proceeding.',
-                    confirmButtonColor: '#3085d6',
-                }).then(() => {
-                    // Focus the textarea so they know where to write
-                    setTimeout(() => noteInput.focus(), 300);
-                });
-                return; // Stop execution
-            }
-
-            // 2. Identify Target
-            const targetId = (target === 'requester') ? currentRequesterId : currentProviderId;
-            const targetName = (target === 'requester') ? document.getElementById('discReqName').textContent : document
-                .getElementById('discProvName').textContent;
-
-            let confirmMsg = (action === 'ban') ?
-                `Are you sure you want to PERMANENTLY BAN ${targetName}?` :
-                `Send this warning to ${targetName}?`;
-
-            // 3. Confirm and Submit
-            if (confirm(confirmMsg)) {
-                document.getElementById('inputActionType').value = action;
-                document.getElementById('inputTargetUserId').value = targetId;
-                document.getElementById('disciplineForm').submit();
-            }
-        }
-    </script>
+@section('scripts')
+    <div id="adminModuleRequestsConfig"
+        data-warning-limit="{{ $warningLimit }}"
+        data-resolve-base-url="{{ url('admin/requests') }}"></div>
+    <script src="{{ asset('js/admin-requests.js') }}"></script>
 @endsection

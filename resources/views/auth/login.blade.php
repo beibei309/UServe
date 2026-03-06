@@ -145,28 +145,10 @@
         </div>
     </div>
 
-    {{-- SWEETALERT LOGIC --}}
-    <script>
-        @if ($errors->has('email'))
-            const errorMessage = "{!! addslashes($errors->first('email')) !!}";
-
-            if (
-                errorMessage.toLowerCase().includes('suspended') ||
-                errorMessage.toLowerCase().includes('banned') ||
-                errorMessage.toLowerCase().includes('blocked') ||
-                errorMessage.toLowerCase().includes('blacklisted')
-            ) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Account Suspended',
-                    html: errorMessage,
-                    confirmButtonColor: '#4F46E5',
-                    confirmButtonText: 'Back to Login',
-
-                });
-            }
-        @endif
-    </script>
+    <div id="loginConfig"
+        data-session-error="@json(session('error') ?? '')"
+        data-email-error="@json($errors->first('email') ?? '')"></div>
+    <script src="{{ asset('js/auth-login.js') }}"></script>
 </body>
 
 </html>

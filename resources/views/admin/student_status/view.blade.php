@@ -57,21 +57,20 @@
                         {{-- STATUS BADGE --}}
                         <div>
                             <span class="text-sm font-medium transition-colors duration-300" style="color: var(--text-primary);">Status:</span>
-                            @php $statusLower = strtolower($status->hss_status); @endphp
-                            
-                            @if($statusLower == 'active')
+
+                            @if(strtolower($status->hss_status) == 'active')
                                 <span class="ml-2 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                     Active
                                 </span>
-                            @elseif($statusLower == 'probation')
+                            @elseif(strtolower($status->hss_status) == 'probation')
                                 <span class="ml-2 px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
                                     Probation
                                 </span>
-                            @elseif($statusLower == 'graduated')
+                            @elseif(strtolower($status->hss_status) == 'graduated')
                                 <span class="ml-2 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                                     Graduated
                                 </span>
-                            @elseif($statusLower == 'deferred')
+                            @elseif(strtolower($status->hss_status) == 'deferred')
                                 <span class="ml-2 px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
                                     Deferred
                                 </span>
@@ -91,7 +90,7 @@
                         {{-- GRADUATION DATE --}}
                         <div class="text-sm">
                             <span class="font-medium transition-colors duration-300" style="color: var(--text-primary);">Graduation Date:</span>
-                            <span class="transition-colors duration-300" style="color: var(--text-secondary);">{{ $status->hss_graduation_date ? \Carbon\Carbon::parse($status->hss_graduation_date)->format('d M Y') : '-' }}</span>
+                            <span class="transition-colors duration-300" style="color: var(--text-secondary);">{{ $status->graduation_date_display }}</span>
                         </div>
                         
                         {{-- TIMESTAMPS --}}
@@ -122,7 +121,7 @@
                     @csrf
                     @method('DELETE')
                     <button type="submit" 
-                            onclick="return confirm('Are you sure you want to delete this status record?')"
+                            data-confirm-message="Are you sure you want to delete this status record?"
                             class="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 border text-red-500 font-medium rounded hover:text-red-400 transition-colors duration-300"
                             style="background-color: var(--bg-primary); border-color: var(--border-color);">
                         <i class="fa-solid fa-trash mr-2"></i>

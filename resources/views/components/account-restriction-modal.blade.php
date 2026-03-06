@@ -1,25 +1,5 @@
 @auth
-    @php
-        $user = auth()->user();
-        $isRestricted = $user->hu_is_blocked || $user->hu_is_suspended || $user->hu_is_blacklisted;
-        $reason = $user->hu_blacklist_reason ?: 'No specific reason provided.';
-
-        $title = 'Account Restricted';
-        $message = 'You cannot continue browsing at this time. Please contact support.';
-
-        if ($user->hu_is_blacklisted) {
-            $title = 'Account Blacklisted';
-            $message = 'Your account has been permanently blacklisted. Please contact support for further assistance.';
-        } elseif ($user->hu_is_suspended) {
-            $title = 'Account Suspended';
-            $message = 'Your account has been suspended temporarily. Please contact support for details.';
-        } elseif ($user->hu_is_blocked) {
-            $title = 'Account Blocked';
-            $message = 'Your account has been blocked. Please contact support for assistance.';
-        }
-    @endphp
-
-    @if($isRestricted)
+    @if($accountRestrictionData['isRestricted'])
         <div class="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/80 backdrop-blur-sm p-4">
             <div class="bg-white border border-slate-200 rounded-2xl shadow-2xl max-w-md w-full p-8 text-center relative overflow-hidden">
                 <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-red-500 to-rose-600"></div>
@@ -30,12 +10,18 @@
                     </svg>
                 </div>
 
-                <h2 class="text-2xl font-bold text-slate-900 mb-3">{{ $title }}</h2>
-                <p class="text-slate-600 mb-6 leading-relaxed">{{ $message }}</p>
+                <h2 class="text-2xl font-bold text-slate-900 mb-3">{{ $accountRestrictionData['title'] }}</h2>
+                <p class="text-slate-600 mb-6 leading-relaxed">{{ $accountRestrictionData['message'] }}</p>
+
+                <div class="bg-slate-50 p-4 rounded-xl text-left border border-slate-200 mb-4">
+                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wide">Restriction Type</p>
+                    <p class="text-sm font-semibold text-slate-900 mt-1">{{ $accountRestrictionData['statusLabel'] }}</p>
+                    <p class="text-xs text-slate-600 mt-1">{{ $accountRestrictionData['scope'] }}</p>
+                </div>
 
                 <div class="bg-red-50 p-4 rounded-xl text-left border border-red-100 mb-6">
                     <p class="text-xs font-bold text-red-500 uppercase tracking-wide">Reason</p>
-                    <p class="text-sm text-slate-800 italic mt-1">"{{ $reason }}"</p>
+                    <p class="text-sm text-slate-800 italic mt-1">"{{ $accountRestrictionData['reason'] }}"</p>
                 </div>
 
                 <form method="POST" action="{{ route('logout') }}">

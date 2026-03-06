@@ -16,6 +16,7 @@ class UserAdminController extends Controller
         ]);
 
         $user->hu_is_blacklisted = true;
+        $user->hu_is_suspended = false;
         $user->hu_blacklist_reason = $data['reason'] ?? 'Banned by admin';
         $user->save();
 
@@ -29,6 +30,7 @@ class UserAdminController extends Controller
     public function unban(User $user): JsonResponse
     {
         $user->hu_is_blacklisted = false;
+        $user->hu_is_suspended = false;
         $user->hu_blacklist_reason = null;
         $user->save();
 

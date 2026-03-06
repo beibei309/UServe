@@ -9,9 +9,25 @@ use App\Models\User;
 use App\Mail\UserBlacklisted;
 use App\Mail\UserUnblacklisted;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 
 class AdminCommunityController extends Controller
 {
+private function resolveProfileImageUrl(?string $path): string
+{
+    if (!$path) {
+        return asset('uploads/profile/default.png');
+    }
+    if (Str::startsWith($path, ['http://', 'https://'])) {
+        return $path;
+    }
+    if (file_exists(public_path('storage/' . $path))) {
+        return asset('storage/' . $path);
+    }
+    return asset($path);
+}
+
    public function index(Request $request)
 {
     $search = $request->input('search');
@@ -37,10 +53,8 @@ class AdminCommunityController extends Controller
 
         // Status Logic
         ->when($status === 'active', fn($q) => $q->where('hu_is_blacklisted', 0)->where('hu_is_suspended', 0))
-            ->when($status === 'suspended', fn($q) => $q->where(function($sub) {
-                $sub->where('hu_is_blacklisted', 1)
-                    ->orWhere('hu_is_suspended', 1);
-            }))
+        ->when($status === 'suspended', fn($q) => $q->where('hu_is_suspended', 1)->where('hu_is_blacklisted', 0))
+        ->when($status === 'blacklisted', fn($q) => $q->where('hu_is_blacklisted', 1))
 
         // 2. ADDED: Rating Range Logic
         ->when($ratingRange, function ($query, $range) {
@@ -73,15 +87,31 @@ class AdminCommunityController extends Controller
 
     // Keep params in URL
     $communityUsers->appends($request->only('search', 'status', 'rating_range'));
+    $communityUsers->getCollection()->transform(function (User $user) {
+        $user->profile_image_url = $this->resolveProfileImageUrl($user->hu_profile_photo_path);
+        $user->status_label = $user->hu_is_blacklisted || $user->hu_is_suspended
+            ? 'Suspended'
+            : ($user->hu_verification_status === 'approved' ? 'Verified' : 'Not Verified');
+        $user->status_badge_class = $user->hu_is_blacklisted || $user->hu_is_suspended
+            ? 'bg-red-100 text-red-800 border-red-200'
+            : ($user->hu_verification_status === 'approved'
+                ? 'bg-green-100 text-green-800 border-green-200'
+                : 'bg-yellow-100 text-yellow-800 border-yellow-200');
+        $user->reviewsReceived->transform(function ($review) {
+            $review->reviewer_image_url = $this->resolveProfileImageUrl(optional($review->reviewer)->hu_profile_photo_path);
+            $review->replied_at_human = $review->hr_replied_at ? Carbon::parse($review->hr_replied_at)->diffForHumans() : null;
+            return $review;
+        });
+        return $user;
+    });
 
     // Stats
    $stats = [
             'total' => User::where('hu_role', 'community')->count(),
             'approved' => User::where('hu_role', 'community')->where('hu_verification_status', 'approved')->count(),
             'pending' => User::where('hu_role', 'community')->where('hu_verification_status', 'pending')->count(),
-            'blacklisted' => User::where('hu_role', 'community')
-                                 ->where(fn($q) => $q->where('hu_is_blacklisted', 1)->orWhere('hu_is_suspended', 1))
-                                 ->count(),
+            'blacklisted' => User::where('hu_role', 'community')->where('hu_is_blacklisted', 1)->count(),
+            'suspended' => User::where('hu_role', 'community')->where('hu_is_suspended', 1)->where('hu_is_blacklisted', 0)->count(),
         ];
 
     return view('admin.community.index', compact('communityUsers', 'stats'));
@@ -91,12 +121,19 @@ class AdminCommunityController extends Controller
 public function view($id)
 {
     $user = User::where('hu_role', 'community')->findOrFail($id);
+    $user->profile_image_url = $this->resolveProfileImageUrl($user->hu_profile_photo_path);
+    $createdAt = $user->hu_created_at ?? $user->created_at;
+    $updatedAt = $user->hu_updated_at ?? $user->updated_at;
+    $user->captured_at_display = $createdAt ? Carbon::parse($createdAt)->format('d M Y, H:i A') : '-';
+    $user->registered_at_display = $createdAt ? Carbon::parse($createdAt)->format('d M Y, h:i A') : '-';
+    $user->updated_at_display = $updatedAt ? Carbon::parse($updatedAt)->format('d M Y, h:i A') : '-';
     return view('admin.community.view', compact('user'));
 }
 
 public function edit($id)
 {
     $user = User::where('hu_role', 'community')->findOrFail($id);
+    $user->profile_image_url = $this->resolveProfileImageUrl($user->hu_profile_photo_path);
     return view('admin.community.edit', compact('user'));
 }
 
@@ -171,12 +208,11 @@ public function update(Request $request, $id)
     // Blacklist / Unblacklist
    if ($request->remove_blacklist) {
             $user->hu_is_blacklisted = 0;
-            $user->hu_is_suspended = 0; // Sync suspended
             $user->hu_blacklist_reason = null;
         } 
         elseif ($request->filled('blacklist_reason')) {
             $user->hu_is_blacklisted = 1;
-            $user->hu_is_suspended = 1; // Sync suspended
+            $user->hu_is_blocked = 0;
             $user->hu_blacklist_reason = trim((string) $validated['blacklist_reason']);
         }
 
@@ -197,7 +233,7 @@ public function blacklist(Request $request, $id)
     $user = User::where('hu_role', 'community')->findOrFail($id);
 
     $user->hu_is_blacklisted = 1;
-        $user->hu_is_suspended = 1; 
+        $user->hu_is_blocked = 0;
         $user->hu_blacklist_reason = $request->blacklist_reason;
         $user->save();
 
@@ -212,7 +248,8 @@ public function unblacklist($id)
     $user = User::where('hu_role', 'community')->findOrFail($id);
 
     $user->hu_is_blacklisted = 0;
-        $user->hu_is_suspended = 0; 
+        $user->hu_is_blocked = 0;
+        $user->hu_is_suspended = 0;
         $user->hu_blacklist_reason = null;
         $user->save();
 
@@ -262,9 +299,11 @@ public function export(Request $request)
 
     if ($request->filled('status')) {
         if ($request->status == 'active') {
-            $query->where('hu_is_blacklisted', false);
+            $query->where('hu_is_blacklisted', false)->where('hu_is_suspended', false);
         } elseif ($request->status == 'blacklisted') {
             $query->where('hu_is_blacklisted', true);
+        } elseif ($request->status == 'suspended') {
+            $query->where('hu_is_suspended', true)->where('hu_is_blacklisted', false);
         }
     }
 
@@ -273,13 +312,11 @@ public function export(Request $request)
     // Prepare CSV
     $csvData = $users->map(function ($user) {
             // [UPDATED] Check both for Status string
-            $isBlacklisted = $user->hu_is_blacklisted || $user->hu_is_suspended;
-            
             return [
                 'Name' => $user->hu_name,
                 'Email' => $user->hu_email,
                 'Phone' => $user->hu_phone,
-                'Status' => $isBlacklisted ? 'Blacklisted/Suspended' : ($user->hu_verification_status == 'approved' ? 'Verified' : 'Not Verified'),
+                'Status' => ucfirst($user->moderationStatusKey()),
             ];
         });
 

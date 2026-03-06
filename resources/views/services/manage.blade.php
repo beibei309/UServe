@@ -38,22 +38,15 @@
 
             {{-- Grid Content --}}
             <div id="tab-contents">
-                @php $statuses = ['all', 'pending', 'approved', 'rejected']; @endphp
-
-                @foreach ($statuses as $status)
+                @foreach (['all', 'pending', 'approved', 'rejected'] as $status)
                     <div id="{{ $status }}-tab-content"
                         class="tab-content grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 {{ $status !== 'all' ? 'hidden' : '' }}">
-
-                        @php
-                            $filtered = $status === 'all' ? $services : $services->where('hss_approval_status', $status);
-                        @endphp
-
-                        @foreach ($filtered as $service)
+                        @foreach ($servicesByStatus[$status] as $service)
                             <div class="group relative rounded-2xl shadow-sm transition-all duration-300 border border-gray-100 flex flex-col overflow-hidden
-                                 {{ strtolower($service->hss_approval_status) == 'suspended' ? 'opacity-80 pointer-events-none' : 'bg-white hover:shadow-lg' }}"
+                                 {{ $service->ui_is_suspended ? 'opacity-80 pointer-events-none' : 'bg-white hover:shadow-lg' }}"
                                 data-service-id="{{ $service->hss_id }}">
 
-                                @if (strtolower($service->hss_approval_status) == 'suspended')
+                                @if ($service->ui_is_suspended)
                                     <div
                                         class="absolute inset-0 bg-black/70 flex flex-col items-center justify-center text-center z-20">
                                         <div class="text-white text-xl font-extrabold tracking-widest uppercase mb-2">
@@ -79,47 +72,16 @@
 
                                 {{-- Card Image & Overlays --}}
                                 <div class="relative h-48 overflow-hidden bg-gray-100">
-                                    @php
-                                        $imageUrl = 'https://via.placeholder.com/400x300?text=Service+Image';
-
-                                        if (!empty($service->hss_image_path)) {
-                                            $path = $service->hss_image_path;
-
-                                            if (Str::startsWith($path, ['http://', 'https://'])) {
-                                                $imageUrl = $path;
-                                            } elseif (Str::startsWith($path, 'storage/')) {
-                                                $imageUrl = asset($path);
-                                            } elseif (Str::startsWith($path, 'services/')) {
-                                                $imageUrl = asset('storage/' . $path);
-                                            } elseif (file_exists(public_path('storage/' . $path))) {
-                                                $imageUrl = asset('storage/' . $path);
-                                            } elseif (file_exists(public_path($path))) {
-                                                $imageUrl = asset($path);
-                                            }
-                                        }
-                                    @endphp
-                                    <img src="{{ $imageUrl }}"
+                                    <img src="{{ $service->ui_image_url }}"
                                         class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                                        onerror="this.src='https://via.placeholder.com/400x300?text=Service+Image'">
+                                        data-fallback-src="https://via.placeholder.com/400x300?text=Service+Image">
 
                                     {{-- 🟢 UPDATE: Only show badge if NOT approved --}}
                                     @if (strtolower($service->hss_approval_status) !== 'approved')
                                         <div class="absolute top-3 right-3">
-                                            @php
-                                                $badgeClass = match (strtolower($service->hss_approval_status)) {
-                                                    'pending' => 'bg-amber-500 text-white',
-                                                    'rejected' => 'bg-red-500 text-white',
-                                                    default => 'bg-gray-500 text-white',
-                                                };
-                                                $icon = match (strtolower($service->hss_approval_status)) {
-                                                    'pending' => '<i class="fa-solid fa-clock mr-1"></i>',
-                                                    'rejected' => '<i class="fa-solid fa-circle-xmark mr-1"></i>',
-                                                    default => '',
-                                                };
-                                            @endphp
                                             <span
-                                                class="backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider shadow-sm {{ $badgeClass }}">
-                                                {!! $icon !!} {{ $service->hss_approval_status }}
+                                                class="backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider shadow-sm {{ $service->ui_badge_class }}">
+                                                {!! $service->ui_badge_icon !!} {{ $service->hss_approval_status }}
                                             </span>
                                         </div>
                                     @endif
@@ -186,17 +148,17 @@
 
                                     {{-- Action Buttons --}}
                                     <div class="mt-auto grid grid-cols-2 gap-3">
-                                        <button onclick="editService({{ $service->hss_id }})"
+                                        <button type="button" data-edit-service="{{ $service->hss_id }}"
                                             class="flex items-center justify-center px-4 py-2.5 bg-gray-50 text-gray-700 text-sm font-semibold rounded-xl hover:bg-gray-100 hover:text-gray-900 transition-all border border-gray-200">
                                             Edit / Status
                                         </button>
-                                        <button onclick='openServiceModal(@json($service), @json($imageUrl))'
+                                        <button type="button" data-open-service-modal='@json($service)'
                                             class="flex items-center justify-center px-4 py-2.5 bg-indigo-50 text-indigo-700 text-sm font-semibold rounded-xl hover:bg-indigo-100 transition-all border border-indigo-100">
                                             Preview
                                         </button>
                                     </div>
                                     <div class="mt-3 text-center">
-                                        <button onclick="deleteService({{ $service->hss_id }})"
+                                        <button type="button" data-delete-service="{{ $service->hss_id }}"
                                             class="text-xs text-red-400 hover:text-red-600 hover:underline transition-colors font-medium">
                                             Delete Service
                                         </button>
@@ -205,7 +167,7 @@
                             </div>
                         @endforeach
 
-                        @if ($filtered->isEmpty())
+                        @if ($servicesByStatus[$status]->isEmpty())
                             <div class="col-span-full py-16 flex flex-col items-center justify-center text-center">
                                 <div
                                     class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-4 text-gray-300">
@@ -229,7 +191,7 @@
     {{-- MODAL --}}
     <div id="serviceModal" class="fixed inset-0 z-50 hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         {{-- Backdrop --}}
-        <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity" onclick="closeServiceModal()"></div>
+        <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity" data-close-service-modal></div>
 
         <div class="fixed inset-0 z-10 overflow-y-auto">
             <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
@@ -241,7 +203,7 @@
                         <img id="modalImage" src="" class="w-full h-full object-cover">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
 
-                        <button onclick="closeServiceModal()"
+                        <button type="button" data-close-service-modal
                             class="absolute top-4 right-4 bg-black/20 hover:bg-black/40 text-white rounded-full p-2 transition backdrop-blur-md">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -277,7 +239,7 @@
                     </div>
 
                     <div class="bg-gray-50 px-6 py-4 flex flex-row-reverse border-t border-gray-100">
-                        <button type="button" onclick="closeServiceModal()"
+                        <button type="button" data-close-service-modal
                             class="w-full inline-flex justify-center rounded-xl border border-gray-300 bg-white px-5 py-2.5 text-sm font-bold text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:mt-0 sm:w-auto">
                             Close
                         </button>
@@ -324,156 +286,10 @@
         }
     </style>
 
-    <script>
-        // --- 1. Tab Logic ---
-        const tabButtons = document.querySelectorAll('.tab-btn');
-        const tabContents = document.querySelectorAll('.tab-content');
-
-        tabButtons.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const target = btn.getAttribute('data-tab');
-                tabContents.forEach(tc => tc.classList.add('hidden'));
-                document.getElementById(`${target}-tab-content`).classList.remove('hidden');
-
-                tabButtons.forEach(b => {
-                    b.classList.remove('border-indigo-600', 'text-indigo-600');
-                    b.classList.add('border-transparent', 'text-gray-500');
-                });
-                btn.classList.remove('border-transparent', 'text-gray-500');
-                btn.classList.add('border-indigo-600', 'text-indigo-600');
-            });
-        });
-
-        // --- 2. Modal Logic ---
-        function openServiceModal(service, imageUrl) {
-            const modal = document.getElementById('serviceModal');
-            const serviceId = service.hss_id ?? service.id;
-            const getField = (prefixed, fallback) => service[prefixed] ?? service[fallback] ?? null;
-
-            document.getElementById('modalTitle').textContent = getField('hss_title', 'title') || 'Untitled Service';
-            document.getElementById('modalImage').src = imageUrl || 'https://via.placeholder.com/400x300?text=Service+Image';
-
-            if (service.category) {
-                document.getElementById('modalCategory').textContent = service.category.hc_name ?? service.category.name ?? '';
-            }
-
-            const descContent = document.getElementById(`data-desc-${serviceId}`).innerHTML;
-            document.getElementById('modalDescription').innerHTML = descContent;
-
-            const pkgContainer = document.getElementById('modalPackagesContainer');
-            pkgContainer.innerHTML = '';
-
-            const tiers = [{
-                    key: 'basic',
-                    label: 'Basic Tier',
-                    color: 'teal',
-                    badge: 'bg-teal-100 text-teal-700'
-                },
-                {
-                    key: 'standard',
-                    label: 'Standard Tier',
-                    color: 'yellow',
-                    badge: 'bg-yellow-100 text-yellow-700'
-                },
-                {
-                    key: 'premium',
-                    label: 'Premium Tier',
-                    color: 'red',
-                    badge: 'bg-red-100 text-red-700'
-                }
-            ];
-
-            let hasPackages = false;
-
-            tiers.forEach(tier => {
-                const price = getField(`hss_${tier.key}_price`, `${tier.key}_price`);
-                const frequency = getField(`hss_${tier.key}_frequency`, `${tier.key}_frequency`);
-
-                if (price) {
-                    hasPackages = true;
-                    const desc = document.getElementById(`data-pkg-${tier.key}-desc-${serviceId}`).innerHTML;
-
-                    const colors = {
-                        teal: 'bg-white border-teal-600 hover:border-teal-600',
-                        yellow: 'bg-yellow-50/50 border-yellow-600 hover:border-yellow-600',
-                        red: 'bg-red-50/50 border-red-600 hover:border-red-600'
-                    };
-
-                    const html = `
-                    <div class="relative flex flex-col md:flex-row gap-5 border rounded-2xl p-5 ${colors[tier.color]} transition hover:shadow-md group">
-                        <div class="md:w-1/3 flex flex-col justify-center border-b md:border-b-0 md:border-r border-black/5 pb-4 md:pb-0 md:pr-5">
-                            <span class="inline-block self-start px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider mb-2 ${tier.badge}">${tier.label}</span>
-                            <div class="flex items-baseline gap-1">
-                                <span class="text-2xl font-extrabold text-gray-900">RM${price}</span>
-                            </div>
-                            <span class="text-xs text-gray-500 font-medium">per ${frequency || 'session'}</span>
-                        </div>
-                        <div class="md:w-2/3 prose prose-sm max-w-none text-gray-600 text-sm flex items-center">
-                            <div>${desc || '<span class="italic opacity-50">No description provided.</span>'}</div>
-                        </div>
-                    </div>
-                `;
-                    pkgContainer.innerHTML += html;
-                }
-            });
-
-            if (!hasPackages) {
-                pkgContainer.innerHTML =
-                    '<div class="text-center p-6 text-gray-400 italic bg-gray-50 rounded-xl border border-dashed border-gray-200">No pricing packages configured.</div>';
-            }
-
-            modal.classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeServiceModal() {
-            document.getElementById('serviceModal').classList.add('hidden');
-            document.body.style.overflow = 'auto';
-        }
-
-        // --- 3. Actions ---
-        function editService(id) {
-            window.location.href = "{{ url('services') }}/" + id + "/edit";
-        }
-
-        function deleteService(serviceId) {
-            Swal.fire({
-                title: 'Delete Service?',
-                text: "This action cannot be undone.",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#ef4444',
-                cancelButtonColor: '#6b7280',
-                confirmButtonText: 'Yes, delete it'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    let url = "{{ route('services.destroy', ':id') }}".replace(':id', serviceId);
-                    fetch(url, {
-                        method: 'DELETE',
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                            'Accept': 'application/json'
-                        }
-                    }).then(res => res.json()).then(data => {
-                        if (data.service) {
-                            document.querySelector(`[data-service-id='${serviceId}']`).remove();
-                            const Toast = Swal.mixin({
-                                toast: true,
-                                position: 'top-end',
-                                showConfirmButton: false,
-                                timer: 3000,
-                                timerProgressBar: true
-                            });
-                            Toast.fire({
-                                icon: 'success',
-                                title: 'Service deleted successfully'
-                            });
-                        } else {
-                            Swal.fire('Error', 'Unable to delete.', 'error');
-                        }
-                    });
-                }
-            });
-        }
-    </script>
+    <div id="servicesManageConfig"
+        data-edit-url-template="{{ url('/services/__ID__/edit') }}"
+        data-delete-url-template="{{ route('services.destroy', '__ID__') }}"></div>
+    @push('scripts')
+        <script src="{{ asset('js/nonadmin-services-manage.js') }}"></script>
+    @endpush
 @endsection

@@ -94,8 +94,8 @@
             </h2>
 
             <!-- Description -->
-            <p class="text-center text-slate-600 mb-6 leading-relaxed">
-                Thanks for signing up! We've sent a verification link to <span class="font-semibold text-indigo-600">{{ auth()->user()->hu_email }}</span>. Please check your inbox and click the link to activate your account.
+               <p class="text-center text-slate-600 mb-6 leading-relaxed">
+                Thanks for signing up! We've sent a verification link to <span class="font-semibold text-indigo-600">{{ $verifyEmailUi['user_email'] }}</span>. Please check your inbox and click the link to activate your account.
             </p>
 
             <!-- Success Message -->
@@ -174,18 +174,9 @@
         </div>
     </div>
 
-    @if (session('status') == 'verification-link-sent')
-        <script>
-            Swal.fire({
-                icon: 'success',
-                title: 'Email Sent!',
-                text: 'A new verification link has been sent to your inbox.',
-                confirmButtonColor: '#4f46e5',
-                timer: 3000,
-                timerProgressBar: true,
-            });
-        </script>
-    @endif
+    <div id="verifyEmailConfig"
+        data-link-sent="{{ session('status') == 'verification-link-sent' ? 'true' : 'false' }}"></div>
+    <script src="{{ asset('js/auth-verify-email.js') }}"></script>
 </body>
 
 </html>

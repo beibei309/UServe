@@ -6,6 +6,7 @@ use Illuminate\Http\JsonResponse;
 use App\Models\Category;
 use App\Models\User;
 use App\Models\StudentService;
+use Illuminate\Support\Facades\Auth;
 
 class HomeController extends Controller
 {
@@ -126,6 +127,29 @@ public function about()
 
         // 3. Return ke view 'about' (Pastikan anda ada fail resources/views/about.blade.php)
         return view('about', compact('totalUsers', 'totalServices', 'totalSellers', 'categories'));
+    }
+
+    public function serviceApply()
+    {
+        $authUser = Auth::user();
+        $user = $authUser instanceof User ? $authUser : null;
+        $canApplyServices = $user ? $user->isVerifiedPublic() : false;
+        $showAddServiceTab = $user ? $user->isStudent() : false;
+
+        return view('services.apply', [
+            'canApplyServices' => $canApplyServices,
+            'showAddServiceTab' => $showAddServiceTab,
+        ]);
+    }
+
+    public function terms()
+    {
+        return view('legal.terms');
+    }
+
+    public function privacy()
+    {
+        return view('legal.privacy');
     }
 
 }

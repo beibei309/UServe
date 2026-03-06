@@ -72,9 +72,9 @@
                         <form id="upload_photo_form" enctype="multipart/form-data" class="max-w-md mx-auto w-full space-y-8">
                             @csrf
                             <div class="flex justify-center">
-                                <div class="relative group cursor-pointer" onclick="document.getElementById('profile_photo_input').click()">
+                                <div class="relative group cursor-pointer" data-photo-picker-trigger>
                                     <div class="w-40 h-40 rounded-full overflow-hidden border-4 border-slate-100 shadow-xl bg-slate-50 relative">
-                                        <img id="profile-preview" src="{{ auth()->user()->hu_profile_photo_path ? asset(auth()->user()->hu_profile_photo_path) : 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->hu_name) }}" class="w-full h-full object-cover">
+                                        <img id="profile-preview" src="{{ $studentsVerificationUi['profile_preview_url'] }}" class="w-full h-full object-cover">
                                         <div class="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><span class="text-white text-sm font-bold">Change</span></div>
                                     </div>
                                 </div>
@@ -82,7 +82,7 @@
                             <input type="file" name="profile_photo" id="profile_photo_input" accept="image/*" class="hidden">
                             <div class="text-center space-y-4">
                                 <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white py-4 rounded-xl font-bold shadow-lg transition-all">Save & Continue</button>
-                                <button type="button" onclick="goToStep(1)" class="text-slate-400 hover:text-slate-600 text-sm font-medium">Back</button>
+                                <button type="button" data-go-step="1" class="text-slate-400 hover:text-slate-600 text-sm font-medium">Back</button>
                             </div>
                         </form>
                     </div>
@@ -164,207 +164,18 @@
     </div>
 
     @if($isEligible)
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-    const UPSI_LAT = 3.7832;
-    const UPSI_LNG = 101.5927;
-    const RADIUS_KM = 25;
-    let stream = null;
-    let selfieDataUrl = null;
-
-// Listen for file selection
-    document.getElementById('profile_photo_input').addEventListener('change', function(event) {
-        const file = event.target.files[0];
-        
-        if (file) {
-            // Create a file reader to read the image
-            const reader = new FileReader();
-            
-            reader.onload = function(e) {
-                // Update the image source immediately
-                document.getElementById('profile-preview').src = e.target.result;
-            }
-            
-            // Read the file as a Data URL
-            reader.readAsDataURL(file);
-        }
-    });
-
-
-    function goToStep(stepNumber) {
-        document.querySelectorAll('.step-panel').forEach(el => el.classList.add('hidden'));
-        if(stepNumber === 'success') {
-            document.getElementById('panel-success').classList.remove('hidden');
-            updateSidebar(4);
-            return;
-        }
-        document.getElementById(`panel-${stepNumber}`).classList.remove('hidden');
-        updateSidebar(stepNumber);
-    }
-
-    function updateSidebar(activeStep) {
-        for(let i=1; i<=3; i++) {
-            const el = document.getElementById(`ind-${i}`);
-            const circle = el.querySelector('div:first-child');
-            if(activeStep > 3) {
-                circle.classList.add('bg-green-500', 'border-green-500', 'text-white');
-                circle.innerHTML = '✓';
-            } else if(i === activeStep) {
-                el.classList.add('opacity-100');
-                circle.classList.add('bg-white', 'border-white', 'text-indigo-600');
-                circle.innerHTML = i;
-            } else if (i < activeStep) {
-                circle.classList.add('bg-indigo-800', 'border-indigo-800', 'text-indigo-300');
-                circle.innerHTML = '✓';
-            } else {
-                el.classList.remove('opacity-100');
-                circle.classList.remove('bg-white', 'border-white', 'text-indigo-600');
-                circle.innerHTML = i;
-            }
-        }
-    }
-
-    function addressVerified(lat, lng, addr){
-        const statusEl = document.getElementById('location_status');
-        statusEl.innerHTML = `<div class="flex items-center gap-2 text-indigo-600 bg-indigo-50 px-4 py-2 rounded-lg border border-indigo-100"><span class="font-bold">Verifying...</span></div>`;
-        if(lat && lng) {
-            fetch("{{ route('verification.save_location') }}", {
-                method: 'POST', 
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'X-CSRF-TOKEN': "{{ csrf_token() }}"
-                }, 
-                body: JSON.stringify({latitude: lat, longitude: lng, address: addr})
-            })
-            .then(async res => {
-                const data = await res.json().catch(() => ({}));
-                if (!res.ok || data.success === false) {
-                    throw new Error(data.message || 'Location verification failed.');
-                }
-
-                statusEl.innerHTML = `<div class="flex items-center gap-2 text-green-600 bg-green-50 px-4 py-2 rounded-lg border border-green-100"><span class="font-bold">Verified!</span></div>`;
-                setTimeout(() => goToStep(2), 1000);
-            })
-            .catch(err => {
-                statusEl.innerHTML = '';
-                Swal.fire({icon:'error', text: err.message || 'Unable to verify location. Please try again.'});
-            });
-            return;
-        }
-        statusEl.innerHTML = '';
-    }
-
-    document.getElementById('detect_location_btn').addEventListener('click', function(){
-        const btn = this; const original = btn.innerHTML;
-        btn.innerHTML = '<span>Detecting...</span>'; btn.disabled = true;
-        if(navigator.geolocation){
-            navigator.geolocation.getCurrentPosition(pos => {
-                const lat = pos.coords.latitude; const lng = pos.coords.longitude;
-                const R = 6371; 
-                const dLat = (lat-UPSI_LAT) * Math.PI/180;
-                const dLon = (lng-UPSI_LNG) * Math.PI/180;
-                const a = Math.sin(dLat/2)**2 + Math.cos(UPSI_LAT*Math.PI/180)*Math.cos(lat*Math.PI/180)*Math.sin(dLon/2)**2;
-                const c = 2*Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-                const dist = R*c;
-                btn.innerHTML = original; btn.disabled = false;
-                if(dist <= RADIUS_KM) addressVerified(lat, lng, `GPS: ${lat}, ${lng}`);
-                else Swal.fire({icon:'error', text:'You must be in Muallim District.'});
-            }, err => {
-                btn.innerHTML = original; btn.disabled = false;
-                Swal.fire({icon:'error', text:'Please allow location access.'});
-            });
-        }
-    });
-
-    document.getElementById('upload_photo_form').addEventListener('submit', function(e){
-        e.preventDefault();
-        
-        const formData = new FormData(this);
-        
-        // Show loading
-        Swal.fire({
-            title: 'Uploading...', 
-            text: 'Please wait',
-            allowOutsideClick: false,
-            didOpen: () => Swal.showLoading()
-        });
-
-        fetch("{{ route('students_verification.upload') }}", {
-            method: 'POST', 
-            body: formData, 
-            headers: {
-                'X-CSRF-TOKEN': "{{ csrf_token() }}",
-                'Accept': 'application/json' // Tell server we want JSON
-            }
-        })
-        .then(response => response.json()) // Parse the JSON from controller
-        .then(data => {
-            if (data.success) {
-                // Success! Close loader and move to next step
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Photo Uploaded!',
-                    toast: true,
-                    position: 'top-end',
-                    showConfirmButton: false,
-                    timer: 1500
-                });
-                
-                // MOVE TO NEXT STEP AUTOMATICALLY
-                goToStep(3); 
-            } else {
-                Swal.fire({icon: 'error', title: 'Upload Failed', text: data.message || 'Something went wrong'});
-            }
-        })
-        .catch(error => {
-            console.error(error);
-            Swal.fire({icon: 'error', title: 'Error', text: 'Network error occurred.'});
-        });
-    });
-    const video = document.getElementById('camera_preview');
-    const canvas = document.getElementById('snapshot_canvas');
-    const startBtn = document.getElementById('start_camera');
-    
-    startBtn.addEventListener('click', async () => {
-        try {
-            stream = await navigator.mediaDevices.getUserMedia({video:true});
-            video.srcObject = stream;
-            video.classList.remove('hidden');
-            document.getElementById('camera_placeholder').classList.add('hidden');
-            startBtn.classList.add('hidden');
-            document.getElementById('camera_controls').classList.remove('hidden');
-        } catch(e) { Swal.fire({icon:'error', text:'Camera error.'}); }
-    });
-
-    document.getElementById('take_snapshot').addEventListener('click', () => {
-        canvas.width = video.videoWidth; canvas.height = video.videoHeight;
-        const ctx = canvas.getContext('2d');
-        ctx.translate(canvas.width, 0); ctx.scale(-1, 1);
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        selfieDataUrl = canvas.toDataURL('image/png');
-        video.classList.add('hidden'); canvas.classList.remove('hidden');
-        document.getElementById('take_snapshot').classList.add('hidden');
-        document.getElementById('confirm_snapshot').classList.remove('hidden');
-        document.getElementById('retake_snapshot').classList.remove('hidden');
-    });
-
-    document.getElementById('retake_snapshot').addEventListener('click', () => {
-        canvas.classList.add('hidden'); video.classList.remove('hidden');
-        document.getElementById('take_snapshot').classList.remove('hidden');
-        document.getElementById('confirm_snapshot').classList.add('hidden');
-        document.getElementById('retake_snapshot').classList.add('hidden');
-    });
-
-    document.getElementById('confirm_snapshot').addEventListener('click', () => {
-        Swal.fire({title:'Verifying...', didOpen:()=>Swal.showLoading()});
-        fetch("{{ route('students_verification.upload_selfie') }}", {
-            method:'POST', body:JSON.stringify({selfie_image: selfieDataUrl}),
-            headers:{'Content-Type':'application/json', 'X-CSRF-TOKEN': "{{ csrf_token() }}"}
-        }).then(r=>{Swal.close(); goToStep('success');})
-        .catch(e=>{Swal.close(); goToStep('success');});
-    });
-    </script>
+    <div id="studentsVerificationConfig"
+        data-save-location-url="{{ route('verification.save_location') }}"
+        data-upload-photo-url="{{ route('students_verification.upload') }}"
+        data-upload-selfie-url="{{ route('students_verification.upload_selfie') }}"
+        data-csrf-token="{{ csrf_token() }}"
+        data-upsi-lat="3.7832"
+        data-upsi-lng="101.5927"
+        data-radius-km="25"></div>
+    @push('scripts')
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script src="{{ asset('js/students-verification.js') }}"></script>
+    @endpush
     <style>.animate-fadeIn{animation:fadeIn 0.5s ease-out forwards}@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}.animate-bounce-short{animation:bounceShort 2s infinite}@keyframes bounceShort{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}</style>
     @endif
 </x-guest-layout>

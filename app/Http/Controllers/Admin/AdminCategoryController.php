@@ -8,6 +8,22 @@ use Illuminate\Http\Request;
 
 class AdminCategoryController extends Controller
 {
+    private function iconOptions(): array
+    {
+        return [
+            'fa fa-user', 'fa fa-users', 'fa fa-user-circle', 'fa fa-id-card',
+            'fa fa-home', 'fa fa-building', 'fa fa-store', 'fa fa-laptop-code',
+            'fa fa-graduation-cap', 'fa fa-book', 'fa fa-pencil', 'fa fa-university',
+            'fa fa-cog', 'fa fa-cogs', 'fa fa-wrench', 'fa fa-check-circle',
+            'fa fa-paint-brush', 'fa fa-folder-open', 'fa fa-file', 'fa fa-file-text',
+            'fa fa-calendar', 'fa fa-bell', 'fa fa-envelope',
+            'fa fa-comments', 'fa fa-commenting', 'fa fa-search', 'fa fa-filter',
+            'fa fa-soap', 'fa fa-credit-card', 'fa fa-shopping-cart', 'fa fa-tag',
+            'fa fa-star', 'fa fa-heart', 'fa fa-thumbs-up', 'fa fa-flag',
+            'fa fa-globe', 'fa fa-map-marker', 'fa fa-car', 'fa fa-bicycle',
+        ];
+    }
+
     public function index()
     {
         $categories = Category::all();
@@ -16,7 +32,8 @@ class AdminCategoryController extends Controller
 
      public function create()
     {
-        return view('admin.categories.create');
+        $icons = $this->iconOptions();
+        return view('admin.categories.create', compact('icons'));
     }
 
     public function store(Request $request)
@@ -49,7 +66,8 @@ class AdminCategoryController extends Controller
 
     public function edit(Category $category)
     {
-        return view('admin.categories.edit', compact('category'));
+        $icons = $this->iconOptions();
+        return view('admin.categories.edit', compact('category', 'icons'));
     }
 
     public function update(Request $request, Category $category)

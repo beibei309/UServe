@@ -17,8 +17,41 @@ class NotificationController extends Controller
         // distinct types of notifications might need different parsing in view,
         // but for now we pass them all.
         $notifications = $user->notifications()->paginate(15);
+        $notifications->setCollection(
+            $notifications->getCollection()->map(function ($notification) {
+                $isUnread = !$notification->read_at;
+                $iconClass = 'bg-gray-100 text-gray-500';
+                $icon = '<i class="fa-solid fa-bell"></i>';
+                $message = strtolower($notification->data['message'] ?? '');
 
-        return view('notifications.index', compact('notifications'));
+                if ($notification->type === 'App\\Notifications\\NewServiceRequest') {
+                    $iconClass = 'bg-blue-100 text-blue-600';
+                    $icon = '<i class="fa-solid fa-calendar-plus"></i>';
+                } elseif ($notification->type === 'App\\Notifications\\ServiceRequestStatusUpdated') {
+                    if (str_contains($message, 'accepted')) {
+                        $iconClass = 'bg-green-100 text-green-600';
+                        $icon = '<i class="fa-solid fa-check"></i>';
+                    } elseif (str_contains($message, 'rejected')) {
+                        $iconClass = 'bg-red-100 text-red-600';
+                        $icon = '<i class="fa-solid fa-xmark"></i>';
+                    } else {
+                        $iconClass = 'bg-indigo-100 text-indigo-600';
+                        $icon = '<i class="fa-solid fa-info"></i>';
+                    }
+                } elseif ($notification->type === 'App\\Notifications\\AdminWarningNotification') {
+                    $iconClass = 'bg-red-50 text-red-600 ring-4 ring-red-50';
+                    $icon = '<i class="fa-solid fa-triangle-exclamation"></i>';
+                }
+
+                $notification->ui_is_unread = $isUnread;
+                $notification->ui_icon_class = $iconClass;
+                $notification->ui_icon = $icon;
+                return $notification;
+            })
+        );
+
+        $hasUnreadNotifications = $user->unreadNotifications()->exists();
+        return view('notifications.index', compact('notifications', 'hasUnreadNotifications'));
     }
 
     /**

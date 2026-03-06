@@ -29,8 +29,11 @@ class AuthenticatedSessionController extends Controller
 
         $user = Auth::user();
 
-        if ($user->hu_is_suspended || $user->hu_is_blacklisted || $user->hu_is_blocked) {
+        if ($user->isHardLocked()) {
             $reason = $user->hu_blacklist_reason ?? 'Violation of terms';
+            $statusMessage = $user->hu_is_blacklisted
+                ? 'Your account has been permanently blacklisted'
+                : 'Your account has been suspended';
 
             Auth::guard('web')->logout();
 
@@ -38,10 +41,8 @@ class AuthenticatedSessionController extends Controller
             $request->session()->regenerateToken();
 
             throw ValidationException::withMessages([
-                'email' => "Your account has been suspended due to the reason: \"{$reason}\". Please contact admin@upsiconnect.com for assistance regarding the restoration of your account."
+                'email' => "{$statusMessage} due to the reason: \"{$reason}\". Please contact admin@upsiconnect.com for assistance regarding your account."
             ]);
-
-
         }
 
         $request->session()->regenerate();

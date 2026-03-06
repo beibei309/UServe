@@ -43,67 +43,16 @@
 
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                     <div>
-                                        @php
-                                            $facultyMap = [
-                                                'FKMT' => 'Fakulti Komputeran dan Meta-Teknologi',
-                                                'FBK' => 'Fakulti Bahasa dan Komunikasi',
-                                                'FPM' => 'Fakulti Pembangunan Manusia',
-                                                'FSMT' => 'Fakulti Sains dan Matematik',
-                                                'FPE' => 'Fakulti Pengurusan dan Ekonomi',
-                                                'FSKIK' => 'Fakulti Seni, Komputeran dan Industri Kreatif',
-                                                'FMUP' => 'Fakulti Muzik dan Seni Persembahan',
-                                                'FSSKJ' => 'Fakulti Sains Sukan dan Kejurulatihan',
-                                                'FTV' => 'Fakulti Teknikal dan Vokasional',
-                                                'FSK' => 'Fakulti Sains Kemanusiaan',
-                                            ];
-                                            $currentFaculty = old('faculty', $user->hu_faculty ?? $user->faculty);
-                                            $currentFaculty = $facultyMap[$currentFaculty] ?? $currentFaculty;
-                                        @endphp
                                         <label for="faculty"
                                             class="block text-sm font-medium text-gray-700">Faculty</label>
                                         <select name="faculty" id="faculty"
                                             class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                                             <option value="">Select Faculty</option>
-                                            <option value="Fakulti Komputeran dan Meta-Teknologi"
-                                                {{ $currentFaculty == 'Fakulti Komputeran dan Meta-Teknologi' ? 'selected' : '' }}>
-                                                Fakulti Komputeran dan Meta-Teknologi
-                                            </option>
-                                            <option value="Fakulti Bahasa dan Komunikasi"
-                                                {{ $currentFaculty == 'Fakulti Bahasa dan Komunikasi' ? 'selected' : '' }}>
-                                                Fakulti Bahasa dan Komunikasi
-                                            </option>
-                                            <option value="Fakulti Pembangunan Manusia"
-                                                {{ $currentFaculty == 'Fakulti Pembangunan Manusia' ? 'selected' : '' }}>
-                                                Fakulti Pembangunan Manusia
-                                            </option>
-                                            <option value="Fakulti Sains dan Matematik"
-                                                {{ $currentFaculty == 'Fakulti Sains dan Matematik' ? 'selected' : '' }}>
-                                                Fakulti Sains dan Matematik
-                                            </option>
-                                            <option value="Fakulti Pengurusan dan Ekonomi"
-                                                {{ $currentFaculty == 'Fakulti Pengurusan dan Ekonomi' ? 'selected' : '' }}>
-                                                Fakulti Pengurusan dan Ekonomi
-                                            </option>
-                                            <option value="Fakulti Sains Kemanusiaan"
-                                                {{ $currentFaculty == 'Fakulti Sains Kemanusiaan' ? 'selected' : '' }}>
-                                                Fakulti Sains Kemanusiaan
-                                            </option>
-                                            <option value="Fakulti Muzik dan Seni Persembahan"
-                                                {{ $currentFaculty == 'Fakulti Muzik dan Seni Persembahan' ? 'selected' : '' }}>
-                                                Fakulti Muzik dan Seni Persembahan
-                                            </option>
-                                            <option value="Fakulti Seni, Komputeran dan Industri Kreatif"
-                                                {{ $currentFaculty == 'Fakulti Seni, Komputeran dan Industri Kreatif' ? 'selected' : '' }}>
-                                                Fakulti Seni, Komputeran dan Industri Kreatif
-                                            </option>
-                                            <option value="Fakulti Sains Sukan dan Kejurulatihan"
-                                                {{ $currentFaculty == 'Fakulti Sains Sukan dan Kejurulatihan' ? 'selected' : '' }}>
-                                                Fakulti Sains Sukan dan Kejurulatihan
-                                            </option>
-                                            <option value="Fakulti Teknikal dan Vokasional"
-                                                {{ $currentFaculty == 'Fakulti Teknikal dan Vokasional' ? 'selected' : '' }}>
-                                                Fakulti Teknikal dan Vokasional
-                                            </option>
+                                            @foreach ($facultyOptions as $facultyOption)
+                                                <option value="{{ $facultyOption }}" {{ $selectedFaculty == $facultyOption ? 'selected' : '' }}>
+                                                    {{ $facultyOption }}
+                                                </option>
+                                            @endforeach
                                         </select>
                                         @error('faculty')
                                             <span class="text-red-500 text-xs">{{ $message }}</span>
@@ -226,7 +175,7 @@
         </div>
 
         {{-- Delete Button (Triggers SweetAlert) --}}
-        <button type="button" onclick="confirmDeleteFile()"
+        <button type="button" data-delete-file-trigger
             class="ml-4 flex-shrink-0 text-sm text-red-600 hover:text-red-800 font-medium hover:underline focus:outline-none">
             Remove
         </button>
@@ -270,99 +219,13 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-{{-- Hidden Form for Deleting File --}}
-<form id="delete-file-form" action="{{ route('students.delete-file') }}" method="POST" style="display: none;">
+<form id="delete-file-form" action="{{ route('students.delete-file') }}" method="POST" class="hidden">
     @csrf
     @method('DELETE')
 </form>
-
-<script>
-    function confirmDeleteFile() {
-        Swal.fire({
-            title: 'Delete File?',
-            text: "Are you sure you want to remove your document? This cannot be undone.",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Yes, delete it!'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                document.getElementById('delete-file-form').submit();
-            }
-        })
-    }
-</script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-
-            // File upload listener
-            const fileInput = document.getElementById('work_experience_file');
-            const fileNameDisplay = document.getElementById('file-name-display');
-            const fileDropArea = document.getElementById('file-drop-area');
-            const currentFileContainer = document.getElementById('current-file-container');
-            
-            if (fileInput) {
-                fileInput.addEventListener('change', function(e) {
-                    if (this.files && this.files.length > 0) {
-                        const fileName = this.files[0].name;
-                        fileNameDisplay.textContent = 'Selected file: ' + fileName;
-                        fileNameDisplay.classList.add('text-indigo-600', 'font-medium');
-                        fileNameDisplay.classList.remove('text-gray-500');
-                        fileDropArea.classList.add('border-indigo-500', 'bg-indigo-50');
-                        
-                        if (currentFileContainer) {
-                            currentFileContainer.classList.add('opacity-50');
-                        }
-                    } else {
-                        fileNameDisplay.textContent = 'PDF, DOC, DOCX up to 10MB';
-                        fileNameDisplay.classList.remove('text-indigo-600', 'font-medium');
-                        fileNameDisplay.classList.add('text-gray-500');
-                        fileDropArea.classList.remove('border-indigo-500', 'bg-indigo-50');
-                        
-                        if (currentFileContainer) {
-                            currentFileContainer.classList.remove('opacity-50');
-                        }
-                    }
-                });
-            }
-
-            // Jika ada session success dari controller ? Tunjuk SweetAlert
-            @if (session('success'))
-                Swal.fire({
-                    title: "Successfull!",
-                    text: "{{ session('success') }}",
-                    icon: "success",
-                    timer: 3000,
-                    timerProgressBar: true,
-                    showConfirmButton: false,
-                });
-            @endif
-
-            // Confirmation sebelum submit form
-            const form = document.querySelector('form');
-
-            if (form) {
-                form.addEventListener('submit', function(e) {
-                    e.preventDefault();
-
-                    Swal.fire({
-                        title: 'Save Changes?',
-                        text: "Are you sure you want to update your profile?",
-                        icon: 'question',
-                        showCancelButton: true,
-                        confirmButtonColor: '#4F46E5',
-                        cancelButtonColor: '#d33',
-                        confirmButtonText: 'Yes, Save Changes',
-                        cancelButtonText: 'Cancel'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            form.submit(); // <-- Normal submit, bukan AJAX
-                        }
-                    });
-                });
-            }
-        });
-    </script>
+    <div id="studentsEditProfileConfig"
+        data-success-message="{{ session('success') ?? '' }}"></div>
+    @push('scripts')
+        <script src="{{ asset('js/students-edit-profile.js') }}"></script>
+    @endpush
 @endsection

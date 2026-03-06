@@ -76,7 +76,7 @@
                             @endif
 
                             {{-- REMOVE BUTTON (Integrated into new design) --}}
-                            <button onclick="confirmRemove({{ $service->hss_id }}, this)"
+                            <button data-favorite-remove data-service-id="{{ $service->hss_id }}"
                                 class="absolute top-4 right-4 bg-white/95 text-red-500 w-8 h-8 rounded-full flex items-center justify-center shadow-md hover:bg-red-500 hover:text-white transition-all transform active:scale-90"
                                 title="Remove from favorites">
                                 <i class="fa-solid fa-heart"></i>
@@ -162,80 +162,10 @@
         @endif
     </main>
 
-    {{-- Javascript for Removal Logic --}}
-    <script>
-        function confirmRemove(serviceId, btn) {
-            Swal.fire({
-                title: 'Remove from favorites?',
-                text: "You can always add this service back later.",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#ef4444', // Red
-                cancelButtonColor: '#64748b', // Slate
-                confirmButtonText: 'Yes, remove it',
-                cancelButtonText: 'Cancel',
-                reverseButtons: true,
-                borderRadius: '1rem',
-                customClass: {
-                    popup: 'rounded-2xl'
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    performRemove(serviceId, btn);
-                }
-            });
-        }
-
-        function performRemove(serviceId, btn) {
-            // Add loading state to button
-            btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i>';
-            btn.disabled = true;
-
-            fetch("{{ route('favorites.services.toggle') }}", {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        service_id: serviceId
-                    })
-                })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        const card = btn.closest('.service-card');
-                        card.classList.add('card-removed');
-
-                        // Success Toast
-                        const Toast = Swal.mixin({
-                            toast: true,
-                            position: 'top-end',
-                            showConfirmButton: false,
-                            timer: 2000,
-                            timerProgressBar: true
-                        });
-                        Toast.fire({
-                            icon: 'success',
-                            title: 'Service removed'
-                        });
-
-                        setTimeout(() => {
-                            card.remove();
-                            // Reload if list is empty to show empty state
-                            if (document.querySelectorAll('.service-card').length === 0) {
-                                location.reload();
-                            }
-                        }, 400);
-                    }
-                })
-                .catch(err => {
-                    Swal.fire('Error', 'Something went wrong!', 'error');
-                    btn.innerHTML = '<i class="fa-solid fa-heart"></i>';
-                    btn.disabled = false;
-                });
-        }
-    </script>
+    <div id="favoritesIndexConfig"
+        data-toggle-url="{{ route('favorites.services.toggle') }}"
+        data-csrf-token="{{ csrf_token() }}"></div>
+    <script src="{{ asset('js/favorites-index.js') }}"></script>
 
 </body>
 </html>

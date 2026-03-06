@@ -15,8 +15,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
         body {
@@ -62,8 +60,6 @@
 </head>
 
 <body class="antialiased text-slate-800">
-    <div x-data="{ mobileMenuOpen: false }">
-
         {{-- Navigation bar --}}
         @include('layouts.navbar')
 
@@ -92,7 +88,7 @@
             <div class="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center z-10">
                 <span
                     class="inline-block py-1 px-3 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-sm font-semibold mb-6">
-                    Welcome back, {{ Auth::user()->hu_name }}!
+                    Welcome back, {{ $dashboardUi['welcome_name'] }}!
                 </span>
 
                 <h1 class="text-4xl md:text-5xl font-extrabold text-white tracking-tight mb-6 leading-tight">
@@ -114,6 +110,8 @@
                             </svg>
                         </div>
                         <input type="text" name="q"
+                            id="dashboard-search-input"
+                            value="{{ $dashboardUi['search_query'] }}"
                             class="block w-full pl-14 pr-4 py-5 bg-white/95 backdrop-blur-sm rounded-2xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-indigo-500/30 shadow-xl text-lg font-medium transition-all"
                             placeholder="What service are you looking for today?">
                         <button type="submit"
@@ -125,18 +123,10 @@
 
                 <div class="flex flex-wrap justify-center gap-3 text-sm">
                     <span class="text-slate-400 mr-2 py-1.5">Popular:</span>
-                    <a href="{{ route('services.index', ['q' => 'iron baju']) }}"
-                        class="px-4 py-1.5 rounded-full bg-slate-800/60 border border-slate-700 text-slate-300 hover:bg-indigo-600 hover:text-white hover:border-indigo-500 transition-all cursor-pointer backdrop-blur-sm">Iron
-                        Baju</a>
-                    <a href="{{ route('services.index', ['q' => 'video editing']) }}"
-                        class="px-4 py-1.5 rounded-full bg-slate-800/60 border border-slate-700 text-slate-300 hover:bg-indigo-600 hover:text-white hover:border-indigo-500 transition-all cursor-pointer backdrop-blur-sm">Video
-                        Editing</a>
-                    <a href="{{ route('services.index', ['q' => 'poster design']) }}"
-                        class="px-4 py-1.5 rounded-full bg-slate-800/60 border border-slate-700 text-slate-300 hover:bg-indigo-600 hover:text-white hover:border-indigo-500 transition-all cursor-pointer backdrop-blur-sm">Poster
-                        Design</a>
-                    <a href="{{ route('services.index', ['q' => 'pickup']) }}"
-                        class="px-4 py-1.5 rounded-full bg-slate-800/60 border border-slate-700 text-slate-300 hover:bg-indigo-600 hover:text-white hover:border-indigo-500 transition-all cursor-pointer backdrop-blur-sm">Pickup
-                        Parcel</a>
+                    @foreach($dashboardUi['popular_searches'] as $popularSearch)
+                    <a href="{{ route('services.index', ['q' => $popularSearch['query']]) }}"
+                        class="px-4 py-1.5 rounded-full bg-slate-800/60 border border-slate-700 text-slate-300 hover:bg-indigo-600 hover:text-white hover:border-indigo-500 transition-all cursor-pointer backdrop-blur-sm">{{ $popularSearch['label'] }}</a>
+                    @endforeach
                 </div>
             </div>
         </section>
@@ -188,50 +178,30 @@
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                    @foreach ($services->take(6) as $service)
+                    @foreach ($serviceCards as $serviceCard)
                         <div
                             class="group bg-white rounded-2xl border border-slate-200 hover:border-indigo-100 hover:shadow-xl transition-all duration-300 flex flex-col overflow-hidden relative">
 
-                           <a href="{{ route('services.details', $service) }}" class="relative h-56 bg-slate-200 overflow-hidden block">
-    @php
-        $imageUrl = '';
-        if (!empty($service->hss_image_path)) {
-            if (\Illuminate\Support\Str::startsWith($service->hss_image_path, ['http://', 'https://'])) {
-                // External image
-                $imageUrl = $service->hss_image_path;
-            } else {
-                // Local image
-                if (\Illuminate\Support\Str::startsWith($service->hss_image_path, 'storage/')) {
-                    $imageUrl = asset($service->hss_image_path);
-                } else {
-                    $imageUrl = asset('storage/' . $service->hss_image_path);
-                }
-            }
-        } else {
-            // Fallback
-            $imageUrl = 'https://ui-avatars.com/api/?name=' . urlencode($service->hss_title ?? 'Service');
-        }
-    @endphp
-
-    <img src="{{ $imageUrl }}" 
+                           <a href="{{ $serviceCard['details_url'] }}" class="relative h-56 bg-slate-200 overflow-hidden block">
+    <img src="{{ $serviceCard['image_url'] }}" 
          class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-         alt="{{ $service->hss_title ?? 'Service' }}">
+         alt="{{ $serviceCard['title'] ?? 'Service' }}">
 
-    @if ($service->category)
+    @if ($serviceCard['category_name'])
         <span class="absolute top-4 left-4 bg-white/95 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold shadow-sm"
-                            style="color: {{ $service->category->hc_color }}">
-                        {{ $service->category->hc_name }}
+                            style="color: {{ $serviceCard['category_color'] }}">
+                        {{ $serviceCard['category_name'] }}
         </span>
     @endif
 </a>
                             <div class="p-5 flex flex-col flex-1">
                                 <div class="flex items-center gap-3 mb-3">
-                                    <img src="{{ $service->user->hu_profile_photo_path ? asset($service->user->hu_profile_photo_path) : 'https://ui-avatars.com/api/?name=' . urlencode($service->user->hu_name) }}"
+                                    <img src="{{ $serviceCard['seller_avatar_url'] }}"
                                         class="w-8 h-8 rounded-full object-cover border border-slate-100">
                                     <div class="flex flex-col">
                                         <span class="text-xs font-bold text-slate-900 flex items-center gap-1">
-                                            {{ Str::limit($service->user->hu_name, 15) }}
-                                            @if ($service->user->hu_trust_badge)
+                                            {{ $serviceCard['seller_name_short'] }}
+                                            @if ($serviceCard['seller_has_trust_badge'])
                                                 <i class="fas fa-check-circle text-blue-500 text-[10px]"></i>
                                             @endif
                                         </span>
@@ -242,36 +212,36 @@
     <div class="flex text-yellow-400 text-[10px]">
         {{-- Loop to generate 5 stars --}}
         @for ($i = 1; $i <= 5; $i++)
-            <i class="{{ $i <= round($service->reviews_avg_rating ?? 0) ? 'fas' : 'far' }} fa-star"></i>
+            <i class="{{ $i <= $serviceCard['rating_stars_filled'] ? 'fas' : 'far' }} fa-star"></i>
         @endfor
     </div>
     
     <span class="font-bold text-slate-700 ml-1">
-        {{ number_format($service->reviews_avg_rating ?? 0, 1) }}
+        {{ $serviceCard['rating_display'] }}
     </span>
 
     <span class="text-slate-400 text-[10px]">
-        ({{ $service->reviews_count ?? 0 }})
+        ({{ $serviceCard['reviews_count_display'] }})
     </span>
 </div>                                </div>
 
-                                <a href="{{ route('services.details', $service) }}" class="block mb-2">
+                                <a href="{{ $serviceCard['details_url'] }}" class="block mb-2">
                                     <h3
                                         class="text-lg font-bold text-slate-900 group-hover:text-indigo-600 transition-colors line-clamp-2 leading-tight">
-                                        {{ $service->hss_title }}
+                                        {{ $serviceCard['title'] }}
                                     </h3>
                                 </a>
 
                                 <div class="rich-text text-sm text-slate-500 line-clamp-2 mb-4">
-                                    {!! $service->hss_description !!}
+                                    {{ $serviceCard['description_preview'] }}
                                 </div>
                                 <div class="mt-auto pt-4 border-t border-slate-100 flex items-center justify-between">
                                     <div>
                                         <span class="text-xs text-slate-400 font-medium uppercase">Starting at</span>
                                         <div class="text-lg font-bold text-slate-900">
-                                            RM{{ number_format($service->hss_basic_price, 0) }}</div>
+                                            RM{{ $serviceCard['price_display'] }}</div>
                                     </div>
-                                    <a href="{{ route('services.details', $service->hss_id) }}"
+                                    <a href="{{ $serviceCard['details_url'] }}"
                                         class="px-4 py-2 bg-slate-900 hover:bg-indigo-600 text-white text-sm font-semibold rounded-lg transition-colors shadow-md">
                                         View Details
                                     </a>
@@ -299,10 +269,6 @@
                     <p class="text-slate-500">Available right now to take your requests.</p>
                 </div>
 
-                @php
-                    $availableHelpers = $topStudents->filter(fn($student) => $student->hu_is_available);
-                @endphp
-
                 <div class="flex gap-6 overflow-x-auto pb-8 hide-scroll snap-x snap-mandatory">
                     @foreach ($availableHelpers as $student)
                         <div class="snap-center shrink-0 w-64 group relative">
@@ -312,13 +278,13 @@
                                 <div class="relative mb-4">
                                     <div
                                         class="w-20 h-20 rounded-full overflow-hidden border-2 border-white shadow-md group-hover:scale-105 transition-transform">
-                                        @if ($student->hu_profile_photo_path)
-                                            <img src="{{ asset($student->hu_profile_photo_path) }}"
+                                        @if ($student['avatar_url'])
+                                            <img src="{{ $student['avatar_url'] }}"
                                                 class="w-full h-full object-cover">
                                         @else
                                             <div
                                                 class="w-full h-full bg-indigo-100 flex items-center justify-center text-indigo-600 text-2xl font-bold">
-                                                {{ substr($student->hu_name, 0, 1) }}
+                                                {{ $student['initial'] }}
                                             </div>
                                         @endif
                                     </div>
@@ -326,20 +292,20 @@
                                         title="Online"></div>
                                 </div>
 
-                                <h3 class="text-lg font-bold text-slate-900 truncate w-full mb-1">{{ $student->hu_name }}
+                                <h3 class="text-lg font-bold text-slate-900 truncate w-full mb-1">{{ $student['name'] }}
                                 </h3>
-                                <p class="text-xs text-slate-500 mb-3">{{ $student->hu_faculty ?? 'Student Seller' }}</p>
+                                <p class="text-xs text-slate-500 mb-3">{{ $student['faculty_display'] }}</p>
 
                                 <div
                                     class="flex items-center justify-center gap-2 mb-4 bg-slate-50 px-3 py-1.5 rounded-full text-xs font-semibold text-slate-700">
                                     <i class="fas fa-star text-yellow-400"></i>
-                                    {{ number_format($student->hu_average_rating ?? 0, 1) }}
+                                    {{ $student['rating_display'] }}
                                     <span class="text-slate-300">|</span>
-                                    {{ $student->reviewsReceived()->count() }} reviews
+                                    {{ $student['reviews_count'] }} reviews
                                 </div>
 
                                 {{-- Key Change: COLORFUL BUTTON --}}
-                                <a href="{{ route('students.profile', $student) }}"
+                                <a href="{{ $student['profile_url'] }}"
                                     class="w-full py-2.5 rounded-xl bg-indigo-600 border border-indigo-600 text-white font-semibold text-sm hover:bg-indigo-700 hover:border-indigo-700 transition-all mt-auto shadow-md hover:shadow-lg">
                                     View Profile
                                 </a>
@@ -356,8 +322,8 @@
 
         @include('layouts.footer')
 
-    </div>
-
+    <div id="dashboardConfig" data-search-query="@json($dashboardUi['search_query'])"></div>
+    <script src="{{ asset('js/nonadmin-dashboard.js') }}"></script>
 </body>
 
 </html>

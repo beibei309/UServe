@@ -21,7 +21,6 @@
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
         body {
@@ -82,16 +81,6 @@
 
 <body class="antialiased text-slate-800">
 
-    @php
-        $hasActiveRequest = false;
-        if (auth()->check()) {
-            $hasActiveRequest = \App\Models\ServiceRequest::where('hsr_requester_id', auth()->id())
-                ->where('hsr_student_service_id', $service->hss_id) // <--- FIXED: Checks specific service only
-                ->whereIn('hsr_status', ['pending', 'accepted', 'in_progress'])
-                ->exists();
-        }
-    @endphp
-
     @include('layouts.navbar')
 
     <div class="bg-white border-b border-gray-200 pt-24 pb-6">
@@ -139,11 +128,7 @@
     {{-- META INFO --}}
     <div class="flex flex-wrap items-center gap-4 text-sm mt-4">
         <span class="font-semibold text-slate-900">
-            @auth
-                {{ $service->user->hu_name }}
-            @else
-                {{ substr($service->user->hu_name, 0, 1) . '****' }}
-            @endauth
+            {{ $detailsUi['provider_display_name'] }}
         </span> |
         <span class="text-slate-500">
             <i class="fa-solid fa-star text-yellow-400"></i>
@@ -174,32 +159,11 @@
                     class="group relative overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-md transition-all duration-300 hover:shadow-xl">
                     {{-- Image Container --}}
                     <div class="aspect-video h-[400px] w-full overflow-hidden bg-gray-100">
-                        @php
-                            $imageUrl = null;
-                            $defaultPlaceholder = 'https://ui-avatars.com/api/?name=' . urlencode($service->hss_title ?? 'Service');
-
-                            if (!empty($service->hss_image_path)) {
-                                $path = $service->hss_image_path;
-
-                                if (Str::startsWith($path, ['http://', 'https://'])) {
-                                    $imageUrl = $path;
-                                } elseif (Str::startsWith($path, 'storage/')) {
-                                    $imageUrl = asset($path);
-                                } elseif (file_exists(public_path('storage/' . $path))) {
-                                    $imageUrl = asset('storage/' . $path);
-                                } elseif (file_exists(public_path($path))) {
-                                    $imageUrl = asset($path);
-                                } else {
-                                    $imageUrl = $defaultPlaceholder;
-                                }
-                            }
-                        @endphp
-
-                        @if ($imageUrl)
-                            <img src="{{ $imageUrl }}"
+                        @if ($detailsImageUrl)
+                            <img src="{{ $detailsImageUrl }}"
                                 alt="{{ $service->hss_title ?? 'Service Image' }}"
                                 class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                onerror="this.onerror=null; this.src='{{ $defaultPlaceholder }}';">
+                                data-fallback-src="{{ $detailsImagePlaceholder }}">
                         @else
                             <div
                                 class="flex h-full w-full flex-col items-center justify-center bg-gray-50 text-gray-400">
@@ -242,7 +206,7 @@
                                         class="w-24 h-24 md:w-28 md:h-28 rounded-full bg-indigo-600 flex items-center justify-center text-3xl md:text-4xl text-white font-bold border-4 border-white shadow-lg 
                         {{-- BLUR IF GUEST --}}
                         @guest blur-md brightness-90 @endguest">
-                                        {{ strtoupper(substr($service->user->hu_name, 0, 1)) }}
+                                        {{ $detailsUi['provider_initial_upper'] }}
                                     </div>
                                 @endif
 
@@ -270,11 +234,7 @@
                             <div class="mb-4">
                                 <h3 class="text-xl font-bold text-slate-900 mb-1">
                                     {{-- Optional: Mask name for guests if you want extra privacy --}}
-                                    @guest
-                                        {{ substr($service->user->hu_name, 0, 1) . '****' }}
-                                    @else
-                                        {{ $service->user->hu_name }}
-                                    @endguest
+                                    {{ $detailsUi['provider_display_name'] }}
                                 </h3>
                                 <div class="flex flex-wrap items-center justify-center md:justify-start gap-2 text-sm">
                                     <span
@@ -313,7 +273,7 @@
                                 @else
                                     {{-- User is GUEST (Redirect to login) --}}
                                     <a href="{{ route('login') }}"
-                                        onclick="return confirm('Please sign in to view the full profile details.')"
+                                        data-requires-login-confirm
                                         class="text-sm font-bold text-gray-500 hover:text-indigo-600 hover:underline transition-colors cursor-pointer">
                                         <i class="fas fa-lock mr-1 text-xs"></i> Sign in to view profile
                                     </a>
@@ -336,7 +296,7 @@
         @if ($reviews->count() > 0)
             <div class="flex items-center gap-2 bg-yellow-50 px-3 py-1 rounded-lg border border-yellow-100">
                 <i class="fas fa-star text-yellow-500"></i>
-                <span class="font-bold text-slate-800">{{ number_format($service->hss_rating ?? 0, 1) }}</span>
+                <span class="font-bold text-slate-800">{{ $detailsUi['rating_display'] }}</span>
                 <span class="text-xs text-gray-500">/ 5.0</span>
             </div>
         @endif
@@ -356,7 +316,7 @@
                             @if($review->reviewer->hu_profile_photo_path)
                                 <img src="{{ asset($review->reviewer->hu_profile_photo_path) }}" class="w-full h-full object-cover">
                             @else
-                                {{ substr($review->reviewer->hu_name ?? 'U', 0, 1) }}
+                                {{ $review->ui_reviewer_initial }}
                             @endif
                         </div>
                     </div>
@@ -366,30 +326,22 @@
                             <div class="flex items-center gap-2">
                                 {{-- Name --}}
                                 <span class="font-bold text-slate-900 text-sm">
-                                    @auth
-                                        {{ $review->reviewer->hu_name ?? 'User' }}
-                                    @else
-                                        {{ substr($review->reviewer->hu_name ?? 'User', 0, 1) . '****' }}
-                                    @endauth
+                                    {{ $review->ui_reviewer_display_name }}
                                 </span>
 
                                 {{-- NEW: Role Badge (Student / Community) --}}
-                                @php
-                                    $reviewerRole = $review->reviewer->hu_role ?? 'student';
-                                @endphp
-                                
-                                @if ($reviewerRole === 'student')
+                                @if ($review->ui_reviewer_role === 'student')
                                     <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-indigo-100 text-indigo-800 capitalize border border-indigo-200">
                                         Student
                                     </span>
-                                @elseif ($reviewerRole === 'community')
+                                @elseif ($review->ui_reviewer_role === 'community')
                                     <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-green-100 text-green-800 capitalize border border-green-200">
                                         Community
                                     </span>
                                 @endif
                             </div>
 
-                            <span class="text-xs text-gray-400">{{ optional($review->hr_created_at)->diffForHumans() ?? 'Recently' }}</span>
+                            <span class="text-xs text-gray-400">{{ $review->ui_created_human }}</span>
                         </div>
 
                         <div class="flex text-yellow-400 text-xs my-1">
@@ -409,18 +361,14 @@
                             <div class="flex items-center gap-2 mb-2">
                                 <span class="text-xs font-bold text-gray-700 flex items-center gap-1">
                                     Reply from seller: 
-                                    @auth
-                                        {{ $service->user->hu_name }}
-                                    @else
-                                        {{ substr($service->user->hu_name, 0, 1) . '****' }}
-                                    @endauth
+                                    {{ $detailsUi['provider_display_name'] }}
                                     @if ($service->user->hu_trust_badge)
                                         <i class="fas fa-check-circle text-[10px] text-blue-500"></i>
                                     @endif
                                 </span>
-                                @if ($review->hr_replied_at)
+                                @if ($review->ui_replied_ago)
                                     <span class="text-[10px] text-gray-400">�
-                                        {{ \Carbon\Carbon::parse($review->hr_replied_at)->diffForHumans() }}</span>
+                                        {{ $review->ui_replied_ago }}</span>
                                 @endif
                             </div>
                             <p class="text-sm text-gray-600 italic">"{{ $review->hr_reply }}"</p>
@@ -695,20 +643,9 @@
                         </h3>
 
                         {{-- WhatsApp Button --}}
-                        @php
-                            $rawPhone = $service->user->hu_phone_number ?? ($service->user->hu_phone ?? '');
-                            $cleanPhone = preg_replace('/[^0-9]/', '', $rawPhone);
-                            if (substr($cleanPhone, 0, 1) === '0') {
-                                $cleanPhone = '60' . substr($cleanPhone, 1);
-                            }
-                            $whatsappUrl =
-                                "https://wa.me/{$cleanPhone}?text=Hi, I am interested in your service: " .
-                                urlencode($service->hss_title);
-                        @endphp
-
-                        @if (!empty($cleanPhone))
+                        @if ($detailsHasPhone)
                             @auth
-                                <a href="{{ $whatsappUrl }}" target="_blank"
+                                <a href="{{ $detailsWhatsappUrl }}" target="_blank"
                                     class="flex items-center justify-center w-full py-3 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-xl font-bold transition-all shadow-md shadow-green-500/20 hover:shadow-green-500/40 hover:-translate-y-0.5 mb-6 group">
                                     <i class="fa-brands fa-whatsapp text-xl mr-2 transition-transform group-hover:scale-110"></i>
                                     Chat on WhatsApp
@@ -735,29 +672,12 @@
 
                             <div x-show="showHours" x-collapse style="display: none;">
                                 <ul class="space-y-2 text-sm mt-3 pl-6 border-l-2 border-gray-50">
-                                    @php
-                                        $daysMap = [
-                                            'mon' => 'Monday',
-                                            'tue' => 'Tuesday',
-                                            'wed' => 'Wednesday',
-                                            'thu' => 'Thursday',
-                                            'fri' => 'Friday',
-                                            'sat' => 'Saturday',
-                                            'sun' => 'Sunday',
-                                        ];
-                                        $schedule = $service->hss_operating_hours ?? [];
-                                    @endphp
-                                    @foreach ($daysMap as $key => $dayName)
-                                        @php
-                                            $d = $schedule[$key] ?? [];
-                                            $isOpen = isset($d['enabled']) && $d['enabled'] == true;
-                                            $isToday = strtolower(now()->format('D')) == strtolower($dayName);
-                                        @endphp
+                                    @foreach ($detailsOperatingDays as $day)
                                         <li
-                                            class="flex justify-between items-center {{ $isToday ? 'text-indigo-600 font-bold' : 'text-gray-500' }}">
-                                            <span class="w-10">{{ $dayName }}</span>
-                                            @if ($isOpen)
-                                                <span>{{ $d['start'] ?? '09:00' }} - {{ $d['end'] ?? '17:00' }}</span>
+                                            class="flex justify-between items-center {{ $day['is_today'] ? 'text-indigo-600 font-bold' : 'text-gray-500' }}">
+                                            <span class="w-10">{{ $day['name'] }}</span>
+                                            @if ($day['is_open'])
+                                                <span>{{ $day['start'] }} - {{ $day['end'] }}</span>
                                             @else
                                                 <span
                                                     class="text-xs bg-gray-100 px-1.5 py-0.5 rounded text-gray-400">Closed</span>
@@ -771,21 +691,22 @@
                         {{-- Utility Buttons Grid --}}
                         <div class="grid grid-cols-2 gap-3">
                             {{-- Share --}}
-                            <button onclick="handleShare(this)"
+                            <button type="button" data-share-trigger
                                 data-url="{{ route('student-services.show', $service->hss_id) }}"
                                 class="flex items-center justify-center gap-2 py-2.5 rounded-xl border border-gray-200 text-gray-600 text-sm font-bold hover:bg-gray-50 hover:border-gray-300 transition-all">
                                 <i class="fa-solid fa-arrow-up-right-from-square"></i> Share
                             </button>
 
                             {{-- Save / Favourite --}}
-                            @php $isFav = auth()->check() && $service->is_favourited; @endphp
                             <button
-                                onclick="handleFavourite({{ $service->hss_id }}, {{ auth()->check() ? 'true' : 'false' }})"
+                                type="button"
+                                data-favourite-service="{{ $service->hss_id }}"
+                                data-logged-in="{{ $detailsUi['is_authenticated'] ? 'true' : 'false' }}"
                                 class="flex items-center justify-center gap-2 py-2.5 rounded-xl border border-gray-200 text-sm font-bold transition-all group
-                    {{ $isFav ? 'bg-red-50 text-red-500 border-red-100' : 'text-gray-600 hover:bg-gray-50 hover:border-gray-300' }}">
+                    {{ $detailsUi['favourite_button_class'] }}">
                                 <i id="heart-{{ $service->hss_id }}"
-                                    class="{{ $isFav ? 'fas' : 'far' }} fa-heart transition-transform group-active:scale-90"></i>
-                                <span id="text-{{ $service->hss_id }}">{{ $isFav ? 'Saved' : 'Save' }}</span>
+                                    class="{{ $detailsUi['favourite_icon_class'] }} fa-heart transition-transform group-active:scale-90"></i>
+                                <span id="text-{{ $service->hss_id }}">{{ $detailsUi['favourite_text'] }}</span>
                             </button>
                         </div>
                     </div>
@@ -803,13 +724,13 @@
         <div class="bg-white rounded-2xl shadow-2xl w-80 p-6 transform scale-95 transition-transform duration-300">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="font-bold text-gray-900">Share Service</h3>
-                <button onclick="closeShareModal()" class="text-gray-400 hover:text-gray-600"><i
+                <button type="button" data-close-share class="text-gray-400 hover:text-gray-600"><i
                         class="fas fa-times"></i></button>
             </div>
             <div class="flex items-center border rounded-lg overflow-hidden bg-gray-50">
                 <input type="text" id="shareLinkInput"
                     class="flex-1 px-3 py-2 text-sm bg-transparent outline-none text-gray-600" readonly>
-                <button onclick="copyShareLink()"
+                <button type="button" data-copy-share
                     class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 text-sm font-medium">Copy</button>
             </div>
             <p id="copyMessage" class="text-xs text-green-600 mt-2 text-center opacity-0 transition-opacity">Copied!
@@ -817,528 +738,24 @@
         </div>
     </div>
 
-    {{-- SCRIPTS --}}
-    <script>
-        document.addEventListener('alpine:init', () => {
-            Alpine.store('booking', {
-                showCalendarModal: false
-            });
-        });
-
-        function bookingSystem() {
-            return {
-                hasActiveRequest: @json($hasActiveRequest),
-                isSessionBased: {{ $service->hss_session_duration ? 'true' : 'false' }},
-
-                // --- DATA ---
-                holidays: @json(
-                    $service->hss_unavailable_dates
-                        ? (is_array($service->hss_unavailable_dates)
-                            ? $service->hss_unavailable_dates
-                            : json_decode($service->hss_unavailable_dates))
-                        : []
-                ),
-                schedule: @json($service->hss_operating_hours ?? []),
-                bookedSlots: @json($bookedAppointments ?? []),
-                manualBlocks: @json($manualBlocks ?? []),
-
-                packages: {
-                    basic: {
-                        price: {{ $service->hss_basic_price ?? 0 }},
-                        description: `{!! $service->hss_basic_description ?? '' !!}`,
-                        duration: "{{ $service->hss_basic_duration ?? '' }}",
-                        frequency: "{{ $service->hss_basic_frequency ?? '' }}"
-                    },
-                    standard: {
-                        price: {{ $service->hss_standard_price ?? 0 }},
-                        description: `{!! $service->hss_standard_description ?? '' !!}`,
-                        duration: "{{ $service->hss_standard_duration ?? '' }}",
-                        frequency: "{{ $service->hss_standard_frequency ?? '' }}"
-                    },
-                    premium: {
-                        price: {{ $service->hss_premium_price ?? 0 }},
-                        description: `{!! $service->hss_premium_description ?? '' !!}`,
-                        duration: "{{ $service->hss_premium_duration ?? '' }}",
-                        frequency: "{{ $service->hss_premium_frequency ?? '' }}"
-                    }
-                },
-
-                currentPackage: '{{ $service->hss_basic_price ? 'basic' : ($service->hss_standard_price ? 'standard' : 'premium') }}',
-                selectedDuration: 1,
-                selectedDate: null,
-                selectedTime: null,
-                upcomingDays: [],
-                timeSlots: [],
-                sessionDuration: {{ $service->hss_session_duration ?? 60 }},
-                showFullCalendar: false,
-                calendarInstance: null,
-
-                // --- COMPUTED PROPERTIES ---
-                get priceColorClass() {
-                    if (this.currentPackage === 'basic') return 'text-teal-600';
-                    if (this.currentPackage === 'standard') return 'text-yellow-500';
-                    if (this.currentPackage === 'premium') return 'text-red-600';
-                    return 'text-indigo-600';
-                },
-
-                formatDuration(minutes) {
-                    if (minutes < 60) {
-                        return minutes + 'm';
-                    } else {
-                        const hours = minutes / 60;
-                        return hours.toFixed(1).replace('.0', '') + 'h';
-                    }
-                },
-
-                // --- METHODS ---
-                init() {
-                    this.generateCalendar();
-                },
-
-                calculateTotal() {
-                    // Use the new packages object structure
-                    return (this.packages[this.currentPackage].price * this.selectedDuration).toFixed(2);
-                },
-
-                selectDuration(hours) {
-                    this.selectedDuration = hours;
-                    this.selectedTime = null;
-                    if (this.selectedDate) {
-                        const dayObj = this.upcomingDays.find(d => d.dateStr === this.selectedDate);
-                        if (dayObj) {
-                            this.generateTimeSlots(dayObj.dayKey);
-                        } else {
-                            const dateObj = new Date(this.selectedDate);
-                            const jsDays = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
-                            this.generateTimeSlots(jsDays[dateObj.getDay()]);
-                        }
-                    }
-                },
-
-                generateCalendar() {
-                    const days = [];
-                    const today = new Date();
-                    const jsDays = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
-                    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
-                    for (let i = 0; i < 14; i++) {
-                        const d = new Date(today);
-                        d.setDate(today.getDate() + i);
-
-                        const year = d.getFullYear();
-                        const month = String(d.getMonth() + 1).padStart(2, '0');
-                        const day = String(d.getDate()).padStart(2, '0');
-                        const dateStr = `${year}-${month}-${day}`;
-
-                        const dayOfWeekIndex = d.getDay();
-                        const dayKey = jsDays[dayOfWeekIndex];
-
-                        let isAvailable = true;
-                        if (this.holidays.includes(dateStr)) isAvailable = false;
-
-                        const config = this.schedule[dayKey];
-                        if (!config || !config.enabled || config.enabled == 'false') isAvailable = false;
-
-                        days.push({
-                            dateStr: dateStr,
-                            dayName: dayNames[dayOfWeekIndex],
-                            dayNumber: day,
-                            dayKey: dayKey,
-                            isAvailable: isAvailable
-                        });
-                    }
-                    this.upcomingDays = days;
-                },
-
-                selectDate(dayObj) {
-                    if (!dayObj.isAvailable) return;
-                    this.selectedDate = dayObj.dateStr;
-                    this.selectedTime = null;
-                    this.generateTimeSlots(dayObj.dayKey);
-                },
-                formatTimeOnly(timeStr) {
-                    if (!timeStr) return '';
-                    let [h, m] = timeStr.split(':').map(Number);
-                    let ampm = h >= 12 ? 'PM' : 'AM';
-                    h = h % 12;
-                    h = h ? h : 12;
-                    return `${h}:${m.toString().padStart(2, '0')} ${ampm}`;
-                },
-
-                generateTimeSlots(dayKey) {
-                    this.timeSlots = [];
-                    const config = this.schedule[dayKey];
-
-                    // If day is disabled in settings, stop.
-                    if (!config || !config.enabled) return;
-
-                    // Parse Operating Hours (e.g., 09:00 to 17:00)
-                    let [startH, startM] = config.start.split(':').map(Number);
-                    let [endH, endM] = config.end.split(':').map(Number);
-
-                    let currentMinutes = startH * 60 + startM;
-                    let endMinutes = endH * 60 + endM;
-
-                    // Step is determined by the Service's Session Duration (e.g., 60 mins)
-                    let stepMinutes = this.sessionDuration;
-                    let durationMinutes = this.selectedDuration * 60; 
-
-                    // Filter real bookings for the selected date
-                    let daysBookings = this.bookedSlots.filter(slot => slot.date === this.selectedDate);
-
-                    // --- ?? NEW: Get Current Real Time Data ---
-                    const now = new Date();
-                    // Create YYYY-MM-DD string for today to compare with selectedDate
-                    const todayStr = now.getFullYear() + '-' + 
-                                     String(now.getMonth() + 1).padStart(2, '0') + '-' + 
-                                     String(now.getDate()).padStart(2, '0');
-                    
-                    const isToday = (this.selectedDate === todayStr);
-                    // Get current time in minutes (e.g., 10:30am = 630 minutes)
-                    const currentRealTimeMinutes = now.getHours() * 60 + now.getMinutes();
-                    // ------------------------------------------
-
-                    while (currentMinutes + durationMinutes <= endMinutes) {
-
-                        let h = Math.floor(currentMinutes / 60);
-                        let m = currentMinutes % 60;
-                        let timeStr = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`; 
-
-                        let proposedStart = currentMinutes;
-                        let proposedEnd = currentMinutes + durationMinutes;
-
-                        // --- ?? NEW: Filter Past Times ---
-                        // If selected date is Today AND the slot start time is less than right now
-                        // We skip adding it to the list (Do not display)
-                        if (isToday && proposedStart <= currentRealTimeMinutes) {
-                            currentMinutes += stepMinutes;
-                            continue; // Skip to next slot
-                        }
-                        // --------------------------------
-
-                        // CHECK: Real Database Bookings (Overlap Check)
-                        let isBooked = daysBookings.some(booking => {
-                            let [bStartH, bStartM] = booking.start_time.split(':').map(Number);
-                            let [bEndH, bEndM] = booking.end_time.split(':').map(Number);
-
-                            let bookingStart = bStartH * 60 + bStartM;
-                            let bookingEnd = bEndH * 60 + bEndM;
-
-                            return (proposedStart < bookingEnd) && (proposedEnd > bookingStart);
-                        });
-                      
-                        let blockKey = `${this.selectedDate} ${timeStr}`;
-                        let isManuallyBlocked = this.manualBlocks.includes(blockKey);
-
-                        if (!isManuallyBlocked) {
-                            isManuallyBlocked = this.manualBlocks.some(blockedKey => {
-                                if (!blockedKey.startsWith(this.selectedDate)) return false;
-                                let blockedTime = blockedKey.split(' ')[1];
-                                let [blkH, blkM] = blockedTime.split(':').map(Number);
-                                let blkMin = blkH * 60 + blkM;
-                                let blkEnd = blkMin + this.sessionDuration;
-
-                                return (proposedStart < blkEnd) && (proposedEnd > blkMin);
-                            });
-                        }
-
-                        this.timeSlots.push({
-                            time: timeStr,
-                            available: !isBooked && !isManuallyBlocked
-                        });
-
-                        currentMinutes += stepMinutes;
-                    }
-                },
-
-                switchPackage(pkg) {
-                    this.currentPackage = pkg;
-                    this.selectedTime = null;
-                },
-
-                formatTimeDisplay(timeStr) {
-                    if (!timeStr) return '';
-                    let [h, m] = timeStr.split(':').map(Number);
-                    let startMinutes = h * 60 + m;
-
-                    // ?? NEW LOGIC: If Task Based, only show Start Time
-                    if (!this.isSessionBased) {
-                        return this.minutesToTime(startMinutes);
-                    }
-
-                    // If Session Based, show Range
-                    let endMinutes = startMinutes + (this.selectedDuration * 60);
-                    return `${this.minutesToTime(startMinutes)} - ${this.minutesToTime(endMinutes)}`;
-                },
-
-                minutesToTime(totalMinutes) {
-                    let h = Math.floor(totalMinutes / 60);
-                    let m = totalMinutes % 60;
-                    let ampm = h >= 12 ? 'PM' : 'AM';
-                    h = h % 12;
-                    h = h ? h : 12;
-                    return `${h}:${m.toString().padStart(2, '0')} ${ampm}`;
-                },
-                calculateEndTime(startTime) {
-                    if (!startTime) return '00:00';
-
-                    let [h, m] = startTime.split(':').map(Number);
-
-                    // ?? Guna selectedDuration (jam) darab 60 minit
-                    let totalMinutes = (h * 60) + m + (this.selectedDuration * 60);
-
-                    let endH = Math.floor(totalMinutes / 60);
-                    let endM = totalMinutes % 60;
-
-                    // Supaya tidak lebih 24 jam
-                    endH = endH % 24;
-
-                    return `${endH.toString().padStart(2, '0')}:${endM.toString().padStart(2, '0')}`;
-                },
-
-                openCalendar() {
-                    this.showFullCalendar = true;
-                    
-                    this.$nextTick(() => {
-                        if (!this.calendarInstance) {
-                            this.calendarInstance = flatpickr("#full-calendar-container", {
-                                inline: true,
-                                minDate: "today",
-                                disable: [
-                                    (date) => {
-                                        // 1. Check Holidays
-                                        // Adjust timezone offset to get correct YYYY-MM-DD
-                                        const offset = date.getTimezoneOffset();
-                                        const adjustedDate = new Date(date.getTime() - (offset*60*1000));
-                                        const dateStr = adjustedDate.toISOString().split('T')[0];
-                                        
-                                        if (this.holidays.includes(dateStr)) return true;
-
-                                        // 2. Check Operating Hours (Day enabled/disabled)
-                                        const jsDays = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
-                                        const dayKey = jsDays[date.getDay()];
-                                        const config = this.schedule[dayKey];
-                                        
-                                        // If no config or explicit disabled, disable date
-                                        // Note: config.enabled can be boolean true/false or string "true"/"false"
-                                        if (!config || (config.enabled !== true && config.enabled !== 'true')) return true;
-                                        
-                                        return false; // Enabled
-                                    }
-                                ],
-                                onChange: (selectedDates, dateStr) => {
-                                    this.selectedDate = dateStr;
-                                    this.selectedTime = null;
-                                    
-                                    // Derive dayKey
-                                    const d = new Date(dateStr);
-                                    const jsDays = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
-                                    const dayKey = jsDays[d.getDay()];
-                                    
-                                    this.generateTimeSlots(dayKey);
-                                    this.showFullCalendar = false;
-                                }
-                            });
-                        }
-                    });
-                },
-
-              submitBooking() {
-                    @auth
-                        // Logic check: Prevents double submission if UI manipulation occurs
-                        if (this.hasActiveRequest) {
-                            Swal.fire('Request Exists', 'You already have an active request for this service.', 'warning');
-                            return;
-                        }
-
-                        let sendStartTime = this.isSessionBased ? this.selectedTime : '00:00';
-                        let sendEndTime = this.isSessionBased ? this.calculateEndTime(this.selectedTime) : '23:59';
-
-                        let displayTime = this.formatTimeDisplay(this.selectedTime);
-
-                        let detailsHtml = `
-                        <div class="text-left bg-gray-50 p-4 rounded-lg border border-gray-200 text-sm mb-4">
-                            <p class="mb-1"><strong>Date:</strong> ${this.selectedDate}</p>
-                            <p class="mb-1"><strong>Time:</strong> ${displayTime}</p>
-                            <p class="mb-1"><strong>Duration:</strong> ${this.selectedDuration} Hours</p>
-                            <p class="text-lg font-bold text-indigo-600 mt-2">Total: RM${this.calculateTotal()}</p>
-                        </div>
-                        <div class="text-left">
-                            <label class="block text-sm font-bold text-gray-700 mb-1">Message to Seller</label>
-                            <textarea id="swal-message-input" class="w-full border rounded-lg p-3 text-sm" rows="3" placeholder="Describe your task..."></textarea>
-                        </div>`;
-
-                        Swal.fire({
-                            title: 'Confirm Booking?',
-                            html: detailsHtml,
-                            showCancelButton: true,
-                            confirmButtonText: 'Confirm Request',
-                            preConfirm: () => {
-                                const msg = document.getElementById('swal-message-input').value;
-                                if (!msg) Swal.showValidationMessage('Please write a message');
-                                return msg;
-                            }
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                // 1. SHOW PROCESSING ALERT
-                                Swal.fire({
-                                    title: 'Processing...',
-                                    text: 'Please wait while we place your order.',
-                                    allowOutsideClick: false,
-                                    didOpen: () => {
-                                        Swal.showLoading();
-                                    }
-                                });
-
-                                const userNote = result.value;
-                                const finalMessage = `BOOKING DETAILS:\nTime: ${displayTime}\nDuration: ${this.selectedDuration}h\n\nNote: ${userNote}`;
-
-                                fetch("{{ route('service-requests.store') }}", {
-                                        method: "POST",
-                                        headers: {
-                                            "Content-Type": "application/json",
-                                            "X-CSRF-TOKEN": "{{ csrf_token() }}"
-                                        },
-                                        body: JSON.stringify({
-                                            student_service_id: {{ $service->hss_id }},
-                                            selected_dates: this.selectedDate,
-                                            start_time: sendStartTime,
-                                            end_time: sendEndTime,
-                                            message: finalMessage,
-                                            selected_package: this.currentPackage,
-                                            offered_price: this.calculateTotal()
-                                        })
-                                    })
-                                    .then(res => res.json())
-                                    .then(data => {
-                                        if (data.success) {
-                                            // 2. SHOW SUCCESS AND REDIRECT
-                                            Swal.fire({
-                                                title: 'Success!',
-                                                text: 'Your request has been sent successfully.',
-                                                icon: 'success',
-                                                confirmButtonText: 'Go to Orders'
-                                            }).then(() => {
-                                                window.location.href = "{{ route('service-requests.index') }}";
-                                            });
-                                        } else {
-                                            Swal.fire('Error', data.message, 'error');
-                                        }
-                                    })
-                                    .catch(error => {
-                                        console.error('Error:', error);
-                                        Swal.fire('Error', 'Something went wrong. Please try again.', 'error');
-                                    });
-                            }
-                        });
-                    @endauth
-
-                    @guest window.location.href = "{{ route('login') }}";
-                    @endguest
-                
-
-        }
-        }
-        }
-
-        function handleShare(btn) {
-            const modal = document.getElementById('shareModal');
-            document.getElementById('shareLinkInput').value = btn.dataset.url;
-            modal.classList.remove('opacity-0', 'pointer-events-none');
-            modal.querySelector('div').classList.remove('scale-95');
-            modal.querySelector('div').classList.add('scale-100');
-        }
-
-        function closeShareModal() {
-            const modal = document.getElementById('shareModal');
-            modal.querySelector('div').classList.remove('scale-100');
-            modal.querySelector('div').classList.add('scale-95');
-            setTimeout(() => modal.classList.add('opacity-0', 'pointer-events-none'), 150);
-        }
-
-        function copyShareLink() {
-            const input = document.getElementById('shareLinkInput');
-            input.select();
-            document.execCommand("copy");
-            const msg = document.getElementById('copyMessage');
-            msg.classList.remove('opacity-0');
-            setTimeout(() => msg.classList.add('opacity-0'), 2000);
-        }
-
-        function handleFavourite(serviceId, loggedIn) {
-            if (!loggedIn) {
-                window.location.href = "{{ route('login') }}";
-                return;
-            }
-
-            const icon = document.getElementById('heart-' + serviceId);
-            const text = document.getElementById('text-' + serviceId);
-
-            fetch("{{ route('favorites.services.toggle') }}", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRF-TOKEN": "{{ csrf_token() }}"
-                    },
-                    body: JSON.stringify({
-                        service_id: serviceId
-                    })
-                })
-                .then(async res => {
-                    const data = await res.json();
-                    if (!res.ok) throw data;
-                    return data;
-                })
-                .then(data => {
-                    if (!data.success) return;
-
-                    if (data.favorited) {
-                        // ?? UI update
-                        icon.className = "fas fa-heart";
-                        icon.parentElement.classList.remove('text-gray-500');
-                        icon.parentElement.classList.add('text-red-500');
-                        text.innerText = "Saved";
-
-                        // ? SweetAlert success
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Saved!',
-                            text: 'Service added to your favourites',
-                            timer: 1500,
-                            showConfirmButton: false,
-                            toast: true,
-                            position: 'top-end'
-                        });
-
-                    } else {
-                        // ?? UI update
-                        icon.className = "far fa-heart";
-                        icon.parentElement.classList.remove('text-red-500');
-                        icon.parentElement.classList.add('text-gray-500');
-                        text.innerText = "Save";
-
-                        // ?? SweetAlert removed
-                        Swal.fire({
-                            icon: 'info',
-                            title: 'Removed',
-                            text: 'Service removed from favourites',
-                            timer: 1500,
-                            showConfirmButton: false,
-                            toast: true,
-                            position: 'top-end'
-                        });
-                    }
-                })
-                .catch(err => {
-                    console.error(err);
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: err.message || 'Unable to update favourite'
-                    });
-                });
-        }
-    </script>
+    <div id="servicesDetailsConfig"
+        data-authenticated="{{ $detailsUi['is_authenticated'] ? 'true' : 'false' }}"
+        data-has-active-request="{{ $hasActiveRequest ? 'true' : 'false' }}"
+        data-is-session-based="{{ $service->hss_session_duration ? 'true' : 'false' }}"
+        data-holidays='@json($detailsHolidays)'
+        data-schedule='@json($detailsSchedule)'
+        data-booked-slots='@json($bookedAppointments ?? [])'
+        data-manual-blocks='@json($manualBlocks ?? [])'
+        data-packages='@json($detailsPackages)'
+        data-current-package="{{ $detailsCurrentPackage }}"
+        data-session-duration="{{ $detailsSessionDuration }}"
+        data-service-id="{{ $service->hss_id }}"
+        data-store-request-url="{{ route('service-requests.store') }}"
+        data-orders-url="{{ route('service-requests.index') }}"
+        data-login-url="{{ route('login') }}"
+        data-favourite-toggle-url="{{ route('favorites.services.toggle') }}"
+        data-csrf-token="{{ csrf_token() }}"></div>
+    <script src="{{ asset('js/nonadmin-services-details.js') }}"></script>
 </body>
 
 </html>

@@ -28,7 +28,7 @@ class UserBlacklisted extends Mailable
     public function build()
     {
         return $this->subject('Important: Your account has been blocked')
-                    ->markdown('emails.blacklisted');
+                    ->view('emails.blacklisted');
     }
 
     /**

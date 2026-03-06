@@ -136,25 +136,23 @@
 
                             {{-- Dynamic Categories --}}
                             @foreach ($categories as $cat)
-                                @php $isActive = ($category_id == $cat->hc_id); @endphp
-
                                 <a href="?category_id={{ $cat->hc_id }}"
                                     class="group flex items-center justify-between px-4 py-3 rounded-2xl text-sm font-bold transition-all duration-300
-                    {{ $isActive ? 'bg-white shadow-lg shadow-slate-100 ring-1 ring-slate-100' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900' }}">
+                    {{ $category_id == $cat->hc_id ? 'bg-white shadow-lg shadow-slate-100 ring-1 ring-slate-100' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900' }}">
 
                                     <div class="flex items-center gap-3">
                                         {{-- Modern Icon Container --}}
                                         <span
                                             class="w-9 h-9 flex items-center justify-center rounded-xl transition-all duration-300 border shadow-sm"
                                             style="
-                                background-color: {{ $isActive ? $cat->hc_color : $cat->hc_color . '10' }}; 
+                                background-color: {{ $category_id == $cat->hc_id ? $cat->hc_color : $cat->hc_color . '10' }}; 
                                 border-color: {{ $cat->hc_color . '30' }};
-                                color: {{ $isActive ? '#FFFFFF' : $cat->hc_color }};
+                                color: {{ $category_id == $cat->hc_id ? '#FFFFFF' : $cat->hc_color }};
                             ">
                                             <i class="{{ $cat->hc_icon ?? 'fa-solid fa-folder' }} text-sm"></i>
                                         </span>
 
-                                        <span class="transition-colors {{ $isActive ? 'text-slate-900' : '' }}">
+                                        <span class="transition-colors {{ $category_id == $cat->hc_id ? 'text-slate-900' : '' }}">
                                             {{ $cat->hc_name }}
                                         </span>
                                     </div>
@@ -163,7 +161,7 @@
                                     @if (isset($cat->services_count))
                                         <span
                                             class="text-[10px] px-2 py-1 rounded-lg font-black tracking-tighter transition-all
-                            {{ $isActive ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-400 group-hover:bg-slate-200 group-hover:text-slate-600' }}">
+                            {{ $category_id == $cat->hc_id ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-400 group-hover:bg-slate-200 group-hover:text-slate-600' }}">
                                             {{ $cat->services_count }}
                                         </span>
                                     @endif
@@ -218,7 +216,7 @@
 
                                 <div class="flex flex-wrap md:flex-nowrap gap-2">
                                     <div class="relative flex-1 md:w-44 group">
-                                        <select name="sort" onchange="this.form.submit()"
+                                        <select name="sort" data-auto-submit
                                             class="block w-full pl-4 pr-10 py-4 bg-slate-50 border-none rounded-[1.5rem] text-slate-700 focus:bg-white focus:ring-2 focus:ring-indigo-500 text-sm cursor-pointer appearance-none font-bold transition-all">
                                             <option value="newest" {{ $sort == 'newest' ? 'selected' : '' }}>Newest
                                                 First</option>
@@ -240,7 +238,7 @@
                                     </div>
 
                                     <div class="relative flex-1 md:w-44 group">
-                                        <select name="available_only" onchange="this.form.submit()"
+                                        <select name="available_only" data-auto-submit
                                             class="block w-full pl-4 pr-10 py-4 bg-slate-50 border-none rounded-[1.5rem] text-slate-700 focus:bg-white focus:ring-2 focus:ring-indigo-500 text-sm cursor-pointer appearance-none font-bold transition-all">
                                             <option value="">🔘 All Status</option>
                                             <option value="1"
@@ -287,29 +285,10 @@
                                     {{-- IMAGE SECTION --}}
                                     <div
                                         class="md:w-72 h-64 md:h-auto flex-shrink-0 relative rounded-[1.5rem] overflow-hidden bg-slate-50">
-                                      @php
-    if (!empty($service->hss_image_path)) {
-        if (\Illuminate\Support\Str::startsWith($service->hss_image_path, ['http://', 'https://'])) {
-            // External image
-            $imageUrl = $service->hss_image_path;
-        } else {
-            // Local image
-            if (\Illuminate\Support\Str::startsWith($service->hss_image_path, 'storage/')) {
-                $imageUrl = asset($service->hss_image_path);
-            } else {
-                $imageUrl = asset('storage/' . $service->hss_image_path);
-            }
-        }
-    } else {
-        // Fallback
-        $imageUrl = 'https://ui-avatars.com/api/?name=' . urlencode($service->hss_title ?? 'Service');
-    }
-@endphp
-
-                                   <img src="{{ $imageUrl }}"
+                                   <img src="{{ $service->ui_image_url }}"
     alt="{{ $service->hss_title }}"
      class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
-    onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name={{ urlencode($service->hss_title ?? 'Service') }}';">
+    data-fallback-src="{{ $service->ui_image_fallback }}">
 
                                         {{-- Category Badge --}}
                                         @if ($service->category)
@@ -338,7 +317,7 @@
                                                 <span
                                                     class="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">
                                                     <i class="far fa-clock text-indigo-500"></i>
-                                                    {{ $service->created_at->diffForHumans() }}
+                                                    {{ $service->ui_created_human }}
                                                 </span>
                                                 <span class="w-1 h-1 rounded-full bg-slate-200"></span>
                                                 <span
@@ -347,8 +326,8 @@
                                                 </span>
                                             </div>
 
-                                            <button type="button" onclick="handleShare(this)"
-                                                data-url="{{ route('services.details', $service->hss_id) }}"
+                                            <button type="button" data-share-trigger
+                                                data-url="{{ $service->ui_details_url }}"
                                                 class="w-10 h-10 flex items-center justify-center rounded-2xl bg-slate-50 text-slate-400 hover:bg-indigo-600 hover:text-white transition-all duration-300 shadow-sm"
                                                 title="Share Service">
                                                 <i class="fas fa-share-alt"></i>
@@ -382,11 +361,11 @@
 
                                         <div class="flex items-center justify-between border-t border-slate-50 pt-6">
                                             {{-- Seller Info --}}
-                                            <a href="{{ Auth::guest() ? route('login') : route('students.profile', $service->user) }}"
+                                            <a href="{{ $service->ui_profile_url }}"
                                                 class="flex items-center gap-3 group/user overflow-hidden max-w-[200px]">
                                                 <div class="relative flex-shrink-0">
 
-                                                    <img src="{{ $service->user->hu_profile_photo_path ? asset( $service->user->hu_profile_photo_path) : (Auth::check() ? 'https://ui-avatars.com/api/?name=' . urlencode($service->user->hu_name) . '&background=random' : 'https://ui-avatars.com/api/?name=' . urlencode(substr($service->user->hu_name, 0, 1)) . '&background=random') }}"
+                                                    <img src="{{ $service->ui_seller_avatar_url }}"
                                                         class="w-12 h-12 rounded-2xl object-cover border-2 border-white shadow-md group-hover/user:ring-2 group-hover/user:ring-indigo-500 transition-all duration-300 @guest blur-sm @endguest">
 
                                                     @guest
@@ -407,15 +386,7 @@
                                                     <span
                                                         class="text-sm font-black text-slate-800 group-hover/user:text-indigo-600 transition truncate"
                                                         @guest title="Login to view full name" @endguest>
-
-                                                        @auth
-                                                            {{-- Logged in: Show Full Name --}}
-                                                            {{ $service->user->hu_name }}
-                                                        @else
-                                                            {{-- Guest: Show 1st letter + stars (e.g. "Ali" -> "A****") --}}
-                                                            {{ Str::limit($service->user->hu_name, 1, '****') }}
-                                                        @endauth
-
+                                                        {{ $service->ui_seller_display_name }}
                                                     </span>
                                                     <span
                                                         class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
@@ -457,11 +428,11 @@
 
         <div id="shareModal"
             class="fixed inset-0 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
-            <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeShareModal()"></div>
+            <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" data-close-share></div>
 
             <div
                 class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 relative transform scale-95 transition-transform duration-300 mx-4">
-                <button onclick="closeShareModal()"
+                <button type="button" data-close-share
                     class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition">
                     <i class="fas fa-times text-xl"></i>
                 </button>
@@ -479,7 +450,7 @@
                     <input type="text" id="shareLinkInput"
                         class="w-full bg-gray-50 border border-gray-200 text-gray-600 text-sm rounded-xl px-4 py-3 pr-24 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
                         readonly>
-                    <button onclick="copyShareLink()"
+                    <button type="button" data-copy-share
                         class="absolute right-1 top-1 bottom-1 bg-indigo-600 hover:bg-indigo-700 text-white px-4 rounded-lg text-sm font-medium transition">
                         Copy
                     </button>
@@ -490,47 +461,8 @@
             </div>
         </div>
 
-        <script>
-            // Favourite Logic
-
-
-            // Share Logic
-            function handleShare(button) {
-                const url = button.dataset.url;
-                const modal = document.getElementById('shareModal');
-                const modalContent = modal.querySelector('div.bg-white'); // Target the inner modal card
-
-                document.getElementById('shareLinkInput').value = url; // Full URL or constructed one
-
-                modal.classList.remove('opacity-0', 'pointer-events-none');
-                modalContent.classList.remove('scale-95');
-                modalContent.classList.add('scale-100');
-            }
-
-            function closeShareModal() {
-                const modal = document.getElementById('shareModal');
-                const modalContent = modal.querySelector('div.bg-white');
-
-                modalContent.classList.remove('scale-100');
-                modalContent.classList.add('scale-95');
-
-                setTimeout(() => {
-                    modal.classList.add('opacity-0', 'pointer-events-none');
-                    document.getElementById('copyMessage').classList.add('opacity-0');
-                }, 150);
-            }
-
-            function copyShareLink() {
-                const input = document.getElementById('shareLinkInput');
-                input.select();
-                input.setSelectionRange(0, 99999); // Mobile compatibility
-                navigator.clipboard.writeText(input.value);
-
-                const msg = document.getElementById('copyMessage');
-                msg.classList.remove('opacity-0');
-                setTimeout(() => msg.classList.add('opacity-0'), 2000);
-            }
-        </script>
+        <div id="servicesIndexConfig" data-page="services-index"></div>
+        <script src="{{ asset('js/nonadmin-services-index.js') }}"></script>
     </div>
 
     {{-- Footer bar --}}

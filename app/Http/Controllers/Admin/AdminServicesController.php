@@ -10,10 +10,11 @@ use App\Models\Review;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
-use App\Mail\WarningMail;
+use App\Mail\ServiceWarningMail;
 use App\Mail\ServiceSuspendedMail;
 use App\Mail\ServiceApprovedMail; 
 use App\Mail\ServiceRejectedMail; 
+use Illuminate\Support\Str;
 
 // Import the Notification
 use App\Notifications\ServiceStatusNotification;
@@ -21,6 +22,28 @@ use App\Notifications\ServiceStatusNotification;
 
 class AdminServicesController extends Controller
 {
+private function serviceWarningLimit(): int
+{
+    return (int) config('moderation.service_warning_limit', 3);
+}
+
+private function resolveServiceImageUrl(?string $path): ?string
+{
+    if (!$path) {
+        return null;
+    }
+
+    if (Str::startsWith($path, ['http://', 'https://'])) {
+        return $path;
+    }
+
+    if (file_exists(public_path('storage/' . $path))) {
+        return asset('storage/' . $path);
+    }
+
+    return asset($path);
+}
+
  public function index(Request $request)
 {
     $search     = $request->query('search');
@@ -30,6 +53,7 @@ class AdminServicesController extends Controller
     $rating = $request->query('rating');
 
 
+    $serviceWarningLimit = $this->serviceWarningLimit();
     $services = StudentService::with(['user', 'category'])
         ->withAvg('reviews as reviews_avg_rating', 'hr_rating')
         ->withCount('reviews')
@@ -52,6 +76,15 @@ class AdminServicesController extends Controller
         ->latest()
         ->paginate(10)
         ->withQueryString();
+    $services->getCollection()->transform(function (StudentService $service) use ($serviceWarningLimit) {
+        $service->hss_image_url = $this->resolveServiceImageUrl($service->hss_image_path);
+        $service->hss_warning_limit = $serviceWarningLimit;
+        $service->hss_warning_class = (int) ($service->hss_warning_count ?? 0) >= max(1, $serviceWarningLimit - 1)
+            ? 'text-red-500'
+            : 'text-gray-500';
+
+        return $service;
+    });
 
     $categories = Category::orderBy('hc_name')->get();
     $students   = User::where('hu_role', 'helper')->orderBy('hu_name')->get();
@@ -59,7 +92,8 @@ class AdminServicesController extends Controller
     return view('admin.services.index', compact(
         'services',
         'categories',
-        'students'
+        'students',
+        'serviceWarningLimit'
     ));
 }
 
@@ -127,6 +161,11 @@ class AdminServicesController extends Controller
     // 2. Cari Servis
     $service = StudentService::findOrFail($id);
     $student = $service->user;
+    $limit = (int) config('moderation.service_warning_limit', 3);
+
+    if ((int) $service->hss_warning_count >= $limit) {
+        return back()->with('warning', "Service already reached {$limit}/{$limit} warnings. Suspend if needed.");
+    }
 
     // 3. Update Warning
     $service->hss_warning_count = $service->hss_warning_count + 1;
@@ -139,27 +178,20 @@ class AdminServicesController extends Controller
 
     $service->save();
 
-    // 4. Hantar Email
+    // 4. Send Email
     try {
-        $emailData = [
-            'student_name' => $student->hu_name,
-            'service_name' => $service->hss_title,
-            'reason'       => $request->reason,
-            'count'        => $service->hss_warning_count
-        ];
-
-        Mail::to($student->hu_email)->send(new WarningMail($emailData));
+        Mail::to($student->hu_email)->send(new ServiceWarningMail($service, $request->reason));
 
     } catch (\Exception $e) {
-        Log::error('Email warning gagal dihantar: ' . $e->getMessage());
+        Log::error('Failed to send warning email: ' . $e->getMessage());
     }
 
     // 5. Response UI
-    if ($service->hss_warning_count >= 3) {
-        return back()->with('warning', 'Student telah mencapai 3/3 warning. Sila suspend jika perlu.');
+    if ($service->hss_warning_count >= $limit) {
+        return back()->with('warning', "Service reached {$limit}/{$limit} warnings. Suspend if needed.");
     }
 
-    return back()->with('success', 'Warning berjaya dihantar. Jumlah warning: ' . $service->hss_warning_count);
+    return back()->with('success', 'Warning issued successfully. Total warnings: ' . $service->hss_warning_count);
 }
 
 public function suspend(StudentService $service)
@@ -167,7 +199,7 @@ public function suspend(StudentService $service)
     $service->hss_approval_status = 'suspended';
     $service->save();
 
-    // Hantar Email
+    // Send Email
     if ($service->user && $service->user->hu_email) {
         Mail::to($service->user->hu_email)->send(new ServiceSuspendedMail($service));
     }
@@ -190,12 +222,16 @@ public function suspend(StudentService $service)
 
     public function show($id)
     {
+        $serviceWarningLimit = $this->serviceWarningLimit();
         $service = StudentService::with(['user', 'category'])
             ->withAvg('reviews as reviews_avg_rating', 'hr_rating')
             ->withCount('reviews')
             ->findOrFail($id);
+        $service->hss_image_url = $this->resolveServiceImageUrl($service->hss_image_path);
+        $service->hss_warning_limit = $serviceWarningLimit;
+        $service->hss_warning_class = (int) ($service->hss_warning_count ?? 0) >= max(1, $serviceWarningLimit - 1) ? 'text-red-500' : '';
 
-        return view('admin.services.show', compact('service'));
+        return view('admin.services.show', compact('service', 'serviceWarningLimit'));
     }
 
     // UNBLOCK Service
