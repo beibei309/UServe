@@ -5,9 +5,9 @@
         
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
             <h1 class="text-3xl font-bold transition-colors duration-300" style="color: var(--text-primary);">Manage Categories</h1>
-            <a href="{{ route('admin.categories.create') }}" 
-               class="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white px-4 py-2 rounded-lg transition-all duration-300 whitespace-nowrap">
-                + Add Category
+            <a href="{{ route('admin.categories.create') }}"
+               class="inline-flex items-center gap-1.5 px-5 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-medium rounded shadow transition-all duration-300 whitespace-nowrap">
+                <i class="fa-solid fa-plus text-xs"></i> Add Category
             </a>
         </div>
 
@@ -69,11 +69,11 @@
                     {{-- 5. STATUS --}}
                     <td class="py-4 px-3 text-center">
                         @if($category->hc_is_active)
-                            <span class="inline-flex items-center px-2 py-1 text-xs font-medium bg-green-100 text-green-800 border border-green-200 rounded-full">
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700">
                                 Active
                             </span>
                         @else
-                            <span class="inline-flex items-center px-2 py-1 text-xs font-medium bg-red-100 text-red-800 border border-red-200 rounded-full">
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700">
                                 Inactive
                             </span>
                         @endif
@@ -81,23 +81,23 @@
 
                     {{-- 6. ACTIONS (Buttons) --}}
                     <td class="py-4 px-3 text-center">
-                        <div class="flex justify-center gap-2">
-                            <a href="{{ route('admin.categories.edit', $category) }}" 
-                               class="text-blue-500 hover:text-blue-700 transition-colors duration-300" 
+                        <div class="flex items-center justify-center gap-2">
+                            <a href="{{ route('admin.categories.edit', $category) }}"
+                               class="inline-flex items-center justify-center w-8 h-8 bg-cyan-100 hover:bg-cyan-200 text-cyan-700 rounded-lg text-xs font-semibold transition-all duration-200"
                                title="Edit Category">
                                 <i class="fa-solid fa-pen-to-square"></i>
                             </a>
-                            
+
                             {{-- SWEET ALERT DELETE FORM --}}
-                            <form id="delete-form-{{ $category->hc_id }}" 
-                                  action="{{ route('admin.categories.destroy', $category) }}" 
-                                  method="POST" 
-                                  class="inline">
-                                @csrf 
+                            <form id="delete-form-{{ $category->hc_id }}"
+                                  action="{{ route('admin.categories.destroy', $category) }}"
+                                  method="POST"
+                                  class="inline-flex">
+                                @csrf
                                 @method('DELETE')
-                                <button type="button" 
+                                <button type="button"
                                         data-category-delete data-category-id="{{ $category->hc_id }}"
-                                        class="text-red-500 hover:text-red-700 transition-colors duration-300" 
+                                        class="inline-flex items-center justify-center w-8 h-8 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg text-xs font-semibold transition-all duration-200"
                                         title="Delete Category">
                                     <i class="fa-solid fa-trash"></i>
                                 </button>

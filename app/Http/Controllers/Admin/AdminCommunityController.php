@@ -249,6 +249,7 @@ public function unblacklist($id)
 
     $user->hu_is_blacklisted = 0;
         $user->hu_is_blocked = 0;
+        $user->hu_is_suspended = 0;
         $user->hu_blacklist_reason = null;
         $user->save();
 

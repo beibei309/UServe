@@ -68,19 +68,19 @@
                         <div class="mb-4">
                             @if ($service->hss_approval_status === 'approved')
                                 <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold bg-green-100 text-green-800 border border-green-200">
-                                    <i class="fas fa-check-circle mr-2"></i>Approved
+                                    Approved
                                 </span>
                             @elseif($service->hss_approval_status === 'rejected')
                                 <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold bg-red-100 text-red-800 border border-red-200">
-                                    <i class="fas fa-times-circle mr-2"></i>Rejected
+                                    Rejected
                                 </span>
                             @elseif($service->hss_approval_status === 'suspended')
                                 <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold bg-gray-100 text-gray-800 border border-gray-200">
-                                    <i class="fas fa-ban mr-2"></i>Suspended
+                                    Suspended
                                 </span>
                             @else
                                 <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold bg-yellow-100 text-yellow-800 border border-yellow-200">
-                                    <i class="fas fa-clock mr-2"></i>Pending
+                                    Pending
                                 </span>
                             @endif
                         </div>
@@ -384,8 +384,7 @@
         <div class="inline-block align-bottom rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border"
              style="background-color: var(--bg-primary); border-color: var(--border-color);">
             <form id="warningForm" method="POST" action="">
-                @csrf 
-                @method('PATCH')
+                @csrf
                 
                 <div class="p-6">
                     <div class="flex items-start gap-4">
@@ -430,6 +429,7 @@
         data-csrf-token="{{ csrf_token() }}"
         data-success-message="{{ session('success') }}"
         data-error-message="{{ session('error') }}"
+        data-warning-message="{{ session('warning') }}"
         data-warning-limit="{{ $serviceWarningLimit }}"></div>
     <script src="{{ asset('js/admin-service-show.js') }}"></script>
 @endsection

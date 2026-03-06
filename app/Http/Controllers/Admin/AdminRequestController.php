@@ -200,6 +200,14 @@ public function resolveDispute(Request $request, $id)
     return redirect()->route('admin.requests.index')->with('success', $message);
 }
     
+    public function destroy($id)
+    {
+        $serviceRequest = ServiceRequest::findOrFail($id);
+        $serviceRequest->delete();
+
+        return redirect()->route('admin.requests.index')->with('success', 'Service request deleted successfully.');
+    }
+
     public function export(Request $request)
 {
     $query = \App\Models\ServiceRequest::with(['requester', 'provider', 'studentService']);

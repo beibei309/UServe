@@ -69,13 +69,14 @@ class AdminFeedbackController extends Controller
             $canWarn = $statusKey === 'active' && (int) $user->hu_warning_count < $userWarningLimit;
 
             $user->feedback_status_key = $statusKey;
-            $user->feedback_status_label = strtoupper($statusKey);
+            $user->feedback_status_label = ucfirst($statusKey);
             $user->feedback_status_badge_class = $this->statusBadgeClass($statusKey);
             $user->feedback_warning_class = (int) $user->hu_warning_count >= $userWarningLimit ? 'text-red-700' : 'text-yellow-600';
             $user->feedback_review_class = (float) ($user->reviews_received_avg_rating ?? 0) < 3.0 ? 'text-red-600' : 'text-green-600';
             $user->feedback_can_warn = $canWarn;
             $user->feedback_can_enforce = $statusKey === 'active' && !$canWarn;
             $user->feedback_can_unblock = $statusKey === 'blocked';
+            $user->feedback_can_unsuspend = $statusKey === 'suspended';
             $user->feedback_next_warning_count = min($userWarningLimit, (int) $user->hu_warning_count + 1);
 
             return $user;
@@ -185,6 +186,19 @@ class AdminFeedbackController extends Controller
         Mail::to($user->hu_email)->send(new SellerUnblockedMail($user));
 
         return back()->with('success', "Helper {$user->hu_name} has been unblocked for seller actions.");
+    }
+
+    public function unsuspendUser(User $user)
+    {
+        if (!$user->hu_is_suspended) {
+            return back()->with('info', 'User is not currently suspended.');
+        }
+
+        $user->hu_is_suspended = false;
+        $user->hu_blacklist_reason = null;
+        $user->save();
+
+        return back()->with('success', "User {$user->hu_name} has been unsuspended.");
     }
 
     public function blockUser(Request $request, User $user)

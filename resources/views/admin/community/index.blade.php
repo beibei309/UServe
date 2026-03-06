@@ -155,24 +155,23 @@
                         </td>
 
                         <td class="py-4 px-6 text-center">
-                            <span class="inline-flex items-center px-3 py-1 text-sm font-medium border rounded-full {{ $user->status_badge_class }}">{{ $user->status_label }}</span>
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold {{ $user->status_badge_class }}">{{ $user->status_label }}</span>
                             @if (($user->hu_is_blacklisted || $user->hu_is_suspended) && $user->hu_blacklist_reason)
                                 <p class="text-xs text-red-600 mt-1">{{ $user->hu_blacklist_reason }}</p>
                             @endif
                         </td>
 
                         <td class="py-4 px-6 text-center">
-                            <div class="flex flex-wrap justify-center gap-2 sm:gap-3 items-center">
+                            <div class="flex flex-wrap justify-center gap-2 items-center">
 
                                 {{-- BUTTON: View Reviews --}}
                                 <button type="button" data-reviews-open data-modal-id="reviews-modal-{{ $user->hu_id }}"
-                                    class="text-yellow-500 hover:text-yellow-400 transition-colors duration-300 relative group p-2 rounded-lg hover:bg-yellow-50"
+                                    class="inline-flex items-center justify-center w-8 h-8 bg-yellow-100 hover:bg-yellow-200 text-yellow-700 rounded-lg text-xs font-semibold transition-all duration-200 relative"
                                     title="Read Reviews">
                                     <i class="fa-solid fa-star-half-stroke"></i>
                                     @if ($user->reviews_received_count > 0)
                                         <span class="absolute -top-1 -right-1 flex h-2 w-2">
-                                            <span
-                                                class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
+                                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
                                             <span class="relative inline-flex rounded-full h-2 w-2 bg-yellow-500"></span>
                                         </span>
                                     @endif
@@ -180,30 +179,28 @@
 
                                 {{-- VIEW --}}
                                 <a href="{{ route('admin.community.view', $user->hu_id) }}"
-                                    class="text-cyan-500 hover:text-cyan-400 transition-colors duration-300 p-2 rounded-lg hover:bg-cyan-50" title="View">
+                                    class="inline-flex items-center justify-center w-8 h-8 bg-cyan-100 hover:bg-cyan-200 text-cyan-700 rounded-lg text-xs font-semibold transition-all duration-200" title="View">
                                     <i class="fa-solid fa-eye"></i>
                                 </a>
 
                                 {{-- EDIT --}}
                                 <a href="{{ route('admin.community.edit', $user->hu_id) }}"
-                                    class="text-blue-500 hover:text-blue-400 transition-colors duration-300 p-2 rounded-lg hover:bg-blue-50" title="Edit">
+                                    class="inline-flex items-center justify-center w-8 h-8 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg text-xs font-semibold transition-all duration-200" title="Edit">
                                     <i class="fa-solid fa-pen-to-square"></i>
                                 </a>
 
                                 {{-- BLACKLIST / UNBLACKLIST --}}
                                 @if (!$user->hu_is_blacklisted && !$user->hu_is_suspended)
-                                    {{-- Show Blacklist Button if user is active --}}
                                     <button type="button" data-blacklist-open data-user-id="{{ $user->hu_id }}"
-                                        class="text-red-500 hover:text-red-400 transition-colors duration-300 p-2 rounded-lg hover:bg-red-50" title="Blacklist">
+                                        class="inline-flex items-center justify-center w-8 h-8 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg text-xs font-semibold transition-all duration-200" title="Blacklist">
                                         <i class="fa-solid fa-ban"></i>
                                     </button>
                                 @else
-                                    {{-- Show Unblacklist Button if user is Blacklisted OR Suspended --}}
                                     <form action="{{ route('admin.community.unblacklist', $user->hu_id) }}" method="POST"
-                                        class="inline unblacklist-form">
+                                        class="inline-flex unblacklist-form">
                                         @csrf
                                         <button type="button" data-unblacklist-confirm
-                                            class="text-green-500 hover:text-green-400 transition-colors duration-300 p-2 rounded-lg hover:bg-green-50" title="Unblacklist">
+                                            class="inline-flex items-center justify-center w-8 h-8 bg-green-100 hover:bg-green-200 text-green-700 rounded-lg text-xs font-semibold transition-all duration-200" title="Unblacklist">
                                             <i class="fa-solid fa-unlock"></i>
                                         </button>
                                     </form>

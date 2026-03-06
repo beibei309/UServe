@@ -252,13 +252,13 @@
                                         <span
                                             class="px-2 py-1 rounded text-red-800 bg-red-100 text-xs font-semibold"
                                             data-status="rejected">
-                                            ✗ Rejected
+                                            Rejected
                                         </span>
                                     @elseif($service->hss_approval_status == 'suspended')
                                         <span
                                             class="px-2 py-1 rounded text-gray-800 bg-gray-100 text-xs font-semibold"
                                             data-status="suspended">
-                                            ⏸ Suspended
+                                            Suspended
                                         </span>
                                     @else
                                         <span
