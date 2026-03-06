@@ -11,12 +11,17 @@ use App\Models\Review;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage; 
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class StudentsController extends Controller
 {
    public function index(Request $request)
 {
-    $user = Auth::user();
+    $authUser = Auth::user();
+    $user = $authUser instanceof User ? $authUser : null;
+    if (!$user) {
+        abort(403);
+    }
 
     // Range handling (default last 30 days)
     $range = $request->get('range', '30days'); // possible: 30days, 3months, yearly
@@ -115,11 +120,37 @@ class StudentsController extends Controller
     $completedOrders = ServiceRequest::where('hsr_provider_id', $user->hu_id)
                         ->where('hsr_status', 'completed')
                         ->count();
+    $myServicesCount = $user->studentServices()->count();
+    $quickActions = [
+        [
+            'title' => 'Create New Service',
+            'icon' => 'fa-plus',
+            'color' => 'text-indigo-600',
+            'bg' => 'bg-indigo-50',
+            'route' => route('services.create'),
+        ],
+        [
+            'title' => 'Manage Services',
+            'icon' => 'fa-list-check',
+            'color' => 'text-blue-600',
+            'bg' => 'bg-blue-50',
+            'route' => route('services.manage'),
+        ],
+        [
+            'title' => 'Edit Profile',
+            'icon' => 'fa-user-pen',
+            'color' => 'text-gray-600',
+            'bg' => 'bg-gray-50',
+            'route' => route('students.edit'),
+        ],
+    ];
 
     return view('students.index', compact(
         'user',
         'averageRating',
         'completedOrders',
+        'myServicesCount',
+        'quickActions',
         'labels',
         'sales',
         'cancelled',
@@ -250,8 +281,29 @@ class StudentsController extends Controller
 
     public function edit()
     {
-        $user = Auth::user();
-        return view('students.edit-profile', compact('user'));
+        $authUser = Auth::user();
+        $user = $authUser instanceof User ? $authUser : null;
+        if (!$user) {
+            abort(403);
+        }
+
+        $facultyMap = [
+            'FKMT' => 'Fakulti Komputeran dan Meta-Teknologi',
+            'FBK' => 'Fakulti Bahasa dan Komunikasi',
+            'FPM' => 'Fakulti Pembangunan Manusia',
+            'FSMT' => 'Fakulti Sains dan Matematik',
+            'FPE' => 'Fakulti Pengurusan dan Ekonomi',
+            'FSKIK' => 'Fakulti Seni, Komputeran dan Industri Kreatif',
+            'FMUP' => 'Fakulti Muzik dan Seni Persembahan',
+            'FSSKJ' => 'Fakulti Sains Sukan dan Kejurulatihan',
+            'FTV' => 'Fakulti Teknikal dan Vokasional',
+            'FSK' => 'Fakulti Sains Kemanusiaan',
+        ];
+        $facultyOptions = array_values($facultyMap);
+        $selectedFaculty = old('faculty', $user->hu_faculty ?? $user->faculty);
+        $selectedFaculty = $facultyMap[$selectedFaculty] ?? $selectedFaculty;
+
+        return view('students.edit-profile', compact('user', 'facultyOptions', 'selectedFaculty'));
         
     }
 
@@ -420,6 +472,7 @@ public function deleteWorkExperienceFile()
 }
     public function profile(User $user)
     {
+        $viewer = Auth::user();
         $user->load([
             'reviewsReceived' => function($query) {
                 $query->latest(); 
@@ -437,6 +490,10 @@ public function deleteWorkExperienceFile()
                         ->where('hss_approval_status', 'approved')
                         ->latest()
                         ->get();
+        $services->transform(function ($service) {
+            $service->ui_image_url = $this->resolveProfileServiceImageUrl($service->hss_image_path);
+            return $service;
+        });
 
         $averageRating = (float) ($user->reviewsReceived()->avg('hr_rating') ?? 0);
         $reportCount = (int) ($user->hu_reports_count ?? 0);
@@ -444,14 +501,72 @@ public function deleteWorkExperienceFile()
             ->whereNotNull('hsr_dispute_reason')
             ->orderByDesc('updated_at')
             ->value('hsr_dispute_reason');
+        $canShowContactCta = $viewer && $viewer->hu_id !== $user->hu_id;
+        $profileWhatsappUrl = $this->buildProfileWhatsappUrl($user);
+        $profileHasPhone = !empty($profileWhatsappUrl);
+        $reviews = $user->reviewsReceived->map(function ($review) {
+            $review->ui_replied_ago = $review->hr_replied_at ? Carbon::parse($review->hr_replied_at)->diffForHumans() : null;
+            $review->ui_reviewer_initial = Str::substr($review->reviewer->hu_name ?? 'A', 0, 1);
+            $review->ui_created_human = optional($review->created_at)->diffForHumans() ?? 'Recently';
+            return $review;
+        });
+        $services = $services->map(function ($service) {
+            $service->ui_basic_price_display = number_format((float) ($service->hss_basic_price ?? 0), 0);
+            $service->ui_description_preview = Str::limit(strip_tags($service->hss_description), 80);
+            $service->ui_reviews_avg_rating_display = number_format((float) ($service->reviews_avg_rating ?? 0), 1);
+            return $service;
+        });
+        $memberSinceSource = $user->created_at ?? $user->hu_created_at;
+        $profileUi = [
+            'initial' => Str::substr($user->hu_name ?? 'U', 0, 1),
+            'average_rating_display' => number_format($averageRating, 1),
+            'average_rating_rounded' => (int) round($averageRating),
+            'latest_report_reason_short' => $latestReportReason ? Str::limit($latestReportReason, 140) : null,
+            'member_since_display' => optional($memberSinceSource)->format('M Y') ?? 'N/A',
+        ];
 
         return view('students.profile', [
             'user' => $user,
             'services' => $services,
-            'reviews' => $user->reviewsReceived,
+            'reviews' => $reviews,
             'averageRating' => round($averageRating, 1),
             'reportCount' => $reportCount,
             'latestReportReason' => $latestReportReason,
+            'canShowContactCta' => $canShowContactCta,
+            'profileWhatsappUrl' => $profileWhatsappUrl,
+            'profileHasPhone' => $profileHasPhone,
+            'profileUi' => $profileUi,
         ]);
+    }
+
+    private function resolveProfileServiceImageUrl(?string $path): string
+    {
+        if (!$path) {
+            return '';
+        }
+
+        if (Str::startsWith($path, ['http://', 'https://'])) {
+            return $path;
+        }
+
+        if (file_exists(public_path('storage/' . $path))) {
+            return asset('storage/' . $path);
+        }
+
+        return asset($path);
+    }
+
+    private function buildProfileWhatsappUrl(User $user): ?string
+    {
+        $rawPhone = $user->hu_phone_number ?? ($user->hu_phone ?? '');
+        $cleanPhone = preg_replace('/[^0-9]/', '', $rawPhone);
+        if (substr($cleanPhone, 0, 1) === '0') {
+            $cleanPhone = '60' . substr($cleanPhone, 1);
+        }
+        if (empty($cleanPhone)) {
+            return null;
+        }
+
+        return "https://wa.me/{$cleanPhone}?text=Hi " . urlencode($user->hu_name) . ', I saw your profile on S2U.';
     }
 }

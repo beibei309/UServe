@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class ProfileController extends Controller
@@ -39,22 +40,67 @@ class ProfileController extends Controller
     {
         $user = $request->user();
 
-        // 1. Fetch reviews received by this user
         $reviews = Review::where('hr_reviewee_id', $user->hu_id)
-                            ->with(['reviewer', 'studentService']) // Load relations
-                            ->latest()
-                            ->get();
+            ->with(['reviewer', 'studentService'])
+            ->latest()
+            ->get();
 
-        // 2. Calculate Statistics
+        $reviews = $reviews->map(function ($review) {
+            $reviewerPhoto = $review->reviewer->hu_profile_photo_path ?? null;
+            if (empty($reviewerPhoto)) {
+                $review->ui_reviewer_photo_url = null;
+                return $review;
+            }
+            if (Str::startsWith($reviewerPhoto, ['http://', 'https://'])) {
+                $review->ui_reviewer_photo_url = $reviewerPhoto;
+                return $review;
+            }
+            $review->ui_reviewer_photo_url = asset($reviewerPhoto);
+            return $review;
+        });
+
         $totalReviews = $reviews->count();
         $averageRating = $totalReviews > 0 ? $reviews->avg('hr_rating') : 0;
+        $ratingDisplay = number_format($averageRating, 1);
+        $ratingStarsFilled = (int) round($averageRating);
+        $profilePhotoUrl = $user->hu_profile_photo_path ? asset($user->hu_profile_photo_path) : null;
+        $profileInitial = Str::substr($user->hu_name ?? 'U', 0, 1);
 
-        // 3. Pass data to view
+        $reviewsView = $reviews->map(function ($review) {
+            $reviewerName = $review->reviewer->hu_name ?? 'Deleted User';
+            $serviceTitle = $review->studentService?->hss_title;
+            return [
+                'reviewer_name' => $reviewerName,
+                'reviewer_initial' => Str::substr($reviewerName, 0, 1),
+                'reviewer_photo_url' => $review->ui_reviewer_photo_url,
+                'created_human' => optional($review->hr_created_at)->diffForHumans() ?? 'Recently',
+                'rating' => (int) ($review->hr_rating ?? 0),
+                'comment' => $review->hr_comment,
+                'has_comment' => filled($review->hr_comment),
+                'has_service' => filled($serviceTitle),
+                'service_title_short' => filled($serviceTitle) ? Str::limit($serviceTitle, 100) : null,
+                'has_reply' => filled($review->hr_reply),
+                'reply' => $review->hr_reply,
+            ];
+        })->values();
+
+        $profileEditUi = [
+            'initial_tab' => session('status') === 'password-updated' ? 'password' : 'profile',
+            'profile_updated' => session('status') === 'profile-updated',
+            'password_updated' => session('status') === 'password-updated',
+            'rating_display' => $ratingDisplay,
+            'rating_stars_filled' => $ratingStarsFilled,
+            'profile_photo_url' => $profilePhotoUrl,
+            'profile_initial' => $profileInitial,
+            'can_edit_email' => in_array($user->hu_role, ['admin', 'superadmin'], true),
+            'has_reviews' => $totalReviews > 0,
+        ];
+
         return view('profile.edit', [
             'user' => $user,
-            'reviews' => $reviews,
+            'reviewsView' => $reviewsView,
             'totalReviews' => $totalReviews,
-            'averageRating' => $averageRating
+            'profileEditUi' => $profileEditUi,
         ]);
     }
 
@@ -132,10 +178,21 @@ class ProfileController extends Controller
         return Redirect::to('/');
     }
 
-    public function create()
-{
-    return view('students.create'); // Return the view where the student can fill their profile
-}
+    public function create(Request $request)
+    {
+        $user = $request->user();
+        $studentsCreateUi = [
+            'profile_photo_preview_url' => $user->hu_profile_photo_path
+                ? asset($user->hu_profile_photo_path)
+                : 'https://ui-avatars.com/api/?name=' . urlencode($user->hu_name ?? 'User'),
+            'default_bio' => $user->hu_bio,
+            'default_faculty' => $user->hu_faculty,
+            'default_course' => $user->hu_course,
+            'default_skills' => $user->hu_skills,
+            'default_work_experience_message' => $user->hu_work_experience_message ?? '',
+        ];
+        return view('students.create', ['studentsCreateUi' => $studentsCreateUi]);
+    }
 
         private function mapLegacyUserPayload(array $validated): array
         {

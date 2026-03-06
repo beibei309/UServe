@@ -113,6 +113,15 @@ Notes: ______________________________________________
 Pass/Fail: ____________  
 Notes: ______________________________________________
 
+## 10) Blade Separation Release Evidence
+
+- [ ] Rerun non-admin and admin regression gates
+- [ ] Rerun smoke matrix coverage (auth, onboarding, services, requests, favorites, profile, admin)
+- [ ] Append dated evidence entry to `docs/migration/blade-separation-final-smoke-matrix.md`
+
+Pass/Fail: ____________  
+Notes: ______________________________________________
+
 ## Final Sign-Off
 
 Overall Result:

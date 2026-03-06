@@ -7,9 +7,11 @@ use App\Models\User;
 use App\Models\Category;
 use App\Models\ServiceRequest;
 use App\Models\Review;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class StudentServiceController extends Controller
 {
@@ -79,6 +81,25 @@ class StudentServiceController extends Controller
     }
 
     $services = $query->paginate(5);
+    $isAuthenticated = Auth::check();
+    $services->getCollection()->transform(function (StudentService $service) use ($isAuthenticated) {
+        $service->ui_image_url = $this->resolveServiceCardImageUrl($service->hss_image_path, $service->hss_title);
+        $service->ui_image_fallback = 'https://ui-avatars.com/api/?name=' . urlencode($service->hss_title ?? 'Service');
+        $service->ui_details_url = route('services.details', $service->hss_id);
+
+        $service->ui_seller_avatar_url = $service->user->hu_profile_photo_path
+            ? asset($service->user->hu_profile_photo_path)
+            : 'https://ui-avatars.com/api/?name=' . urlencode($isAuthenticated ? $service->user->hu_name : substr((string) $service->user->hu_name, 0, 1)) . '&background=random';
+        $service->ui_seller_display_name = $isAuthenticated
+            ? $service->user->hu_name
+            : Str::limit($service->user->hu_name, 1, '****');
+        $service->ui_profile_url = $isAuthenticated
+            ? route('students.profile', $service->user)
+            : route('login');
+        $service->ui_created_human = $service->created_at->diffForHumans();
+
+        return $service;
+    });
 
     return view('services.index', [
         'services' => $services,
@@ -86,6 +107,21 @@ class StudentServiceController extends Controller
         'category_id' => $category_id,
         'sort' => $sort,
     ]);
+}
+
+private function resolveServiceCardImageUrl(?string $path, ?string $serviceTitle): string
+{
+    $fallback = 'https://ui-avatars.com/api/?name=' . urlencode($serviceTitle ?? 'Service');
+    if (!$path) return $fallback;
+
+    if (Str::startsWith($path, ['http://', 'https://'])) {
+        return $path;
+    }
+    if (Str::startsWith($path, 'storage/')) {
+        return asset($path);
+    }
+
+    return asset('storage/' . ltrim($path, '/'));
 }
 
   public function edit(StudentService $service)
@@ -96,6 +132,22 @@ class StudentServiceController extends Controller
     }
 
     $categories = \App\Models\Category::all();
+    $defaultSchedule = [
+        'mon' => ['enabled' => true, 'start' => '09:00', 'end' => '17:00'],
+        'tue' => ['enabled' => true, 'start' => '09:00', 'end' => '17:00'],
+        'wed' => ['enabled' => true, 'start' => '09:00', 'end' => '17:00'],
+        'thu' => ['enabled' => true, 'start' => '09:00', 'end' => '17:00'],
+        'fri' => ['enabled' => true, 'start' => '09:00', 'end' => '17:00'],
+        'sat' => ['enabled' => false, 'start' => '10:00', 'end' => '14:00'],
+        'sun' => ['enabled' => false, 'start' => '10:00', 'end' => '14:00'],
+    ];
+    $scheduleData = $service->hss_operating_hours ?? $defaultSchedule;
+    foreach ($defaultSchedule as $key => $val) {
+        if (!isset($scheduleData[$key])) {
+            $scheduleData[$key] = $val;
+        }
+    }
+    $serviceImageUrl = $this->resolveServiceImageUrl($service->hss_image_path);
 
     $bookedSlots = \App\Models\ServiceRequest::where('hsr_student_service_id', $service->hss_id)
         ->whereIn('hsr_status', ['accepted', 'approved', 'in_progress']) 
@@ -112,7 +164,7 @@ class StudentServiceController extends Controller
             return $date . ' ' . $time;
         });
 
-    return view('services.edit', compact('service', 'categories', 'bookedSlots'));
+    return view('services.edit', compact('service', 'categories', 'bookedSlots', 'scheduleData', 'serviceImageUrl'));
 }
 
 public function update(Request $request, StudentService $service): JsonResponse
@@ -326,6 +378,31 @@ $isUnavailable = $request->has('is_unavailable'); // Check checkbox status
         ], 200);
     }
 
+    public function show(StudentService $service)
+    {
+        $service->loadMissing(['category', 'user']);
+        $provider = $service->user;
+        $authUser = Auth::user();
+        $viewer = $authUser instanceof User ? $authUser : null;
+
+        $canContactProvider = $viewer
+            && $viewer->hu_id !== $provider->hu_id
+            && $viewer->isCommunity()
+            && $provider->isStudent();
+
+        $isProviderFavorited = $viewer
+            ? $viewer->favorites()->where('hf_favorited_user_id', $provider->hu_id)->exists()
+            : false;
+
+        return view('services.show', compact(
+            'service',
+            'provider',
+            'viewer',
+            'canContactProvider',
+            'isProviderFavorited'
+        ));
+    }
+
     public function create(Request $request)
     {
         $user = $request->user();
@@ -335,8 +412,17 @@ $isUnavailable = $request->has('is_unavailable'); // Check checkbox status
 
         // Get categories for the form
         $categories = \App\Models\Category::all();
+        $defaultSchedule = [
+            'mon' => ['enabled' => true, 'start' => '09:00', 'end' => '17:00'],
+            'tue' => ['enabled' => true, 'start' => '09:00', 'end' => '17:00'],
+            'wed' => ['enabled' => true, 'start' => '09:00', 'end' => '17:00'],
+            'thu' => ['enabled' => true, 'start' => '09:00', 'end' => '17:00'],
+            'fri' => ['enabled' => true, 'start' => '09:00', 'end' => '17:00'],
+            'sat' => ['enabled' => false, 'start' => '10:00', 'end' => '14:00'],
+            'sun' => ['enabled' => false, 'start' => '10:00', 'end' => '14:00'],
+        ];
 
-        return view('services.create', compact('categories'));
+        return view('services.create', compact('categories', 'defaultSchedule'));
     }
 
     public function store(Request $request)
@@ -541,6 +627,30 @@ $isUnavailable = $request->has('is_unavailable'); // Check checkbox status
     }
 
     $services = $query->orderByDesc('created_at')->get();
+    $services->transform(function (StudentService $service) {
+        $status = strtolower((string) $service->hss_approval_status);
+        $service->ui_is_suspended = $status === 'suspended';
+        $service->ui_image_url = $this->resolveServiceImageUrl($service->hss_image_path);
+        $service->ui_badge_class = match ($status) {
+            'pending' => 'bg-amber-500 text-white',
+            'rejected' => 'bg-red-500 text-white',
+            default => 'bg-gray-500 text-white',
+        };
+        $service->ui_badge_icon = match ($status) {
+            'pending' => '<i class="fa-solid fa-clock mr-1"></i>',
+            'rejected' => '<i class="fa-solid fa-circle-xmark mr-1"></i>',
+            default => '',
+        };
+
+        return $service;
+    });
+
+    $servicesByStatus = [
+        'all' => $services,
+        'pending' => $services->where('hss_approval_status', 'pending')->values(),
+        'approved' => $services->where('hss_approval_status', 'approved')->values(),
+        'rejected' => $services->where('hss_approval_status', 'rejected')->values(),
+    ];
 
     // Dapatkan senarai kategori unik daripada servis milik user ini sahaja untuk filter dropdown
     $categories = $user->studentServices() // Pastikan ada relationship 'studentServices' di User model
@@ -550,7 +660,31 @@ $isUnavailable = $request->has('is_unavailable'); // Check checkbox status
         ->unique('hc_id')
         ->filter();
 
-    return view('services.manage', compact('services', 'categories'));
+    return view('services.manage', compact('services', 'categories', 'servicesByStatus'));
+}
+
+private function resolveServiceImageUrl(?string $path, ?string $fallback = null): string
+{
+    $resolvedFallback = $fallback ?? 'https://via.placeholder.com/400x300?text=Service+Image';
+    if (!$path) return $resolvedFallback;
+
+    if (Str::startsWith($path, ['http://', 'https://'])) {
+        return $path;
+    }
+    if (Str::startsWith($path, 'storage/')) {
+        return asset($path);
+    }
+    if (Str::startsWith($path, 'services/')) {
+        return asset('storage/' . $path);
+    }
+    if (file_exists(public_path('storage/' . $path))) {
+        return asset('storage/' . $path);
+    }
+    if (file_exists(public_path($path))) {
+        return asset($path);
+    }
+
+    return $resolvedFallback;
 }
 
     public function approve(StudentService $service)
@@ -613,6 +747,18 @@ $isUnavailable = $request->has('is_unavailable'); // Check checkbox status
             ->with('reviewer') 
             ->latest()
             ->get();
+        $isAuthenticatedViewer = (bool) $viewer;
+        $reviews = $reviews->map(function ($review) use ($isAuthenticatedViewer) {
+            $reviewerName = $review->reviewer->hu_name ?? 'User';
+            $review->ui_reviewer_role = $review->reviewer->hu_role ?? 'student';
+            $review->ui_replied_ago = $review->hr_replied_at ? Carbon::parse($review->hr_replied_at)->diffForHumans() : null;
+            $review->ui_reviewer_initial = Str::substr($reviewerName, 0, 1);
+            $review->ui_reviewer_display_name = $isAuthenticatedViewer
+                ? $reviewerName
+                : Str::substr($reviewerName, 0, 1) . '****';
+            $review->ui_created_human = optional($review->hr_created_at)->diffForHumans() ?? 'Recently';
+            return $review;
+        });
 
         $service->hss_rating = $reviews->count() > 0 ? round($reviews->avg('hr_rating'), 1) : 0;
 
@@ -620,7 +766,7 @@ $isUnavailable = $request->has('is_unavailable'); // Check checkbox status
         $service->avg_days = $orders->avg(function($order) {
             $rawDate = $order->hsr_selected_dates;
             $date = is_array($rawDate) ? ($rawDate[0] ?? now()->toDateString()) : $rawDate;
-            return \Carbon\Carbon::parse($date)->diffInDays(now());
+            return Carbon::parse($date)->diffInDays(now());
         }) ?? 0;
 
         $manualBlocks = $service->hss_blocked_slots;
@@ -643,14 +789,117 @@ $isUnavailable = $request->has('is_unavailable'); // Check checkbox status
             ];
         });
 
+        $hasActiveRequest = false;
+        if ($viewer) {
+            $hasActiveRequest = ServiceRequest::where('hsr_requester_id', $viewer->hu_id)
+                ->where('hsr_student_service_id', $service->hss_id)
+                ->whereIn('hsr_status', ['pending', 'accepted', 'in_progress'])
+                ->exists();
+        }
+
+        $detailsHolidays = $service->hss_unavailable_dates;
+        if (is_string($detailsHolidays)) {
+            $decodedHolidays = json_decode($detailsHolidays, true);
+            $detailsHolidays = is_array($decodedHolidays) ? $decodedHolidays : [];
+        }
+        $detailsHolidays = is_array($detailsHolidays) ? $detailsHolidays : [];
+
+        $detailsSchedule = is_array($service->hss_operating_hours) ? $service->hss_operating_hours : [];
+        $detailsPackages = [
+            'basic' => [
+                'price' => $service->hss_basic_price ?? 0,
+                'description' => $service->hss_basic_description ?? '',
+                'duration' => $service->hss_basic_duration ?? '',
+                'frequency' => $service->hss_basic_frequency ?? '',
+            ],
+            'standard' => [
+                'price' => $service->hss_standard_price ?? 0,
+                'description' => $service->hss_standard_description ?? '',
+                'duration' => $service->hss_standard_duration ?? '',
+                'frequency' => $service->hss_standard_frequency ?? '',
+            ],
+            'premium' => [
+                'price' => $service->hss_premium_price ?? 0,
+                'description' => $service->hss_premium_description ?? '',
+                'duration' => $service->hss_premium_duration ?? '',
+                'frequency' => $service->hss_premium_frequency ?? '',
+            ],
+        ];
+        $detailsCurrentPackage = $service->hss_basic_price ? 'basic' : ($service->hss_standard_price ? 'standard' : 'premium');
+        $detailsSessionDuration = (int) ($service->hss_session_duration ?? 60);
+        $detailsImagePlaceholder = 'https://ui-avatars.com/api/?name=' . urlencode($service->hss_title ?? 'Service');
+        $detailsImageUrl = !empty($service->hss_image_path) ? $this->resolveServiceImageUrl($service->hss_image_path, $detailsImagePlaceholder) : '';
+        $detailsWhatsappUrl = $this->buildServiceWhatsappUrl($service);
+        $detailsHasPhone = !empty($detailsWhatsappUrl);
+        $providerName = $service->user->hu_name ?? 'User';
+        $providerMaskedName = Str::substr($providerName, 0, 1) . '****';
+        $isFavouritedByViewer = $isAuthenticatedViewer && (bool) ($service->is_favourited ?? false);
+        $daysMap = [
+            'mon' => 'Monday',
+            'tue' => 'Tuesday',
+            'wed' => 'Wednesday',
+            'thu' => 'Thursday',
+            'fri' => 'Friday',
+            'sat' => 'Saturday',
+            'sun' => 'Sunday',
+        ];
+        $detailsOperatingDays = [];
+        foreach ($daysMap as $key => $dayName) {
+            $d = $detailsSchedule[$key] ?? [];
+            $isOpen = isset($d['enabled']) && $d['enabled'] == true;
+            $detailsOperatingDays[] = [
+                'name' => $dayName,
+                'is_open' => $isOpen,
+                'start' => $d['start'] ?? '09:00',
+                'end' => $d['end'] ?? '17:00',
+                'is_today' => strtolower(now()->format('D')) == strtolower(substr($dayName, 0, 3)),
+            ];
+        }
+
         return view('services.details', [
             'service' => $service,
             'provider' => $service->user,
             'viewer' => $viewer,
             'reviews' => $reviews,
             'manualBlocks' => $manualBlocks,
-            'bookedAppointments' => $bookedAppointments, 
+            'bookedAppointments' => $bookedAppointments,
+            'hasActiveRequest' => $hasActiveRequest,
+            'detailsHolidays' => $detailsHolidays,
+            'detailsSchedule' => $detailsSchedule,
+            'detailsPackages' => $detailsPackages,
+            'detailsCurrentPackage' => $detailsCurrentPackage,
+            'detailsSessionDuration' => $detailsSessionDuration,
+            'detailsImageUrl' => $detailsImageUrl,
+            'detailsImagePlaceholder' => $detailsImagePlaceholder,
+            'detailsWhatsappUrl' => $detailsWhatsappUrl,
+            'detailsHasPhone' => $detailsHasPhone,
+            'detailsOperatingDays' => $detailsOperatingDays,
+            'detailsUi' => [
+                'is_authenticated' => $isAuthenticatedViewer,
+                'provider_display_name' => $isAuthenticatedViewer ? $providerName : $providerMaskedName,
+                'provider_masked_name' => $providerMaskedName,
+                'provider_initial_upper' => Str::upper(Str::substr($providerName, 0, 1)),
+                'rating_display' => number_format((float) ($service->hss_rating ?? 0), 1),
+                'favourite_button_class' => $isFavouritedByViewer
+                    ? 'bg-red-50 text-red-500 border-red-100'
+                    : 'text-gray-600 hover:bg-gray-50 hover:border-gray-300',
+                'favourite_icon_class' => $isFavouritedByViewer ? 'fas' : 'far',
+                'favourite_text' => $isFavouritedByViewer ? 'Saved' : 'Save',
+            ],
         ]);
+    }
+
+    private function buildServiceWhatsappUrl(StudentService $service): ?string
+    {
+        $rawPhone = $service->user->hu_phone_number ?? ($service->user->hu_phone ?? '');
+        $cleanPhone = preg_replace('/[^0-9]/', '', $rawPhone);
+        if (substr($cleanPhone, 0, 1) === '0') {
+            $cleanPhone = '60' . substr($cleanPhone, 1);
+        }
+        if (empty($cleanPhone)) {
+            return null;
+        }
+        return "https://wa.me/{$cleanPhone}?text=Hi, I am interested in your service: " . urlencode($service->hss_title);
     }
 
     

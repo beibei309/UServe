@@ -167,3 +167,26 @@
 - Complexity: medium.
 - Main challenge is consistency across existing flows, not technical feasibility.
 - This is achievable without stopping current feature development if phased correctly.
+
+## Non-Admin Rollout (Phase-by-Phase)
+
+### Preflight Requirements
+- Establish behavior baseline for each role and critical flow.
+- Use risk scoring per page: `traffic × coupling × criticality`.
+- Enforce refactor-only contract unless UX change is explicitly approved.
+
+### Phase 0 Artifacts
+- Inventory map: `docs/migration/non-admin-phase-0-inventory-map.md`
+- Hotspot matrix: `docs/migration/non-admin-phase-0-hotspot-matrix.md`
+- Migration decision matrix: `docs/migration/non-admin-phase-0-migration-decision-matrix.md`
+- Slice tracker + PR controls: `docs/migration/non-admin-slice-tracker.md`
+
+### Foundation Rules for Non-Admin
+- JS modules must follow deterministic lifecycle: `init`, `destroy`, `reinit`.
+- Use delegated `data-action` event model for dynamic content.
+- Forbid dynamic code execution (`eval`, `new Function`) in loaders/modules.
+
+### Global Execution Controls
+- Vertical slice workflow: Audit → Refactor → Validate → Smoke test → Merge.
+- One feature slice per PR to minimize blast radius.
+- Each PR must include gate results and rollback notes.

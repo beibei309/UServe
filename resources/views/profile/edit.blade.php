@@ -21,22 +21,24 @@
                         </div>
                         <div>
                             <p class="text-xs text-slate-400 font-bold uppercase tracking-wider">Rating</p>
-                            <p class="text-lg font-black text-slate-900">{{ number_format($averageRating ?? 0, 1) }} <span class="text-xs text-slate-400 font-medium">/ 5.0</span></p>
+                            <p class="text-lg font-black text-slate-900">{{ $profileEditUi['rating_display'] }} <span class="text-xs text-slate-400 font-medium">/ 5.0</span></p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div x-data="{ activeTab: '{{ session('status') === 'password-updated' ? 'password' : 'profile' }}' }" class="flex flex-col lg:flex-row gap-8 items-start">
+            <div class="flex flex-col lg:flex-row gap-8 items-start" id="profileEditRoot">
                 
                 {{-- SIDEBAR NAVIGATION --}}
                 <aside class="lg:w-72 flex-shrink-0 w-full sticky top-24">
                     <div class="bg-white p-3 rounded-[2rem] shadow-sm border border-slate-200/60">
                         <nav class="space-y-1">
                             {{-- Profile Tab --}}
-                            <button @click="activeTab = 'profile'" 
-                                :class="activeTab === 'profile' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'"
-                                class="flex items-center px-5 py-4 text-sm font-bold rounded-2xl transition-all duration-300 w-full group">
+                            <button type="button"
+                                data-profile-tab-button="profile"
+                                class="flex items-center px-5 py-4 text-sm font-bold rounded-2xl transition-all duration-300 w-full group {{ $profileEditUi['initial_tab'] === 'profile' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900' }}"
+                                data-active-class="bg-indigo-600 text-white shadow-lg shadow-indigo-100"
+                                data-inactive-class="text-slate-500 hover:bg-slate-50 hover:text-slate-900">
                                 <svg class="mr-3 h-5 w-5 transition-transform group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                 </svg>
@@ -44,9 +46,11 @@
                             </button>
 
                             {{-- Reviews Tab (NEW) --}}
-                            <button @click="activeTab = 'reviews'" 
-                                :class="activeTab === 'reviews' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'"
-                                class="flex items-center px-5 py-4 text-sm font-bold rounded-2xl transition-all duration-300 w-full group">
+                            <button type="button"
+                                data-profile-tab-button="reviews"
+                                class="flex items-center px-5 py-4 text-sm font-bold rounded-2xl transition-all duration-300 w-full group {{ $profileEditUi['initial_tab'] === 'reviews' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900' }}"
+                                data-active-class="bg-indigo-600 text-white shadow-lg shadow-indigo-100"
+                                data-inactive-class="text-slate-500 hover:bg-slate-50 hover:text-slate-900">
                                 <svg class="mr-3 h-5 w-5 transition-transform group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                                 </svg>
@@ -55,9 +59,11 @@
                             </button>
 
                             {{-- Password Tab --}}
-                            <button @click="activeTab = 'password'" 
-                                :class="activeTab === 'password' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'"
-                                class="flex items-center px-5 py-4 text-sm font-bold rounded-2xl transition-all duration-300 w-full group">
+                            <button type="button"
+                                data-profile-tab-button="password"
+                                class="flex items-center px-5 py-4 text-sm font-bold rounded-2xl transition-all duration-300 w-full group {{ $profileEditUi['initial_tab'] === 'password' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900' }}"
+                                data-active-class="bg-indigo-600 text-white shadow-lg shadow-indigo-100"
+                                data-inactive-class="text-slate-500 hover:bg-slate-50 hover:text-slate-900">
                                 <svg class="mr-3 h-5 w-5 transition-transform group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                                 </svg>
@@ -77,11 +83,8 @@
                 <div class="flex-1 w-full">
                     
                     {{-- TAB 1: PROFILE INFORMATION --}}
-                    <div x-show="activeTab === 'profile'" x-cloak 
-                         x-transition:enter="transition ease-out duration-300 transform" 
-                         x-transition:enter-start="opacity-0 translate-y-4" 
-                         x-transition:enter-end="opacity-100 translate-y-0" 
-                         class="bg-white shadow-sm rounded-[2.5rem] border border-slate-200/60 overflow-hidden">
+                    <div data-profile-tab-panel="profile"
+                         class="{{ $profileEditUi['initial_tab'] === 'profile' ? '' : 'hidden' }} bg-white shadow-sm rounded-[2.5rem] border border-slate-200/60 overflow-hidden">
                         
                         <div class="px-8 py-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                             <div>
@@ -96,27 +99,26 @@
                                 @method('patch')
 
                                 {{-- Photo Upload UI --}}
-                                <div class="flex flex-col sm:flex-row items-center gap-8 pb-8 border-b border-slate-50"
-     x-data="{ previewUrl: null }">
+                                <div class="flex flex-col sm:flex-row items-center gap-8 pb-8 border-b border-slate-50">
 
     <div class="relative group">
         <div class="w-28 h-28 md:w-32 md:h-32 rounded-[2rem] overflow-hidden border-4 border-white shadow-2xl bg-slate-100 ring-1 ring-slate-200">
 
             {{-- ?? Preview Image (shows after user selects new file) --}}
-            <img x-show="previewUrl"
-                 :src="previewUrl"
-                 class="w-full h-full object-cover">
+            <img id="profile-photo-preview"
+                 src=""
+                 class="w-full h-full object-cover hidden">
 
             {{-- ?? Existing profile image --}}
-            @if(auth()->user()->hu_profile_photo_path)
-                <img x-show="!previewUrl"
-                     src="{{ asset(auth()->user()->hu_profile_photo_path) }}"
+            @if($profileEditUi['profile_photo_url'])
+                <img id="profile-photo-current"
+                     src="{{ $profileEditUi['profile_photo_url'] }}"
                      class="w-full h-full object-cover">
             @else
                 {{-- ?? Fallback letter avatar --}}
-                <div x-show="!previewUrl"
+                <div id="profile-photo-fallback"
                      class="w-full h-full flex items-center justify-center bg-indigo-600 text-white text-4xl font-black">
-                    {{ substr(auth()->user()->hu_name, 0, 1) }}
+                    {{ $profileEditUi['profile_initial'] }}
                 </div>
             @endif
 
@@ -138,8 +140,7 @@
                name="profile_photo"
                type="file"
                accept="image/*"
-               class="hidden"
-               @change="previewUrl = $event.target.files[0] ? URL.createObjectURL($event.target.files[0]) : null">
+               class="hidden">
     </div>
 
     <div class="text-center sm:text-left">
@@ -164,9 +165,9 @@
                                     <div>
                                         <label class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Email Address</label>
                                         <input type="email" name="email" value="{{ old('email', $user->hu_email) }}" required
-                                            @if($user->hu_role !== 'admin' && $user->hu_role !== 'superadmin') readonly @endif
+                                            @if(!$profileEditUi['can_edit_email']) readonly @endif
                                             class="block w-full rounded-2xl border-slate-200 py-3.5 px-4 transition-all font-semibold 
-                                            @if($user->hu_role !== 'admin' && $user->hu_role !== 'superadmin') bg-slate-100 text-slate-400 cursor-not-allowed @else bg-slate-50/50 text-slate-700 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 @endif">
+                                            @if(!$profileEditUi['can_edit_email']) bg-slate-100 text-slate-400 cursor-not-allowed @else bg-slate-50/50 text-slate-700 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 @endif">
                                         @error('email') <p class="mt-2 text-xs text-rose-500 font-bold">{{ $message }}</p> @enderror
                                     </div>
 
@@ -200,8 +201,8 @@
 
                                 {{-- Footer Actions --}}
                                 <div class="pt-10 flex items-center justify-end border-t border-slate-50 gap-6">
-                                    @if (session('status') === 'profile-updated')
-                                        <span x-data="{ show: true }" x-show="show" x-transition x-init="setTimeout(() => show = false, 3000)" class="text-sm text-emerald-600 font-bold flex items-center">
+                                    @if ($profileEditUi['profile_updated'])
+                                        <span data-profile-autohide class="text-sm text-emerald-600 font-bold flex items-center">
                                             <i class="fa-solid fa-circle-check mr-2"></i> Changes Saved
                                         </span>
                                     @endif
@@ -214,11 +215,8 @@
                     </div>
 
                     {{-- TAB 2: REVIEWS (NEW - Carousell Style) --}}
-                    <div x-show="activeTab === 'reviews'" x-cloak 
-                         x-transition:enter="transition ease-out duration-300 transform" 
-                         x-transition:enter-start="opacity-0 translate-y-4" 
-                         x-transition:enter-end="opacity-100 translate-y-0" 
-                         class="bg-white shadow-sm rounded-[2.5rem] border border-slate-200/60 overflow-hidden">
+                    <div data-profile-tab-panel="reviews"
+                         class="{{ $profileEditUi['initial_tab'] === 'reviews' ? '' : 'hidden' }} bg-white shadow-sm rounded-[2.5rem] border border-slate-200/60 overflow-hidden">
                         
                         {{-- Review Header Summary --}}
                         <div class="px-8 py-8 border-b border-slate-100 bg-slate-50/50">
@@ -229,14 +227,14 @@
                                 </div>
                                 
                                 {{-- Rating Big Badge --}}
-                                @if(isset($averageRating))
+                                @if($profileEditUi['has_reviews'])
                                 <div class="flex items-center gap-4 bg-white px-5 py-3 rounded-2xl shadow-sm border border-slate-200">
-                                    <div class="text-3xl font-black text-indigo-600">{{ number_format($averageRating, 1) }}</div>
+                                    <div class="text-3xl font-black text-indigo-600">{{ $profileEditUi['rating_display'] }}</div>
                                     <div class="h-8 w-px bg-slate-200"></div>
                                     <div class="flex flex-col">
                                         <div class="flex text-yellow-400 text-xs mb-1">
                                             @for($i=1; $i<=5; $i++)
-                                                <i class="{{ $i <= round($averageRating) ? 'fas' : 'far' }} fa-star"></i>
+                                                <i class="{{ $i <= $profileEditUi['rating_stars_filled'] ? 'fas' : 'far' }} fa-star"></i>
                                             @endfor
                                         </div>
                                         <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">{{ $totalReviews ?? 0 }} Reviews</span>
@@ -248,28 +246,18 @@
 
                         {{-- Review List --}}
                         <div class="divide-y divide-slate-100">
-                            @if(isset($reviews) && $reviews->count() > 0)
-                                @foreach($reviews as $review)
+                            @if($profileEditUi['has_reviews'])
+                                @foreach($reviewsView as $review)
                                 <div class="p-8 hover:bg-slate-50/30 transition-colors">
                                     <div class="flex items-start gap-4 md:gap-6">
                                         {{-- Avatar --}}
                                         <div class="flex-shrink-0">
-                                            @if($review->reviewer && $review->reviewer->hu_profile_photo_path)
-                                                @php
-                                                    $reviewerPhoto = $review->reviewer->hu_profile_photo_path;
-                                                    if (\Illuminate\Support\Str::startsWith($reviewerPhoto, ['http://', 'https://'])) {
-                                                        $reviewerPhotoUrl = $reviewerPhoto;
-                                                    } elseif (\Illuminate\Support\Str::startsWith($reviewerPhoto, 'storage/')) {
-                                                        $reviewerPhotoUrl = asset($reviewerPhoto);
-                                                    } else {
-                                                        $reviewerPhotoUrl = asset($reviewerPhoto);
-                                                    }
-                                                @endphp
-                                                <img src="{{ $reviewerPhotoUrl }}" 
+                                            @if($review['reviewer_photo_url'])
+                                                <img src="{{ $review['reviewer_photo_url'] }}" 
                                                      class="w-12 h-12 md:w-14 md:h-14 rounded-full object-cover shadow-sm border-2 border-white ring-1 ring-slate-100">
                                             @else
                                                 <div class="w-12 h-12 md:w-14 md:h-14 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-black text-lg shadow-sm border-2 border-white ring-1 ring-slate-100">
-                                                    {{ substr($review->reviewer->hu_name ?? 'User', 0, 1) }}
+                                                    {{ $review['reviewer_initial'] }}
                                                 </div>
                                             @endif
                                         </div>
@@ -278,49 +266,49 @@
                                         <div class="flex-1 min-w-0">
                                             <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-2">
                                                 <h4 class="text-base font-bold text-slate-900 truncate">
-                                                    {{ $review->reviewer->hu_name ?? 'Deleted User' }}
+                                                    {{ $review['reviewer_name'] }}
                                                 </h4>
                                                 <span class="text-xs font-medium text-slate-400 mt-1 sm:mt-0">
-                                                    {{ optional($review->hr_created_at)->diffForHumans() ?? 'Recently' }}
+                                                    {{ $review['created_human'] }}
                                                 </span>
                                             </div>
 
                                             {{-- Stars --}}
                                             <div class="flex text-yellow-400 text-xs mb-3">
                                                 @for($i=1; $i<=5; $i++)
-                                                    <i class="{{ $i <= $review->hr_rating ? 'fas' : 'far' }} fa-star"></i>
+                                                    <i class="{{ $i <= $review['rating'] ? 'fas' : 'far' }} fa-star"></i>
                                                 @endfor
                                             </div>
 
                                             {{-- Comment --}}
-                                            @if($review->hr_comment)
+                                            @if($review['has_comment'])
                                                 <p class="text-slate-600 text-sm leading-relaxed mb-3">
-                                                    {{ $review->hr_comment }}
+                                                    {{ $review['comment'] }}
                                                 </p>
                                             @else
                                                 <p class="text-slate-400 text-sm italic mb-3">No written review provided.</p>
                                             @endif
 
                                             {{-- Context Badge (Carousell Style) --}}
-                                            @if($review->studentService)
+                                            @if($review['has_service'])
                                                 <div class="inline-flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-lg">
                                                     <div class="w-6 h-6 rounded bg-white flex items-center justify-center border border-slate-200">
                                                         <i class="fas fa-shopping-bag text-[10px] text-slate-400"></i>
                                                     </div>
                                                     <div class="flex flex-col">
                                                         <span class="text-[10px] text-slate-400 uppercase font-bold tracking-wider leading-none">You bought</span>
-                                                        <span class="text-xs font-bold text-slate-700 leading-none mt-1">{{ Str::limit($review->studentService->hss_title, 100) }}</span>
+                                                        <span class="text-xs font-bold text-slate-700 leading-none mt-1">{{ $review['service_title_short'] }}</span>
                                                     </div>
                                                 </div>
                                             @endif
 
                                             {{-- Reply Section --}}
-                                            @if($review->hr_reply)
+                                            @if($review['has_reply'])
                                                 <div class="mt-4 bg-indigo-50/50 border border-indigo-100 rounded-xl p-4 ml-0 md:ml-4">
                                                     <p class="text-xs font-bold text-indigo-900 mb-1 flex items-center gap-1">
                                                         <i class="fas fa-reply fa-rotate-180"></i> Your Reply:
                                                     </p>
-                                                    <p class="text-sm text-indigo-800/80 italic">"{{ $review->hr_reply }}"</p>
+                                                    <p class="text-sm text-indigo-800/80 italic">"{{ $review['reply'] }}"</p>
                                                 </div>
                                             @endif
                                         </div>
@@ -340,11 +328,8 @@
                     </div>
 
                     {{-- TAB 3: PASSWORD UPDATE --}}
-                    <div x-show="activeTab === 'password'" x-cloak 
-                         x-transition:enter="transition ease-out duration-300 transform" 
-                         x-transition:enter-start="opacity-0 translate-y-4" 
-                         x-transition:enter-end="opacity-100 translate-y-0" 
-                         class="bg-white shadow-sm rounded-[2.5rem] border border-slate-200/60 overflow-hidden">
+                    <div data-profile-tab-panel="password"
+                         class="{{ $profileEditUi['initial_tab'] === 'password' ? '' : 'hidden' }} bg-white shadow-sm rounded-[2.5rem] border border-slate-200/60 overflow-hidden">
                         
                         <div class="px-8 py-6 border-b border-slate-100 bg-slate-50/50">
                             <h3 class="text-xl font-black text-slate-900 tracking-tight">Security Credentials</h3>
@@ -379,8 +364,8 @@
                                 </div>
 
                                 <div class="pt-8 flex items-center justify-end border-t border-slate-50 gap-6">
-                                    @if (session('status') === 'password-updated')
-                                        <span x-data="{ show: true }" x-show="show" x-transition x-init="setTimeout(() => show = false, 3000)" class="text-sm text-emerald-600 font-bold flex items-center">
+                                    @if ($profileEditUi['password_updated'])
+                                        <span data-profile-autohide class="text-sm text-emerald-600 font-bold flex items-center">
                                             <i class="fa-solid fa-shield-check mr-2"></i> Security Updated
                                         </span>
                                     @endif
@@ -396,4 +381,8 @@
             </div>
         </div>
     </div>
+    <div id="profileEditConfig"
+        data-initial-tab="{{ $profileEditUi['initial_tab'] }}"
+        data-autohide-ms="3000"></div>
+    <script src="{{ asset('js/nonadmin-profile-edit.js') }}"></script>
 </x-app-layout>

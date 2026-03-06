@@ -127,6 +127,11 @@ public function favoriteServices()
     )->withTimestamps();
 }
 
+    public function favorites()
+    {
+        return $this->hasMany(Favorite::class, 'hf_user_id', 'hu_id');
+    }
+
     public function notifications(): MorphMany
     {
         return $this->morphMany(DatabaseNotification::class, 'hn_notifiable')

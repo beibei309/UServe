@@ -18,9 +18,20 @@ class RegisteredUserController extends Controller
     /**
      * Display the registration view.
      */
-    public function create(): View
+    public function create(Request $request): View
     {
-        return view('auth.register');
+        $oldInput = (array) $request->session()->get('_old_input', []);
+        $initialRole = $oldInput['role'] ?? 'student';
+        $initialCommunityType = $oldInput['community_type'] ?? 'public';
+        $registerUi = [
+            'initial_role' => $initialRole,
+            'initial_community_type' => $initialCommunityType,
+            'is_student_selected' => $initialRole === 'student',
+            'is_community_selected' => $initialRole === 'community',
+            'show_student_section' => $initialRole === 'student',
+            'show_community_section' => $initialRole === 'community',
+        ];
+        return view('auth.register', ['registerUi' => $registerUi]);
     }
 
     /**
@@ -33,11 +44,6 @@ class RegisteredUserController extends Controller
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => [
-                'required', 
-                'string', 
-                'email', 
-                'max:255', 
-                'unique:h2u_users,hu_email',
                 'required',
                 'string',
                 'email',
@@ -47,71 +53,29 @@ class RegisteredUserController extends Controller
                     if ($request->role === 'student' && !str_ends_with($value, '@siswa.upsi.edu.my')) {
                         $fail('Student must use @siswa.upsi.edu.my email');
                     }
-                },
-            ],
-                        
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'role' => ['required', 'in:student,community'],
-            'phone' => ['required', 'string', 'max:20'],
-            'student_id' => ['required_if:role,student', 'nullable', 'string', 'max:20'],
-            // Optional: used for instant verification; name retained for compatibility
-            'community_type' => ['nullable', 'in:public,staff'],
-            'staff_email' => [
-                'nullable', 
-                'email',
-                function ($attribute, $value, $fail) use ($request) {
-                    if ($request->role === 'student') {
-                        if (!str_ends_with($value, '@siswa.upsi.edu.my')) {
-                            $fail('Students must register with their @siswa.upsi.edu.my email.');
-                        }
-                    } elseif ($request->community_type === 'staff') { // Check community_type for staff
-                        // Allowed staff pattern (Central + Faculties + Depts)
+                    if ($request->role === 'community' && $request->community_type === 'staff') {
                         $pattern = '/^[a-zA-Z0-9._%+-]+@(upsi\.edu\.my|fsskj\.upsi\.edu\.my|fpm\.upsi\.edu\.my|fsmt\.upsi\.edu\.my|fskik\.upsi\.edu\.my|meta\.upsi\.edu\.my|fbk\.upsi\.edu\.my|fpe\.upsi\.edu\.my|fmsp\.upsi\.edu\.my|ftv\.upsi\.edu\.my|fsk\.upsi\.edu\.my|bendahari\.upsi\.edu\.my|ict\.upsi\.edu\.my)$/';
-                        
                         if (!preg_match($pattern, $value)) {
                             $fail('Staff must use a valid UPSI staff email (e.g., @upsi.edu.my or faculty subdomain).');
                         }
                     }
-                }
+                },
             ],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'role' => ['required', 'in:student,community'],
             'phone' => ['required', 'string', 'max:20'],
             'student_id' => ['required_if:role,student', 'nullable', 'string', 'max:20'],
             'community_type' => ['nullable', 'in:public,staff'],
-            // staff_email removed - use main email
         ]);
-
-        // Set verification status based on role
-        $verificationStatus = 'pending';
-        $publicVerifiedAt = null;
-        $staffVerifiedAt = null;
-        
-        if ($request->role === 'student') {
-            if ($request->role === 'student') {
-                // email already validated
-                $verificationStatus = 'approved';
-                $publicVerifiedAt = now();
-            }
-
-            
-        } elseif ($request->role === 'community') {
-            // Staff are auto-verified if they have valid UPSI email
-            if ($request->community_type === 'staff' && $request->staff_email && preg_match('/@([a-zA-Z]+\.)?upsi\.edu\.my$/', $request->staff_email)) {
-                $verificationStatus = 'approved';
-                $staffVerifiedAt = now();
-            }
-        }
 
         $user = User::create([
             'hu_name' => $request->name,
-            'hu_email' => $request->email,                           
+            'hu_email' => $request->email,
             'hu_password' => Hash::make($request->password),
             'hu_role' => $request->role,
             'hu_phone' => $request->phone,
             'hu_student_id' => $request->student_id,
-            // 'staff_email' => $request->staff_email, // Removed as we use main email
-            'hu_verification_status' => 'pending', // Always pending until email verified
+            'hu_verification_status' => 'pending',
             'hu_is_available' => $request->role === 'student' ? true : false,
         ]);
 

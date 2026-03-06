@@ -1,37 +1,5 @@
 @extends('layouts.helper')
 
-{{-- 1. Initialize Schedule Data (Merge Defaults with Existing DB Data) --}}
-@php
-    $defaultSchedule = [
-        'mon' => ['enabled' => true, 'start' => '09:00', 'end' => '17:00'],
-        'tue' => ['enabled' => true, 'start' => '09:00', 'end' => '17:00'],
-        'wed' => ['enabled' => true, 'start' => '09:00', 'end' => '17:00'],
-        'thu' => ['enabled' => true, 'start' => '09:00', 'end' => '17:00'],
-        'fri' => ['enabled' => true, 'start' => '09:00', 'end' => '17:00'],
-        'sat' => ['enabled' => false, 'start' => '10:00', 'end' => '14:00'],
-        'sun' => ['enabled' => false, 'start' => '10:00', 'end' => '14:00'],
-    ];
-    $scheduleData = $service->hss_operating_hours ?? $defaultSchedule;
-    foreach ($defaultSchedule as $key => $val) {
-        if (!isset($scheduleData[$key])) {
-            $scheduleData[$key] = $val;
-        }
-    }
-
-    $serviceImagePath = $service->hss_image_path ?? null;
-    if ($serviceImagePath) {
-        if (filter_var($serviceImagePath, FILTER_VALIDATE_URL)) {
-            $serviceImageUrl = $serviceImagePath;
-        } elseif (str_starts_with($serviceImagePath, 'storage/')) {
-            $serviceImageUrl = asset($serviceImagePath);
-        } else {
-            $serviceImageUrl = asset('storage/' . ltrim($serviceImagePath, '/'));
-        }
-    } else {
-        $serviceImageUrl = null;
-    }
-@endphp
-
 @section('content')
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
@@ -137,28 +105,28 @@
                     <nav class="-mb-px flex space-x-8" aria-label="Tabs">
                         <button
                             class="step-link step-active group w-1/4 py-4 px-1 border-b-2 font-medium text-sm flex items-center justify-center transition-colors"
-                            data-target="overview" onclick="switchTab('overview')">
+                            data-target="overview" data-switch-tab="overview">
                             <span
                                 class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs mr-2 font-bold ring-1 ring-indigo-600">1</span>
                             Overview
                         </button>
                         <button
                             class="step-link step-inactive group w-1/4 py-4 px-1 border-b-2 font-medium text-sm flex items-center justify-center transition-colors"
-                            data-target="pricing" onclick="switchTab('pricing')">
+                            data-target="pricing" data-switch-tab="pricing">
                             <span
                                 class="w-6 h-6 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center text-xs mr-2 font-bold">2</span>
                             Pricing
                         </button>
                         <button
                             class="step-link step-inactive group w-1/4 py-4 px-1 border-b-2 font-medium text-sm flex items-center justify-center transition-colors"
-                            data-target="description" onclick="switchTab('description')">
+                            data-target="description" data-switch-tab="description">
                             <span
                                 class="w-6 h-6 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center text-xs mr-2 font-bold">3</span>
                             Description
                         </button>
                         <button
                             class="step-link step-inactive group w-1/4 py-4 px-1 border-b-2 font-medium text-sm flex items-center justify-center transition-colors"
-                            data-target="availability" onclick="switchTab('availability')">
+                            data-target="availability" data-switch-tab="availability">
                             <span
                                 class="w-6 h-6 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center text-xs mr-2 font-bold">4</span>
                             Availability
@@ -217,7 +185,7 @@
                     </div>
 
                     <div class="mt-8 pt-6 border-t border-gray-100 flex justify-end">
-                        <button type="button" onclick="nextStep('overview', 'pricing')"
+                        <button type="button" data-next-step="overview|pricing"
                             class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition shadow-sm flex items-center">
                             Next Step <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -331,11 +299,11 @@
                     </div>
 
                     <div class="mt-8 pt-6 border-t border-gray-100 flex justify-between">
-                        <button type="button" onclick="nextStep('pricing', 'overview')"
+                        <button type="button" data-next-step="pricing|overview"
                             class="px-5 py-2.5 text-gray-600 hover:text-gray-900 font-medium">
                             ← Back
                         </button>
-                        <button type="button" onclick="nextStep('pricing', 'description')"
+                        <button type="button" data-next-step="pricing|description"
                             class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition shadow-sm flex items-center">
                             Next Step <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor"
                                 viewBox="0 0 24 24">
@@ -361,11 +329,11 @@
                     </div>
 
                     <div class="mt-8 pt-6 border-t border-gray-100 flex justify-between">
-                        <button type="button" onclick="nextStep('description', 'pricing')"
+                        <button type="button" data-next-step="description|pricing"
                             class="px-5 py-2.5 text-gray-600 hover:text-gray-900 font-medium">
                             ← Back
                         </button>
-                        <button type="button" onclick="nextStep('description', 'availability')"
+                        <button type="button" data-next-step="description|availability"
                             class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition shadow-sm flex items-center">
                             Next Step <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor"
                                 viewBox="0 0 24 24">
@@ -632,17 +600,17 @@
 
                                         {{-- 2. BUTANG TAMBAHAN (2 Weeks / 2 Months) --}}
                                         <div class="grid grid-cols-2 gap-3 mb-3">
-                                            <button type="button" onclick="quickBlockDates(1, 'week')"
+                                            <button type="button" data-quick-block="1|week"
                                                 class="text-xs bg-slate-50 border border-slate-200 text-slate-600 py-2 rounded-lg hover:bg-slate-100 font-medium">
                                                 + 1 Week
                                             </button>    
-                                            <button type="button" onclick="quickBlockDates(1, 'month')"
+                                            <button type="button" data-quick-block="1|month"
                                                 class="text-xs bg-slate-50 border border-slate-200 text-slate-600 py-2 rounded-lg hover:bg-slate-100 font-medium">
                                                 + 1 Month
                                             </button>
                                         </div>
 
-                                        <button type="button" onclick="clearUnavailableDates()"
+                                        <button type="button" data-clear-unavailable
                                             class="w-full text-xs bg-red-50 text-red-600 border border-red-100 py-2 rounded-lg hover:bg-red-100 font-bold transition-colors">
                                             <i class="fa-solid fa-trash-can mr-1"></i> Clear All Dates
                                         </button>
@@ -657,10 +625,10 @@
                     <div class="bg-gray-50 rounded-xl p-8 text-center border border-gray-100 mt-8">
                         <h3 class="text-lg font-bold text-gray-900">Update Service?</h3>
                         <div class="flex justify-center gap-4 mt-4">
-                            <button type="button" onclick="nextStep('availability', 'description')"
+                            <button type="button" data-next-step="availability|description"
                                 class="px-5 py-3 text-gray-600 hover:bg-gray-100 rounded-lg font-medium transition">Review
                                 Details</button>
-                            <button type="button" onclick="submitForm()"
+                            <button type="button" data-submit-form
                                 class="px-8 py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition shadow-lg flex items-center">Save
                                 Changes</button>
                         </div>
@@ -671,396 +639,17 @@
         </div>
     </div>
 
-    <script>
-        // --- 1. QUILL CONFIG ---
-        const toolbarOptions = [
-            ['bold', 'italic', 'underline'],
-            [{
-                'list': 'bullet'
-            }]
-        ];
-
-        function setupQuill(editorId, inputId, placeholder) {
-            if (document.getElementById(editorId)) {
-                var quill = new Quill('#' + editorId, {
-                    theme: 'snow',
-                    modules: {
-                        toolbar: toolbarOptions
-                    },
-                    placeholder: placeholder
-                });
-                quill.on('text-change', function() {
-                    document.getElementById(inputId).value = quill.root.innerHTML;
-                });
-            }
-        }
-        document.addEventListener('DOMContentLoaded', function() {
-            setupQuill('editor-basic', 'input-basic', 'e.g. 1 hour online consultation...');
-            setupQuill('editor-standard', 'input-standard', 'Describe standard package...');
-            setupQuill('editor-premium', 'input-premium', 'Describe premium package...');
-            setupQuill('editor-main', 'input-main', 'Provide a comprehensive description of your service...');
-        });
-
-        // --- 2. TEMPLATE IMAGE ---
-        document.querySelectorAll('.template-image').forEach(img => {
-            img.addEventListener('click', function() {
-                document.querySelectorAll('.template-image').forEach(i => i.classList.remove('ring-4',
-                    'ring-indigo-300'));
-                this.classList.add('ring-4', 'ring-indigo-300');
-                document.getElementById('template_image').value = this.dataset.val;
-                document.getElementById('image').value = "";
-            });
-        });
-
-        // --- 3. EXTRA PACKAGES ---
-        document.getElementById('offer_packages').addEventListener('change', function() {
-            const extra = document.getElementById('extraPackages');
-            if (this.checked) extra.classList.remove('hidden');
-            else extra.classList.add('hidden');
-        });
-
-        // --- 4. ALPINE SCHEDULE ---
-        function scheduleHandler() {
-            return {
-                isSessionBased: @json($service->hss_session_duration !== null),
-                isUnavailable: @json(!$service->hss_is_active),
-                currentDuration: @json($service->hss_session_duration ?? 60),
-
-                // Data from Controller
-                schedule: @json($scheduleData),
-                bookedSlots: @json($bookedSlots ?? []), // Real bookings (cannot change)
-
-                // 🟢 NEW: Manually Blocked Slots (e.g., ["2025-12-17 14:00"])
-                blockedSlots: @json($service->hss_blocked_slots ?? []),
-
-                days: [{
-                        key: 'mon',
-                        name: 'Monday'
-                    }, {
-                        key: 'tue',
-                        name: 'Tuesday'
-                    },
-                    {
-                        key: 'wed',
-                        name: 'Wednesday'
-                    }, {
-                        key: 'thu',
-                        name: 'Thursday'
-                    },
-                    {
-                        key: 'fri',
-                        name: 'Friday'
-                    }, {
-                        key: 'sat',
-                        name: 'Saturday'
-                    },
-                    {
-                        key: 'sun',
-                        name: 'Sunday'
-                    }
-                ],
-
-                showBulk: false,
-                bulkStart: '09:00',
-                bulkEnd: '17:00',
-
-                // Preview Data
-                previewDate: null,
-                previewSlots: [],
-                previewMessage: 'Select a date above to manage slots.',
-
-                init() {
-                    flatpickr("#preview-date-picker", {
-                        minDate: "today",
-                        defaultDate: new Date(), // Select today by default
-                        onChange: (selectedDates, dateStr) => {
-                            this.previewDate = dateStr;
-                            this.generatePreview();
-                        }
-                    });
-                    // Initial Load
-                    this.previewDate = new Date().toISOString().split('T')[0];
-                    this.$nextTick(() => {
-                        this.generatePreview();
-                    });
-                },
-
-                // 🟢 NEW FUNCTION: Toggle Block Status
-                toggleSlotBlock(slot) {
-                    // Cannot toggle real bookings
-                    if (slot.isBooked) return;
-
-                    // Construct the key (e.g., "2025-12-17 14:00")
-                    const slotKey = `${this.previewDate} ${slot.start}`;
-
-                    if (this.blockedSlots.includes(slotKey)) {
-                        // If exists, remove it (Unblock)
-                        this.blockedSlots = this.blockedSlots.filter(s => s !== slotKey);
-                    } else {
-                        // If not exists, add it (Block)
-                        this.blockedSlots.push(slotKey);
-                    }
-
-                    // Regenerate view to reflect changes
-                    this.generatePreview();
-                },
-
-                generatePreview() {
-                    if (!this.previewDate) return;
-                    this.previewSlots = [];
-
-                    // 1. Get Day Settings
-                    const d = new Date(this.previewDate);
-                    const dayName = d.toLocaleDateString('en-US', {
-                        weekday: 'short'
-                    }).toLowerCase();
-                    const daySettings = this.schedule[dayName];
-
-                    if (!daySettings || !daySettings.enabled) {
-                        this.previewMessage = 'Service is closed on ' + dayName + 's.';
-                        return;
-                    }
-
-                    // 2. Loop Time
-                    let startMinutes = this.timeToMinutes(daySettings.start);
-                    let endMinutes = this.timeToMinutes(daySettings.end);
-                    let duration = parseInt(this.currentDuration);
-                    const now = new Date();
-                    const todayStr = now.toISOString().split('T')[0];
-                    const isToday = this.previewDate === todayStr;
-                    const currentMinutes = now.getHours() * 60 + now.getMinutes();
-
-                    for (let time = startMinutes; time + duration <= endMinutes; time += duration) {
-                        // Hide slots that have already fully passed for today
-                        if (isToday && (time + duration) <= currentMinutes) {
-                            continue;
-                        }
-
-                        let startTimeStr = this.minutesToTime(time);
-                        let endTimeStr = this.minutesToTime(time + duration);
-
-                        // Key identifier
-                        let slotKey = `${this.previewDate} ${startTimeStr}`;
-
-                        // Check Statuses
-                        let isBooked = this.bookedSlots.includes(slotKey); // Database booking
-                        let isBlocked = this.blockedSlots.includes(slotKey); // Manual Block
-
-                        this.previewSlots.push({
-                            start: startTimeStr,
-                            display: `${this.formatAmPm(startTimeStr)} - ${this.formatAmPm(endTimeStr)}`,
-                            isBooked: isBooked,
-                            isBlocked: isBlocked // Pass block status to view
-                        });
-                    }
-
-                    if (this.previewSlots.length === 0) {
-                        this.previewMessage = isToday
-                            ? 'No remaining slots for today.'
-                            : 'No slots available settings.';
-                    }
-                },
-
-                // --- Helpers ---
-                applyBulkTime() {
-                    for (const dayKey in this.schedule) {
-                        if (this.schedule[dayKey].enabled) {
-                            this.schedule[dayKey].start = this.bulkStart;
-                            this.schedule[dayKey].end = this.bulkEnd;
-                        }
-                    }
-                    this.showBulk = false;
-                    this.generatePreview();
-                },
-                timeToMinutes(time) {
-                    const [h, m] = time.split(':').map(Number);
-                    return h * 60 + m;
-                },
-                minutesToTime(minutes) {
-                    const h = Math.floor(minutes / 60);
-                    const m = minutes % 60;
-                    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-                },
-                formatAmPm(time) {
-                    let [h, m] = time.split(':');
-                    h = parseInt(h);
-                    let ampm = h >= 12 ? 'PM' : 'AM';
-                    h = h % 12;
-                    h = h ? h : 12;
-                    return `${h}:${m} ${ampm}`;
-                }
-            }
-        }
-
-        // --- 5. FLATPICKR ---
-        let fpInstance;
-        document.addEventListener('DOMContentLoaded', function() {
-            fpInstance = flatpickr("#unavailableDates", {
-                mode: "multiple",
-                dateFormat: "Y-m-d",
-                minDate: "today",
-                conjunction: ", ",
-                defaultDate: @json($service->hss_unavailable_dates ?? []),
-                locale: {
-                    firstDayOfWeek: 1
-                }
-            });
-        });
-
-        function formatDate(date) {
-            return date.toISOString().split('T')[0];
-        }
-        window.quickBlockDates = function(amount, unit) {
-            if (!fpInstance) return;
-            let daysToAdd = unit === 'week' ? amount * 7 : amount * 30,
-                newDates = [],
-                today = new Date();
-            for (let i = 0; i < daysToAdd; i++) {
-                let d = new Date(today);
-                d.setDate(today.getDate() + i);
-                newDates.push(formatDate(d));
-            }
-            let current = fpInstance.selectedDates.map(d => formatDate(d));
-            fpInstance.setDate([...new Set([...current, ...newDates])], true);
-        };
-        window.clearUnavailableDates = function() {
-            if (fpInstance) fpInstance.clear();
-        };
-
-        // --- 6. NAVIGATION LOGIC (VANILLA JS TO MATCH CREATE) ---
-        function switchTab(targetId) {
-            document.querySelectorAll('.tab-section').forEach(el => el.classList.add('hidden'));
-            document.getElementById(targetId).classList.remove('hidden');
-            updateHeader(targetId);
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
-        }
-
-        function nextStep(currentId, nextId) {
-            // Validate Basic
-            if (currentId === 'overview' && nextId === 'pricing') {
-                if (!document.getElementById('title').value || !document.getElementById('category_id').value) {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Required Fields',
-                        text: 'Please provide a Title and Category.'
-                    });
-                    return;
-                }
-            }
-            // Validate Price
-            if (currentId === 'pricing' && nextId === 'description') {
-                if (!document.getElementById('basic_price').value) {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Required Fields',
-                        text: 'Please set a price for the Basic Package.'
-                    });
-                    return;
-                }
-            }
-            switchTab(nextId);
-        }
-
-        function updateHeader(activeId) {
-            const map = {
-                'overview': 0,
-                'pricing': 1,
-                'description': 2,
-                'availability': 3
-            };
-            const activeIndex = map[activeId];
-            const links = document.querySelectorAll('.step-link');
-            links.forEach((link, index) => {
-                link.className =
-                    "step-link w-1/4 py-4 px-1 border-b-2 font-medium text-sm flex items-center justify-center transition-colors"; // Base
-                const circle = link.querySelector('span');
-                if (index < activeIndex) {
-                    link.classList.add('step-completed', 'border-green-500', 'text-green-600');
-                    circle.className =
-                        "w-6 h-6 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-xs mr-2 font-bold";
-                    circle.innerHTML = "✓";
-                } else if (index === activeIndex) {
-                    link.classList.add('step-active', 'border-indigo-500', 'text-indigo-600');
-                    circle.className =
-                        "w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs mr-2 font-bold ring-1 ring-indigo-600";
-                    circle.innerHTML = index + 1;
-                } else {
-                    link.classList.add('step-inactive', 'border-transparent', 'text-gray-400');
-                    circle.className =
-                        "w-6 h-6 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center text-xs mr-2 font-bold";
-                    circle.innerHTML = index + 1;
-                }
-            });
-        }
-
-        // --- 7. FINAL SUBMISSION ---
-       // --- 7. FINAL SUBMISSION (Debug Version) ---
-async function submitForm() {
-    const form = document.getElementById('editServiceForm');
-    
-    // Sync Flatpickr to hidden input
-    if (fpInstance) document.getElementById('unavailableDates').value = fpInstance.input.value;
-
-    const formData = new FormData(form);
-
-    Swal.fire({
-        title: 'Saving Changes',
-        text: 'Updating...',
-        allowOutsideClick: false,
-        didOpen: () => { Swal.showLoading(); }
-    });
-
-    try {
-        const response = await fetch("{{ route('services.update', $service->hss_id) }}", {
-            method: 'POST', // POST is safer for file uploads
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                'Accept': 'application/json' 
-            },
-            body: formData
-        });
-
-        // Check if response is JSON
-        const contentType = response.headers.get("content-type");
-        if (contentType && contentType.indexOf("application/json") !== -1) {
-            const data = await response.json();
-            
-            if (!response.ok) {
-                // Validation Error (422)
-                let errorMsg = data.message || 'Validation failed';
-                if(data.errors) {
-                    // Show the first validation error found
-                    errorMsg = Object.values(data.errors)[0][0];
-                }
-                throw new Error(errorMsg);
-            }
-
-            if (data.success) {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Updated Successfully!',
-                    confirmButtonColor: '#10b981'
-                }).then(() => window.location.href = "{{ route('services.manage') }}");
-            } else {
-                throw new Error(data.error || 'Unknown error');
-            }
-        } else {
-            // Server returned HTML (500 Error Page)
-            const text = await response.text();
-            console.error("Server Error HTML:", text); // Check Console for full details
-            throw new Error("Server Error (500). Check console for details.");
-        }
-
-    } catch (error) {
-        console.error(error);
-        Swal.fire({
-            icon: 'error',
-            title: 'Oops...',
-            text: error.message
-        });
-    }
-}    </script>
+    <div id="servicesEditConfig"
+        data-is-session-based="{{ $service->hss_session_duration !== null ? 'true' : 'false' }}"
+        data-is-unavailable="{{ !$service->hss_is_active ? 'true' : 'false' }}"
+        data-current-duration="{{ $service->hss_session_duration ?? 60 }}"
+        data-schedule='@json($scheduleData)'
+        data-booked-slots='@json($bookedSlots ?? [])'
+        data-blocked-slots='@json($service->hss_blocked_slots ?? [])'
+        data-unavailable-dates='@json($service->hss_unavailable_dates ?? [])'
+        data-update-url="{{ route('services.update', $service->hss_id) }}"
+        data-manage-url="{{ route('services.manage') }}"></div>
+    @push('scripts')
+        <script src="{{ asset('js/nonadmin-services-edit.js') }}"></script>
+    @endpush
 @endsection

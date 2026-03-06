@@ -7,6 +7,7 @@ use App\Models\StudentService;
 use Illuminate\Http\JsonResponse; // Added for return type
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class DashboardController extends Controller
 {
@@ -56,6 +57,9 @@ public function index(Request $request)
     }
 
     $services = $query->latest()->take(6)->get();
+    $serviceCards = $services->map(function (StudentService $service) {
+        return $this->mapDashboardServiceCard($service);
+    })->values();
 
     // ... (Keep the rest of your code for $categories and $topStudents same as before) ...
     $categories = Category::withCount(['services' => function ($q) {
@@ -74,8 +78,23 @@ public function index(Request $request)
         ->orderByDesc('reviews_received_avg_rating') 
         ->take(10)
         ->get();
+    $availableHelpers = $topStudents
+        ->filter(fn(User $student) => (bool) $student->hu_is_available)
+        ->map(fn(User $student) => $this->mapDashboardHelperCard($student))
+        ->values();
 
-    return view('dashboard', compact('services', 'categories', 'topStudents', 'q', 'category_id'));
+    $dashboardUi = [
+        'search_query' => $q ?? '',
+        'welcome_name' => $request->user()?->hu_name ?? 'User',
+        'popular_searches' => [
+            ['label' => 'Iron Baju', 'query' => 'iron baju'],
+            ['label' => 'Video Editing', 'query' => 'video editing'],
+            ['label' => 'Poster Design', 'query' => 'poster design'],
+            ['label' => 'Pickup Parcel', 'query' => 'pickup'],
+        ],
+    ];
+
+    return view('dashboard', compact('serviceCards', 'categories', 'availableHelpers', 'q', 'category_id', 'dashboardUi'));
 }
     public function services(Request $request): JsonResponse
     {
@@ -158,5 +177,66 @@ public function index(Request $request)
             session(['view_mode' => 'seller']);
             return redirect()->route('students.index'); // Redirect to Helper Dashboard
         }
+    }
+
+    private function resolveDashboardServiceImageUrl(?string $path, ?string $title): string
+    {
+        $fallback = 'https://ui-avatars.com/api/?name=' . urlencode($title ?? 'Service');
+        if (!$path) {
+            return $fallback;
+        }
+        if (Str::startsWith($path, ['http://', 'https://'])) {
+            return $path;
+        }
+        if (Str::startsWith($path, 'storage/')) {
+            return asset($path);
+        }
+        return asset('storage/' . ltrim($path, '/'));
+    }
+
+    private function resolveUserAvatarUrl(?string $path, ?string $name): string
+    {
+        if (!empty($path)) {
+            if (Str::startsWith($path, ['http://', 'https://'])) {
+                return $path;
+            }
+            return asset($path);
+        }
+        return 'https://ui-avatars.com/api/?name=' . urlencode($name ?? 'User');
+    }
+
+    private function mapDashboardServiceCard(StudentService $service): array
+    {
+        $rating = (float) ($service->reviews_avg_rating ?? 0);
+        return [
+            'details_url' => route('services.details', $service),
+            'title' => $service->hss_title,
+            'description_html' => $service->hss_description,
+            'description_preview' => Str::limit(strip_tags($service->hss_description ?? ''), 140),
+            'image_url' => $this->resolveDashboardServiceImageUrl($service->hss_image_path, $service->hss_title),
+            'category_name' => $service->category?->hc_name,
+            'category_color' => $service->category?->hc_color,
+            'seller_name_short' => Str::limit($service->user?->hu_name ?? 'User', 15),
+            'seller_avatar_url' => $this->resolveUserAvatarUrl($service->user?->hu_profile_photo_path, $service->user?->hu_name),
+            'seller_has_trust_badge' => (bool) ($service->user?->hu_trust_badge ?? false),
+            'rating_display' => number_format($rating, 1),
+            'rating_stars_filled' => (int) round($rating),
+            'reviews_count_display' => (int) ($service->reviews_count ?? 0),
+            'price_display' => number_format((float) ($service->hss_basic_price ?? 0), 0),
+        ];
+    }
+
+    private function mapDashboardHelperCard(User $student): array
+    {
+        $rating = (float) ($student->reviews_received_avg_rating ?? 0);
+        return [
+            'profile_url' => route('students.profile', $student),
+            'name' => $student->hu_name,
+            'initial' => Str::substr($student->hu_name ?? 'U', 0, 1),
+            'avatar_url' => $student->hu_profile_photo_path ? asset($student->hu_profile_photo_path) : null,
+            'faculty_display' => $student->hu_faculty ?: 'Student Seller',
+            'rating_display' => number_format($rating, 1),
+            'reviews_count' => (int) ($student->reviews_received_count ?? 0),
+        ];
     }
 }

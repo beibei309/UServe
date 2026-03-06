@@ -40,72 +40,17 @@
                 </a>
             </div>
 
-            @php
-                $currentUserId = (int) (auth()->user()->hu_id ?? auth()->id());
-                $isRequester = $currentUserId === (int) $serviceRequest->hsr_requester_id;
-                $isProvider = $currentUserId === (int) $serviceRequest->hsr_provider_id;
-                $service = $serviceRequest->studentService;
-                $selectedPackage = is_array($serviceRequest->hsr_selected_package)
-                    ? ($serviceRequest->hsr_selected_package[0] ?? 'custom')
-                    : ($serviceRequest->hsr_selected_package ?? 'custom');
-                $selectedPackageLabel = trim(str_replace('"', '', (string) $selectedPackage));
-                $selectedPackageLabel = $selectedPackageLabel !== '' ? $selectedPackageLabel : 'Custom';
-
-                $providerRestricted = $serviceRequest->provider->hu_is_suspended == 1 || $serviceRequest->provider->hu_is_blacklisted == 1 || $serviceRequest->provider->hu_is_blocked == 1;
-                $buyerRestricted = $serviceRequest->requester->hu_is_suspended == 1 || $serviceRequest->requester->hu_is_blacklisted == 1;
-                $isRestricted = $providerRestricted || $buyerRestricted;
-
-                // --- 2. Determine Colors (Using Inline Styles to guarantee visibility) ---
-                
-                if ($isRestricted) {
-                    $headerStyle = 'background: linear-gradient(to right, #ef4444, #b91c1c);'; // Red-500 to Red-700
-                    $statusDot = 'bg-red-400';
-                } else {
-                    switch($serviceRequest->hsr_status) {
-                        case 'in_progress':
-                        case 'accepted':
-                            // Blue
-                            $headerStyle = 'background: linear-gradient(to right, #3b82f6, #4f46e5);'; 
-                            $statusDot = 'bg-blue-300';
-                            break;
-                        case 'completed':
-                            // Green
-                            $headerStyle = 'background: linear-gradient(to right, #10b981, #059669);'; 
-                            $statusDot = 'bg-green-300';
-                            break;
-                        case 'cancelled':
-                        case 'rejected':
-                        case 'disputed':
-                            // Gray/Redish
-                            $headerStyle = 'background: linear-gradient(to right, #6b7280, #374151);'; 
-                            $statusDot = 'bg-red-300';
-                            break;
-                        case 'waiting_payment':
-                            // Yellow
-                            $headerStyle = 'background: linear-gradient(to right, #facc15, #ca8a04);'; 
-                            $statusDot = 'bg-yellow-300';
-                            break;
-                        case 'pending':
-                        default:
-                            // Orange/Yellow
-                            $headerStyle = 'background: linear-gradient(to right, #facc15, #fb923c);'; 
-                            $statusDot = 'bg-white'; 
-                            break;
-                    }
-                }
-            @endphp
-
             <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
 
                 {{-- Dynamic Header Background --}}
-                <div class="relative px-8 py-10 text-white" style="{{ $headerStyle }}">
+                <div class="relative px-8 py-10 text-white" style="{{ $headerVisual['style'] }}">
                     <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                         <div>
                             <span class="inline-block px-3 py-1 mb-3 text-xs font-bold tracking-wider uppercase bg-white/20 rounded-full">
                                 Request #{{ $serviceRequest->hsr_id }}
                             </span>
                             <h1 class="text-3xl font-extrabold tracking-tight text-white">
-                                {{ optional($service)->hss_title ?? 'Custom Request' }}
+                                {{ optional($serviceRequest->studentService)->hss_title ?? 'Custom Request' }}
                             </h1>
                             <p class="mt-2 text-indigo-100 flex items-center gap-2">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -120,7 +65,7 @@
                             <span class="text-sm font-semibold uppercase tracking-wide">Status</span>
                             <div class="text-xl font-bold capitalize flex items-center gap-2 mt-1">
                                 {{-- Dynamic Status Dot --}}
-                                <span class="w-3 h-3 rounded-full {{ $statusDot }}"></span>
+                                <span class="w-3 h-3 rounded-full {{ $headerVisual['dot'] }}"></span>
                                 
                                 @if($isRestricted)
                                     Account Restricted
@@ -172,27 +117,17 @@
                                     <div class="sm:col-span-2">
                                         <label class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Requested Dates</label>
                                         <div class="flex flex-col gap-1 mt-1 text-gray-800 font-medium">
-                                            @if (is_array($serviceRequest->hsr_selected_dates))
-                                                @foreach ($serviceRequest->hsr_selected_dates as $date)
-                                                    <div class="flex items-center gap-2">
-                                                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                        </svg>
-                                                        {{ \Carbon\Carbon::parse($date)->format('l, F j, Y') }}
-                                                    </div>
-                                                @endforeach
-                                            @elseif($serviceRequest->hsr_selected_dates)
+                                            @forelse ($requestedDateDisplays as $dateDisplay)
                                                 <div class="flex items-center gap-2">
                                                     <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                             d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                                     </svg>
-                                                    {{ \Carbon\Carbon::parse($serviceRequest->hsr_selected_dates)->format('l, F j, Y') }}
+                                                    {{ $dateDisplay }}
                                                 </div>
-                                            @else
+                                            @empty
                                                 <span class="text-gray-400 italic">No dates selected</span>
-                                            @endif
+                                            @endforelse
                                         </div>
                                     </div>
 
@@ -254,26 +189,6 @@
                             </div>
 
                             @if ($service)
-                                @php
-                                    $imageUrl = null;
-                                    $defaultPlaceholder = 'https://ui-avatars.com/api/?name=' . urlencode($service->hss_title ?? 'Service');
-
-                                    if (!empty($service->hss_image_path)) {
-                                        $path = $service->hss_image_path;
-
-                                        if (Str::startsWith($path, ['http://', 'https://'])) {
-                                            $imageUrl = $path;
-                                        } elseif (Str::startsWith($path, 'storage/')) {
-                                            $imageUrl = asset($path);
-                                        } elseif (file_exists(public_path('storage/' . $path))) {
-                                            $imageUrl = asset('storage/' . $path);
-                                        } elseif (file_exists(public_path($path))) {
-                                            $imageUrl = asset($path);
-                                        } else {
-                                            $imageUrl = $defaultPlaceholder;
-                                        }
-                                    }
-                                @endphp
                                 <div>
                                     <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
                                         <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -291,8 +206,8 @@
                                             </div>
 
                                             <div class="w-20 h-20 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0 grayscale">
-                                                @if ($imageUrl)
-                                                    <img src="{{ $imageUrl }}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='{{ $defaultPlaceholder }}';">
+                                                @if ($serviceImageUrl)
+                                                    <img src="{{ $serviceImageUrl }}" data-fallback-src="{{ $serviceImageFallback }}" class="w-full h-full object-cover">
                                                 @else
                                                     <div class="w-full h-full flex items-center justify-center text-gray-400">
                                                         <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd" /></svg>
@@ -311,8 +226,8 @@
                                         {{-- ACTIVE: Clickable Link --}}
                                         <a href="{{ route('services.details', $service->hss_id) }}" class="block bg-white rounded-xl border border-gray-200 p-5 flex gap-4 items-start hover:shadow-md transition-all hover:border-indigo-300 group">
                                             <div class="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
-                                                @if ($imageUrl)
-                                                    <img src="{{ $imageUrl }}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='{{ $defaultPlaceholder }}';">
+                                                @if ($serviceImageUrl)
+                                                    <img src="{{ $serviceImageUrl }}" data-fallback-src="{{ $serviceImageFallback }}" class="w-full h-full object-cover">
                                                 @else
                                                     <div class="w-full h-full flex items-center justify-center text-gray-300">
                                                         <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd" /></svg>
@@ -332,16 +247,6 @@
                             @endif
 
                             @if ($serviceRequest->hsr_payment_proof)
-                                @php
-                                    $proofPath = $serviceRequest->hsr_payment_proof;
-                                    if (Str::startsWith($proofPath, ['http://', 'https://'])) {
-                                        $proofUrl = $proofPath;
-                                    } elseif (Str::startsWith($proofPath, 'storage/')) {
-                                        $proofUrl = asset($proofPath);
-                                    } else {
-                                        $proofUrl = asset('storage/' . $proofPath);
-                                    }
-                                @endphp
                                 <div class="mt-8">
                                     <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
                                         <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -353,22 +258,22 @@
                                     <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
                                         <div class="flex items-center justify-between mb-4">
                                             <span class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Payment Proof</span>
-                                            <a href="{{ $proofUrl }}" target="_blank" class="text-indigo-600 hover:text-indigo-800 text-sm font-medium flex items-center gap-1 transition">
+                                            <a href="{{ $paymentProofUrl }}" target="_blank" class="text-indigo-600 hover:text-indigo-800 text-sm font-medium flex items-center gap-1 transition">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
                                                 Open Original
                                             </a>
                                         </div>
                                         
                                         <div class="rounded-lg overflow-hidden border border-gray-100 bg-gray-50 flex justify-center p-4">
-                                            @if (Str::endsWith(strtolower($proofPath), '.pdf'))
+                                            @if ($paymentProofIsPdf)
                                                 <div class="flex flex-col items-center justify-center py-6">
                                                     <svg class="w-16 h-16 text-red-500 opacity-80 mb-3" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M11.362 2c4.156 0 2.638 6 2.638 6s6-1.65 6 2.457v11.543h-16v-20h7.362zm.827 7.5c-.328-.242-.361-.252-.408-.252-.161 0-.319.497-.319.497l-.234.698s.709-.54 1.144-.725c.168-.071.145-.097-.183-.218zm-2.062 1.488c-.979.622-1.895 1.581-2.072 1.932-.15.297-.478.752-.519 1-.038.225.267.382.435.334.301-.087 1.258-.598 2.156-3.266zm1.196 6.512c.706 0 1.272-.647 1.272-1.446 0-.66-.465-1.195-1.042-1.195-.576 0-1.041.535-1.041 1.195 0 .799.565 1.446 1.271 1.446h-1.46c-1.334-.067-2.618-.46-3.805-1.056l3.364-1.229c.142-.045.242-.1.319-.166.39-.334.618-1.571.618-2.678 0-1.554.025-2.738.04-3.551.011-.643.08-1.282.203-1.91h-5.462v18h14v-11.543c0-3.136-2.522-3.136-2.522-3.136s-.795 3.197-2.428 5.765zm2.844-3c-.928-1.149-1.341-1.693-1.802-1.693-1.173 0-1.246 1.638-1.096 2.413.085.441.258 1.139 1.096 1.139 1.19 0 1.838-.942 1.802-1.859zm-10.222 13h10v-2h-10v2zm0-4h14v-2h-14v2z"/></svg>
                                                     <p class="text-sm font-semibold text-gray-700">PDF Document Uploaded</p>
-                                                    <a href="{{ $proofUrl }}" target="_blank" class="mt-2 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700">View PDF</a>
+                                                    <a href="{{ $paymentProofUrl }}" target="_blank" class="mt-2 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700">View PDF</a>
                                                 </div>
                                             @else
-                                                <a href="{{ $proofUrl }}" target="_blank" class="block">
-                                                    <img src="{{ $proofUrl }}" alt="Payment Proof" class="max-w-full h-auto max-h-96 object-contain rounded-md shadow-sm hover:opacity-95 transition-opacity">
+                                                <a href="{{ $paymentProofUrl }}" target="_blank" class="block">
+                                                    <img src="{{ $paymentProofUrl }}" alt="Payment Proof" class="max-w-full h-auto max-h-96 object-contain rounded-md shadow-sm hover:opacity-95 transition-opacity">
                                                 </a>
                                             @endif
                                         </div>
@@ -406,7 +311,7 @@
                                                 <p class="text-sm font-bold text-gray-900 group-hover:text-indigo-600 transition-colors">{{ $serviceRequest->provider->hu_name }} <span class="text-gray-300 text-[10px] ml-1">↗</span></p>
                                                 <div class="flex items-center text-xs text-yellow-500">
                                                     <svg class="w-3 h-3 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
-                                                    <span class="ml-1 text-gray-600">{{ number_format(\App\Models\Review::where('hr_reviewee_id', $serviceRequest->provider->hu_id)->avg('hr_rating') ?? 0, 1) }}</span>
+                                                    <span class="ml-1 text-gray-600">{{ number_format($providerAverageRating, 1) }}</span>
                                                 </div>
                                             </div>
                                         </a>
@@ -436,7 +341,7 @@
                                                 <p class="text-sm font-bold text-gray-900 group-hover:text-blue-600 transition-colors">{{ $serviceRequest->requester->hu_name }} <span class="text-gray-300 text-[10px] ml-1">↗</span></p>
                                                 <div class="flex items-center text-xs text-yellow-500">
                                                     <svg class="w-3 h-3 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
-                                                    <span class="ml-1 text-gray-600">{{ number_format(\App\Models\Review::where('hr_reviewee_id', $serviceRequest->requester->hu_id)->avg('hr_rating') ?? 0, 1) }}</span>
+                                                    <span class="ml-1 text-gray-600">{{ number_format($buyerAverageRating, 1) }}</span>
                                                 </div>
                                             </div>
                                         </a>
@@ -447,10 +352,6 @@
                             <div class="bg-gray-50 rounded-xl border border-gray-200 p-6">
                                 <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-4">Available Actions</h3>
                                 <div class="space-y-3">
-                                    @php
-                                        $contactPhone = $isProvider ? $serviceRequest->requester->hu_phone : $serviceRequest->provider->hu_phone;
-                                    @endphp
-                                    
                                     @if($isRestricted)
                                         <div class="p-3 bg-red-50 text-red-700 text-sm font-medium rounded-lg border border-red-100 flex items-center gap-2">
                                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
@@ -466,26 +367,26 @@
                                         @endif
 
                                         @if ($isProvider && $serviceRequest->isPending())
-                                            <button onclick="updateRequestStatus({{ $serviceRequest->hsr_id }}, 'accept')" class="w-full py-2.5 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 shadow-sm transition">Accept Request</button>
-                                            <button onclick="updateRequestStatus({{ $serviceRequest->hsr_id }}, 'reject')" class="w-full py-2.5 bg-white border border-red-200 text-red-600 rounded-lg font-semibold hover:bg-red-50 transition">Reject Request</button>
+                                            <button type="button" data-request-action="accept" data-request-id="{{ $serviceRequest->hsr_id }}" class="w-full py-2.5 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 shadow-sm transition">Accept Request</button>
+                                            <button type="button" data-request-action="reject" data-request-id="{{ $serviceRequest->hsr_id }}" class="w-full py-2.5 bg-white border border-red-200 text-red-600 rounded-lg font-semibold hover:bg-red-50 transition">Reject Request</button>
                                         @endif
 
                                         @if ($isProvider && $serviceRequest->isAccepted())
-                                            <button onclick="updateRequestStatus({{ $serviceRequest->hsr_id }}, 'in-progress')" class="w-full py-2.5 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 shadow-sm transition">Start Work</button>
+                                            <button type="button" data-request-action="in-progress" data-request-id="{{ $serviceRequest->hsr_id }}" class="w-full py-2.5 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 shadow-sm transition">Start Work</button>
                                         @endif
 
                                         @if ($isProvider && $serviceRequest->isInProgress())
-                                            <button onclick="updateRequestStatus({{ $serviceRequest->hsr_id }}, 'complete')" class="w-full py-2.5 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 shadow-sm transition">Mark as Completed</button>
+                                            <button type="button" data-request-action="complete" data-request-id="{{ $serviceRequest->hsr_id }}" class="w-full py-2.5 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 shadow-sm transition">Mark as Completed</button>
                                         @endif
 
                                         @if ($isRequester && $serviceRequest->hsr_status === 'pending')
-                                            <button onclick="updateRequestStatus({{ $serviceRequest->hsr_id }}, 'cancel')" class="w-full py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition">Cancel Request</button>
+                                            <button type="button" data-request-action="cancel" data-request-id="{{ $serviceRequest->hsr_id }}" class="w-full py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition">Cancel Request</button>
                                         @elseif ($isRequester && ($serviceRequest->hsr_status === 'in_progress' || $serviceRequest->hsr_status === 'accepted'))
                                             <button disabled class="w-full py-2.5 bg-gray-100 border border-gray-200 text-gray-400 rounded-lg font-semibold cursor-not-allowed flex items-center justify-center gap-2"><i class="fa-solid fa-play"></i> Work Started</button>
                                         @endif
 
-                                        @if ($isRequester && $serviceRequest->isCompleted() && !$serviceRequest->reviews()->where('hr_reviewer_id', auth()->id())->exists())
-                                            <button onclick="openReviewModal({{ $serviceRequest->hsr_id }}, '')" class="w-full py-2.5 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 shadow-sm transition">Leave a Review</button>
+                                        @if ($isRequester && $serviceRequest->isCompleted() && !$hasCurrentUserReviewed)
+                                            <button type="button" data-open-review="{{ $serviceRequest->hsr_id }}" class="w-full py-2.5 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 shadow-sm transition">Leave a Review</button>
                                         @endif
                                     @endif
                                 </div>
@@ -534,7 +435,7 @@
         <div class="relative top-20 mx-auto p-0 border-0 w-full max-w-md shadow-2xl rounded-2xl bg-white overflow-hidden">
             <div class="bg-indigo-600 px-6 py-4 flex justify-between items-center">
                 <h3 class="text-lg font-bold text-white">Rate Your Experience</h3>
-                <button onclick="closeReviewModal()" class="text-white/80 hover:text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+                <button type="button" data-close-review class="text-white/80 hover:text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
             </div>
             <div class="p-6">
                 <form id="reviewForm" class="space-y-6">
@@ -544,7 +445,7 @@
                         <label class="block text-sm font-medium text-gray-700 mb-2">How would you rate this service?</label>
                         <div class="flex justify-center gap-2">
                             @for ($i = 1; $i <= 5; $i++)
-                                <button type="button" onclick="setRating({{ $i }})" class="star-button text-4xl text-gray-300 hover:text-yellow-400 transition-colors focus:outline-none">★</button>
+                                <button type="button" data-set-rating="{{ $i }}" class="star-button text-4xl text-gray-300 hover:text-yellow-400 transition-colors focus:outline-none">★</button>
                             @endfor
                         </div>
                         <input type="hidden" id="rating" name="rating" required>
@@ -554,7 +455,7 @@
                         <textarea id="comment" name="comment" rows="4" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all resize-none" placeholder="Tell us what you liked..."></textarea>
                     </div>
                     <div class="flex gap-3">
-                        <button type="button" onclick="closeReviewModal()" class="flex-1 px-4 py-2.5 border border-gray-300 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 transition">Cancel</button>
+                        <button type="button" data-close-review class="flex-1 px-4 py-2.5 border border-gray-300 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 transition">Cancel</button>
                         <button type="submit" class="flex-1 px-4 py-2.5 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition">Submit Review</button>
                     </div>
                 </form>
@@ -562,154 +463,10 @@
         </div>
     </div>
 
-    <script>
-        async function updateRequestStatus(requestId, action) {
-            let confirmText = "Are you sure?";
-            let confirmBtnColor = "#3085d6";
-            let bodyData = {}; 
-
-            if (action === 'reject') {
-                const { value: reason } = await Swal.fire({
-                    title: 'Reject Request',
-                    text: "Please provide a reason for the student:",
-                    input: 'textarea',
-                    inputPlaceholder: 'e.g. Fully booked on this date...',
-                    showCancelButton: true,
-                    confirmButtonColor: '#d33',
-                    confirmButtonText: 'Yes, Reject it',
-                    inputValidator: (value) => { if (!value) return 'You need to write something!' }
-                });
-                if (!reason) return;
-                confirmText = "This action cannot be undone.";
-                confirmBtnColor = "#d33";
-                bodyData = { rejection_reason: reason };
-            }
-            else if (action === 'cancel') {
-                const result = await Swal.fire({
-                    title: 'Cancel Request?',
-                    text: "This action cannot be undone.",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#d33',
-                    confirmButtonText: 'Yes, Cancel it'
-                });
-                if (!result.isConfirmed) return;
-            }
-            else {
-                const result = await Swal.fire({
-                    title: 'Confirm Action',
-                    text: "Are you sure you want to proceed?",
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    confirmButtonText: 'Yes, proceed'
-                });
-                if (!result.isConfirmed) return;
-            }
-
-            const endpoints = {
-                'accept': `/service-requests/${requestId}/accept`,
-                'reject': `/service-requests/${requestId}/reject`,
-                'in-progress': `/service-requests/${requestId}/mark-in-progress`,
-                'complete': `/service-requests/${requestId}/mark-completed`,
-                'cancel': `/service-requests/${requestId}/cancel`
-            };
-
-            try {
-                // Show loading state
-                Swal.fire({
-                    title: 'Processing...',
-                    allowOutsideClick: false,
-                    didOpen: () => Swal.showLoading()
-                });
-
-                // Dynamically build and submit a form instead of fetch to support redirects
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = endpoints[action];
-
-                // Append CSRF Token
-                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
-                if (csrfToken) {
-                    const csrfInput = document.createElement('input');
-                    csrfInput.type = 'hidden';
-                    csrfInput.name = '_token';
-                    csrfInput.value = csrfToken;
-                    form.appendChild(csrfInput);
-                }
-
-                // Append any extra body data (like rejection_reason)
-                for (const [key, value] of Object.entries(bodyData)) {
-                    if (value !== undefined && value !== null) {
-                        const input = document.createElement('input');
-                        input.type = 'hidden';
-                        input.name = key;
-                        input.value = value;
-                        form.appendChild(input);
-                    }
-                }
-
-                document.body.appendChild(form);
-                form.submit();
-
-            } catch (e) {
-                console.error(e);
-                Swal.fire('Error', 'An error occurred while processing your request.', 'error');
-            }
-        }
-
-        // Review Logic
-        function openReviewModal(id, name) {
-            document.getElementById('reviewServiceRequestId').value = id;
-            document.getElementById('reviewModal').classList.remove('hidden');
-        }
-
-        function closeReviewModal() {
-            document.getElementById('reviewModal').classList.add('hidden');
-            document.getElementById('reviewForm').reset();
-            resetStars();
-        }
-
-        function setRating(rating) {
-            document.getElementById('rating').value = rating;
-            document.querySelectorAll('.star-button').forEach((star, index) => {
-                star.classList.toggle('text-yellow-400', index < rating);
-                star.classList.toggle('text-gray-300', index >= rating);
-            });
-        }
-
-        function resetStars() { setRating(0); }
-
-        document.getElementById('reviewForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const formData = new FormData(this);
-            try {
-                const reviewStoreUrl = @json(route('reviews.store'));
-                const res = await fetch(reviewStoreUrl, {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        'Accept': 'application/json'
-                    }
-                });
-
-                let data = null;
-                try {
-                    data = await res.json();
-                } catch (parseError) {
-                    data = { success: false, error: 'Unexpected server response.' };
-                }
-
-                if (data.success) {
-                    closeReviewModal();
-                    Swal.fire("Thank You!", "Review submitted.", "success").then(() => location.reload());
-                } else {
-                    Swal.fire("Error", data.error || 'Unable to submit review.', "error");
-                }
-            } catch (err) {
-                Swal.fire("Error", "System error", "error");
-            }
-        });
-    </script>
+    <div id="serviceRequestsShowConfig"
+        data-review-store-url="{{ route('reviews.store') }}"
+        data-request-action-url-template="{{ url('/service-requests/__ID__/__ACTION__') }}"></div>
+    @push('scripts')
+        <script src="{{ asset('js/nonadmin-service-requests-show.js') }}"></script>
+    @endpush
 </x-app-layout>

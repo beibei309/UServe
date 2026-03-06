@@ -14,6 +14,7 @@ use Illuminate\Routing\Controller as BaseController;
 use App\Notifications\NewServiceRequest;
 use App\Notifications\ServiceRequestStatusUpdated;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 use App\Mail\NewServiceRequestNotification;
 use Carbon\Carbon;
 
@@ -159,6 +160,7 @@ class ServiceRequestController extends BaseController
 public function index(Request $request)
 {
     $user = Auth::user();
+    $defaultStatusTab = $request->input('tab', 'pending');
     
     // --- 1. DATA FOR DROPDOWNS ---
     $categories = \App\Models\Category::all();
@@ -187,7 +189,7 @@ public function index(Request $request)
                         ->get();
 
         $query = \App\Models\ServiceRequest::where('hsr_provider_id', $user->hu_id)
-            ->with(['requester', 'studentService']);
+            ->with(['requester', 'provider', 'studentService.category', 'reviewForHelper', 'reviewByHelper']);
 
         // A. Search
         if ($search) {
@@ -222,11 +224,13 @@ public function index(Request $request)
         $query->orderBy('created_at', 'desc');
 
         $receivedRequests = $query->get();
+        $this->decorateRequestsForUi($receivedRequests, $user->hu_id, true);
 
         return view('service-requests.helper', [
             'receivedRequests' => $receivedRequests,
             'categories' => $categories,
-            'serviceTypes' => $myServices 
+            'serviceTypes' => $myServices,
+            'defaultStatusTab' => $defaultStatusTab,
         ]);
     }
 
@@ -238,7 +242,7 @@ public function index(Request $request)
         $allServiceTypes = \App\Models\StudentService::selectRaw('hss_id as id, hss_title as title')->get();
 
         $query = \App\Models\ServiceRequest::where('hsr_requester_id', $user->hu_id)
-            ->with(['provider', 'studentService']);
+            ->with(['requester', 'provider', 'studentService.category']);
 
         // A. Search
         if ($search) {
@@ -273,11 +277,21 @@ public function index(Request $request)
         $query->orderBy('created_at', 'desc');
 
         $sentRequests = $query->get();
+        $this->decorateRequestsForUi($sentRequests, $user->hu_id, false);
+        $uniqueCategories = $sentRequests
+            ->map(function (ServiceRequest $serviceRequest) {
+                return optional(optional($serviceRequest->studentService)->category)->hc_name ?? 'Other';
+            })
+            ->unique()
+            ->sort()
+            ->values();
 
         return view('service-requests.index', [
             'sentRequests' => $sentRequests,
             'categories' => $categories,
-            'serviceTypes' => $allServiceTypes
+            'serviceTypes' => $allServiceTypes,
+            'uniqueCategories' => $uniqueCategories,
+            'defaultStatusTab' => $defaultStatusTab,
         ]);
     }
 }
@@ -300,8 +314,269 @@ public function index(Request $request)
             'provider',
             'reviews.reviewer'
         ]);
+        $service = $serviceRequest->studentService;
 
-        return view('service-requests.show', compact('serviceRequest'));
+        $currentUserId = (int) ($user->hu_id ?? $user->id);
+        $isRequester = $currentUserId === (int) $serviceRequest->hsr_requester_id;
+        $isProvider = $currentUserId === (int) $serviceRequest->hsr_provider_id;
+        $providerRestricted = (bool) ($serviceRequest->provider->hu_is_suspended || $serviceRequest->provider->hu_is_blacklisted || $serviceRequest->provider->hu_is_blocked);
+        $buyerRestricted = (bool) ($serviceRequest->requester->hu_is_suspended || $serviceRequest->requester->hu_is_blacklisted);
+        $isRestricted = $providerRestricted || $buyerRestricted;
+
+        $selectedPackageRaw = is_array($serviceRequest->hsr_selected_package)
+            ? ($serviceRequest->hsr_selected_package[0] ?? 'custom')
+            : ($serviceRequest->hsr_selected_package ?? 'custom');
+        $selectedPackageLabel = trim(str_replace('"', '', (string) $selectedPackageRaw));
+        $selectedPackageLabel = $selectedPackageLabel !== '' ? $selectedPackageLabel : 'Custom';
+
+        $headerVisual = $this->resolveShowHeaderVisual($serviceRequest->hsr_status, $isRestricted);
+
+        $requestedDateDisplays = collect((array) $serviceRequest->hsr_selected_dates)
+            ->filter()
+            ->map(function ($date) {
+                try {
+                    return Carbon::parse($date)->format('l, F j, Y');
+                } catch (\Throwable $e) {
+                    return (string) $date;
+                }
+            })
+            ->values();
+
+        $providerAverageRating = Review::where('hr_reviewee_id', $serviceRequest->provider->hu_id)->avg('hr_rating') ?? 0;
+        $buyerAverageRating = Review::where('hr_reviewee_id', $serviceRequest->requester->hu_id)->avg('hr_rating') ?? 0;
+        $hasCurrentUserReviewed = $serviceRequest->reviews
+            ->contains(fn (Review $review) => (int) $review->hr_reviewer_id === $currentUserId);
+        $contactPhone = $isProvider ? $serviceRequest->requester->hu_phone : $serviceRequest->provider->hu_phone;
+
+        $serviceImageFallback = 'https://ui-avatars.com/api/?name=' . urlencode($service->hss_title ?? 'Service');
+        $serviceImageUrl = null;
+        if (!empty($service->hss_image_path)) {
+            $path = $service->hss_image_path;
+            if (Str::startsWith($path, ['http://', 'https://'])) {
+                $serviceImageUrl = $path;
+            } elseif (Str::startsWith($path, 'storage/')) {
+                $serviceImageUrl = asset($path);
+            } elseif (file_exists(public_path('storage/' . $path))) {
+                $serviceImageUrl = asset('storage/' . $path);
+            } elseif (file_exists(public_path($path))) {
+                $serviceImageUrl = asset($path);
+            } else {
+                $serviceImageUrl = $serviceImageFallback;
+            }
+        }
+
+        $paymentProofUrl = null;
+        $paymentProofIsPdf = false;
+        if ($serviceRequest->hsr_payment_proof) {
+            $proofPath = $serviceRequest->hsr_payment_proof;
+            if (Str::startsWith($proofPath, ['http://', 'https://'])) {
+                $paymentProofUrl = $proofPath;
+            } elseif (Str::startsWith($proofPath, 'storage/')) {
+                $paymentProofUrl = asset($proofPath);
+            } else {
+                $paymentProofUrl = asset('storage/' . $proofPath);
+            }
+            $paymentProofIsPdf = Str::endsWith(strtolower($proofPath), '.pdf');
+        }
+
+        return view('service-requests.show', compact(
+            'serviceRequest',
+            'service',
+            'isRequester',
+            'isProvider',
+            'providerRestricted',
+            'buyerRestricted',
+            'isRestricted',
+            'selectedPackageLabel',
+            'headerVisual',
+            'requestedDateDisplays',
+            'providerAverageRating',
+            'buyerAverageRating',
+            'hasCurrentUserReviewed',
+            'contactPhone',
+            'serviceImageUrl',
+            'serviceImageFallback',
+            'paymentProofUrl',
+            'paymentProofIsPdf'
+        ));
+    }
+
+    private function decorateRequestsForUi($requests, int $currentUserId, bool $helperView): void
+    {
+        $reviewedIds = Review::where('hr_reviewer_id', $currentUserId)
+            ->whereIn('hr_service_request_id', $requests->pluck('hsr_id')->all())
+            ->pluck('hr_service_request_id')
+            ->flip();
+
+        $requests->transform(function (ServiceRequest $request) use ($reviewedIds, $helperView) {
+            $service = $request->studentService;
+            $selectedPackageRaw = is_array($request->hsr_selected_package)
+                ? ($request->hsr_selected_package[0] ?? 'custom')
+                : ($request->hsr_selected_package ?? 'custom');
+            $packageLabel = trim(str_replace('"', '', (string) $selectedPackageRaw));
+            $packageLabel = $packageLabel !== '' ? $packageLabel : 'Custom';
+            $pkgType = strtolower($packageLabel);
+
+            $dates = is_array($request->hsr_selected_dates) ? $request->hsr_selected_dates : (array) $request->hsr_selected_dates;
+            $dates = array_values(array_filter($dates));
+            $firstDate = $dates[0] ?? null;
+            $firstDateDisplay = null;
+            if ($firstDate) {
+                try {
+                    $firstDateDisplay = Carbon::parse($firstDate)->format('M j, Y');
+                } catch (\Throwable $e) {
+                    $firstDateDisplay = (string) $firstDate;
+                }
+            }
+
+            $isSellerRestricted = (bool) ($request->provider->hu_is_suspended || $request->provider->hu_is_blacklisted || $request->provider->hu_is_blocked);
+            $hasDatePassed = false;
+            if ($firstDate) {
+                try {
+                    $hasDatePassed = now()->startOfDay()->gte(Carbon::parse($firstDate)->startOfDay());
+                } catch (\Throwable $e) {
+                    $hasDatePassed = false;
+                }
+            }
+
+            $request->ui_package_label = $packageLabel;
+            $request->ui_pkg_duration = $service->{$pkgType . '_duration'} ?? null;
+            $request->ui_pkg_frequency = $service->{$pkgType . '_frequency'} ?? null;
+            $request->ui_first_date_display = $firstDateDisplay;
+            $request->ui_date_count = count($dates);
+            $request->ui_is_seller_restricted = $isSellerRestricted;
+            $request->ui_has_date_passed = $hasDatePassed;
+            $request->ui_created_human = optional($request->created_at)->diffForHumans();
+            $request->ui_updated_human = optional($request->updated_at)->diffForHumans();
+            $request->ui_updated_date = optional($request->updated_at)->format('M j, Y');
+            $request->ui_reviewed_by_auth = isset($reviewedIds[$request->hsr_id]);
+            $request->ui_display_id = str_pad((string) $request->hsr_id, 5, '0', STR_PAD_LEFT);
+
+            if (!$helperView) {
+                $request->ui_status_text = strtoupper(str_replace('_', ' ', (string) $request->hsr_status));
+                $request->ui_inprogress_style = $this->resolveBuyerInProgressStyles($request->hsr_status, $isSellerRestricted);
+                $request->ui_completed_theme = $this->resolveBuyerCompletedTheme($request->hsr_status);
+            } else {
+                $request->ui_helper_inprogress_theme = $this->resolveHelperInProgressTheme($request->hsr_status);
+                $request->ui_helper_completed_theme = $this->resolveHelperCompletedTheme($request->hsr_status);
+            }
+
+            return $request;
+        });
+    }
+
+    private function resolveBuyerInProgressStyles(string $status, bool $isSellerRestricted): array
+    {
+        if ($isSellerRestricted) {
+            return [
+                'badge' => 'border-red-200 bg-red-100 text-red-700',
+                'card' => 'border-red-300 bg-red-50 hover:border-red-400',
+                'stripe' => 'bg-red-500',
+                'status_text' => 'SELLER RESTRICTED',
+            ];
+        }
+
+        $badge = match ($status) {
+            'disputed' => 'border-red-200 bg-red-50 text-red-700',
+            'waiting_payment' => 'border-yellow-200 bg-yellow-50 text-yellow-700',
+            default => 'border-blue-200 bg-blue-50 text-blue-700',
+        };
+        $card = match ($status) {
+            'disputed' => 'border-red-200 hover:border-red-300 bg-white',
+            'waiting_payment' => 'border-yellow-200 hover:border-yellow-300 bg-white',
+            default => 'border-blue-100 hover:border-blue-200 bg-white',
+        };
+        $stripe = match ($status) {
+            'disputed' => 'bg-red-500',
+            'waiting_payment' => 'bg-yellow-500',
+            default => 'bg-blue-500',
+        };
+
+        return [
+            'badge' => $badge,
+            'card' => $card,
+            'stripe' => $stripe,
+            'status_text' => strtoupper(str_replace('_', ' ', $status)),
+        ];
+    }
+
+    private function resolveBuyerCompletedTheme(string $status): array
+    {
+        return match ($status) {
+            'completed' => [
+                'border' => 'border-green-200 hover:border-green-300',
+                'strip' => 'bg-green-500',
+                'badge' => 'bg-green-100 text-green-700',
+                'icon_bg' => 'bg-green-50',
+                'icon_text' => 'text-green-600',
+                'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />',
+            ],
+            'rejected' => [
+                'border' => 'border-red-200 hover:border-red-300',
+                'strip' => 'bg-red-500',
+                'badge' => 'bg-red-100 text-red-700',
+                'icon_bg' => 'bg-red-50',
+                'icon_text' => 'text-red-600',
+                'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />',
+            ],
+            default => [
+                'border' => 'border-gray-200 hover:border-gray-300',
+                'strip' => 'bg-gray-400',
+                'badge' => 'bg-gray-100 text-gray-600',
+                'icon_bg' => 'bg-gray-50',
+                'icon_text' => 'text-gray-500',
+                'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />',
+            ],
+        };
+    }
+
+    private function resolveHelperInProgressTheme(string $status): array
+    {
+        return match ($status) {
+            'disputed' => ['color' => 'red', 'border' => 'border-red-200', 'bg' => 'bg-red-500'],
+            'waiting_payment' => ['color' => 'yellow', 'border' => 'border-yellow-200', 'bg' => 'bg-yellow-400'],
+            'in_progress' => ['color' => 'blue', 'border' => 'border-blue-200', 'bg' => 'bg-blue-500'],
+            default => ['color' => 'gray', 'border' => 'border-gray-200', 'bg' => 'bg-gray-400'],
+        };
+    }
+
+    private function resolveHelperCompletedTheme(string $status): array
+    {
+        return match ($status) {
+            'completed' => [
+                'border' => 'border-green-200 hover:border-green-300',
+                'strip' => 'bg-green-500',
+                'badge' => 'bg-green-100 text-green-700',
+                'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />',
+            ],
+            'rejected' => [
+                'border' => 'border-red-200 hover:border-red-300',
+                'strip' => 'bg-red-500',
+                'badge' => 'bg-red-100 text-red-700',
+                'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />',
+            ],
+            default => [
+                'border' => 'border-gray-200 hover:border-gray-300',
+                'strip' => 'bg-gray-400',
+                'badge' => 'bg-gray-100 text-gray-600',
+                'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />',
+            ],
+        };
+    }
+
+    private function resolveShowHeaderVisual(string $status, bool $isRestricted): array
+    {
+        if ($isRestricted) {
+            return ['style' => 'background: linear-gradient(to right, #ef4444, #b91c1c);', 'dot' => 'bg-red-400'];
+        }
+
+        return match ($status) {
+            'in_progress', 'accepted' => ['style' => 'background: linear-gradient(to right, #3b82f6, #4f46e5);', 'dot' => 'bg-blue-300'],
+            'completed' => ['style' => 'background: linear-gradient(to right, #10b981, #059669);', 'dot' => 'bg-green-300'],
+            'cancelled', 'rejected', 'disputed' => ['style' => 'background: linear-gradient(to right, #6b7280, #374151);', 'dot' => 'bg-red-300'],
+            'waiting_payment' => ['style' => 'background: linear-gradient(to right, #facc15, #ca8a04);', 'dot' => 'bg-yellow-300'],
+            default => ['style' => 'background: linear-gradient(to right, #facc15, #fb923c);', 'dot' => 'bg-white'],
+        };
     }
 
     /**

@@ -20,7 +20,7 @@
         <div class="content">
             <p>Hello {{ $user->hu_name }},</p>
             <div class="notice-box">
-                Your graduation date is approaching on <strong>{{ \Carbon\Carbon::parse($user->studentStatus->graduation_date)->format('d M Y') }}</strong>.
+                Your graduation date is approaching on <strong>{{ $graduationDateDisplay }}</strong>.
             </div>
             <p>Please wrap up active services on the platform to ensure a smooth transition for your clients.</p>
             <a class="button" href="{{ route('dashboard') }}">Manage My Services</a>

@@ -145,52 +145,10 @@
         </div>
     </div>
 
-    {{-- SWEETALERT LOGIC --}}
-    <script>
-        @if (session('error'))
-            const sessionErrorMessage = "{!! addslashes(session('error')) !!}";
-            if (
-                sessionErrorMessage.toLowerCase().includes('suspended') ||
-                sessionErrorMessage.toLowerCase().includes('banned') ||
-                sessionErrorMessage.toLowerCase().includes('blocked') ||
-                sessionErrorMessage.toLowerCase().includes('blacklisted')
-            ) {
-                const sessionTitle = sessionErrorMessage.toLowerCase().includes('blacklisted')
-                    ? 'Account Blacklisted'
-                    : (sessionErrorMessage.toLowerCase().includes('blocked') ? 'Account Blocked' : 'Account Suspended');
-                Swal.fire({
-                    icon: 'error',
-                    title: sessionTitle,
-                    html: sessionErrorMessage,
-                    confirmButtonColor: '#4F46E5',
-                    confirmButtonText: 'Back to Login',
-                });
-            }
-        @endif
-
-        @if ($errors->has('email'))
-            const errorMessage = "{!! addslashes($errors->first('email')) !!}";
-
-            if (
-                errorMessage.toLowerCase().includes('suspended') ||
-                errorMessage.toLowerCase().includes('banned') ||
-                errorMessage.toLowerCase().includes('blocked') ||
-                errorMessage.toLowerCase().includes('blacklisted')
-            ) {
-                const title = errorMessage.toLowerCase().includes('blacklisted')
-                    ? 'Account Blacklisted'
-                    : (errorMessage.toLowerCase().includes('blocked') ? 'Account Blocked' : 'Account Suspended');
-                Swal.fire({
-                    icon: 'error',
-                    title: title,
-                    html: errorMessage,
-                    confirmButtonColor: '#4F46E5',
-                    confirmButtonText: 'Back to Login',
-
-                });
-            }
-        @endif
-    </script>
+    <div id="loginConfig"
+        data-session-error="@json(session('error') ?? '')"
+        data-email-error="@json($errors->first('email') ?? '')"></div>
+    <script src="{{ asset('js/auth-login.js') }}"></script>
 </body>
 
 </html>

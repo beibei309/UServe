@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/nonadmin_regression_gate.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/admin_regression_gate.ps1

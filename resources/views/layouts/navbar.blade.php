@@ -11,26 +11,6 @@
     }
 </style>
 
-{{-- INITIALIZE LOGIC --}}
-@php
-    $user = auth()->user();
-    $isLoggedIn = auth()->check();
-    $isHelper = $isLoggedIn && $user->hu_role === 'helper';
-
-    // Determine View Mode: 'seller' or 'buyer' (Default)
-    // If user is not logged in, default to buyer.
-    $viewMode = session('view_mode', 'buyer');
-
-    // Safety check: If role is student, force buyer mode
-    if ($isLoggedIn && $user->hu_role === 'student') {
-        $viewMode = 'buyer';
-    }
-
-    if ($isLoggedIn && $user->hu_role === 'helper' && $user->hu_is_blocked) {
-        $viewMode = 'buyer';
-    }
-@endphp
-
 {{-- TOP UTILITY BAR --}}
 <div class="w-full bg-white border-b border-slate-100 font-sans sticky top-0 z-50">
     <div class="max-w-7xl mx-auto h-16 md:h-20 flex items-center justify-between px-6 relative">
@@ -81,8 +61,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-16 md:h-20">
 
-            <div class="flex-shrink-0 flex items-center cursor-pointer gap-2"
-                onclick="window.location.href='{{ $isLoggedIn ? route('dashboard') : route('home') }}'">
+            <a href="{{ $isLoggedIn ? route('dashboard') : route('home') }}" class="flex-shrink-0 flex items-center cursor-pointer gap-2">
 
                 <img src="{{ asset('images/logo-svg.png') }}" alt="U-Serve Logo" class="h-20 w-auto object-contain">
 
@@ -98,7 +77,7 @@
                         Seller Blocked
                     </span>
                 @endif
-            </div>
+            </a>
 
             <div class="hidden md:flex items-center space-x-1 lg:space-x-4">
 
@@ -140,17 +119,6 @@
 
             <div class="hidden md:flex items-center space-x-3 lg:space-x-4">
                 @auth
-                    @php
-                        $unreadNotificationCount = 0;
-
-                        try {
-                            if (\Illuminate\Support\Facades\Schema::hasTable('h2u_notifications')) {
-                                $unreadNotificationCount = auth()->user()->unreadNotifications()->count();
-                            }
-                        } catch (\Throwable $e) {
-                            $unreadNotificationCount = 0;
-                        }
-                    @endphp
                     <div class="flex items-center space-x-2 border-r border-gray-200 pr-4 mr-2">
                         <a href="{{ route('notifications.index') }}"
                             class="relative p-2 text-gray-500 hover:text-indigo-600 hover:bg-gray-100 rounded-full transition focus:outline-none">
@@ -391,7 +359,7 @@
 </nav>
 
 @auth
-    @if (auth()->user()->hu_role === 'helper' && auth()->user()->hu_is_blocked)
+    @if ($isHelper && $user->hu_is_blocked)
         <div class="w-full bg-amber-50 border-b border-amber-200">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
                 <p class="text-xs sm:text-sm font-medium text-amber-800">

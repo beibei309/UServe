@@ -6,6 +6,7 @@ use Illuminate\Http\JsonResponse;
 use App\Models\Category;
 use App\Models\User;
 use App\Models\StudentService;
+use Illuminate\Support\Facades\Auth;
 
 class HomeController extends Controller
 {
@@ -130,7 +131,15 @@ public function about()
 
     public function serviceApply()
     {
-        return view('services.apply');
+        $authUser = Auth::user();
+        $user = $authUser instanceof User ? $authUser : null;
+        $canApplyServices = $user ? $user->isVerifiedPublic() : false;
+        $showAddServiceTab = $user ? $user->isStudent() : false;
+
+        return view('services.apply', [
+            'canApplyServices' => $canApplyServices,
+            'showAddServiceTab' => $showAddServiceTab,
+        ]);
     }
 
     public function terms()

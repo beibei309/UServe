@@ -19,17 +19,15 @@
                 <div class="mt-6 border-b border-gray-200">
                     <nav class="-mb-px flex space-x-8" aria-label="Tabs">
                         <a href="{{ route('services.apply') }}" class="whitespace-nowrap py-4 px-1 border-b-2 text-sm font-medium border-indigo-600 text-indigo-600">Apply for Services</a>
-                        @auth
-                            @if(Auth::user()->isStudent())
-                                <a href="{{ route('services.create') }}" class="whitespace-nowrap py-4 px-1 border-b-2 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">Add New Service</a>
-                            @endif
-                        @endauth
+                        @if($showAddServiceTab)
+                            <a href="{{ route('services.create') }}" class="whitespace-nowrap py-4 px-1 border-b-2 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">Add New Service</a>
+                        @endif
                     </nav>
                 </div>
             </div>
 
             <!-- Verification Notice -->
-            @if(!Auth::user()->isVerifiedPublic())
+            @if(!$canApplyServices)
                 <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-8">
                     <div class="flex">
                         <div class="flex-shrink-0">
@@ -183,7 +181,7 @@
                         </a>
                         <button type="submit" 
                                 class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors flex items-center space-x-2"
-                                {{ !Auth::user()->isVerifiedPublic() ? 'disabled' : '' }}>
+                                {{ !$canApplyServices ? 'disabled' : '' }}>
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
                             </svg>
@@ -226,85 +224,10 @@
     <!-- Success/Error Messages -->
     <div id="messageContainer" class="fixed top-4 right-4 z-50"></div>
 
-    <script>
-        document.getElementById('applyServiceForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            @if(!Auth::user()->isVerifiedPublic())
-                showMessage('Please complete your account verification first.', 'error');
-                return;
-            @endif
-            
-            const formData = new FormData(this);
-            const submitButton = this.querySelector('button[type="submit"]');
-            const originalText = submitButton.innerHTML;
-            
-            // Show loading state
-            submitButton.disabled = true;
-            submitButton.innerHTML = `
-                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Submitting...
-            `;
-            
-            try {
-                const response = await fetch('{{ route("services.apply.store") }}', {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('[name="_token"]').value,
-                        'Accept': 'application/json',
-                    },
-                    body: formData
-                });
-                
-                const data = await response.json();
-                
-                if (response.ok) {
-                    showMessage(data.message || 'Service application submitted successfully! Students will be notified and can contact you soon.', 'success');
-                    setTimeout(() => {
-                        window.location.href = '{{ route("services.applications.index") }}';
-                    }, 2000);
-                } else {
-                    showMessage(data.error || data.message || 'An error occurred. Please try again.', 'error');
-                    submitButton.disabled = false;
-                    submitButton.innerHTML = originalText;
-                }
-                
-            } catch (error) {
-                console.error('Error:', error);
-                showMessage('An error occurred. Please try again.', 'error');
-                submitButton.disabled = false;
-                submitButton.innerHTML = originalText;
-            }
-        });
-        
-        function showMessage(message, type) {
-            const messageContainer = document.getElementById('messageContainer');
-            const messageDiv = document.createElement('div');
-            
-            const bgColor = type === 'success' ? 'bg-green-500' : 'bg-red-500';
-            
-            messageDiv.className = `${bgColor} text-white px-6 py-3 rounded-lg shadow-lg mb-4 transform transition-all duration-300 translate-x-full max-w-md`;
-            messageDiv.textContent = message;
-            
-            messageContainer.appendChild(messageDiv);
-            
-            // Animate in
-            setTimeout(() => {
-                messageDiv.classList.remove('translate-x-full');
-            }, 100);
-            
-            // Remove after 5 seconds
-            setTimeout(() => {
-                messageDiv.classList.add('translate-x-full');
-                setTimeout(() => {
-                    if (messageContainer.contains(messageDiv)) {
-                        messageContainer.removeChild(messageDiv);
-                    }
-                }, 300);
-            }, 5000);
-        }
-    </script>
+    <div id="servicesApplyConfig"
+        data-can-apply="{{ $canApplyServices ? 'true' : 'false' }}"
+        data-store-url="{{ route('services.apply.store') }}"
+        data-applications-url="{{ route('services.applications.index') }}"
+        data-blocked-message="Please complete your account verification first."></div>
+    <script src="{{ asset('js/nonadmin-services-apply.js') }}"></script>
 </x-app-layout>

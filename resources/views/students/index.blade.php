@@ -11,12 +11,12 @@
         }
     </style>
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" x-data="availabilityComponent()">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" x-data="studentsIndexAvailability()">
 
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
             <div>
                 <h1 class="text-3xl font-bold text-slate-900 tracking-tight">Dashboard</h1>
-                <p class="text-slate-500 mt-1">Welcome back, {{ Auth::user()->hu_name }}! Here's what's happening today.</p>
+                <p class="text-slate-500 mt-1">Welcome back, {{ $user->hu_name }}! Here's what's happening today.</p>
             </div>
 
             <div class="bg-white p-2 pr-4 rounded-full shadow-sm border border-gray-200 flex items-center gap-3">
@@ -70,7 +70,7 @@
                 <div>
                     <p class="text-sm font-medium text-gray-500 group-hover:text-indigo-600 transition-colors">My
                         Services</p>
-                    <h3 class="text-2xl font-bold text-slate-900 mt-1">{{ Auth::user()->studentServices()->count() }}</h3>
+                    <h3 class="text-2xl font-bold text-slate-900 mt-1">{{ $myServicesCount }}</h3>
                 </div>
                 <div
                     class="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
@@ -118,7 +118,7 @@
                     <p class="text-sm font-medium text-gray-500 group-hover:text-yellow-600 transition-colors">Average
                         Rating</p>
                     <div class="flex items-center gap-2 mt-1">
-                        <h3 class="text-2xl font-bold text-slate-900">4.9</h3>
+                        <h3 class="text-2xl font-bold text-slate-900">{{ $averageRating }}</h3>
                         <i class="fa-solid fa-star text-yellow-400 text-sm"></i>
                     </div>
                 </div>
@@ -139,7 +139,7 @@
                             <p class="text-sm text-gray-500">Track your earnings and order volume</p>
                         </div>
                         <form method="GET">
-                            <select name="range" onchange="this.form.submit()"
+                            <select name="range" data-auto-submit
                                 class="bg-gray-50 border-0 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block p-2.5 font-medium">
                                 <option value="30days" {{ ($range ?? '30days') === '30days' ? 'selected' : '' }}>Last 30
                                     Days</option>
@@ -160,34 +160,7 @@
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
                     <h2 class="text-lg font-bold text-slate-900 mb-4">Quick Actions</h2>
                     <div class="space-y-3">
-                        @php
-                            $actions = [
-                                [
-                                    'title' => 'Create New Service',
-                                    'icon' => 'fa-plus',
-                                    'color' => 'text-indigo-600',
-                                    'bg' => 'bg-indigo-50',
-                                    'route' => route('services.create'),
-                                ],
-                                [
-                                    'title' => 'Manage Services',
-                                    'icon' => 'fa-list-check',
-                                    'color' => 'text-blue-600',
-                                    'bg' => 'bg-blue-50',
-                                    'route' => route('services.manage'),
-                                ],
-
-                                [
-                                    'title' => 'Edit Profile',
-                                    'icon' => 'fa-user-pen',
-                                    'color' => 'text-gray-600',
-                                    'bg' => 'bg-gray-50',
-                                    'route' => route('students.edit'),
-                                ],
-                            ];
-                        @endphp
-
-                        @foreach ($actions as $action)
+                        @foreach ($quickActions as $action)
                             <a href="{{ $action['route'] }}"
                                 class="flex items-center p-3 rounded-xl hover:bg-gray-50 border border-transparent hover:border-gray-200 transition-all group">
                                 <div
@@ -316,285 +289,18 @@
 
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        const labels = @json($labels ?? []);
-        const sales = @json($sales ?? []);
-        const cancelled = @json($cancelled ?? []);
-        const completed = @json($completedDaily ?? []);
-        const newOrders = @json($newOrders ?? []);
-
-        const ctx = document.getElementById('overviewChart').getContext('2d');
-
-        // Create a gradient for the primary line
-        const gradientSales = ctx.createLinearGradient(0, 0, 0, 300);
-        gradientSales.addColorStop(0, 'rgba(90, 219, 232, 0.2)');
-        gradientSales.addColorStop(1, 'rgba(90, 219, 232, 0)');
-
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{
-                        label: 'Sales ($)',
-                        data: sales,
-                        borderWidth: 3,
-                        borderColor: '#0EA5E9', // Sky Blue
-                        backgroundColor: gradientSales,
-                        pointBackgroundColor: '#fff',
-                        pointBorderColor: '#0EA5E9',
-                        pointRadius: 4,
-                        pointHoverRadius: 6,
-                        fill: true,
-                        tension: 0.4
-                    },
-                    {
-                        label: 'New Orders',
-                        data: newOrders,
-                        borderWidth: 2,
-                        borderColor: '#10B981', // Emerald
-                        pointBackgroundColor: '#10B981',
-                        borderDash: [5, 5],
-                        fill: false,
-                        tension: 0.4
-                    },
-                    {
-                        label: 'Completed',
-                        data: completed,
-                        borderWidth: 2,
-                        borderColor: '#6366F1', // Indigo
-                        pointBackgroundColor: '#6366F1',
-                        fill: false,
-                        tension: 0.4,
-                        hidden: true // Hidden by default to reduce clutter
-                    },
-                    {
-                        label: 'Cancelled',
-                        data: cancelled,
-                        borderWidth: 2,
-                        borderColor: '#EF4444', // Red
-                        pointBackgroundColor: '#EF4444',
-                        fill: false,
-                        tension: 0.4,
-                        hidden: true
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'top',
-                        align: 'end',
-                        labels: {
-                            usePointStyle: true,
-                            boxWidth: 8,
-                            padding: 20,
-                            font: {
-                                family: "'Plus Jakarta Sans', sans-serif",
-                                size: 12
-                            }
-                        }
-                    },
-                    tooltip: {
-                        backgroundColor: '#1e293b',
-                        padding: 12,
-                        titleFont: {
-                            family: "'Plus Jakarta Sans', sans-serif",
-                            size: 13
-                        },
-                        bodyFont: {
-                            family: "'Plus Jakarta Sans', sans-serif",
-                            size: 12
-                        },
-                        cornerRadius: 8,
-                        displayColors: false
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: {
-                            color: '#f1f5f9',
-                            borderDash: [4, 4]
-                        },
-                        ticks: {
-                            font: {
-                                family: "'Plus Jakarta Sans', sans-serif"
-                            },
-                            color: '#64748b'
-                        },
-                        border: {
-                            display: false
-                        }
-                    },
-                    x: {
-                        grid: {
-                            display: false
-                        },
-                        ticks: {
-                            font: {
-                                family: "'Plus Jakarta Sans', sans-serif"
-                            },
-                            color: '#64748b'
-                        },
-                        border: {
-                            display: false
-                        }
-                    }
-                },
-                interaction: {
-                    intersect: false,
-                    mode: 'index',
-                },
-            }
-        });
-
-        // Alpine Logic (Preserved from original but cleaned up)
-        function availabilityComponent() {
-            return {
-                isAvailable: {{ Auth::user()->hu_is_available ? 'true' : 'false' }},
-                isSaving: false,
-                showModal: false,
-                startDate: '{{ Auth::user()->hu_unavailable_start_date ?? '' }}',
-                endDate: '{{ Auth::user()->hu_unavailable_end_date ?? '' }}',
-
-                openModal() {
-                    this.showModal = true;
-                },
-
-                closeModal() {
-                    this.showModal = false;
-                },
-
-                formatDate(dateString) {
-                    if (!dateString) return '';
-                    return new Date(dateString).toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                        year: 'numeric'
-                    });
-                },
-
-                // Quick one-click toggle from the header bar
-                quickToggle() {
-                    if (this.isSaving) return;
-                    // If currently available, going offline -> open modal so dates can be set
-                    if (this.isAvailable) {
-                        this.isAvailable = false;
-                        this.openModal();
-                    } else {
-                        // Going back online -> clear dates and save immediately
-                        this.isAvailable = true;
-                        this.startDate = '';
-                        this.endDate = '';
-                        this.doSave(true, null, null);
-                    }
-                },
-
-                addDuration(daysToAdd, monthsToAdd) {
-                    // 1. If Start Date is empty, set it to Today
-                    if (!this.startDate) {
-                        this.startDate = new Date().toISOString().split('T')[0];
-                    }
-
-                    // 2. Determine base date (Start from existing EndDate if present, otherwise StartDate)
-                    let baseString = this.endDate ? this.endDate : this.startDate;
-
-                    // Add T12:00:00 to avoid timezone rolling the date back
-                    let dateObj = new Date(baseString + 'T12:00:00');
-
-                    // 3. Add duration
-                    if (daysToAdd > 0) dateObj.setDate(dateObj.getDate() + daysToAdd);
-                    if (monthsToAdd > 0) dateObj.setMonth(dateObj.getMonth() + monthsToAdd);
-
-                    // 4. Update End Date
-                    this.endDate = dateObj.toISOString().split('T')[0];
-                },
-
-                deleteDates() {
-                    this.startDate = '';
-                    this.endDate = '';
-                    this.isAvailable = true;
-                },
-
-                saveChanges() {
-                    let finalStartDate = this.startDate;
-                    let finalEndDate = this.endDate;
-
-                    // Validation
-                    if (!this.isAvailable) {
-                        if (!finalStartDate || !finalEndDate) {
-                            Swal.fire({
-                                icon: 'warning',
-                                title: 'Date Required',
-                                text: 'Please select both start and end dates.',
-                                confirmButtonColor: '#3085d6'
-                            });
-                            return;
-                        }
-                        if (new Date(finalStartDate) > new Date(finalEndDate)) {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Invalid Dates',
-                                text: 'Start date cannot be after end date.',
-                                confirmButtonColor: '#d33'
-                            });
-                            return;
-                        }
-                    } else {
-                        finalStartDate = null;
-                        finalEndDate = null;
-                    }
-
-                    this.doSave(this.isAvailable, finalStartDate, finalEndDate);
-                },
-
-                doSave(isAvailable, startDate, endDate) {
-                    this.isSaving = true;
-                    fetch("{{ route('availability.updateSettings') }}", {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').getAttribute('content'),
-                            'Accept': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            is_available: isAvailable,
-                            start_date: startDate,
-                            end_date: endDate
-                        })
-                    })
-                    .then(res => {
-                        if (!res.ok) return res.json().then(e => { throw new Error(e.message || 'Server error'); });
-                        return res.json();
-                    })
-                    .then(data => {
-                        this.isAvailable = data.is_available;
-                        this.startDate = data.start_date || '';
-                        this.endDate = data.end_date || '';
-                        this.isSaving = false;
-                        this.closeModal();
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Updated!',
-                            text: data.message,
-                            showConfirmButton: false,
-                            timer: 1500
-                        });
-                    })
-                    .catch(err => {
-                        this.isSaving = false;
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Oops...',
-                            text: err.message,
-                            confirmButtonColor: '#d33'
-                        });
-                    });
-                }
-            }
-        }
-    </script>
+    <div id="studentsIndexConfig"
+        data-chart-labels='@json($labels ?? [])'
+        data-chart-sales='@json($sales ?? [])'
+        data-chart-cancelled='@json($cancelled ?? [])'
+        data-chart-completed='@json($completedDaily ?? [])'
+        data-chart-new-orders='@json($newOrders ?? [])'
+        data-is-available="{{ $user->hu_is_available ? 'true' : 'false' }}"
+        data-start-date="{{ $user->hu_unavailable_start_date ?? '' }}"
+        data-end-date="{{ $user->hu_unavailable_end_date ?? '' }}"
+        data-availability-update-url="{{ route('availability.updateSettings') }}"></div>
+    @push('scripts')
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="{{ asset('js/students-index.js') }}"></script>
+    @endpush
 @endsection

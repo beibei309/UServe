@@ -27,7 +27,7 @@
                                 @else
                                     <div
                                         class="w-full h-full bg-slate-800 flex items-center justify-center text-white font-bold text-5xl">
-                                        {{ substr($user->hu_name, 0, 1) }}
+                                        {{ $profileUi['initial'] }}
                                     </div>
                                 @endif
                             </div>
@@ -82,7 +82,7 @@
                                         <div
                                             class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-yellow-50 border border-yellow-200 text-yellow-700 text-xs font-bold shadow-sm">
                                             <i class="fa-solid fa-star text-yellow-500"></i>
-                                            {{ number_format($averageRating ?? 0, 1) }}
+                                            {{ $profileUi['average_rating_display'] }}
                                             <span class="font-normal text-yellow-600 opacity-80">
                                                 {{ $reviews->count() }}
                                                 reviews</span>
@@ -97,7 +97,7 @@
                                             </p>
                                             @if (!empty($latestReportReason))
                                                 <p class="text-xs text-red-700 mt-1">
-                                                    Latest report reason: {{ \Illuminate\Support\Str::limit($latestReportReason, 140) }}
+                                                    Latest report reason: {{ $profileUi['latest_report_reason_short'] }}
                                                 </p>
                                             @else
                                                 <p class="text-xs text-red-700 mt-1">Report reason is under admin review.</p>
@@ -109,22 +109,9 @@
                                 {{-- ACTION BUTTONS --}}
                                 <div class="mt-6 md:mt-0 flex flex-col sm:flex-row gap-3">
                                     @auth
-                                        @if (auth()->id() !== $user->hu_id)
-                                            @php
-                                                // Prepare WhatsApp Link
-                                                $rawPhone = $user->hu_phone_number ?? ($user->hu_phone ?? '');
-                                                $cleanPhone = preg_replace('/[^0-9]/', '', $rawPhone);
-                                                if (substr($cleanPhone, 0, 1) === '0') {
-                                                    $cleanPhone = '60' . substr($cleanPhone, 1);
-                                                }
-                                                $whatsappUrl =
-                                                    "https://wa.me/{$cleanPhone}?text=Hi " .
-                                                    urlencode($user->hu_name) .
-                                                    ', I saw your profile on S2U.';
-                                            @endphp
-
-                                            @if (!empty($cleanPhone))
-                                                <a href="{{ $whatsappUrl }}" target="_blank"
+                                        @if ($canShowContactCta)
+                                            @if ($profileHasPhone)
+                                                <a href="{{ $profileWhatsappUrl }}" target="_blank"
                                                     class="inline-flex items-center justify-center px-6 py-3 bg-green-500 hover:bg-green-600 text-white font-bold rounded-xl transition shadow-lg shadow-green-500/30 transform hover:-translate-y-0.5">
                                                     <i class="fa-brands fa-whatsapp text-xl mr-2"></i>
                                                     Chat on WhatsApp
@@ -169,7 +156,7 @@
                         <div class="space-y-4">
                             <div class="flex justify-between items-center text-sm border-b border-gray-50 pb-2">
                                 <span class="text-gray-500">Member Since</span>
-                                <span class="font-semibold text-gray-900">{{ optional($user->created_at ?? $user->hu_created_at)->format('M Y') ?? 'N/A' }}</span>
+                                <span class="font-semibold text-gray-900">{{ $profileUi['member_since_display'] }}</span>
                             </div>
                             <div class="flex justify-between items-center text-sm border-b border-gray-50 pb-2">
                                 <span class="text-gray-500">Total Services</span>
@@ -257,27 +244,10 @@
 
                                         {{-- Service Image --}}
                                        <a href="{{ route('services.details', $service) }}" class="block h-48 bg-gray-100 overflow-hidden relative">
-    @if ($service->hss_image_path)
-        @php
-            $path = $service->hss_image_path;
-            
-            // 1. Check if it's an external URL (e.g. placeholder or S3)
-            if (Str::startsWith($path, ['http://', 'https://'])) {
-                $imageUrl = $path;
-            } 
-            // 2. Check if file exists in the 'storage' folder (public/storage/...)
-            elseif (file_exists(public_path('storage/' . $path))) {
-                $imageUrl = asset('storage/' . $path);
-            } 
-            // 3. Fallback: Assume it's in the public root (public/...)
-            else {
-                $imageUrl = asset($path);
-            }
-        @endphp
-
-        <img src="{{ $imageUrl }}" 
-             alt="{{ $service->hss_title }}"
-             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+    @if ($service->ui_image_url)
+        <img src="{{ $service->ui_image_url }}" 
+            alt="{{ $service->hss_title }}"
+            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
     @else
         <div class="w-full h-full flex items-center justify-center bg-slate-50 text-slate-300">
             <i class="fa-regular fa-image text-4xl"></i>
@@ -286,7 +256,7 @@
 
     {{-- Price Tag --}}
     <div class="absolute bottom-3 right-3 bg-slate-900/90 backdrop-blur-md text-white px-3 py-1.5 rounded-lg text-sm font-bold shadow-lg">
-        RM {{ number_format($service->hss_basic_price ?? 0, 0) }}
+        RM {{ $service->ui_basic_price_display }}
     </div>
 </a>                                        {{-- Service Details --}}
                                         <div class="p-5 flex flex-col flex-1">
@@ -303,7 +273,7 @@
                                             </a>
 
                                             <p class="text-sm text-gray-500 line-clamp-2 mb-4 flex-1">
-                                                {{ Str::limit(strip_tags($service->hss_description), 80) }}
+                                                {{ $service->ui_description_preview }}
                                             </p>
 
 
@@ -316,7 +286,7 @@
 
                                                     {{-- Papar rating: jika tiada ulasan, ia akan papar 0.0 --}}
                                                     <span class="text-slate-900 font-bold">
-                                                        {{ number_format($service->reviews_avg_rating ?? 0, 1) }}
+                                                        {{ $service->ui_reviews_avg_rating_display }}
                                                     </span>
 
                                                     {{-- Optional: Papar jumlah ulasan untuk servis tersebut --}}
@@ -358,7 +328,7 @@
                             <div
                                 class="flex items-center gap-4 bg-slate-50 px-5 py-3 rounded-2xl border border-slate-100">
                                 <span
-                                    class="text-3xl font-bold text-slate-900">{{ number_format($averageRating ?? 0, 1) }}</span>
+                                    class="text-3xl font-bold text-slate-900">{{ $profileUi['average_rating_display'] }}</span>
                                 <div class="h-8 w-px bg-slate-200"></div>
                                 <div class="flex flex-col">
                                     {{-- 1. Bintang Rating --}}
@@ -366,7 +336,7 @@
                                         @for ($i = 0; $i < 5; $i++)
                                             {{-- Menggunakan average_rating yang kita kira di controller --}}
                                             <i
-                                                class="fas fa-star {{ $i < round($averageRating ?? 0) ? '' : 'text-gray-200' }}"></i>
+                                                class="fas fa-star {{ $i < $profileUi['average_rating_rounded'] ? '' : 'text-gray-200' }}"></i>
                                         @endfor
                                     </div>
 
@@ -395,7 +365,7 @@
     @else
         {{-- Fallback to Initials --}}
         <div class="w-11 h-11 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold border border-indigo-100 shadow-sm">
-            {{ substr($review->reviewer->hu_name ?? 'A', 0, 1) }}
+            {{ $review->ui_reviewer_initial }}
         </div>
     @endif
 </div>
@@ -413,7 +383,7 @@
                                                                 @endfor
                                                             </div>
                                                             <span class="text-[11px] text-gray-400">•
-                                                                {{ optional($review->created_at)->diffForHumans() ?? 'Recently' }}</span>
+                                                                {{ $review->ui_created_human }}</span>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -451,9 +421,9 @@
                                                                 <span
                                                                     class="text-[10px] font-bold text-indigo-600 uppercase tracking-wider">Seller's
                                                                     Response</span>
-                                                                @if ($review->hr_replied_at)
+                                                                @if ($review->ui_replied_ago)
                                                                     <span class="text-[10px] text-gray-400">•
-                                                                        {{ \Carbon\Carbon::parse($review->hr_replied_at)->diffForHumans() }}</span>
+                                                                        {{ $review->ui_replied_ago }}</span>
                                                                 @endif
                                                             </div>
                                                             <p class="text-sm text-gray-700 italic leading-relaxed">

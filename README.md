@@ -40,8 +40,15 @@ GitHub Actions workflow is available at:
 
 It runs:
 
+- non-admin Blade gate
+- admin Blade gate
 - fresh migration + seed
 - full test suite
 - Blade compile check
 - config sanity
 - event/listener listing sanity
+
+## Merge and Gate Policy
+
+- Branch protection and required checks: [docs/release/branch-protection-and-gates.md](docs/release/branch-protection-and-gates.md)
+- Install local pre-push hooks: `powershell -ExecutionPolicy Bypass -File ./scripts/install_git_hooks.ps1`

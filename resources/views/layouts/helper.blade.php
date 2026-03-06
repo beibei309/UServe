@@ -114,29 +114,10 @@
 
     @stack('scripts')
 
-    <!-- Global SweetAlert Session Handler -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            @if(session('success'))
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success!',
-                    text: "{{ session('success') }}",
-                    timer: 2000,
-                    showConfirmButton: false
-                });
-            @endif
-
-            @if(session('error'))
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error!',
-                    text: "{{ session('error') }}",
-                    confirmButtonColor: '#d33'
-                });
-            @endif
-        });
-    </script>
+    <div id="sessionAlertConfig"
+        data-success="@json(session('success') ?? '')"
+        data-error="@json(session('error') ?? '')"></div>
+    <script src="{{ asset('js/session-alerts.js') }}"></script>
 </body>
 
 </html>

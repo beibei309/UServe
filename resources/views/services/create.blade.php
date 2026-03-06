@@ -1,18 +1,5 @@
 @extends('layouts.helper')
 
-{{-- 1. Initialize Default Schedule (PHP) --}}
-@php
-    $defaultSchedule = [
-        'mon' => ['enabled' => true, 'start' => '09:00', 'end' => '17:00'],
-        'tue' => ['enabled' => true, 'start' => '09:00', 'end' => '17:00'],
-        'wed' => ['enabled' => true, 'start' => '09:00', 'end' => '17:00'],
-        'thu' => ['enabled' => true, 'start' => '09:00', 'end' => '17:00'],
-        'fri' => ['enabled' => true, 'start' => '09:00', 'end' => '17:00'],
-        'sat' => ['enabled' => false, 'start' => '10:00', 'end' => '14:00'],
-        'sun' => ['enabled' => false, 'start' => '10:00', 'end' => '14:00'],
-    ];
-@endphp
-
 @section('content')
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
@@ -113,7 +100,7 @@
                 </div>
 
                 <div class="mt-8 pt-6 border-t border-gray-100 flex justify-end">
-                    <button type="button" onclick="nextStep('overview', 'pricing')" class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition shadow-sm flex items-center">
+                    <button type="button" data-next-step="overview|pricing" class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition shadow-sm flex items-center">
                         Next Step <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                     </button>
                 </div>
@@ -194,8 +181,8 @@
                 </div>
 
                 <div class="mt-8 pt-6 border-t border-gray-100 flex justify-between">
-                    <button type="button" onclick="nextStep('pricing', 'overview')" class="px-5 py-2.5 text-gray-600 hover:text-gray-900 font-medium">Back</button>
-                    <button type="button" onclick="nextStep('pricing', 'description')" class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition shadow-sm flex items-center">
+                    <button type="button" data-next-step="pricing|overview" class="px-5 py-2.5 text-gray-600 hover:text-gray-900 font-medium">Back</button>
+                    <button type="button" data-next-step="pricing|description" class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition shadow-sm flex items-center">
                         Next Step <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                     </button>
                 </div>
@@ -215,8 +202,8 @@
                     <p class="text-xs text-gray-400 mt-2 text-right">Be descriptive and professional.</p>
                 </div>
                 <div class="mt-8 pt-6 border-t border-gray-100 flex justify-between">
-                    <button type="button" onclick="nextStep('description', 'pricing')" class="px-5 py-2.5 text-gray-600 hover:text-gray-900 font-medium"> ← Back</button>
-                    <button type="button" onclick="nextStep('description', 'availability')" class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition shadow-sm flex items-center">
+                    <button type="button" data-next-step="description|pricing" class="px-5 py-2.5 text-gray-600 hover:text-gray-900 font-medium"> ← Back</button>
+                    <button type="button" data-next-step="description|availability" class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition shadow-sm flex items-center">
                         Next Step <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                     </button>
                 </div>
@@ -305,9 +292,9 @@
                                 <p class="text-xs text-slate-500 mb-6">Select specific dates when unavailable.</p>
                                 <input type="text" id="unavailableDates" name="unavailable_dates" class="w-full pl-10 rounded-xl border-slate-200 focus:ring-indigo-500 text-sm py-3 font-medium shadow-sm" placeholder="Select dates...">
                                 <div class="grid grid-cols-2 gap-3 mt-4">
-                                    <button type="button" onclick="quickBlockDates(1, 'week')" class="px-3 py-2 bg-slate-50 text-slate-600 text-xs rounded-lg font-bold border border-slate-200">+ 1 Week</button>
-                                    <button type="button" onclick="quickBlockDates(1, 'month')" class="px-3 py-2 bg-slate-50 text-slate-600 text-xs rounded-lg font-bold border border-slate-200">+ 1 Month</button>
-                                    <button type="button" onclick="clearUnavailableDates()" class="col-span-2 px-3 py-2 bg-rose-50 text-rose-600 text-xs rounded-lg font-bold border border-rose-100">Clear All</button>
+                                    <button type="button" data-quick-block="1|week" class="px-3 py-2 bg-slate-50 text-slate-600 text-xs rounded-lg font-bold border border-slate-200">+ 1 Week</button>
+                                    <button type="button" data-quick-block="1|month" class="px-3 py-2 bg-slate-50 text-slate-600 text-xs rounded-lg font-bold border border-slate-200">+ 1 Month</button>
+                                    <button type="button" data-clear-unavailable class="col-span-2 px-3 py-2 bg-rose-50 text-rose-600 text-xs rounded-lg font-bold border border-rose-100">Clear All</button>
                                 </div>
                             </div>
                         </div>
@@ -317,8 +304,8 @@
                 <div class="bg-gray-50 rounded-xl p-8 text-center border border-gray-100 mt-8">
                     <h3 class="text-lg font-bold text-gray-900">Ready to Launch?</h3>
                     <div class="flex justify-center gap-4 mt-6">
-                        <button type="button" onclick="nextStep('availability', 'description')" class="px-5 py-3 text-gray-600 hover:bg-gray-100 rounded-lg font-medium">Review Details</button>
-                        <button type="button" onclick="submitForm()" class="px-8 py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 shadow-lg">Publish Service Now</button>
+                        <button type="button" data-next-step="availability|description" class="px-5 py-3 text-gray-600 hover:bg-gray-100 rounded-lg font-medium">Review Details</button>
+                        <button type="button" data-submit-form class="px-8 py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 shadow-lg">Publish Service Now</button>
                     </div>
                 </div>
             </div>
@@ -326,166 +313,11 @@
     </div>
 </div>
 
-<script>
-    // --- 1. QUILL CONFIG ---
-    const toolbarOptions = [['bold', 'italic', 'underline'], [{'list': 'bullet'}]];
-    function setupQuill(editorId, inputId, placeholder) {
-        var quill = new Quill('#' + editorId, { theme: 'snow', modules: { toolbar: toolbarOptions }, placeholder: placeholder });
-        quill.on('text-change', function() { document.getElementById(inputId).value = quill.root.innerHTML; });
-    }
-    document.addEventListener('DOMContentLoaded', function() {
-        setupQuill('editor-basic', 'input-basic', 'e.g. 1 hour online consultation...');
-        setupQuill('editor-standard', 'input-standard', 'Describe standard package...');
-        setupQuill('editor-premium', 'input-premium', 'Describe premium package...');
-        setupQuill('editor-main', 'input-main', 'Provide a comprehensive description...');
-    });
-
-    // --- 2. ALPINE JS SCHEDULER ---
-    function scheduleHandler() {
-        return {
-            isSessionBased: true,
-            days: [
-                { key: 'mon', name: 'Monday' }, { key: 'tue', name: 'Tuesday' },
-                { key: 'wed', name: 'Wednesday' }, { key: 'thu', name: 'Thursday' },
-                { key: 'fri', name: 'Friday' }, { key: 'sat', name: 'Saturday' },
-                { key: 'sun', name: 'Sunday' }
-            ],
-            // Inject PHP Default Schedule here
-            schedule: @json($defaultSchedule),
-            showBulk: false,
-            bulkStart: '09:00',
-            bulkEnd: '17:00',
-            applyBulkTime() {
-                for (const dayKey in this.schedule) {
-                    if (this.schedule[dayKey].enabled) {
-                        this.schedule[dayKey].start = this.bulkStart;
-                        this.schedule[dayKey].end = this.bulkEnd;
-                    }
-                }
-                this.showBulk = false;
-            }
-        }
-    }
-
-    // --- 3. FLATPICKR ---
-    let fpInstance;
-    document.addEventListener('DOMContentLoaded', function() {
-        fpInstance = flatpickr("#unavailableDates", {
-            mode: "multiple", dateFormat: "Y-m-d", minDate: "today", conjunction: ", ",
-            locale: { firstDayOfWeek: 1 }
-        });
-    });
-    window.quickBlockDates = function(amount, unit) {
-        if (!fpInstance) return;
-        let daysToAdd = unit === 'week' ? amount * 7 : amount * 30;
-        let newDates = [], today = new Date();
-        for (let i = 0; i < daysToAdd; i++) {
-            let d = new Date(today); d.setDate(today.getDate() + i);
-            newDates.push(d.toISOString().split('T')[0]);
-        }
-        let current = fpInstance.selectedDates.map(d => d.toISOString().split('T')[0]);
-        fpInstance.setDate([...new Set([...current, ...newDates])], true);
-    };
-    window.clearUnavailableDates = function() { if (fpInstance) fpInstance.clear(); };
-
-    // --- 4. EXTRA PACKAGES UI ---
-    document.getElementById('offer_packages').addEventListener('change', function() {
-        const extra = document.getElementById('extraPackages');
-        this.checked ? extra.classList.remove('hidden') : extra.classList.add('hidden');
-    });
-
-    // --- 5. NAVIGATION ---
-    function nextStep(currentId, nextId) {
-        // Validation (simplified for brevity)
-        if (currentId === 'overview' && nextId === 'pricing' && (!document.getElementById('title').value || !document.getElementById('category_id').value)) {
-            Swal.fire({ icon: 'warning', title: 'Missing Info', text: 'Please enter a Title and Category.' }); return;
-        }
-        if (currentId === 'pricing' && nextId === 'description' && !document.getElementById('basic_price').value) {
-            Swal.fire({ icon: 'warning', title: 'Missing Info', text: 'Please set a price for the Basic Package.' }); return;
-        }
-        if (currentId === 'description' && nextId === 'availability' && !document.getElementById('input-main').value) {
-            Swal.fire({ icon: 'warning', title: 'Missing Info', text: 'Please provide a service description.' }); return;
-        }
-        
-        // Tab switching
-        document.querySelectorAll('.tab-section').forEach(el => el.classList.add('hidden'));
-        document.getElementById(nextId).classList.remove('hidden');
-        updateHeader(nextId);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    function updateHeader(activeId) {
-        const map = { 'overview': 0, 'pricing': 1, 'description': 2, 'availability': 3 };
-        const activeIndex = map[activeId];
-        document.querySelectorAll('.step-link').forEach((link, index) => {
-            const circle = link.querySelector('span');
-            // Reset classes
-            link.className = "step-link w-1/4 py-4 px-1 border-b-2 font-medium text-sm flex items-center justify-center transition-colors pointer-events-none";
-            circle.className = "w-6 h-6 rounded-full flex items-center justify-center text-xs mr-2 font-bold";
-            
-            if (index < activeIndex) {
-                link.classList.add('step-completed', 'border-green-500', 'text-green-600');
-                circle.classList.add('bg-green-100', 'text-green-600');
-                circle.innerHTML =  "✓";
-            } else if (index === activeIndex) {
-                link.classList.add('step-active', 'border-indigo-500', 'text-indigo-600');
-                circle.classList.add('bg-indigo-100', 'text-indigo-600', 'ring-1', 'ring-indigo-600');
-                circle.innerHTML = index + 1;
-            } else {
-                link.classList.add('step-inactive', 'border-transparent', 'text-gray-400');
-                circle.classList.add('bg-gray-100', 'text-gray-500');
-                circle.innerHTML = index + 1;
-            }
-        });
-    }
-
-    // --- 6. SUBMISSION ---
-    async function submitForm() {
-        const form = document.getElementById('createServiceForm');
-        // Sync Flatpickr
-        if (fpInstance) document.getElementById('unavailableDates').value = fpInstance.input.value;
-
-        const formData = new FormData(form);
-        
-        Swal.fire({ title: 'Publishing...', didOpen: () => Swal.showLoading() });
-
-        try {
-            const response = await fetch("{{ route('services.store') }}", {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'Accept': 'application/json'
-                },
-                body: formData
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                Swal.fire({
-                    icon: 'success', title: 'Success!', text: 'Service published successfully.',
-                    confirmButtonText: 'Go to Dashboard', confirmButtonColor: '#10b981'
-                }).then(() => { window.location.href = "{{ route('services.manage') }}"; });
-            } else {
-                // Show validation errors or specific server error message
-                let msg = data.message || 'Please check your inputs.';
-                
-                if (data.errors) {
-                    msg = Object.values(data.errors).flat().join('\n');
-                } else if (data.error) {
-                    msg = data.error;
-                }
-
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Publication Failed',
-                    text: msg
-                });
-            }
-        } catch (error) {
-            console.error(error);
-            Swal.fire('System Error', 'Please check your connection.', 'error');
-        }
-    }
-</script>
+<div id="servicesCreateConfig"
+    data-default-schedule='@json($defaultSchedule)'
+    data-store-url="{{ route('services.store') }}"
+    data-manage-url="{{ route('services.manage') }}"></div>
+@push('scripts')
+    <script src="{{ asset('js/nonadmin-services-create.js') }}"></script>
+@endpush
 @endsection
