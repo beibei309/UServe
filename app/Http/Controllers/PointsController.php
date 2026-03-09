@@ -8,6 +8,7 @@ use App\Models\CertificateRedemption;
 use App\Models\Reward;
 use App\Models\RewardRedemption;
 use App\Models\ServiceRequest;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -450,5 +451,157 @@ class PointsController extends BaseController
                                   ->paginate(20);
 
         return view('points.buyer-history', compact('buyerPointsHistory'));
+    }
+
+    /**
+     * Display leaderboard page based on user role
+     */
+    public function leaderboard(): View
+    {
+        $user = Auth::user();
+
+        // Get both leaderboards for all users (view-only for community)
+        $sellerLeaderboard = $this->getSellerLeaderboard(10);
+        $buyerLeaderboard = $this->getBuyerLeaderboard(10);
+
+        return view('points.leaderboard', compact(
+            'sellerLeaderboard',
+            'buyerLeaderboard'
+        ));
+    }
+
+    /**
+     * Get seller leaderboard data
+     */
+    public function getSellerLeaderboard(int $limit = 20)
+    {
+        return User::select(
+                       'h2u_users.hu_id',
+                       'h2u_users.hu_name', 
+                       'h2u_users.hu_email',
+                       'h2u_users.hu_role',
+                       'h2u_users.hu_profile_photo_path',
+                       'h2u_users.created_at',
+                       'h2u_users.updated_at'
+                   )
+                   ->selectRaw('COALESCE(SUM(h2u_seller_points.hsp_points_earned), 0) as seller_points_sum_hsp_points_earned')
+                   ->whereIn('hu_role', ['student', 'helper'])
+                   ->join('h2u_seller_points', 'h2u_users.hu_id', '=', 'h2u_seller_points.hsp_user_id')
+                   ->where('h2u_seller_points.hsp_status', 'earned')
+                   ->groupBy(
+                       'h2u_users.hu_id',
+                       'h2u_users.hu_name', 
+                       'h2u_users.hu_email',
+                       'h2u_users.hu_role',
+                       'h2u_users.hu_profile_photo_path',
+                       'h2u_users.created_at',
+                       'h2u_users.updated_at'
+                   )
+                   ->havingRaw('COALESCE(SUM(h2u_seller_points.hsp_points_earned), 0) > 0')
+                   ->orderByRaw('COALESCE(SUM(h2u_seller_points.hsp_points_earned), 0) DESC')
+                   ->take($limit)
+                   ->get();
+    }
+
+    /**
+     * Get buyer leaderboard data
+     */
+    public function getBuyerLeaderboard(int $limit = 20)
+    {
+        return User::select(
+                       'h2u_users.hu_id',
+                       'h2u_users.hu_name', 
+                       'h2u_users.hu_email',
+                       'h2u_users.hu_role',
+                       'h2u_users.hu_profile_photo_path',
+                       'h2u_users.created_at',
+                       'h2u_users.updated_at'
+                   )
+                   ->selectRaw('COALESCE(SUM(h2u_buyer_points.hbp_points_earned), 0) as buyer_points_sum_hbp_points_earned')
+                   ->join('h2u_buyer_points', 'h2u_users.hu_id', '=', 'h2u_buyer_points.hbp_user_id')
+                   ->where('h2u_buyer_points.hbp_status', 'earned')
+                   ->groupBy(
+                       'h2u_users.hu_id',
+                       'h2u_users.hu_name', 
+                       'h2u_users.hu_email',
+                       'h2u_users.hu_role',
+                       'h2u_users.hu_profile_photo_path',
+                       'h2u_users.created_at',
+                       'h2u_users.updated_at'
+                   )
+                   ->havingRaw('COALESCE(SUM(h2u_buyer_points.hbp_points_earned), 0) > 0')
+                   ->orderByRaw('COALESCE(SUM(h2u_buyer_points.hbp_points_earned), 0) DESC')
+                   ->take($limit)
+                   ->get();
+    }
+
+    /**
+     * Get seller leaderboard only
+     */
+    public function sellerLeaderboard(): View
+    {
+        $user = Auth::user();
+
+        $sellerLeaderboard = $this->getSellerLeaderboard(50);
+        // Only calculate rank for students (who can actually be sellers)
+        $userRank = $user->canAccessSellerFeatures() ? $this->getUserSellerRank($user->hu_id) : null;
+
+        return view('points.seller-leaderboard', compact(
+            'sellerLeaderboard',
+            'userRank'
+        ));
+    }
+
+    /**
+     * Get buyer leaderboard only
+     */
+    public function buyerLeaderboard(): View
+    {
+        $buyerLeaderboard = $this->getBuyerLeaderboard(50);
+        $userRank = $this->getUserBuyerRank(Auth::id());
+
+        return view('points.buyer-leaderboard', compact(
+            'buyerLeaderboard',
+            'userRank'
+        ));
+    }
+
+    /**
+     * Get user's rank in seller leaderboard
+     */
+    private function getUserSellerRank($userId): ?int
+    {
+        $allUsersWithPoints = User::select('h2u_users.hu_id')
+                                  ->selectRaw('COALESCE(SUM(h2u_seller_points.hsp_points_earned), 0) as total_points')
+                                  ->whereIn('hu_role', ['student', 'helper'])
+                                  ->join('h2u_seller_points', 'h2u_users.hu_id', '=', 'h2u_seller_points.hsp_user_id')
+                                  ->where('h2u_seller_points.hsp_status', 'earned')
+                                  ->groupBy('h2u_users.hu_id')
+                                  ->havingRaw('COALESCE(SUM(h2u_seller_points.hsp_points_earned), 0) > 0')
+                                  ->orderByRaw('COALESCE(SUM(h2u_seller_points.hsp_points_earned), 0) DESC')
+                                  ->pluck('hu_id')
+                                  ->toArray();
+
+        $rank = array_search($userId, $allUsersWithPoints);
+        return $rank !== false ? $rank + 1 : null;
+    }
+
+    /**
+     * Get user's rank in buyer leaderboard
+     */
+    private function getUserBuyerRank($userId): ?int
+    {
+        $allUsersWithPoints = User::select('h2u_users.hu_id')
+                                  ->selectRaw('COALESCE(SUM(h2u_buyer_points.hbp_points_earned), 0) as total_points')
+                                  ->join('h2u_buyer_points', 'h2u_users.hu_id', '=', 'h2u_buyer_points.hbp_user_id')
+                                  ->where('h2u_buyer_points.hbp_status', 'earned')
+                                  ->groupBy('h2u_users.hu_id')
+                                  ->havingRaw('COALESCE(SUM(h2u_buyer_points.hbp_points_earned), 0) > 0')
+                                  ->orderByRaw('COALESCE(SUM(h2u_buyer_points.hbp_points_earned), 0) DESC')
+                                  ->pluck('hu_id')
+                                  ->toArray();
+
+        $rank = array_search($userId, $allUsersWithPoints);
+        return $rank !== false ? $rank + 1 : null;
     }
 }

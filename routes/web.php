@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminFaqsController;
 use App\Http\Controllers\Admin\AdminFeedbackController;
 use App\Http\Controllers\Admin\AdminRequestController;
+use App\Http\Controllers\Admin\AdminRewardController;
 use App\Http\Controllers\Admin\AdminServicesController;
 use App\Http\Controllers\Admin\AdminStudentController;
 use App\Http\Controllers\Admin\AdminStudentStatusController;
@@ -199,6 +200,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/points/buyer', [PointsController::class, 'buyerDashboard'])->name('points.buyer.dashboard');
     Route::get('/points/buyer/history', [PointsController::class, 'buyerHistory'])->name('points.buyer.history');
     Route::post('/points/rewards/redeem', [PointsController::class, 'redeemReward'])->name('points.rewards.redeem');
+    
+    // Leaderboard routes
+    Route::get('/points/leaderboard', [PointsController::class, 'leaderboard'])->name('points.leaderboard');
+    Route::get('/points/leaderboard/seller', [PointsController::class, 'sellerLeaderboard'])->name('points.leaderboard.seller');
+    Route::get('/points/leaderboard/buyer', [PointsController::class, 'buyerLeaderboard'])->name('points.leaderboard.buyer');
 });
 
 // Public JSON endpoints
@@ -326,6 +332,28 @@ Route::middleware(['auth:admin', 'prevent-back-history'])->prefix('admin')->grou
         Route::put('/update/{id}', [AdminStudentStatusController::class, 'update'])->name('update');
         Route::delete('/delete/{id}', [AdminStudentStatusController::class, 'destroy'])->name('delete');
         Route::post('/remind/{id}', [AdminStudentStatusController::class, 'sendReminder'])->name('send_reminder');
+    });
+
+    // ========================================
+    // REWARDS & REDEMPTIONS MANAGEMENT
+    // ========================================
+    Route::prefix('rewards')->name('admin.rewards.')->group(function () {
+        Route::get('/', [AdminRewardController::class, 'index'])->name('index');
+        Route::get('/list', [AdminRewardController::class, 'rewards'])->name('list');
+        Route::get('/create', [AdminRewardController::class, 'create'])->name('create');
+        Route::post('/store', [AdminRewardController::class, 'store'])->name('store');
+        Route::get('/{reward}/edit', [AdminRewardController::class, 'edit'])->name('edit');
+        Route::put('/{reward}', [AdminRewardController::class, 'update'])->name('update');
+        Route::patch('/{reward}/toggle-status', [AdminRewardController::class, 'toggleStatus'])->name('toggle-status');
+        Route::delete('/{reward}', [AdminRewardController::class, 'destroy'])->name('destroy');
+        
+        // Redemptions management
+        Route::get('/redemptions', [AdminRewardController::class, 'redemptions'])->name('redemptions');
+        Route::patch('/redemptions/{redemption}/status', [AdminRewardController::class, 'updateRedemptionStatus'])->name('redemptions.update-status');
+        
+        // Analytics and exports
+        Route::get('/analytics', [AdminRewardController::class, 'analytics'])->name('analytics');
+        Route::get('/export-redemptions', [AdminRewardController::class, 'exportRedemptions'])->name('export-redemptions');
     });
 
     // ========================================

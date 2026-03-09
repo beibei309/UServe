@@ -395,10 +395,15 @@ public function favoriteServices()
     public function routeNotificationFor($driver, $notification = null)
     {
         if ($driver === 'database') {
-            return $this;
+            return $this->notifications();
         }
 
-        return parent::routeNotificationFor($driver, $notification);
+        // For other drivers like 'mail', return the appropriate route
+        if ($driver === 'mail') {
+            return $this->hu_email;
+        }
+
+        return null;
     }
 
     /**

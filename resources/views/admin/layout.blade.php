@@ -519,6 +519,69 @@
                         </a>
                     </li>
 
+                    <li>
+                        <button type="button" data-submenu-toggle data-menu-id="rewardMenu" data-arrow-id="rewardArrow"
+                            class="w-full flex items-center justify-between px-4 py-3 rounded-lg transition-colors duration-300 nav-hover
+            {{ request()->routeIs('admin.rewards.*') ? 'text-white font-semibold' : '' }}"
+                            @if(request()->routeIs('admin.rewards.*'))
+                            style="background-color: var(--hover-bg);"
+                            @else
+                            style="color: var(--text-secondary);"
+                            @endif>
+                            <div class="flex items-center gap-3">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                                    </path>
+                                </svg>
+                                <span>Rewards System</span>
+                            </div>
+                            <svg id="rewardArrow"
+                                class="w-4 h-4 transition-transform {{ request()->routeIs('admin.rewards.*') ? 'rotate-90' : '' }}"
+                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 5l7 7-7 7">
+                                </path>
+                            </svg>
+                        </button>
+
+                        <ul id="rewardMenu"
+                            class="pl-11 mt-1 space-y-1 {{ request()->routeIs('admin.rewards.*') ? '' : 'hidden' }}">                      
+                            <li>
+                                <a href="{{ route('admin.rewards.index') }}"
+                                    class="block px-4 py-2 text-sm rounded-lg transition-colors duration-300 submenu-hover
+                                    {{ request()->routeIs('admin.rewards.index') ? 'text-cyan-400 font-semibold' : '' }}"
+                                    @if(!request()->routeIs('admin.rewards.index'))
+                                    style="color: var(--text-secondary);"
+                                    @endif>Dashboard</a>
+                            </li>
+                            <li>
+                                <a href="{{ route('admin.rewards.list') }}"
+                                    class="block px-4 py-2 text-sm rounded-lg transition-colors duration-300 submenu-hover
+                                    {{ request()->routeIs('admin.rewards.list', 'admin.rewards.create', 'admin.rewards.edit') ? 'text-cyan-400 font-semibold' : '' }}"
+                                    @if(!request()->routeIs('admin.rewards.list', 'admin.rewards.create', 'admin.rewards.edit'))
+                                    style="color: var(--text-secondary);"
+                                    @endif>Manage Rewards</a>
+                            </li>
+                            <li>
+                                <a href="{{ route('admin.rewards.redemptions') }}"
+                                    class="block px-4 py-2 text-sm rounded-lg transition-colors duration-300 submenu-hover
+                                    {{ request()->routeIs('admin.rewards.redemptions') ? 'text-cyan-400 font-semibold' : '' }}"
+                                    @if(!request()->routeIs('admin.rewards.redemptions'))
+                                    style="color: var(--text-secondary);"
+                                    @endif>Redemptions</a>
+                            </li>
+                            <li>
+                                <a href="{{ route('admin.rewards.analytics') }}"
+                                    class="block px-4 py-2 text-sm rounded-lg transition-colors duration-300 submenu-hover
+                                    {{ request()->routeIs('admin.rewards.analytics') ? 'text-cyan-400 font-semibold' : '' }}"
+                                    @if(!request()->routeIs('admin.rewards.analytics'))
+                                    style="color: var(--text-secondary);"
+                                    @endif>Analytics</a>
+                            </li>
+                        </ul>
+                    </li>
+
 
                 </ul>
 

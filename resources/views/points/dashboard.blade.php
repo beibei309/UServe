@@ -17,11 +17,16 @@
                         <p class="text-gray-600 mt-1 text-sm sm:text-base">Track your points and redeem certificates</p>
                     </div>
                 </div>
-                <div class="mt-4 sm:mt-0">
+                <div class="mt-4 sm:mt-0 flex space-x-2">
                     <a href="{{ route('points.history') }}"
                        class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors w-full sm:w-auto justify-center">
                         <i class="fas fa-history mr-2"></i>
                         View History
+                    </a>
+                    <a href="{{ route('points.leaderboard') }}"
+                       class="inline-flex items-center px-4 py-2 border border-orange-300 rounded-lg text-sm font-medium text-orange-700 bg-orange-50 hover:bg-orange-100 transition-colors w-full sm:w-auto justify-center">
+                        <i class="fas fa-trophy mr-2"></i>
+                        Leaderboard
                     </a>
                 </div>
             </div>
