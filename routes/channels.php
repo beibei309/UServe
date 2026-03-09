@@ -6,6 +6,7 @@ Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
     return (int) $user->hu_id === (int) $id;
 <<<<<<< HEAD
 });
+<<<<<<< HEAD
 
 // Private channel for conversation messages
 Broadcast::channel('conversation.{conversationId}', function ($user, $conversationId) {
@@ -20,3 +21,5 @@ Broadcast::channel('conversation.{conversationId}', function ($user, $conversati
 =======
 >>>>>>> 00141b2 (fix: stabilize helper request flows and mode switching)
 });
+=======
+>>>>>>> develop

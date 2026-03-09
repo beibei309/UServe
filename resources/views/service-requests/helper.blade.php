@@ -355,11 +355,14 @@
 
                                             {{-- Button: Normal Width --}}
 <<<<<<< HEAD
+<<<<<<< HEAD
                                             <button type="button" data-open-proof="{{ $request->hsr_id }}" data-proof-url="{{ asset('storage/' . $request->hsr_payment_proof) }}"
                                                 class="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-blue-700 transition-all">
                                                 Check Proof
                                             </button>
 =======
+=======
+>>>>>>> develop
                                             @if ($request->ui_has_payment_proof)
                                                 <button type="button" data-open-proof="{{ $request->hsr_id }}" data-proof-url="{{ $request->ui_payment_proof_url }}"
                                                     class="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-blue-700 transition-all">
@@ -368,7 +371,10 @@
                                             @else
                                                 <span class="text-xs font-semibold text-red-600">Proof file is missing</span>
                                             @endif
+<<<<<<< HEAD
 >>>>>>> 00141b2 (fix: stabilize helper request flows and mode switching)
+=======
+>>>>>>> develop
                                         </div>
                                     </div>
 
@@ -567,14 +573,20 @@
                                 
                                 {{-- 1. Buyer's Review (Incoming) --}}
 <<<<<<< HEAD
+<<<<<<< HEAD
                                 @if ($request->reviewForHelper)
                                     <button type="button" data-open-buyer-review='@json($request->reviewForHelper)' data-reviewer-name="{{ $request->requester->hu_name }}"
+=======
+                                @if ($request->ui_review_for_helper)
+                                    <button type="button" data-open-buyer-review='@json($request->ui_review_for_helper)' data-reviewer-name="{{ $request->requester->hu_name }}"
+>>>>>>> develop
                                         class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-yellow-700 bg-yellow-50 hover:bg-yellow-100 border border-yellow-200 transition-all">
                                         <div class="flex gap-0.5 text-yellow-500">
                                             @for ($i = 1; $i <= 5; $i++)
-                                                <i class="{{ $i <= $request->reviewForHelper->hr_rating ? 'fas' : 'far' }} fa-star text-xs"></i>
+                                                <i class="{{ $i <= $request->ui_review_for_helper->hr_rating ? 'fas' : 'far' }} fa-star text-xs"></i>
                                             @endfor
                                         </div>
+<<<<<<< HEAD
                                         <span>{{ $request->reviewForHelper->hr_reply ? 'See Reply' : 'Reply' }}</span>
 =======
                                 @if ($request->ui_review_for_helper)
@@ -587,6 +599,9 @@
                                         </div>
                                         <span>{{ $request->ui_review_for_helper->hr_reply ? 'See Reply' : 'Reply' }}</span>
 >>>>>>> 00141b2 (fix: stabilize helper request flows and mode switching)
+=======
+                                        <span>{{ $request->ui_review_for_helper->hr_reply ? 'See Reply' : 'Reply' }}</span>
+>>>>>>> develop
                                     </button>
                                 @elseif($request->hsr_status === 'completed')
                                     <span class="text-xs text-gray-400 italic py-2">Waiting for buyer review...</span>

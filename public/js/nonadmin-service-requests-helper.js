@@ -61,9 +61,6 @@
         proofFallback.classList.add('hidden');
         proofImage.src = '';
         proofPdf.src = '';
-<<<<<<< HEAD
-        proofLink.href = fileUrl;
-=======
         proofLink.href = typeof fileUrl === 'string' && fileUrl.trim() !== '' ? fileUrl : '#';
 
         if (typeof fileUrl !== 'string' || fileUrl.trim() === '') {
@@ -71,7 +68,6 @@
             proofModal.classList.remove('hidden');
             return;
         }
->>>>>>> 00141b2 (fix: stabilize helper request flows and mode switching)
 
         let extension = '';
         try {
@@ -100,8 +96,6 @@
         proofModal.classList.remove('hidden');
     }
 
-<<<<<<< HEAD
-=======
     function submitManualFinalize(requestId, outcome) {
         const form = document.getElementById(`finalize-form-${requestId}`);
         const outcomeInput = document.getElementById(`finalize-outcome-${requestId}`);
@@ -126,7 +120,6 @@
         });
     }
 
->>>>>>> 00141b2 (fix: stabilize helper request flows and mode switching)
     function submitDecision(outcome) {
         if (!finalizeOrderForm || !finalizeOutcome) return;
         finalizeOutcome.value = outcome;
@@ -443,15 +436,11 @@
             return;
         }
 
-<<<<<<< HEAD
-=======
         const finalize = event.target.closest('[data-finalize-order]');
         if (finalize) {
             submitManualFinalize(finalize.dataset.finalizeOrder, finalize.dataset.outcome || 'paid');
             return;
         }
-
->>>>>>> 00141b2 (fix: stabilize helper request flows and mode switching)
         if (event.target.closest('[data-close-proof]')) {
             closeProofModal();
             return;

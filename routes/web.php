@@ -1,6 +1,7 @@
 <?php
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HelpController;
 use App\Http\Controllers\HomeController;
@@ -28,6 +29,9 @@ use App\Http\Controllers\Admin\AdminServicesController;
 =======
 use App\Http\Controllers\Admin\AdminAuthController;
 >>>>>>> 00141b2 (fix: stabilize helper request flows and mode switching)
+=======
+use App\Http\Controllers\Admin\AdminAuthController;
+>>>>>>> develop
 use App\Http\Controllers\Admin\AdminCategoryController;
 use App\Http\Controllers\Admin\AdminCommunityController;
 use App\Http\Controllers\Admin\AdminDashboardController;
@@ -38,10 +42,16 @@ use App\Http\Controllers\Admin\AdminServicesController;
 use App\Http\Controllers\Admin\AdminStudentController;
 use App\Http\Controllers\Admin\AdminStudentStatusController;
 <<<<<<< HEAD
+<<<<<<< HEAD
 use App\Http\Controllers\NotificationController;
 =======
 use App\Http\Controllers\Admin\SuperAdminController;
 >>>>>>> 00141b2 (fix: stabilize helper request flows and mode switching)
+=======
+use App\Http\Controllers\Admin\ReportAdminController;
+use App\Http\Controllers\Admin\SuperAdminController;
+use App\Http\Controllers\Admin\UserAdminController;
+>>>>>>> develop
 use App\Http\Controllers\Admin\VerificationController as AdminVerificationController;
 use App\Http\Controllers\AvailabilityController;
 use App\Http\Controllers\DashboardController;
@@ -50,6 +60,10 @@ use App\Http\Controllers\HelpController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Pages\AdminPageController;
+<<<<<<< HEAD
+=======
+use App\Http\Controllers\PointsController;
+>>>>>>> develop
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReviewController;
@@ -78,9 +92,12 @@ Route::patch('/students/edit-profile', [StudentsController::class, 'update'])->m
 Route::delete('/students/profile/delete-file', [App\Http\Controllers\StudentsController::class, 'deleteWorkExperienceFile'])->middleware(['auth'])->name('students.delete-file');
 <<<<<<< HEAD
 
+<<<<<<< HEAD
 =======
 >>>>>>> 00141b2 (fix: stabilize helper request flows and mode switching)
 
+=======
+>>>>>>> develop
 // -- AUTHENTICATED ROUTES --
 Route::middleware(['auth'])->group(function () {
 
@@ -100,21 +117,28 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/verification/save-location', [VerificationController::class, 'saveLocation'])
         ->name('verification.save_location');
 <<<<<<< HEAD
+<<<<<<< HEAD
     
 =======
 
 >>>>>>> 00141b2 (fix: stabilize helper request flows and mode switching)
+=======
+
+>>>>>>> develop
     Route::get('/onboarding/community', [VerificationController::class, 'onboardingCommunity'])->name('onboarding.community.verify');
 
     Route::post('/onboarding/community/upload-photo', [VerificationController::class, 'uploadPhoto'])->name('onboarding.community.upload_photo');
     Route::post('/onboarding/community/upload-selfie', [VerificationController::class, 'uploadCommunitySelfie'])->name('onboarding.community.upload_selfie');
     Route::post('/onboarding/community/submit-doc', [VerificationController::class, 'submitDoc'])->name('onboarding.community.submit_doc');
 <<<<<<< HEAD
+<<<<<<< HEAD
         
         
         
 =======
 >>>>>>> 00141b2 (fix: stabilize helper request flows and mode switching)
+=======
+>>>>>>> develop
 
 });
 
@@ -140,10 +164,14 @@ Route::get('/student-services/{service}', [StudentServiceController::class, 'sho
 Route::get('/services/apply', [HomeController::class, 'serviceApply'])->middleware(['auth'])->name('services.apply');
 
 <<<<<<< HEAD
+<<<<<<< HEAD
  Route::get('/service-requests', [ServiceRequestController::class, 'index'])->middleware(['auth'])->name('service-requests.index');
 =======
 Route::get('/service-requests', [ServiceRequestController::class, 'index'])->middleware(['auth'])->name('service-requests.index');
 >>>>>>> 00141b2 (fix: stabilize helper request flows and mode switching)
+=======
+Route::get('/service-requests', [ServiceRequestController::class, 'index'])->middleware(['auth'])->name('service-requests.index');
+>>>>>>> develop
 Route::post('/service-request', [ServiceRequestController::class, 'store'])->middleware(['auth'])->name('service-request.store');
 
 // Service Request routes
@@ -171,19 +199,27 @@ Route::middleware(['auth'])->group(function () {
 Route::get('/services/{id}', [StudentServiceController::class, 'details'])->name('services.details');
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     // routes/web.php
 =======
 // routes/web.php
 >>>>>>> 00141b2 (fix: stabilize helper request flows and mode switching)
+=======
+// routes/web.php
+>>>>>>> develop
 
 Route::post('/switch-mode', [App\Http\Controllers\DashboardController::class, 'switchMode'])
     ->name('switch.mode')
     ->middleware('auth');
 <<<<<<< HEAD
+<<<<<<< HEAD
     
 =======
 
 >>>>>>> 00141b2 (fix: stabilize helper request flows and mode switching)
+=======
+
+>>>>>>> develop
 // after login
 Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
@@ -219,9 +255,12 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/availability/update-settings', [AvailabilityController::class, 'updateSettings'])->name('availability.updateSettings');
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 =======
 >>>>>>> 00141b2 (fix: stabilize helper request flows and mode switching)
+=======
+>>>>>>> develop
     Route::post('/reviews', [ReviewController::class, 'store'])->name('reviews.store');
     Route::post('/reviews/{id}/reply', [ReviewController::class, 'reply'])->name('reviews.reply');
     Route::post('/reports', [ReportController::class, 'store']);
@@ -255,11 +294,14 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/points/certificates/{redemption}', [PointsController::class, 'certificate'])->name('points.certificate');
 });
 
+<<<<<<< HEAD
 
 =======
 });
 >>>>>>> 00141b2 (fix: stabilize helper request flows and mode switching)
 
+=======
+>>>>>>> develop
 // Public JSON endpoints
 Route::get('/students/{user}', [StudentServiceController::class, 'storefront']);
 Route::get('/search/services', [SearchController::class, 'services']);
@@ -269,6 +311,7 @@ require __DIR__.'/auth.php';
 // / Admin Login (public)
 Route::get('/admin/login', [AdminAuthController::class, 'showLogin'])->name('admin.login');
 Route::post('/admin/login', [AdminAuthController::class, 'login'])->name('admin.login.submit');
+<<<<<<< HEAD
 <<<<<<< HEAD
     
 =======
@@ -282,6 +325,12 @@ Route::middleware(['auth:admin', 'prevent-back-history'])->prefix('admin')->grou
     // ========================================
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
 
+=======
+
+// Protected Admin Routes - Requires admin authentication
+Route::middleware(['auth:admin', 'prevent-back-history'])->prefix('admin')->group(function () {
+
+>>>>>>> develop
     // ========================================
     // ADMIN DASHBOARD
     // ========================================
@@ -293,14 +342,19 @@ Route::middleware(['auth:admin', 'prevent-back-history'])->prefix('admin')->grou
     // View pending community verifications (document + selfie uploads)
     Route::get('/verifications', [AdminPageController::class, 'verifications'])->name('admin.verifications.page');
 <<<<<<< HEAD
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> develop
     // Community Verification Actions
     Route::post('/verifications/{user}/approve', [AdminVerificationController::class, 'approve'])->name('admin.verifications.approve');
     Route::post('/verifications/{user}/reject', [AdminVerificationController::class, 'reject'])->name('admin.verifications.reject');
-    
+
     // View uploaded documents
     Route::get('/verifications/{user}/document', [AdminVerificationController::class, 'showDocument'])->name('admin.verifications.document');
     Route::get('/verifications/{user}/selfie', [AdminVerificationController::class, 'showSelfie'])->name('admin.verifications.selfie');
+<<<<<<< HEAD
     
 =======
 
@@ -313,6 +367,9 @@ Route::middleware(['auth:admin', 'prevent-back-history'])->prefix('admin')->grou
     Route::get('/verifications/{user}/selfie', [AdminVerificationController::class, 'showSelfie'])->name('admin.verifications.selfie');
 
 >>>>>>> 00141b2 (fix: stabilize helper request flows and mode switching)
+=======
+
+>>>>>>> develop
     // ========================================
     // STUDENT MANAGEMENT
     // ========================================
@@ -322,7 +379,11 @@ Route::middleware(['auth:admin', 'prevent-back-history'])->prefix('admin')->grou
     Route::put('/students/{id}/update', [AdminStudentController::class, 'update'])->name('admin.students.update');
     Route::delete('/students/{id}', [AdminStudentController::class, 'destroy'])->name('admin.students.destroy');
 <<<<<<< HEAD
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> develop
     // Student Actions (Ban/Unban/Role)
     Route::post('/students/{id}/ban', [AdminStudentController::class, 'ban'])->name('admin.students.ban');
     Route::post('/students/{id}/unban', [AdminStudentController::class, 'unban'])->name('admin.students.unban');

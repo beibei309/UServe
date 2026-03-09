@@ -6,20 +6,29 @@ use App\Models\Review;
 use App\Models\ServiceRequest;
 use App\Models\StudentService;
 <<<<<<< HEAD
+<<<<<<< HEAD
 use App\Models\Review;
 use App\Models\Cat;
 use App\Http\Controllers\PointsController;
 =======
+=======
+use App\Models\Cat;
+use App\Http\Controllers\PointsController;
+>>>>>>> develop
 use App\Notifications\ServiceRequestStatusUpdated;
 use App\Services\ServiceImageUrlResolver;
 use App\Services\ServiceRequestNotificationService;
 use Carbon\Carbon;
+<<<<<<< HEAD
 >>>>>>> 00141b2 (fix: stabilize helper request flows and mode switching)
+=======
+>>>>>>> develop
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+<<<<<<< HEAD
 <<<<<<< HEAD
 use Illuminate\Routing\Controller as BaseController;
 use App\Notifications\NewServiceRequest;
@@ -32,6 +41,9 @@ use Carbon\Carbon;
 =======
 use Illuminate\Support\Str;
 >>>>>>> 00141b2 (fix: stabilize helper request flows and mode switching)
+=======
+use Illuminate\Support\Str;
+>>>>>>> develop
 
 class ServiceRequestController extends BaseController
 {
@@ -54,6 +66,7 @@ class ServiceRequestController extends BaseController
             $validated = $request->validate([
                 'student_service_id' => 'required|exists:h2u_student_services,hss_id',
 <<<<<<< HEAD
+<<<<<<< HEAD
                 'selected_dates'     => 'required|date',
                 'start_time'         => 'nullable|string', 
                 'end_time'           => 'nullable|string',
@@ -61,23 +74,32 @@ class ServiceRequestController extends BaseController
                 'message'            => 'nullable|string|max:1000',
                 'offered_price'      => 'nullable|numeric|min:0|max:99999.99'
 =======
+=======
+>>>>>>> develop
                 'selected_dates' => 'required|date',
                 'start_time' => 'nullable|string',
                 'end_time' => 'nullable|string',
                 'selected_package' => 'required|string',
                 'message' => 'nullable|string|max:1000',
                 'offered_price' => 'nullable|numeric|min:0|max:99999.99',
+<<<<<<< HEAD
 >>>>>>> 00141b2 (fix: stabilize helper request flows and mode switching)
+=======
+>>>>>>> develop
             ]);
 
             $studentService = StudentService::findOrFail($validated['student_service_id']);
 
             // Check availability
 <<<<<<< HEAD
+<<<<<<< HEAD
             if (!$studentService->hss_is_active || !$studentService->user->hu_is_available) {
 =======
             if (! $studentService->hss_is_active || ! $studentService->user->hu_is_available) {
 >>>>>>> 00141b2 (fix: stabilize helper request flows and mode switching)
+=======
+            if (! $studentService->hss_is_active || ! $studentService->user->hu_is_available) {
+>>>>>>> develop
                 return response()->json([
                     'success' => false,
                     'message' => 'Service or provider unavailable.',
@@ -85,6 +107,7 @@ class ServiceRequestController extends BaseController
             }
 
             // Check for existing active requests from this user
+<<<<<<< HEAD
 <<<<<<< HEAD
          $hasActiveRequest = ServiceRequest::where('hsr_requester_id', $user->hu_id)
              ->where('hsr_student_service_id', $studentService->hss_id) // <--- CHANGED: Check specific service ID
@@ -94,6 +117,11 @@ class ServiceRequestController extends BaseController
                 ->where('hsr_student_service_id', $studentService->hss_id) // <--- CHANGED: Check specific service ID
                 ->whereIn('hsr_status', ['pending', 'accepted', 'in_progress'])
 >>>>>>> 00141b2 (fix: stabilize helper request flows and mode switching)
+=======
+            $hasActiveRequest = ServiceRequest::where('hsr_requester_id', $user->hu_id)
+                ->where('hsr_student_service_id', $studentService->hss_id) // <--- CHANGED: Check specific service ID
+                ->whereIn('hsr_status', ['pending', 'accepted', 'in_progress'])
+>>>>>>> develop
                 ->exists();
 
             if ($hasActiveRequest) {
@@ -110,10 +138,14 @@ class ServiceRequestController extends BaseController
             // If it is Session Based, we MUST have times and check overlap
             if ($studentService->hss_session_duration) {
 <<<<<<< HEAD
+<<<<<<< HEAD
                 if (!$startTime || !$endTime) {
 =======
                 if (! $startTime || ! $endTime) {
 >>>>>>> 00141b2 (fix: stabilize helper request flows and mode switching)
+=======
+                if (! $startTime || ! $endTime) {
+>>>>>>> develop
                     return response()->json([
                         'success' => false,
                         'message' => 'Start and End time are required for this service.',
@@ -147,6 +179,7 @@ class ServiceRequestController extends BaseController
             // Create Request
             $serviceRequest = ServiceRequest::create([
                 'hsr_student_service_id' => $studentService->hss_id,
+<<<<<<< HEAD
 <<<<<<< HEAD
                 'hsr_requester_id'       => $user->hu_id,
                 'hsr_provider_id'        => $studentService->hss_user_id,
@@ -194,10 +227,25 @@ class ServiceRequestController extends BaseController
 
             $this->serviceRequestNotificationService->notifyCreated($serviceRequest, $studentService, $user);
 >>>>>>> 00141b2 (fix: stabilize helper request flows and mode switching)
+=======
+                'hsr_requester_id' => $user->hu_id,
+                'hsr_provider_id' => $studentService->hss_user_id,
+                'hsr_selected_dates' => [$validated['selected_dates']],
+                'hsr_start_time' => $startTime,
+                'hsr_end_time' => $endTime,
+                'hsr_selected_package' => [$validated['selected_package']],
+                'hsr_message' => $validated['message'] ?? null,
+                'hsr_offered_price' => $validated['offered_price'] ?? null,
+                'hsr_status' => 'pending',
+            ]);
+
+            $this->serviceRequestNotificationService->notifyCreated($serviceRequest, $studentService, $user);
+>>>>>>> develop
 
             return response()->json([
                 'success' => true,
                 'message' => 'Service request sent successfully!',
+<<<<<<< HEAD
 <<<<<<< HEAD
                 'request_id' => $serviceRequest->hsr_id
             ]);
@@ -212,6 +260,14 @@ class ServiceRequestController extends BaseController
             Log::error('ServiceRequest store error: '.$e->getMessage());
 
 >>>>>>> 00141b2 (fix: stabilize helper request flows and mode switching)
+=======
+                'request_id' => $serviceRequest->hsr_id,
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('ServiceRequest store error: '.$e->getMessage());
+
+>>>>>>> develop
             return response()->json([
                 'success' => false,
                 'message' => 'Server error occurred.',
@@ -219,6 +275,7 @@ class ServiceRequestController extends BaseController
         }
     }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 public function index(Request $request)
 {
@@ -234,11 +291,16 @@ public function index(Request $request)
     $selectedServiceId = $request->input('service_type'); 
     $status = $request->input('status'); // NEW: Capture Status
 =======
+=======
+>>>>>>> develop
     public function index(Request $request)
     {
         $user = Auth::user();
         $defaultStatusTab = $request->input('tab', 'pending');
+<<<<<<< HEAD
 >>>>>>> 00141b2 (fix: stabilize helper request flows and mode switching)
+=======
+>>>>>>> develop
 
         // --- 1. DATA FOR DROPDOWNS ---
         $categories = \App\Models\Category::all();
@@ -250,6 +312,7 @@ public function index(Request $request)
         $status = $request->input('status'); // NEW: Capture Status
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     // ==========================================
     // 3. HELPER MODE (Seller View)
     // ==========================================
@@ -259,10 +322,16 @@ public function index(Request $request)
         $myServices = \App\Models\StudentService::where('hss_user_id', $user->hu_id)
                         ->selectRaw('hss_id as id, hss_title as title')
                         ->get();
+=======
+        // Safety: Reset service ID if it's invalid
+        if (is_array($selectedServiceId) || json_decode((string) $selectedServiceId)) {
+            $selectedServiceId = null;
+        }
+>>>>>>> develop
 
-        $query = \App\Models\ServiceRequest::where('hsr_provider_id', $user->hu_id)
-            ->with(['requester', 'provider', 'studentService.category', 'reviewForHelper', 'reviewByHelper']);
+        $viewMode = session('view_mode', 'buyer');
 
+<<<<<<< HEAD
         // A. Search
         if ($search) {
             $query->where(function($q) use ($search) {
@@ -356,11 +425,41 @@ public function index(Request $request)
                 ->orWhereHas('provider', function($subQ) use ($search) {
                     $subQ->where('hu_name', 'LIKE', "%{$search}%");
 =======
+=======
+        // ==========================================
+        // 3. HELPER MODE (Seller View)
+        // ==========================================
+        if ($user->hu_role === 'helper' && $viewMode === 'seller') {
+
+            // Fetch only THIS seller's services for the dropdown
+            $myServices = \App\Models\StudentService::where('hss_user_id', $user->hu_id)
+                ->selectRaw('hss_id as id, hss_title as title')
+                ->get();
+
+            $query = \App\Models\ServiceRequest::where('hsr_provider_id', $user->hu_id)
+                ->with(['requester', 'provider', 'studentService.category', 'reviewForHelper', 'reviewByHelper']);
+
+            // A. Search
+            if ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->whereHas('studentService', function ($subQ) use ($search) {
+                        $subQ->where('hss_title', 'LIKE', "%{$search}%");
+                    })
+                        ->orWhereHas('requester', function ($subQ) use ($search) {
+                            $subQ->where('hu_name', 'LIKE', "%{$search}%");
+                        });
+                });
+            }
+
+>>>>>>> develop
             // B. Category Filter
             if ($categoryId) {
                 $query->whereHas('studentService', function ($q) use ($categoryId) {
                     $q->where('hss_category_id', $categoryId);
+<<<<<<< HEAD
 >>>>>>> 00141b2 (fix: stabilize helper request flows and mode switching)
+=======
+>>>>>>> develop
                 });
             }
 
@@ -388,6 +487,7 @@ public function index(Request $request)
             ]);
         }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
         // B. Category Filter
         if ($categoryId) {
@@ -488,6 +588,68 @@ public function index(Request $request)
             ]);
         }
 >>>>>>> 00141b2 (fix: stabilize helper request flows and mode switching)
+=======
+        // ==========================================
+        // 4. BUYER MODE (Student View)
+        // ==========================================
+        else {
+            // Buyers see all services in the dropdown
+            $allServiceTypes = \App\Models\StudentService::selectRaw('hss_id as id, hss_title as title')->get();
+
+            $query = \App\Models\ServiceRequest::where('hsr_requester_id', $user->hu_id)
+                ->with(['requester', 'provider', 'studentService.category']);
+
+            // A. Search
+            if ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->whereHas('studentService', function ($subQ) use ($search) {
+                        $subQ->where('hss_title', 'LIKE', "%{$search}%");
+                    })
+                        ->orWhereHas('provider', function ($subQ) use ($search) {
+                            $subQ->where('hu_name', 'LIKE', "%{$search}%");
+                        });
+                });
+            }
+
+            // B. Category Filter
+            if ($categoryId) {
+                $query->whereHas('studentService', function ($q) use ($categoryId) {
+                    $q->where('hss_category_id', $categoryId);
+                });
+            }
+
+            // C. Service Type Filter
+            if ($selectedServiceId) {
+                $query->where('hsr_student_service_id', $selectedServiceId);
+            }
+
+            // D. Status Filter (NEW)
+            if ($status) {
+                $query->where('hsr_status', $status);
+            }
+
+            // Default Sort: Always Newest First
+            $query->orderBy('created_at', 'desc');
+
+            $sentRequests = $query->get();
+            $this->decorateRequestsForUi($sentRequests, $user->hu_id, false);
+            $uniqueCategories = $sentRequests
+                ->map(function (ServiceRequest $serviceRequest) {
+                    return optional(optional($serviceRequest->studentService)->category)->hc_name ?? 'Other';
+                })
+                ->unique()
+                ->sort()
+                ->values();
+
+            return view('service-requests.index', [
+                'sentRequests' => $sentRequests,
+                'categories' => $categories,
+                'serviceTypes' => $allServiceTypes,
+                'uniqueCategories' => $uniqueCategories,
+                'defaultStatusTab' => $defaultStatusTab,
+            ]);
+        }
+>>>>>>> develop
     }
 
     /**
@@ -543,6 +705,7 @@ public function index(Request $request)
         $contactPhone = $isProvider ? $serviceRequest->requester->hu_phone : $serviceRequest->provider->hu_phone;
 
 <<<<<<< HEAD
+<<<<<<< HEAD
         $serviceImageFallback = 'https://ui-avatars.com/api/?name=' . urlencode($service->hss_title ?? 'Service');
         $serviceImageUrl = null;
         if (!empty($service->hss_image_path)) {
@@ -560,12 +723,17 @@ public function index(Request $request)
             }
         }
 =======
+=======
+>>>>>>> develop
         $serviceImageFallback = 'https://ui-avatars.com/api/?name='.urlencode($service->hss_title ?? 'Service');
         $serviceImageUrl = $this->serviceImageUrlResolver->resolveGeneralImageUrl(
             $service->hss_image_path,
             $serviceImageFallback
         );
+<<<<<<< HEAD
 >>>>>>> 00141b2 (fix: stabilize helper request flows and mode switching)
+=======
+>>>>>>> develop
 
         $paymentProofUrl = null;
         $paymentProofIsPdf = false;
@@ -577,10 +745,14 @@ public function index(Request $request)
                 $paymentProofUrl = asset($proofPath);
             } else {
 <<<<<<< HEAD
+<<<<<<< HEAD
                 $paymentProofUrl = asset('storage/' . $proofPath);
 =======
                 $paymentProofUrl = asset('storage/'.$proofPath);
 >>>>>>> 00141b2 (fix: stabilize helper request flows and mode switching)
+=======
+                $paymentProofUrl = asset('storage/'.$proofPath);
+>>>>>>> develop
             }
             $paymentProofIsPdf = Str::endsWith(strtolower($proofPath), '.pdf');
         }
@@ -610,13 +782,24 @@ public function index(Request $request)
     private function decorateRequestsForUi($requests, int $currentUserId, bool $helperView): void
     {
 <<<<<<< HEAD
+<<<<<<< HEAD
         $reviewedIds = Review::where('hr_reviewer_id', $currentUserId)
             ->whereIn('hr_service_request_id', $requests->pluck('hsr_id')->all())
             ->pluck('hr_service_request_id')
             ->flip();
+=======
+        $requestIds = $requests->pluck('hsr_id')->all();
+        $reviewsByRequest = collect();
+        if (!empty($requestIds)) {
+            $reviewsByRequest = Review::whereIn('hr_service_request_id', $requestIds)
+                ->get()
+                ->groupBy('hr_service_request_id');
+        }
+>>>>>>> develop
 
-        $requests->transform(function (ServiceRequest $request) use ($reviewedIds, $helperView) {
+        $requests->transform(function (ServiceRequest $request) use ($reviewsByRequest, $helperView, $currentUserId) {
             $service = $request->studentService;
+<<<<<<< HEAD
 =======
         $requestIds = $requests->pluck('hsr_id')->all();
         $reviewsByRequest = collect();
@@ -630,6 +813,9 @@ public function index(Request $request)
             $service = $request->studentService;
             $requestReviews = $reviewsByRequest->get((int) $request->hsr_id, collect());
 >>>>>>> 00141b2 (fix: stabilize helper request flows and mode switching)
+=======
+            $requestReviews = $reviewsByRequest->get((int) $request->hsr_id, collect());
+>>>>>>> develop
             $selectedPackageRaw = is_array($request->hsr_selected_package)
                 ? ($request->hsr_selected_package[0] ?? 'custom')
                 : ($request->hsr_selected_package ?? 'custom');
@@ -661,12 +847,17 @@ public function index(Request $request)
 
             $request->ui_package_label = $packageLabel;
 <<<<<<< HEAD
+<<<<<<< HEAD
             $request->ui_pkg_duration = $service->{$pkgType . '_duration'} ?? null;
             $request->ui_pkg_frequency = $service->{$pkgType . '_frequency'} ?? null;
 =======
             $request->ui_pkg_duration = $service->{$pkgType.'_duration'} ?? null;
             $request->ui_pkg_frequency = $service->{$pkgType.'_frequency'} ?? null;
 >>>>>>> 00141b2 (fix: stabilize helper request flows and mode switching)
+=======
+            $request->ui_pkg_duration = $service->{$pkgType.'_duration'} ?? null;
+            $request->ui_pkg_frequency = $service->{$pkgType.'_frequency'} ?? null;
+>>>>>>> develop
             $request->ui_first_date_display = $firstDateDisplay;
             $request->ui_date_count = count($dates);
             $request->ui_is_seller_restricted = $isSellerRestricted;
@@ -675,9 +866,34 @@ public function index(Request $request)
             $request->ui_updated_human = optional($request->updated_at)->diffForHumans();
             $request->ui_updated_date = optional($request->updated_at)->format('M j, Y');
 <<<<<<< HEAD
+<<<<<<< HEAD
             $request->ui_reviewed_by_auth = isset($reviewedIds[$request->hsr_id]);
+=======
+            $request->ui_reviewed_by_auth = $requestReviews->contains(function (Review $review) use ($currentUserId) {
+                return (int) $review->hr_reviewer_id === $currentUserId;
+            });
+            $request->ui_review_for_helper = $requestReviews->first(function (Review $review) use ($request) {
+                return (int) $review->hr_reviewee_id === (int) $request->hsr_provider_id;
+            });
+            $request->ui_review_by_helper = $requestReviews->first(function (Review $review) use ($request) {
+                return (int) $review->hr_reviewer_id === (int) $request->hsr_provider_id;
+            });
+>>>>>>> develop
             $request->ui_display_id = str_pad((string) $request->hsr_id, 5, '0', STR_PAD_LEFT);
+            $paymentProofPath = (string) ($request->hsr_payment_proof ?? '');
+            $request->ui_has_payment_proof = $paymentProofPath !== '';
+            $request->ui_payment_proof_url = null;
+            if ($request->ui_has_payment_proof) {
+                if (Str::startsWith($paymentProofPath, ['http://', 'https://'])) {
+                    $request->ui_payment_proof_url = $paymentProofPath;
+                } elseif (Str::startsWith($paymentProofPath, 'storage/')) {
+                    $request->ui_payment_proof_url = asset($paymentProofPath);
+                } else {
+                    $request->ui_payment_proof_url = asset('storage/' . ltrim($paymentProofPath, '/'));
+                }
+            }
 
+<<<<<<< HEAD
             if (!$helperView) {
 =======
             $request->ui_reviewed_by_auth = $requestReviews->contains(function (Review $review) use ($currentUserId) {
@@ -705,6 +921,9 @@ public function index(Request $request)
 
             if (! $helperView) {
 >>>>>>> 00141b2 (fix: stabilize helper request flows and mode switching)
+=======
+            if (! $helperView) {
+>>>>>>> develop
                 $request->ui_status_text = strtoupper(str_replace('_', ' ', (string) $request->hsr_status));
                 $request->ui_inprogress_style = $this->resolveBuyerInProgressStyles($request->hsr_status, $isSellerRestricted);
                 $request->ui_completed_theme = $this->resolveBuyerCompletedTheme($request->hsr_status);
@@ -844,10 +1063,14 @@ public function index(Request $request)
         }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
         if (!$serviceRequest->isPending()) {
 =======
         if (! $serviceRequest->isPending()) {
 >>>>>>> 00141b2 (fix: stabilize helper request flows and mode switching)
+=======
+        if (! $serviceRequest->isPending()) {
+>>>>>>> develop
             return back()->with('error', 'This request cannot be accepted.');
         }
 
@@ -872,10 +1095,14 @@ public function index(Request $request)
         }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
         if (!$serviceRequest->isPending()) {
 =======
         if (! $serviceRequest->isPending()) {
 >>>>>>> 00141b2 (fix: stabilize helper request flows and mode switching)
+=======
+        if (! $serviceRequest->isPending()) {
+>>>>>>> develop
             return response()->json([
                 'success' => false,
                 'message' => 'This request cannot be rejected.',
@@ -892,10 +1119,14 @@ public function index(Request $request)
         $serviceRequest->update([
             'hsr_status' => 'rejected',
 <<<<<<< HEAD
+<<<<<<< HEAD
             'hsr_rejection_reason' => $request->rejection_reason
 =======
             'hsr_rejection_reason' => $request->rejection_reason,
 >>>>>>> 00141b2 (fix: stabilize helper request flows and mode switching)
+=======
+            'hsr_rejection_reason' => $request->rejection_reason,
+>>>>>>> develop
         ]);
 
         $serviceRequest->requester->notify(new ServiceRequestStatusUpdated($serviceRequest, 'rejected'));
@@ -909,6 +1140,7 @@ public function index(Request $request)
 
         // Only the provider can mark as in progress
 <<<<<<< HEAD
+<<<<<<< HEAD
        if ($serviceRequest->hsr_requester_id != $user->hu_id && $serviceRequest->hsr_provider_id != $user->hu_id) {
             abort(403, 'You are not authorized to update this request.');
         }
@@ -921,16 +1153,27 @@ public function index(Request $request)
 
         if (! $serviceRequest->isAccepted()) {
 >>>>>>> 00141b2 (fix: stabilize helper request flows and mode switching)
+=======
+        if ($serviceRequest->hsr_requester_id != $user->hu_id && $serviceRequest->hsr_provider_id != $user->hu_id) {
+            abort(403, 'You are not authorized to update this request.');
+        }
+
+        if (! $serviceRequest->isAccepted()) {
+>>>>>>> develop
             return back()->with('error', 'This request must be accepted first.');
         }
 
         $serviceRequest->update([
             'hsr_status' => 'in_progress',
 <<<<<<< HEAD
+<<<<<<< HEAD
             'hsr_started_at' => now(), 
 =======
             'hsr_started_at' => now(),
 >>>>>>> 00141b2 (fix: stabilize helper request flows and mode switching)
+=======
+            'hsr_started_at' => now(),
+>>>>>>> develop
         ]);
 
         $serviceRequest->requester->notify(new ServiceRequestStatusUpdated($serviceRequest, 'in_progress'));
@@ -948,20 +1191,28 @@ public function index(Request $request)
         }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
         if (!$serviceRequest->isInProgress()) {
 =======
         if (! $serviceRequest->isInProgress()) {
 >>>>>>> 00141b2 (fix: stabilize helper request flows and mode switching)
+=======
+        if (! $serviceRequest->isInProgress()) {
+>>>>>>> develop
             return back()->with('error', 'This request must be in progress first.');
         }
 
         $serviceRequest->update([
             'hsr_status' => 'waiting_payment',
 <<<<<<< HEAD
+<<<<<<< HEAD
             'hsr_finished_at' => now(), 
 =======
             'hsr_finished_at' => now(),
 >>>>>>> 00141b2 (fix: stabilize helper request flows and mode switching)
+=======
+            'hsr_finished_at' => now(),
+>>>>>>> develop
         ]);
 
         $serviceRequest->requester->notify(new ServiceRequestStatusUpdated($serviceRequest, 'waiting_payment'));
@@ -974,12 +1225,17 @@ public function index(Request $request)
     {
         // 1. Authorization
 <<<<<<< HEAD
+<<<<<<< HEAD
 	$user = Auth::user();
        if ($serviceRequest->hsr_requester_id != $user->hu_id && $serviceRequest->hsr_provider_id != $user->hu_id) {
 =======
         $user = Auth::user();
         if ($serviceRequest->hsr_requester_id != $user->hu_id && $serviceRequest->hsr_provider_id != $user->hu_id) {
 >>>>>>> 00141b2 (fix: stabilize helper request flows and mode switching)
+=======
+        $user = Auth::user();
+        if ($serviceRequest->hsr_requester_id != $user->hu_id && $serviceRequest->hsr_provider_id != $user->hu_id) {
+>>>>>>> develop
             abort(403);
         }
 
@@ -996,12 +1252,17 @@ public function index(Request $request)
                 $extension = strtolower($file->getClientOriginalExtension() ?: $file->extension() ?: 'bin');
                 $random = bin2hex(random_bytes(6));
 <<<<<<< HEAD
+<<<<<<< HEAD
                 $filename = 'payment_' . $serviceRequest->hsr_id . '_' . now()->format('YmdHis') . '_' . $random . '.' . $extension;
+=======
+                $filename = 'payment_'.$serviceRequest->hsr_id.'_'.now()->format('YmdHis').'_'.$random.'.'.$extension;
+>>>>>>> develop
 
                 $disk = Storage::disk('public');
                 $directory = 'payment_proofs';
-                $path = $directory . '/' . $filename;
+                $path = $directory.'/'.$filename;
 
+<<<<<<< HEAD
                 if (!$disk->exists($directory)) {
 =======
                 $filename = 'payment_'.$serviceRequest->hsr_id.'_'.now()->format('YmdHis').'_'.$random.'.'.$extension;
@@ -1012,15 +1273,22 @@ public function index(Request $request)
 
                 if (! $disk->exists($directory)) {
 >>>>>>> 00141b2 (fix: stabilize helper request flows and mode switching)
+=======
+                if (! $disk->exists($directory)) {
+>>>>>>> develop
                     $disk->makeDirectory($directory);
                 }
 
                 $tmpPath = $file->getRealPath() ?: $file->getPathname();
 <<<<<<< HEAD
+<<<<<<< HEAD
                 if (empty($tmpPath) || !is_file($tmpPath)) {
 =======
                 if (empty($tmpPath) || ! is_file($tmpPath)) {
 >>>>>>> 00141b2 (fix: stabilize helper request flows and mode switching)
+=======
+                if (empty($tmpPath) || ! is_file($tmpPath)) {
+>>>>>>> develop
                     return back()->withErrors([
                         'payment_proof' => 'Upload failed. Temporary upload file is missing. Please retry.',
                     ]);
@@ -1035,10 +1303,14 @@ public function index(Request $request)
 
                 $stored = $disk->put($path, $contents);
 <<<<<<< HEAD
+<<<<<<< HEAD
                 if (!$stored || !$disk->exists($path)) {
 =======
                 if (! $stored || ! $disk->exists($path)) {
 >>>>>>> 00141b2 (fix: stabilize helper request flows and mode switching)
+=======
+                if (! $stored || ! $disk->exists($path)) {
+>>>>>>> develop
                     return back()->withErrors(['payment_proof' => 'Payment proof upload failed. Please try again.']);
                 }
 
@@ -1059,10 +1331,14 @@ public function index(Request $request)
         // 4. Update Status
         $serviceRequest->update([
 <<<<<<< HEAD
+<<<<<<< HEAD
             'hsr_payment_status' => 'verification_status'
 =======
             'hsr_payment_status' => 'verification_status',
 >>>>>>> 00141b2 (fix: stabilize helper request flows and mode switching)
+=======
+            'hsr_payment_status' => 'verification_status',
+>>>>>>> develop
         ]);
 
         return back()->with('success', 'Payment confirmed! Waiting for seller verification.');
@@ -1072,12 +1348,17 @@ public function index(Request $request)
     {
         // 1. Authorization
 <<<<<<< HEAD
+<<<<<<< HEAD
 	$user = Auth::user();
        if ($serviceRequest->hsr_requester_id != $user->hu_id && $serviceRequest->hsr_provider_id != $user->hu_id) {
 =======
         $user = Auth::user();
         if ($serviceRequest->hsr_requester_id != $user->hu_id && $serviceRequest->hsr_provider_id != $user->hu_id) {
 >>>>>>> 00141b2 (fix: stabilize helper request flows and mode switching)
+=======
+        $user = Auth::user();
+        if ($serviceRequest->hsr_requester_id != $user->hu_id && $serviceRequest->hsr_provider_id != $user->hu_id) {
+>>>>>>> develop
             abort(403, 'Unauthorized action.');
         }
 
@@ -1100,6 +1381,7 @@ public function index(Request $request)
 
 <<<<<<< HEAD
             return back()->with('success', 'Payment confirmed and Order marked as Completed! Seller earned 1 point.');
+<<<<<<< HEAD
         } 
         
         else {
@@ -1107,6 +1389,9 @@ public function index(Request $request)
             return back()->with('success', 'Payment confirmed and Order marked as Completed!');
         } else {
 >>>>>>> 00141b2 (fix: stabilize helper request flows and mode switching)
+=======
+        } else {
+>>>>>>> develop
             $serviceRequest->update([
                 'hsr_status' => 'waiting_payment',          // We still close the order
                 'hsr_payment_status' => 'unpaid', // But flag it as a problem
@@ -1138,10 +1423,14 @@ public function index(Request $request)
             'hsr_status' => 'disputed',
             'hsr_dispute_reason' => $reason,
 <<<<<<< HEAD
+<<<<<<< HEAD
             'hsr_reported_by' => Auth::id()
 =======
             'hsr_reported_by' => Auth::id(),
 >>>>>>> 00141b2 (fix: stabilize helper request flows and mode switching)
+=======
+            'hsr_reported_by' => Auth::id(),
+>>>>>>> develop
         ]);
 
         return back()->with('success', 'Report submitted. Admin will review the case.');
@@ -1156,6 +1445,7 @@ public function index(Request $request)
         // 1. Update the Request Status
         $serviceRequest->update([
 <<<<<<< HEAD
+<<<<<<< HEAD
             'hsr_status' => 'disputed', 
             'hsr_payment_status' => 'dispute', 
             'hsr_dispute_reason' => $request->reason,
@@ -1166,6 +1456,12 @@ public function index(Request $request)
             'hsr_dispute_reason' => $request->reason,
             'hsr_reported_by' => Auth::id(),
 >>>>>>> 00141b2 (fix: stabilize helper request flows and mode switching)
+=======
+            'hsr_status' => 'disputed',
+            'hsr_payment_status' => 'dispute',
+            'hsr_dispute_reason' => $request->reason,
+            'hsr_reported_by' => Auth::id(),
+>>>>>>> develop
         ]);
 
         $buyerId = $serviceRequest->hsr_requester_id;
@@ -1212,10 +1508,14 @@ public function index(Request $request)
         }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
         if (!$serviceRequest->isInProgress()) {
 =======
         if (! $serviceRequest->isInProgress()) {
 >>>>>>> 00141b2 (fix: stabilize helper request flows and mode switching)
+=======
+        if (! $serviceRequest->isInProgress()) {
+>>>>>>> develop
             return back()->with('error', 'This request must be in progress first.');
         }
 
@@ -1243,9 +1543,13 @@ public function index(Request $request)
         $request = ServiceRequest::findOrFail($id);
         $request->update(['hsr_payment_status' => 'paid']);
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 
 >>>>>>> 00141b2 (fix: stabilize helper request flows and mode switching)
+=======
+
+>>>>>>> develop
         return back()->with('success', 'Payment status updated.');
     }
 
@@ -1255,10 +1559,14 @@ public function index(Request $request)
 
         // 1. Authorization
 <<<<<<< HEAD
+<<<<<<< HEAD
        if ($serviceRequest->hsr_requester_id != $user->hu_id && $serviceRequest->hsr_provider_id != $user->hu_id) {
 =======
         if ($serviceRequest->hsr_requester_id != $user->hu_id && $serviceRequest->hsr_provider_id != $user->hu_id) {
 >>>>>>> 00141b2 (fix: stabilize helper request flows and mode switching)
+=======
+        if ($serviceRequest->hsr_requester_id != $user->hu_id && $serviceRequest->hsr_provider_id != $user->hu_id) {
+>>>>>>> develop
             abort(403, 'You are not authorized to cancel this request.');
         }
 
@@ -1294,19 +1602,27 @@ public function index(Request $request)
         // Validate the new status
         $validated = $request->validate([
 <<<<<<< HEAD
+<<<<<<< HEAD
             'status' => 'required|in:pending,accepted,rejected,in_progress,waiting_payment,completed,cancelled,disputed,approved'
 =======
             'status' => 'required|in:pending,accepted,rejected,in_progress,waiting_payment,completed,cancelled,disputed,approved',
 >>>>>>> 00141b2 (fix: stabilize helper request flows and mode switching)
+=======
+            'status' => 'required|in:pending,accepted,rejected,in_progress,waiting_payment,completed,cancelled,disputed,approved',
+>>>>>>> develop
         ]);
 
         // Update the status
         $serviceRequest->update([
 <<<<<<< HEAD
+<<<<<<< HEAD
             'hsr_status' => $validated['status']
 =======
             'hsr_status' => $validated['status'],
 >>>>>>> 00141b2 (fix: stabilize helper request flows and mode switching)
+=======
+            'hsr_status' => $validated['status'],
+>>>>>>> develop
         ]);
 
         return response()->json([
@@ -1343,7 +1659,10 @@ public function index(Request $request)
         return back()->with('success', 'Review submitted!');
     }
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 =======
 >>>>>>> 00141b2 (fix: stabilize helper request flows and mode switching)
+=======
+>>>>>>> develop
 }

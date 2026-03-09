@@ -35,12 +35,17 @@ test('profile information can be updated', function () {
 
     $this->assertSame('Test User', $user->hu_name);
 <<<<<<< HEAD
+<<<<<<< HEAD
     $this->assertSame('test@example.com', $user->hu_email);
     $this->assertNull($user->hu_email_verified_at);
 =======
     $this->assertSame($originalEmail, $user->hu_email);
     $this->assertEquals($originalVerificationAt, $user->hu_email_verified_at);
 >>>>>>> 00141b2 (fix: stabilize helper request flows and mode switching)
+=======
+    $this->assertSame($originalEmail, $user->hu_email);
+    $this->assertEquals($originalVerificationAt, $user->hu_email_verified_at);
+>>>>>>> develop
 });
 
 test('email verification status is unchanged when the email address is unchanged', function () {
