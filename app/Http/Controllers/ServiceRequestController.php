@@ -2,28 +2,28 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Review;
 use App\Models\ServiceRequest;
 use App\Models\StudentService;
-use App\Models\Review;
 use App\Models\Cat;
 use App\Http\Controllers\PointsController;
+use App\Notifications\ServiceRequestStatusUpdated;
+use App\Services\ServiceImageUrlResolver;
+use App\Services\ServiceRequestNotificationService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Routing\Controller as BaseController;
-use App\Notifications\NewServiceRequest;
-use App\Notifications\ServiceRequestStatusUpdated;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
-use App\Mail\NewServiceRequestNotification;
-use Carbon\Carbon;
-
 
 class ServiceRequestController extends BaseController
 {
-    public function __construct()
-    {
+    public function __construct(
+        private readonly ServiceRequestNotificationService $serviceRequestNotificationService,
+        private readonly ServiceImageUrlResolver $serviceImageUrlResolver,
+    ) {
         $this->middleware('auth');
     }
 
@@ -34,22 +34,22 @@ class ServiceRequestController extends BaseController
     {
         try {
             $user = Auth::user();
-            
+
             // 1. Validate basic fields (Make times nullable for flexibility)
             $validated = $request->validate([
                 'student_service_id' => 'required|exists:h2u_student_services,hss_id',
-                'selected_dates'     => 'required|date',
-                'start_time'         => 'nullable|string', 
-                'end_time'           => 'nullable|string',
-                'selected_package'   => 'required|string',
-                'message'            => 'nullable|string|max:1000',
-                'offered_price'      => 'nullable|numeric|min:0|max:99999.99'
+                'selected_dates' => 'required|date',
+                'start_time' => 'nullable|string',
+                'end_time' => 'nullable|string',
+                'selected_package' => 'required|string',
+                'message' => 'nullable|string|max:1000',
+                'offered_price' => 'nullable|numeric|min:0|max:99999.99',
             ]);
 
             $studentService = StudentService::findOrFail($validated['student_service_id']);
 
             // Check availability
-            if (!$studentService->hss_is_active || !$studentService->user->hu_is_available) {
+            if (! $studentService->hss_is_active || ! $studentService->user->hu_is_available) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Service or provider unavailable.',
@@ -57,9 +57,9 @@ class ServiceRequestController extends BaseController
             }
 
             // Check for existing active requests from this user
-         $hasActiveRequest = ServiceRequest::where('hsr_requester_id', $user->hu_id)
-             ->where('hsr_student_service_id', $studentService->hss_id) // <--- CHANGED: Check specific service ID
-             ->whereIn('hsr_status', ['pending', 'accepted', 'in_progress'])
+            $hasActiveRequest = ServiceRequest::where('hsr_requester_id', $user->hu_id)
+                ->where('hsr_student_service_id', $studentService->hss_id) // <--- CHANGED: Check specific service ID
+                ->whereIn('hsr_status', ['pending', 'accepted', 'in_progress'])
                 ->exists();
 
             if ($hasActiveRequest) {
@@ -71,11 +71,11 @@ class ServiceRequestController extends BaseController
 
             // --- LOGIC SPLIT: Session vs Task ---
             $startTime = $validated['start_time'];
-            $endTime   = $validated['end_time'];
+            $endTime = $validated['end_time'];
 
             // If it is Session Based, we MUST have times and check overlap
             if ($studentService->hss_session_duration) {
-                if (!$startTime || !$endTime) {
+                if (! $startTime || ! $endTime) {
                     return response()->json([
                         'success' => false,
                         'message' => 'Start and End time are required for this service.',
@@ -102,55 +102,35 @@ class ServiceRequestController extends BaseController
                 }
             } else {
                 $startTime = $startTime ?? '00:00';
-                $endTime   = $endTime ?? '23:59';
-                
-        
+                $endTime = $endTime ?? '23:59';
+
             }
 
             // Create Request
             $serviceRequest = ServiceRequest::create([
                 'hsr_student_service_id' => $studentService->hss_id,
-                'hsr_requester_id'       => $user->hu_id,
-                'hsr_provider_id'        => $studentService->hss_user_id,
-                'hsr_selected_dates'     => [$validated['selected_dates']],
-                'hsr_start_time'         => $startTime,
-                'hsr_end_time'           => $endTime,
-                'hsr_selected_package'   => [$validated['selected_package']],
-                'hsr_message'            => $validated['message'] ?? null,
-                'hsr_offered_price'      => $validated['offered_price'] ?? null,
-                'hsr_status'             => 'pending'
+                'hsr_requester_id' => $user->hu_id,
+                'hsr_provider_id' => $studentService->hss_user_id,
+                'hsr_selected_dates' => [$validated['selected_dates']],
+                'hsr_start_time' => $startTime,
+                'hsr_end_time' => $endTime,
+                'hsr_selected_package' => [$validated['selected_package']],
+                'hsr_message' => $validated['message'] ?? null,
+                'hsr_offered_price' => $validated['offered_price'] ?? null,
+                'hsr_status' => 'pending',
             ]);
 
-            // Notify Provider + Email (non-blocking)
-            try {
-                $studentService->user->notify(new NewServiceRequest($serviceRequest));
-
-                if ($studentService->user->hu_email) {
-                    Mail::to($studentService->user->hu_email)
-                        ->send(new NewServiceRequestNotification($serviceRequest, 'provider'));
-                }
-
-                if ($user->hu_email) {
-                    Mail::to($user->hu_email)
-                        ->send(new NewServiceRequestNotification($serviceRequest, 'student'));
-                }
-            } catch (\Throwable $notifyError) {
-                Log::warning('ServiceRequest notifications failed: ' . $notifyError->getMessage(), [
-                    'service_request_id' => $serviceRequest->hsr_id,
-                    'requester_id' => $user->hu_id,
-                    'provider_id' => $studentService->hss_user_id,
-                ]);
-            }
-            
+            $this->serviceRequestNotificationService->notifyCreated($serviceRequest, $studentService, $user);
 
             return response()->json([
                 'success' => true,
                 'message' => 'Service request sent successfully!',
-                'request_id' => $serviceRequest->hsr_id
+                'request_id' => $serviceRequest->hsr_id,
             ]);
 
         } catch (\Exception $e) {
-            Log::error('ServiceRequest store error: ' . $e->getMessage());
+            Log::error('ServiceRequest store error: '.$e->getMessage());
+
             return response()->json([
                 'success' => false,
                 'message' => 'Server error occurred.',
@@ -158,144 +138,144 @@ class ServiceRequestController extends BaseController
         }
     }
 
-public function index(Request $request)
-{
-    $user = Auth::user();
-    $defaultStatusTab = $request->input('tab', 'pending');
-    
-    // --- 1. DATA FOR DROPDOWNS ---
-    $categories = \App\Models\Category::all();
-    
-    // --- 2. CAPTURE INPUTS ---
-    $search = $request->input('search');
-    $categoryId = $request->input('category');
-    $selectedServiceId = $request->input('service_type'); 
-    $status = $request->input('status'); // NEW: Capture Status
+    public function index(Request $request)
+    {
+        $user = Auth::user();
+        $defaultStatusTab = $request->input('tab', 'pending');
 
-    // Safety: Reset service ID if it's invalid
-    if (is_array($selectedServiceId) || json_decode((string)$selectedServiceId)) {
-        $selectedServiceId = null;
-    }
+        // --- 1. DATA FOR DROPDOWNS ---
+        $categories = \App\Models\Category::all();
 
-    $viewMode = session('view_mode', 'buyer');
+        // --- 2. CAPTURE INPUTS ---
+        $search = $request->input('search');
+        $categoryId = $request->input('category');
+        $selectedServiceId = $request->input('service_type');
+        $status = $request->input('status'); // NEW: Capture Status
 
-    // ==========================================
-    // 3. HELPER MODE (Seller View)
-    // ==========================================
-    if ($user->hu_role === 'helper' && $viewMode === 'seller') {
-        
-        // Fetch only THIS seller's services for the dropdown
-        $myServices = \App\Models\StudentService::where('hss_user_id', $user->hu_id)
-                        ->selectRaw('hss_id as id, hss_title as title')
-                        ->get();
+        // Safety: Reset service ID if it's invalid
+        if (is_array($selectedServiceId) || json_decode((string) $selectedServiceId)) {
+            $selectedServiceId = null;
+        }
 
-        $query = \App\Models\ServiceRequest::where('hsr_provider_id', $user->hu_id)
-            ->with(['requester', 'provider', 'studentService.category', 'reviewForHelper', 'reviewByHelper']);
+        $viewMode = session('view_mode', 'buyer');
 
-        // A. Search
-        if ($search) {
-            $query->where(function($q) use ($search) {
-                $q->whereHas('studentService', function($subQ) use ($search) {
-                    $subQ->where('hss_title', 'LIKE', "%{$search}%");
-                })
-                ->orWhereHas('requester', function($subQ) use ($search) {
-                    $subQ->where('hu_name', 'LIKE', "%{$search}%");
+        // ==========================================
+        // 3. HELPER MODE (Seller View)
+        // ==========================================
+        if ($user->hu_role === 'helper' && $viewMode === 'seller') {
+
+            // Fetch only THIS seller's services for the dropdown
+            $myServices = \App\Models\StudentService::where('hss_user_id', $user->hu_id)
+                ->selectRaw('hss_id as id, hss_title as title')
+                ->get();
+
+            $query = \App\Models\ServiceRequest::where('hsr_provider_id', $user->hu_id)
+                ->with(['requester', 'provider', 'studentService.category', 'reviewForHelper', 'reviewByHelper']);
+
+            // A. Search
+            if ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->whereHas('studentService', function ($subQ) use ($search) {
+                        $subQ->where('hss_title', 'LIKE', "%{$search}%");
+                    })
+                        ->orWhereHas('requester', function ($subQ) use ($search) {
+                            $subQ->where('hu_name', 'LIKE', "%{$search}%");
+                        });
                 });
-            });
-        }
+            }
 
-        // B. Category Filter
-        if ($categoryId) {
-            $query->whereHas('studentService', function($q) use ($categoryId) {
-                $q->where('hss_category_id', $categoryId);
-            });
-        }
-
-        // C. Service Type Filter
-        if ($selectedServiceId) {
-            $query->where('hsr_student_service_id', $selectedServiceId);
-        }
-
-        // D. Status Filter (NEW)
-        if ($status) {
-            $query->where('hsr_status', $status);
-        }
-
-        // Default Sort: Always Newest First
-        $query->orderBy('created_at', 'desc');
-
-        $receivedRequests = $query->get();
-        $this->decorateRequestsForUi($receivedRequests, $user->hu_id, true);
-
-        return view('service-requests.helper', [
-            'receivedRequests' => $receivedRequests,
-            'categories' => $categories,
-            'serviceTypes' => $myServices,
-            'defaultStatusTab' => $defaultStatusTab,
-        ]);
-    }
-
-    // ==========================================
-    // 4. BUYER MODE (Student View)
-    // ==========================================
-    else {
-        // Buyers see all services in the dropdown
-        $allServiceTypes = \App\Models\StudentService::selectRaw('hss_id as id, hss_title as title')->get();
-
-        $query = \App\Models\ServiceRequest::where('hsr_requester_id', $user->hu_id)
-            ->with(['requester', 'provider', 'studentService.category']);
-
-        // A. Search
-        if ($search) {
-            $query->where(function($q) use ($search) {
-                $q->whereHas('studentService', function($subQ) use ($search) {
-                    $subQ->where('hss_title', 'LIKE', "%{$search}%");
-                })
-                ->orWhereHas('provider', function($subQ) use ($search) {
-                    $subQ->where('hu_name', 'LIKE', "%{$search}%");
+            // B. Category Filter
+            if ($categoryId) {
+                $query->whereHas('studentService', function ($q) use ($categoryId) {
+                    $q->where('hss_category_id', $categoryId);
                 });
-            });
+            }
+
+            // C. Service Type Filter
+            if ($selectedServiceId) {
+                $query->where('hsr_student_service_id', $selectedServiceId);
+            }
+
+            // D. Status Filter (NEW)
+            if ($status) {
+                $query->where('hsr_status', $status);
+            }
+
+            // Default Sort: Always Newest First
+            $query->orderBy('created_at', 'desc');
+
+            $receivedRequests = $query->get();
+            $this->decorateRequestsForUi($receivedRequests, $user->hu_id, true);
+
+            return view('service-requests.helper', [
+                'receivedRequests' => $receivedRequests,
+                'categories' => $categories,
+                'serviceTypes' => $myServices,
+                'defaultStatusTab' => $defaultStatusTab,
+            ]);
         }
 
-        // B. Category Filter
-        if ($categoryId) {
-            $query->whereHas('studentService', function($q) use ($categoryId) {
-                $q->where('hss_category_id', $categoryId);
-            });
+        // ==========================================
+        // 4. BUYER MODE (Student View)
+        // ==========================================
+        else {
+            // Buyers see all services in the dropdown
+            $allServiceTypes = \App\Models\StudentService::selectRaw('hss_id as id, hss_title as title')->get();
+
+            $query = \App\Models\ServiceRequest::where('hsr_requester_id', $user->hu_id)
+                ->with(['requester', 'provider', 'studentService.category']);
+
+            // A. Search
+            if ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->whereHas('studentService', function ($subQ) use ($search) {
+                        $subQ->where('hss_title', 'LIKE', "%{$search}%");
+                    })
+                        ->orWhereHas('provider', function ($subQ) use ($search) {
+                            $subQ->where('hu_name', 'LIKE', "%{$search}%");
+                        });
+                });
+            }
+
+            // B. Category Filter
+            if ($categoryId) {
+                $query->whereHas('studentService', function ($q) use ($categoryId) {
+                    $q->where('hss_category_id', $categoryId);
+                });
+            }
+
+            // C. Service Type Filter
+            if ($selectedServiceId) {
+                $query->where('hsr_student_service_id', $selectedServiceId);
+            }
+
+            // D. Status Filter (NEW)
+            if ($status) {
+                $query->where('hsr_status', $status);
+            }
+
+            // Default Sort: Always Newest First
+            $query->orderBy('created_at', 'desc');
+
+            $sentRequests = $query->get();
+            $this->decorateRequestsForUi($sentRequests, $user->hu_id, false);
+            $uniqueCategories = $sentRequests
+                ->map(function (ServiceRequest $serviceRequest) {
+                    return optional(optional($serviceRequest->studentService)->category)->hc_name ?? 'Other';
+                })
+                ->unique()
+                ->sort()
+                ->values();
+
+            return view('service-requests.index', [
+                'sentRequests' => $sentRequests,
+                'categories' => $categories,
+                'serviceTypes' => $allServiceTypes,
+                'uniqueCategories' => $uniqueCategories,
+                'defaultStatusTab' => $defaultStatusTab,
+            ]);
         }
-
-        // C. Service Type Filter
-        if ($selectedServiceId) {
-            $query->where('hsr_student_service_id', $selectedServiceId);
-        }
-
-        // D. Status Filter (NEW)
-        if ($status) {
-            $query->where('hsr_status', $status);
-        }
-
-        // Default Sort: Always Newest First
-        $query->orderBy('created_at', 'desc');
-
-        $sentRequests = $query->get();
-        $this->decorateRequestsForUi($sentRequests, $user->hu_id, false);
-        $uniqueCategories = $sentRequests
-            ->map(function (ServiceRequest $serviceRequest) {
-                return optional(optional($serviceRequest->studentService)->category)->hc_name ?? 'Other';
-            })
-            ->unique()
-            ->sort()
-            ->values();
-
-        return view('service-requests.index', [
-            'sentRequests' => $sentRequests,
-            'categories' => $categories,
-            'serviceTypes' => $allServiceTypes,
-            'uniqueCategories' => $uniqueCategories,
-            'defaultStatusTab' => $defaultStatusTab,
-        ]);
     }
-}
 
     /**
      * Show a specific service request
@@ -303,17 +283,17 @@ public function index(Request $request)
     public function show(ServiceRequest $serviceRequest)
     {
         $user = Auth::user();
-        
+
         // Only requester and provider can view the request
         if ($serviceRequest->hsr_requester_id != $user->hu_id && $serviceRequest->hsr_provider_id != $user->hu_id) {
             abort(403, 'You are not authorized to view this request.');
         }
 
         $serviceRequest->load([
-            'studentService.category', 
-            'requester', 
+            'studentService.category',
+            'requester',
             'provider',
-            'reviews.reviewer'
+            'reviews.reviewer',
         ]);
         $service = $serviceRequest->studentService;
 
@@ -349,22 +329,11 @@ public function index(Request $request)
             ->contains(fn (Review $review) => (int) $review->hr_reviewer_id === $currentUserId);
         $contactPhone = $isProvider ? $serviceRequest->requester->hu_phone : $serviceRequest->provider->hu_phone;
 
-        $serviceImageFallback = 'https://ui-avatars.com/api/?name=' . urlencode($service->hss_title ?? 'Service');
-        $serviceImageUrl = null;
-        if (!empty($service->hss_image_path)) {
-            $path = $service->hss_image_path;
-            if (Str::startsWith($path, ['http://', 'https://'])) {
-                $serviceImageUrl = $path;
-            } elseif (Str::startsWith($path, 'storage/')) {
-                $serviceImageUrl = asset($path);
-            } elseif (file_exists(public_path('storage/' . $path))) {
-                $serviceImageUrl = asset('storage/' . $path);
-            } elseif (file_exists(public_path($path))) {
-                $serviceImageUrl = asset($path);
-            } else {
-                $serviceImageUrl = $serviceImageFallback;
-            }
-        }
+        $serviceImageFallback = 'https://ui-avatars.com/api/?name='.urlencode($service->hss_title ?? 'Service');
+        $serviceImageUrl = $this->serviceImageUrlResolver->resolveGeneralImageUrl(
+            $service->hss_image_path,
+            $serviceImageFallback
+        );
 
         $paymentProofUrl = null;
         $paymentProofIsPdf = false;
@@ -375,7 +344,7 @@ public function index(Request $request)
             } elseif (Str::startsWith($proofPath, 'storage/')) {
                 $paymentProofUrl = asset($proofPath);
             } else {
-                $paymentProofUrl = asset('storage/' . $proofPath);
+                $paymentProofUrl = asset('storage/'.$proofPath);
             }
             $paymentProofIsPdf = Str::endsWith(strtolower($proofPath), '.pdf');
         }
@@ -404,13 +373,17 @@ public function index(Request $request)
 
     private function decorateRequestsForUi($requests, int $currentUserId, bool $helperView): void
     {
-        $reviewedIds = Review::where('hr_reviewer_id', $currentUserId)
-            ->whereIn('hr_service_request_id', $requests->pluck('hsr_id')->all())
-            ->pluck('hr_service_request_id')
-            ->flip();
+        $requestIds = $requests->pluck('hsr_id')->all();
+        $reviewsByRequest = collect();
+        if (!empty($requestIds)) {
+            $reviewsByRequest = Review::whereIn('hr_service_request_id', $requestIds)
+                ->get()
+                ->groupBy('hr_service_request_id');
+        }
 
-        $requests->transform(function (ServiceRequest $request) use ($reviewedIds, $helperView) {
+        $requests->transform(function (ServiceRequest $request) use ($reviewsByRequest, $helperView, $currentUserId) {
             $service = $request->studentService;
+            $requestReviews = $reviewsByRequest->get((int) $request->hsr_id, collect());
             $selectedPackageRaw = is_array($request->hsr_selected_package)
                 ? ($request->hsr_selected_package[0] ?? 'custom')
                 : ($request->hsr_selected_package ?? 'custom');
@@ -441,8 +414,8 @@ public function index(Request $request)
             }
 
             $request->ui_package_label = $packageLabel;
-            $request->ui_pkg_duration = $service->{$pkgType . '_duration'} ?? null;
-            $request->ui_pkg_frequency = $service->{$pkgType . '_frequency'} ?? null;
+            $request->ui_pkg_duration = $service->{$pkgType.'_duration'} ?? null;
+            $request->ui_pkg_frequency = $service->{$pkgType.'_frequency'} ?? null;
             $request->ui_first_date_display = $firstDateDisplay;
             $request->ui_date_count = count($dates);
             $request->ui_is_seller_restricted = $isSellerRestricted;
@@ -450,10 +423,30 @@ public function index(Request $request)
             $request->ui_created_human = optional($request->created_at)->diffForHumans();
             $request->ui_updated_human = optional($request->updated_at)->diffForHumans();
             $request->ui_updated_date = optional($request->updated_at)->format('M j, Y');
-            $request->ui_reviewed_by_auth = isset($reviewedIds[$request->hsr_id]);
+            $request->ui_reviewed_by_auth = $requestReviews->contains(function (Review $review) use ($currentUserId) {
+                return (int) $review->hr_reviewer_id === $currentUserId;
+            });
+            $request->ui_review_for_helper = $requestReviews->first(function (Review $review) use ($request) {
+                return (int) $review->hr_reviewee_id === (int) $request->hsr_provider_id;
+            });
+            $request->ui_review_by_helper = $requestReviews->first(function (Review $review) use ($request) {
+                return (int) $review->hr_reviewer_id === (int) $request->hsr_provider_id;
+            });
             $request->ui_display_id = str_pad((string) $request->hsr_id, 5, '0', STR_PAD_LEFT);
+            $paymentProofPath = (string) ($request->hsr_payment_proof ?? '');
+            $request->ui_has_payment_proof = $paymentProofPath !== '';
+            $request->ui_payment_proof_url = null;
+            if ($request->ui_has_payment_proof) {
+                if (Str::startsWith($paymentProofPath, ['http://', 'https://'])) {
+                    $request->ui_payment_proof_url = $paymentProofPath;
+                } elseif (Str::startsWith($paymentProofPath, 'storage/')) {
+                    $request->ui_payment_proof_url = asset($paymentProofPath);
+                } else {
+                    $request->ui_payment_proof_url = asset('storage/' . ltrim($paymentProofPath, '/'));
+                }
+            }
 
-            if (!$helperView) {
+            if (! $helperView) {
                 $request->ui_status_text = strtoupper(str_replace('_', ' ', (string) $request->hsr_status));
                 $request->ui_inprogress_style = $this->resolveBuyerInProgressStyles($request->hsr_status, $isSellerRestricted);
                 $request->ui_completed_theme = $this->resolveBuyerCompletedTheme($request->hsr_status);
@@ -586,14 +579,13 @@ public function index(Request $request)
     public function accept(ServiceRequest $serviceRequest)
     {
         $user = Auth::user();
-        
 
         // Only the provider can accept
         if ($serviceRequest->hsr_requester_id != $user->hu_id && $serviceRequest->hsr_provider_id != $user->hu_id) {
             abort(403, 'You are not authorized to accept this request.');
         }
 
-        if (!$serviceRequest->isPending()) {
+        if (! $serviceRequest->isPending()) {
             return back()->with('error', 'This request cannot be accepted.');
         }
 
@@ -611,13 +603,13 @@ public function index(Request $request)
     public function reject(Request $request, ServiceRequest $serviceRequest)
     {
         $user = Auth::user();
-        
+
         // Authorization check
         if ($serviceRequest->hsr_requester_id != $user->hu_id && $serviceRequest->hsr_provider_id != $user->hu_id) {
             abort(403, 'You are not authorized to reject this request.');
         }
 
-        if (!$serviceRequest->isPending()) {
+        if (! $serviceRequest->isPending()) {
             return response()->json([
                 'success' => false,
                 'message' => 'This request cannot be rejected.',
@@ -633,7 +625,7 @@ public function index(Request $request)
         // 2. UPDATE: Save status AND reason
         $serviceRequest->update([
             'hsr_status' => 'rejected',
-            'hsr_rejection_reason' => $request->rejection_reason
+            'hsr_rejection_reason' => $request->rejection_reason,
         ]);
 
         $serviceRequest->requester->notify(new ServiceRequestStatusUpdated($serviceRequest, 'rejected'));
@@ -644,22 +636,21 @@ public function index(Request $request)
     public function markInProgress(ServiceRequest $serviceRequest)
     {
         $user = Auth::user();
-        
+
         // Only the provider can mark as in progress
-       if ($serviceRequest->hsr_requester_id != $user->hu_id && $serviceRequest->hsr_provider_id != $user->hu_id) {
+        if ($serviceRequest->hsr_requester_id != $user->hu_id && $serviceRequest->hsr_provider_id != $user->hu_id) {
             abort(403, 'You are not authorized to update this request.');
         }
 
-        if (!$serviceRequest->isAccepted()) {
+        if (! $serviceRequest->isAccepted()) {
             return back()->with('error', 'This request must be accepted first.');
         }
 
-        
         $serviceRequest->update([
             'hsr_status' => 'in_progress',
-            'hsr_started_at' => now(), 
+            'hsr_started_at' => now(),
         ]);
-       
+
         $serviceRequest->requester->notify(new ServiceRequestStatusUpdated($serviceRequest, 'in_progress'));
 
         return back()->with('success', 'Service marked as in progress!');
@@ -668,33 +659,32 @@ public function index(Request $request)
     public function markWorkFinished(ServiceRequest $serviceRequest)
     {
         $user = Auth::user();
-        
+
         // Only the provider can mark as in progress
         if ($serviceRequest->hsr_requester_id != $user->hu_id && $serviceRequest->hsr_provider_id != $user->hu_id) {
             abort(403, 'You are not authorized to update this request.');
         }
 
-        if (!$serviceRequest->isInProgress()) {
+        if (! $serviceRequest->isInProgress()) {
             return back()->with('error', 'This request must be in progress first.');
         }
 
-        
         $serviceRequest->update([
             'hsr_status' => 'waiting_payment',
-            'hsr_finished_at' => now(), 
+            'hsr_finished_at' => now(),
         ]);
-       
+
         $serviceRequest->requester->notify(new ServiceRequestStatusUpdated($serviceRequest, 'waiting_payment'));
 
         return back()->with('success', 'Service marked as finished!');
     }
 
     // BUYER/REQUESTER SIDE TO MAKE PAKMENT
-   public function buyerConfirmPayment(Request $request, ServiceRequest $serviceRequest)
+    public function buyerConfirmPayment(Request $request, ServiceRequest $serviceRequest)
     {
         // 1. Authorization
-	$user = Auth::user();
-       if ($serviceRequest->hsr_requester_id != $user->hu_id && $serviceRequest->hsr_provider_id != $user->hu_id) {
+        $user = Auth::user();
+        if ($serviceRequest->hsr_requester_id != $user->hu_id && $serviceRequest->hsr_provider_id != $user->hu_id) {
             abort(403);
         }
 
@@ -710,18 +700,18 @@ public function index(Request $request)
             try {
                 $extension = strtolower($file->getClientOriginalExtension() ?: $file->extension() ?: 'bin');
                 $random = bin2hex(random_bytes(6));
-                $filename = 'payment_' . $serviceRequest->hsr_id . '_' . now()->format('YmdHis') . '_' . $random . '.' . $extension;
+                $filename = 'payment_'.$serviceRequest->hsr_id.'_'.now()->format('YmdHis').'_'.$random.'.'.$extension;
 
                 $disk = Storage::disk('public');
                 $directory = 'payment_proofs';
-                $path = $directory . '/' . $filename;
+                $path = $directory.'/'.$filename;
 
-                if (!$disk->exists($directory)) {
+                if (! $disk->exists($directory)) {
                     $disk->makeDirectory($directory);
                 }
 
                 $tmpPath = $file->getRealPath() ?: $file->getPathname();
-                if (empty($tmpPath) || !is_file($tmpPath)) {
+                if (empty($tmpPath) || ! is_file($tmpPath)) {
                     return back()->withErrors([
                         'payment_proof' => 'Upload failed. Temporary upload file is missing. Please retry.',
                     ]);
@@ -735,7 +725,7 @@ public function index(Request $request)
                 }
 
                 $stored = $disk->put($path, $contents);
-                if (!$stored || !$disk->exists($path)) {
+                if (! $stored || ! $disk->exists($path)) {
                     return back()->withErrors(['payment_proof' => 'Payment proof upload failed. Please try again.']);
                 }
 
@@ -755,7 +745,7 @@ public function index(Request $request)
 
         // 4. Update Status
         $serviceRequest->update([
-            'hsr_payment_status' => 'verification_status'
+            'hsr_payment_status' => 'verification_status',
         ]);
 
         return back()->with('success', 'Payment confirmed! Waiting for seller verification.');
@@ -764,8 +754,8 @@ public function index(Request $request)
     public function finalizeOrder(Request $request, ServiceRequest $serviceRequest)
     {
         // 1. Authorization
-	$user = Auth::user();
-       if ($serviceRequest->hsr_requester_id != $user->hu_id && $serviceRequest->hsr_provider_id != $user->hu_id) {
+        $user = Auth::user();
+        if ($serviceRequest->hsr_requester_id != $user->hu_id && $serviceRequest->hsr_provider_id != $user->hu_id) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -787,9 +777,7 @@ public function index(Request $request)
             $serviceRequest->requester->notify(new ServiceRequestStatusUpdated($serviceRequest, 'completed'));
 
             return back()->with('success', 'Payment confirmed and Order marked as Completed! Seller earned 1 point.');
-        } 
-        
-        else {
+        } else {
             $serviceRequest->update([
                 'hsr_status' => 'waiting_payment',          // We still close the order
                 'hsr_payment_status' => 'unpaid', // But flag it as a problem
@@ -812,15 +800,15 @@ public function index(Request $request)
 
         // Concatenate reason if notes exist
         $reason = $request->dispute_reason;
-        if($request->additional_notes) {
-            $reason .= " - Note: " . $request->additional_notes;
+        if ($request->additional_notes) {
+            $reason .= ' - Note: '.$request->additional_notes;
         }
 
         // Update status to 'disputed'
         $serviceRequest->update([
             'hsr_status' => 'disputed',
             'hsr_dispute_reason' => $reason,
-            'hsr_reported_by' => Auth::id()
+            'hsr_reported_by' => Auth::id(),
         ]);
 
         return back()->with('success', 'Report submitted. Admin will review the case.');
@@ -834,10 +822,10 @@ public function index(Request $request)
 
         // 1. Update the Request Status
         $serviceRequest->update([
-            'hsr_status' => 'disputed', 
-            'hsr_payment_status' => 'dispute', 
+            'hsr_status' => 'disputed',
+            'hsr_payment_status' => 'dispute',
             'hsr_dispute_reason' => $request->reason,
-            'hsr_reported_by' => Auth::id()
+            'hsr_reported_by' => Auth::id(),
         ]);
 
         $buyerId = $serviceRequest->hsr_requester_id;
@@ -872,13 +860,13 @@ public function index(Request $request)
     public function markCompleted(ServiceRequest $serviceRequest)
     {
         $user = Auth::user();
-        
+
         // Only the provider can mark as completed
         if ($serviceRequest->hsr_requester_id != $user->hu_id && $serviceRequest->hsr_provider_id != $user->hu_id) {
             abort(403, 'You are not authorized to update this request.');
         }
 
-        if (!$serviceRequest->isInProgress()) {
+        if (! $serviceRequest->isInProgress()) {
             return back()->with('error', 'This request must be in progress first.');
         }
 
@@ -897,9 +885,11 @@ public function index(Request $request)
         return back()->with('success', 'Service marked as completed! Both parties can now leave reviews. You earned 1 point!');
     }
 
-        public function markAsPaid($id) {
+    public function markAsPaid($id)
+    {
         $request = ServiceRequest::findOrFail($id);
         $request->update(['hsr_payment_status' => 'paid']);
+
         return back()->with('success', 'Payment status updated.');
     }
 
@@ -908,7 +898,7 @@ public function index(Request $request)
         $user = Auth::user();
 
         // 1. Authorization
-       if ($serviceRequest->hsr_requester_id != $user->hu_id && $serviceRequest->hsr_provider_id != $user->hu_id) {
+        if ($serviceRequest->hsr_requester_id != $user->hu_id && $serviceRequest->hsr_provider_id != $user->hu_id) {
             abort(403, 'You are not authorized to cancel this request.');
         }
 
@@ -927,10 +917,11 @@ public function index(Request $request)
 
         return back()->with('success', 'Service request cancelled successfully.');
     }
-        public function updateStatus(Request $request, $id)
+
+    public function updateStatus(Request $request, $id)
     {
         $serviceRequest = ServiceRequest::findOrFail($id);
-        
+
         // Validate that the user owns the request or is the provider
         if (Auth::id() !== $serviceRequest->hsr_requester_id && Auth::id() !== $serviceRequest->hsr_provider_id) {
             return response()->json([
@@ -942,17 +933,17 @@ public function index(Request $request)
 
         // Validate the new status
         $validated = $request->validate([
-            'status' => 'required|in:pending,accepted,rejected,in_progress,waiting_payment,completed,cancelled,disputed,approved'
+            'status' => 'required|in:pending,accepted,rejected,in_progress,waiting_payment,completed,cancelled,disputed,approved',
         ]);
 
         // Update the status
         $serviceRequest->update([
-            'hsr_status' => $validated['status']
+            'hsr_status' => $validated['status'],
         ]);
 
         return response()->json([
-            'success' => true, 
-            'message' => 'Booking status updated to ' . $validated['status']
+            'success' => true,
+            'message' => 'Booking status updated to '.$validated['status'],
         ]);
     }
 
@@ -983,5 +974,4 @@ public function index(Request $request)
 
         return back()->with('success', 'Review submitted!');
     }
-
 }

@@ -165,8 +165,8 @@ public function index(Request $request)
             return redirect()->route('dashboard')->with('error', 'Your account is blocked from seller actions. You can continue using buyer features.');
         }
 
-        // Get current mode (default to 'seller' for helpers if not set)
-        $currentMode = session('view_mode', 'seller');
+        // Get current mode (default to buyer when not set to avoid first-click inversion)
+        $currentMode = session('view_mode', 'buyer');
 
         if ($currentMode === 'seller') {
             // Switch to Buying Mode

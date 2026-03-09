@@ -352,12 +352,16 @@
                                                 <svg class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                                 <span class="font-bold text-sm">Payment Proof Uploaded</span>
                                             </div>
-                                            
+
                                             {{-- Button: Normal Width --}}
-                                            <button type="button" data-open-proof="{{ $request->hsr_id }}" data-proof-url="{{ asset('storage/' . $request->hsr_payment_proof) }}"
-                                                class="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-blue-700 transition-all">
-                                                Check Proof
-                                            </button>
+                                            @if ($request->ui_has_payment_proof)
+                                                <button type="button" data-open-proof="{{ $request->hsr_id }}" data-proof-url="{{ $request->ui_payment_proof_url }}"
+                                                    class="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-blue-700 transition-all">
+                                                    Check Proof
+                                                </button>
+                                            @else
+                                                <span class="text-xs font-semibold text-red-600">Proof file is missing</span>
+                                            @endif
                                         </div>
                                     </div>
 
@@ -555,22 +559,22 @@
                             <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
                                 
                                 {{-- 1. Buyer's Review (Incoming) --}}
-                                @if ($request->reviewForHelper)
-                                    <button type="button" data-open-buyer-review='@json($request->reviewForHelper)' data-reviewer-name="{{ $request->requester->hu_name }}"
+                                @if ($request->ui_review_for_helper)
+                                    <button type="button" data-open-buyer-review='@json($request->ui_review_for_helper)' data-reviewer-name="{{ $request->requester->hu_name }}"
                                         class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-yellow-700 bg-yellow-50 hover:bg-yellow-100 border border-yellow-200 transition-all">
                                         <div class="flex gap-0.5 text-yellow-500">
                                             @for ($i = 1; $i <= 5; $i++)
-                                                <i class="{{ $i <= $request->reviewForHelper->hr_rating ? 'fas' : 'far' }} fa-star text-xs"></i>
+                                                <i class="{{ $i <= $request->ui_review_for_helper->hr_rating ? 'fas' : 'far' }} fa-star text-xs"></i>
                                             @endfor
                                         </div>
-                                        <span>{{ $request->reviewForHelper->hr_reply ? 'See Reply' : 'Reply' }}</span>
+                                        <span>{{ $request->ui_review_for_helper->hr_reply ? 'See Reply' : 'Reply' }}</span>
                                     </button>
                                 @elseif($request->hsr_status === 'completed')
                                     <span class="text-xs text-gray-400 italic py-2">Waiting for buyer review...</span>
                                 @endif
 
                                 {{-- 2. Seller's Review (Outgoing) --}}
-                                @if ($request->reviewByHelper)
+                                @if ($request->ui_reviewed_by_auth)
                                     <div class="inline-flex items-center justify-center gap-2 px-3 py-2 text-xs font-medium rounded-lg bg-green-50 text-green-700 border border-green-200">
                                         <i class="fas fa-check"></i> You rated buyer
                                     </div>
