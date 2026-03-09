@@ -98,6 +98,14 @@ class ServiceRequest extends Model
             return $this->hasOne(Review::class, 'hr_service_request_id', 'hsr_id');
     }
 
+    /**
+     * Get the seller points earned for this service request
+     */
+    public function sellerPoints()
+    {
+        return $this->hasMany(SellerPoint::class, 'hsp_service_request_id', 'hsr_id');
+    }
+
     public function reviewForHelper()
     {
             return $this->hasOne(Review::class, 'hr_service_request_id', 'hsr_id')
@@ -109,7 +117,6 @@ class ServiceRequest extends Model
             return $this->hasOne(Review::class, 'hr_service_request_id', 'hsr_id')
             ->where('hr_reviewer_id', $this->hsr_provider_id);
     }
-
 
     public function reviewForClient()
     {

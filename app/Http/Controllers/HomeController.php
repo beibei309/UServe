@@ -12,36 +12,49 @@ class HomeController extends Controller
 {
     public function home(Request $request)
     {
-        $q = $request->query('q'); // get ?q= from URL, or null if not present
+        try {
+            $q = $request->query('q', ''); // get ?q= from URL, or empty string if not present
+            $category_id = $request->query('category_id'); 
+            $min_rating = $request->query('min_rating');
+            $available = $request->query('available');
 
-        $category_id = $request->query('category_id'); 
-        $min_rating = $request->query('min_rating');
-        $available = $request->query('available');
+            $services = StudentService::with('category', 'user')
+                        ->where('hss_is_active', true)
+                        ->latest()
+                        ->get();        
+                        
+            $categories = Category::withCount(['services' => function ($q) {
+                $q->where('hss_is_active', true);
+            }])->get();
 
-        $services = StudentService::with('category', 'user')
-                    ->where('hss_is_active', true)
-                    ->latest()
-                    ->get();        
-                    
-        $categories = Category::withCount(['services' => function ($q) {
-            $q->where('hss_is_active', true);
-        }])->get();
+            //Display top provider
+            $topStudents = \App\Models\User::where('hu_role', 'student')
+            ->whereHas('services', function ($q) {
+                $q->where('hss_is_active', true);
+            })
+            ->withCount(['services' => function ($q) {
+                $q->where('hss_is_active', true);
+            }])
+            ->withAvg('reviewsReceived as average_rating', 'hr_rating')
+            ->orderByDesc('services_count')
+            ->take(6)
+            ->get();
 
-        //Display top provider
-        $topStudents = \App\Models\User::where('hu_role', 'student')
-        ->whereHas('services', function ($q) {
-            $q->where('hss_is_active', true);
-        })
-        ->withCount(['services' => function ($q) {
-            $q->where('hss_is_active', true);
-        }])
-        ->withAvg('reviewsReceived as average_rating', 'hr_rating')
-        ->orderByDesc('services_count')
-        ->take(6)
-        ->get();
-
-
-        return view('welcome', compact('services', 'categories','q', 'category_id', 'min_rating', 'available', 'topStudents'));
+            return view('welcome', compact('services', 'categories','q', 'category_id', 'min_rating', 'available', 'topStudents'));
+        } catch (\Exception $e) {
+            // In case of any error, return a simple view with empty data
+            \Log::error('Error in HomeController@home: ' . $e->getMessage());
+            
+            return view('welcome', [
+                'services' => collect([]),
+                'categories' => collect([]),
+                'q' => '',
+                'category_id' => null,
+                'min_rating' => null,
+                'available' => null,
+                'topStudents' => collect([])
+            ]);
+        }
     }
 
     public function services(Request $request): JsonResponse

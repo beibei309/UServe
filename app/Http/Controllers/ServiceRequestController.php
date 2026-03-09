@@ -6,6 +6,7 @@ use App\Models\ServiceRequest;
 use App\Models\StudentService;
 use App\Models\Review;
 use App\Models\Cat;
+use App\Http\Controllers\PointsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -779,10 +780,13 @@ public function index(Request $request)
                 'hsr_completed_at' => now(),          // Record completion time
             ]);
 
+            // Award seller points for completed sale
+            PointsController::awardPointsForCompletedService($serviceRequest);
+
             // Notify Buyer
             $serviceRequest->requester->notify(new ServiceRequestStatusUpdated($serviceRequest, 'completed'));
 
-            return back()->with('success', 'Payment confirmed and Order marked as Completed!');
+            return back()->with('success', 'Payment confirmed and Order marked as Completed! Seller earned 1 point.');
         } 
         
         else {
@@ -856,7 +860,10 @@ public function index(Request $request)
             $request->hsr_status = 'completed'; // Set directly to completed as requested
             $request->save();
             
-            return back()->with('success', 'Report cancelled. Order marked as completed.');
+            // Award seller points since order is now completed
+            PointsController::awardPointsForCompletedService($request);
+            
+            return back()->with('success', 'Report cancelled. Order marked as completed. Seller earned 1 point.');
         }
 
         return back()->with('error', 'Cannot cancel report at this stage.');
@@ -881,10 +888,13 @@ public function index(Request $request)
             'hsr_completed_at' => now(), // Rekod masa tamat kerja
         ]);
 
+        // Award seller points for completed service
+        PointsController::awardPointsForCompletedService($serviceRequest);
+
         // Notify Requester
         $serviceRequest->requester->notify(new ServiceRequestStatusUpdated($serviceRequest, 'completed'));
 
-        return back()->with('success', 'Service marked as completed! Both parties can now leave reviews.');
+        return back()->with('success', 'Service marked as completed! Both parties can now leave reviews. You earned 1 point!');
     }
 
         public function markAsPaid($id) {

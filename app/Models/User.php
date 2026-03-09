@@ -235,6 +235,32 @@ public function favoriteServices()
         return $this->hasMany(ServiceRequest::class, 'hsr_provider_id', 'hu_id');
     }
 
+    public function sellerPoints()
+    {
+        return $this->hasMany(SellerPoint::class, 'hsp_user_id', 'hu_id');
+    }
+
+    public function certificateRedemptions()
+    {
+        return $this->hasMany(CertificateRedemption::class, 'hcr_user_id', 'hu_id');
+    }
+
+    /**
+     * Get total seller points for this user
+     */
+    public function getTotalSellerPoints(): int
+    {
+        return $this->sellerPoints()->where('hsp_status', 'earned')->sum('hsp_points_earned');
+    }
+
+    /**
+     * Check if user has enough points for certificate redemption
+     */
+    public function canRedeemCertificate($requiredPoints = 1): bool
+    {
+        return $this->getTotalSellerPoints() >= $requiredPoints;
+    }
+
     public function getAuthPassword(): string
     {
         return (string) $this->hu_password;

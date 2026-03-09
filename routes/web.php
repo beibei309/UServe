@@ -14,6 +14,7 @@ use App\Http\Controllers\VerificationController;
 use App\Http\Controllers\StudentServiceController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ServiceRequestController;
+use App\Http\Controllers\PointsController;
 use App\Http\Controllers\Admin\SuperAdminController;
 use App\Http\Controllers\Admin\AdminFeedbackController;
 use App\Http\Controllers\Admin\ReportAdminController;
@@ -188,6 +189,14 @@ Route::middleware(['auth'])->group(function () {
         ->name('favorites.services.toggle');
     Route::get('/favorites', [FavoriteController::class, 'index'])
         ->name('favorites.index');
+
+    // Seller Points routes
+    Route::get('/points', [PointsController::class, 'dashboard'])->name('points.dashboard');
+    Route::get('/points/history', [PointsController::class, 'history'])->name('points.history');
+    Route::post('/points/redeem', [PointsController::class, 'redeemCertificate'])->name('points.redeem');
+    Route::post('/points/redeem-ajax', [PointsController::class, 'redeemCertificateAjax'])->name('points.redeem.ajax');
+    Route::delete('/points/redemptions/{redemption}', [PointsController::class, 'cancelRedemption'])->name('points.cancel-redemption');
+    Route::get('/points/certificates/{redemption}', [PointsController::class, 'certificate'])->name('points.certificate');
 });
 
 

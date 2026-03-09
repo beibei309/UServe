@@ -96,6 +96,11 @@
                         class="px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-indigo-600 hover:bg-gray-50 transition-colors duration-200 {{ request()->routeIs('service-requests.index') ? 'nav-link-active' : '' }}">
                         Incoming Orders
                     </a>
+                    <a href="{{ route('points.dashboard') }}"
+                        class="px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-indigo-600 hover:bg-gray-50 transition-colors duration-200 {{ request()->routeIs('points.*') ? 'nav-link-active' : '' }}">
+                        <i class="fas fa-coins mr-1 text-yellow-500"></i>
+                        Points
+                    </a>
                 @else
                     {{-- LINKS FOR BUYER / STUDENT --}}
                     <a href="{{ $isLoggedIn ? route('dashboard') : route('home') }}"
@@ -269,6 +274,10 @@
                 <a href="{{ route('service-requests.index') }}"
                     class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50">Incoming
                     Orders</a>
+                <a href="{{ route('points.dashboard') }}"
+                    class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50">
+                    <i class="fas fa-coins mr-2 text-yellow-500"></i>Points
+                </a>
             @else
                 {{-- MOBILE BUYER LINKS --}}
                 <a href="{{ $isLoggedIn ? route('dashboard') : route('home') }}"
