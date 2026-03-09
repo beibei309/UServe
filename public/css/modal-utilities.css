@@ -1,0 +1,15 @@
+/* Modal overlay utility class to handle display states */
+.modal-overlay {
+    display: none !important;
+}
+
+.modal-overlay.active {
+    display: flex !important;
+}
+
+/* For modals that use :target pseudo-class */
+.modal-overlay:target {
+    display: flex !important;
+}
+
+/* JavaScript will handle adding/removing the 'active' class for modal visibility */

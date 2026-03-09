@@ -20,10 +20,10 @@ return new class extends Migration
             $table->text('hcr_notes')->nullable();
             $table->timestamp('hcr_issued_at')->nullable();
             $table->timestamps();
-            
+
             // Foreign key constraint
             $table->foreign('hcr_user_id')->references('hu_id')->on('h2u_users')->onDelete('cascade');
-            
+
             // Indexes
             $table->index('hcr_user_id');
             $table->index('hcr_status');

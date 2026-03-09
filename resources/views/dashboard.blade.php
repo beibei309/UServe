@@ -164,56 +164,7 @@
             </div>
         </section>
 
-        {{-- Quick Access Points Section for Community Users --}}
-        @auth
-        @if(Auth::user()->isCommunity())
-        <section class="py-12 bg-gradient-to-r from-purple-50 to-pink-50 border-b border-gray-100">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="bg-white rounded-2xl shadow-lg border border-purple-100 p-8">
-                    <div class="flex flex-col md:flex-row items-center justify-between">
-                        <div class="flex items-center space-x-6 mb-6 md:mb-0">
-                            <div class="bg-gradient-to-br from-purple-500 to-pink-500 w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg">
-                                <i class="fas fa-coins text-white text-2xl"></i>
-                            </div>
-                            <div>
-                                <h3 class="text-2xl font-bold text-gray-900 mb-2">Your Points Dashboard</h3>
-                                <p class="text-gray-600">Track your purchase rewards and redeem exclusive benefits!</p>
-                                <div class="flex items-center space-x-4 mt-3">
-                                    <div class="bg-purple-100 px-3 py-1 rounded-full">
-                                        <span class="text-sm font-medium text-purple-700">
-                                            {{ Auth::user()->getTotalBuyerPoints() }} Points Earned
-                                        </span>
-                                    </div>
-                                    @if(App\Models\Reward::active()->where('hr_points_cost', '<=', Auth::user()->getAccessibleTotalPoints())->count() > 0)
-                                    <div class="bg-pink-100 px-3 py-1 rounded-full">
-                                        <span class="text-sm font-medium text-pink-700">
-                                            {{ App\Models\Reward::active()->where('hr_points_cost', '<=', Auth::user()->getAccessibleTotalPoints())->count() }} Rewards Available
-                                        </span>
-                                    </div>
-                                    @endif
-                                </div>
-                            </div>
-                        </div>
-                        <div class="flex flex-col sm:flex-row gap-4">
-                            <a href="{{ route('points.dashboard') }}" 
-                               class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-xl font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-200 shadow-lg hover:shadow-xl">
-                                <i class="fas fa-tachometer-alt mr-2"></i>
-                                View Dashboard
-                            </a>
-                            @if(Auth::user()->getTotalBuyerPoints() > 0)
-                            <a href="{{ route('points.dashboard') }}#points-store-section" 
-                               class="bg-white text-purple-600 px-6 py-3 rounded-xl font-semibold border-2 border-purple-200 hover:bg-purple-50 transition-all duration-200">
-                                <i class="fas fa-gift mr-2"></i>
-                                Shop Rewards
-                            </a>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-        @endif
-        @endauth
+
 
         <section class="py-16 bg-slate-50">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

@@ -119,6 +119,13 @@
                         class="px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-indigo-600 hover:bg-gray-50 transition-colors duration-200">
                         Help
                     </a>
+                    @auth
+                    <a href="{{ route('points.buyer.dashboard') }}"
+                        class="px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-indigo-600 hover:bg-gray-50 transition-colors duration-200 {{ request()->routeIs('points.buyer.*') ? 'nav-link-active' : '' }}">
+                        <i class="fas fa-gift mr-1 text-purple-500"></i>
+                        Rewards
+                    </a>
+                    @endauth
                 @endif
             </div>
 

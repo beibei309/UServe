@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\SellerPoint;
+use App\Models\BuyerPoint;
 use App\Models\CertificateRedemption;
+use App\Models\Reward;
+use App\Models\RewardRedemption;
 use App\Models\ServiceRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -20,12 +23,12 @@ class PointsController extends BaseController
     }
 
     /**
-     * Display the points dashboard for the authenticated user
+     * Display the seller points dashboard for the authenticated user
      */
     public function dashboard(): View
     {
         $user = Auth::user();
-        
+
         // Get user's points data
         $totalPoints = $user->getTotalSellerPoints();
         $recentPoints = $user->sellerPoints()
@@ -33,20 +36,20 @@ class PointsController extends BaseController
                              ->orderBy('created_at', 'desc')
                              ->take(10)
                              ->get();
-        
+
         // Get certificate redemptions
         $certificates = $user->certificateRedemptions()
                              ->orderBy('created_at', 'desc')
                              ->get();
-        
+
         // Check if user can redeem certificate
         $canRedeemCertificate = $user->canRedeemCertificate(1);
-        
+
         // Check if user already has a certificate achievement
         $hasCertificateAchievement = $user->certificateRedemptions()
                                           ->whereIn('hcr_status', ['pending', 'issued'])
                                           ->exists();
-        
+
         // Get points needed for next certificate
         $pointsNeededForCertificate = max(0, 1 - $totalPoints);
 
@@ -91,6 +94,36 @@ class PointsController extends BaseController
     }
 
     /**
+     * Award buyer points for a completed service request
+     * This method should be called when a service request is completed
+     */
+    public static function awardBuyerPointsForCompletedService(ServiceRequest $serviceRequest, int $points = 1): ?BuyerPoint
+    {
+        // Ensure we have a requester (buyer)
+        if (!$serviceRequest->hsr_requester_id) {
+            return null;
+        }
+
+        // Check if buyer points have already been awarded for this service request
+        $existingPoints = BuyerPoint::where('hbp_service_request_id', $serviceRequest->hsr_id)
+                                   ->where('hbp_user_id', $serviceRequest->hsr_requester_id)
+                                   ->first();
+
+        if ($existingPoints) {
+            return $existingPoints; // Points already awarded
+        }
+
+        // Create new buyer point record
+        return BuyerPoint::create([
+            'hbp_user_id' => $serviceRequest->hsr_requester_id,
+            'hbp_service_request_id' => $serviceRequest->hsr_id,
+            'hbp_points_earned' => $points,
+            'hbp_status' => 'earned',
+            'hbp_description' => 'Points earned for completing service request: ' . ($serviceRequest->studentService->hss_title ?? 'Service'),
+        ]);
+    }
+
+    /**
      * Redeem certificate using points (AJAX)
      */
     public function redeemCertificateAjax(Request $request)
@@ -123,7 +156,7 @@ class PointsController extends BaseController
 
             // Create certificate redemption record
             $certificateNumber = CertificateRedemption::generateCertificateNumber();
-            
+
             $redemption = CertificateRedemption::create([
                 'hcr_user_id' => $user->hu_id,
                 'hcr_points_used' => 0, // No points deducted - this is an achievement
@@ -186,7 +219,7 @@ class PointsController extends BaseController
 
             // Create certificate redemption record
             $certificateNumber = CertificateRedemption::generateCertificateNumber();
-            
+
             $redemption = CertificateRedemption::create([
                 'hcr_user_id' => $user->hu_id,
                 'hcr_points_used' => 0, // No points deducted - this is an achievement
@@ -265,7 +298,7 @@ class PointsController extends BaseController
     public function history(): View
     {
         $user = Auth::user();
-        
+
         $pointsHistory = $user->sellerPoints()
                               ->with('serviceRequest.studentService')
                               ->orderBy('created_at', 'desc')
@@ -287,5 +320,135 @@ class PointsController extends BaseController
         }
 
         return view('points.certificate', compact('redemption'));
+    }
+
+    /**
+     * Redeem a reward using points
+     */
+    public function redeemReward(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'reward_id' => 'required|exists:h2u_rewards,hr_id'
+        ]);
+
+        $user = Auth::user();
+        $reward = Reward::findOrFail($request->reward_id);
+
+        // Check if user can redeem this reward
+        if (!$reward->canUserRedeem($user)) {
+            return back()->with('error', 'You cannot redeem this reward at this time.');
+        }
+
+        try {
+            DB::beginTransaction();
+
+            // Calculate expiry date (30 days from redemption)
+            $expiresAt = now()->addDays(30);
+
+            // Generate redemption code
+            $redemptionCode = RewardRedemption::generateRedemptionCode($reward->hr_code_prefix);
+
+            // Create redemption record
+            $redemption = RewardRedemption::create([
+                'hrr_user_id' => $user->hu_id,
+                'hrr_reward_id' => $reward->hr_id,
+                'hrr_points_used' => $reward->hr_points_cost,
+                'hrr_redemption_code' => $redemptionCode,
+                'hrr_status' => 'active',
+                'hrr_redeemed_at' => now(),
+                'hrr_expires_at' => $expiresAt,
+            ]);
+
+            // Deduct points by creating negative point entry in buyer points
+            // (since rewards are for buyers/requesters)
+            BuyerPoint::create([
+                'hbp_user_id' => $user->hu_id,
+                'hbp_service_request_id' => null,
+                'hbp_points_earned' => -$reward->hr_points_cost,
+                'hbp_status' => 'earned',
+                'hbp_description' => "Points used for reward: {$reward->hr_title} (Code: {$redemptionCode})",
+            ]);
+
+            DB::commit();
+
+            return back()->with('success', "Reward redeemed successfully! Your code is: {$redemptionCode}");
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            return back()->with('error', 'An error occurred while redeeming the reward. Please try again.');
+        }
+    }
+
+    /**
+     * Get available rewards for dashboard
+     */
+    public function getAvailableRewards()
+    {
+        return Reward::active()
+                    ->orderBy('hr_points_cost')
+                    ->get();
+    }
+
+    /**
+     * Get user's reward redemptions
+     */
+    public function getUserRewardRedemptions($user, int $limit = 5)
+    {
+        return $user->rewardRedemptions()
+                   ->with('reward')
+                   ->orderBy('hrr_redeemed_at', 'desc')
+                   ->take($limit)
+                   ->get();
+    }
+
+    /**
+     * Display the buyer points dashboard for the authenticated user
+     */
+    public function buyerDashboard(): View
+    {
+        $user = Auth::user();
+
+        // Get buyer points data
+        $buyerPoints = $user->getTotalBuyerPoints();
+        $totalEarnedPoints = $user->buyerPoints()
+                                 ->where('hbp_status', 'earned')
+                                 ->where('hbp_points_earned', '>', 0) // Only positive points (earned, not spent)
+                                 ->sum('hbp_points_earned');
+        
+        $recentBuyerPoints = $user->buyerPoints()
+                                 ->with('serviceRequest.studentService')
+                                 ->where('hbp_points_earned', '>', 0) // Only earned points
+                                 ->orderBy('created_at', 'desc')
+                                 ->take(10)
+                                 ->get();
+
+        // Get available rewards
+        $availableRewards = $this->getAvailableRewards();
+
+        // Get user's reward redemptions
+        $rewardRedemptions = $this->getUserRewardRedemptions($user, 5);
+
+        return view('points.buyer-dashboard', compact(
+            'buyerPoints',
+            'totalEarnedPoints',
+            'recentBuyerPoints',
+            'availableRewards',
+            'rewardRedemptions'
+        ));
+    }
+
+    /**
+     * Display buyer points history
+     */
+    public function buyerHistory(): View
+    {
+        $user = Auth::user();
+
+        $buyerPointsHistory = $user->buyerPoints()
+                                  ->with('serviceRequest.studentService')
+                                  ->orderBy('created_at', 'desc')
+                                  ->paginate(20);
+
+        return view('points.buyer-history', compact('buyerPointsHistory'));
     }
 }

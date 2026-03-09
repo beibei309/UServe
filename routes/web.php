@@ -187,13 +187,18 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/favorites', [FavoriteController::class, 'index'])
         ->name('favorites.index');
 
-    // Seller Points routes
+    // Points System routes
     Route::get('/points', [PointsController::class, 'dashboard'])->name('points.dashboard');
     Route::get('/points/history', [PointsController::class, 'history'])->name('points.history');
     Route::post('/points/redeem', [PointsController::class, 'redeemCertificate'])->name('points.redeem');
     Route::post('/points/redeem-ajax', [PointsController::class, 'redeemCertificateAjax'])->name('points.redeem.ajax');
     Route::delete('/points/redemptions/{redemption}', [PointsController::class, 'cancelRedemption'])->name('points.cancel-redemption');
     Route::get('/points/certificates/{redemption}', [PointsController::class, 'certificate'])->name('points.certificate');
+    
+    // Buyer Points & Rewards routes
+    Route::get('/points/buyer', [PointsController::class, 'buyerDashboard'])->name('points.buyer.dashboard');
+    Route::get('/points/buyer/history', [PointsController::class, 'buyerHistory'])->name('points.buyer.history');
+    Route::post('/points/rewards/redeem', [PointsController::class, 'redeemReward'])->name('points.rewards.redeem');
 });
 
 // Public JSON endpoints

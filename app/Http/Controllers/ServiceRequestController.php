@@ -770,13 +770,14 @@ class ServiceRequestController extends BaseController
                 'hsr_completed_at' => now(),          // Record completion time
             ]);
 
-            // Award seller points for completed sale
-            PointsController::awardPointsForCompletedService($serviceRequest);
+            // Award points for completed service
+            PointsController::awardPointsForCompletedService($serviceRequest); // Seller points
+            PointsController::awardBuyerPointsForCompletedService($serviceRequest); // Buyer points
 
             // Notify Buyer
             $serviceRequest->requester->notify(new ServiceRequestStatusUpdated($serviceRequest, 'completed'));
 
-            return back()->with('success', 'Payment confirmed and Order marked as Completed! Seller earned 1 point.');
+            return back()->with('success', 'Payment confirmed and Order marked as Completed! Both parties earned 1 point each.');
         } else {
             $serviceRequest->update([
                 'hsr_status' => 'waiting_payment',          // We still close the order
@@ -848,10 +849,11 @@ class ServiceRequestController extends BaseController
             $request->hsr_status = 'completed'; // Set directly to completed as requested
             $request->save();
             
-            // Award seller points since order is now completed
-            PointsController::awardPointsForCompletedService($request);
+            // Award points for completed service
+            PointsController::awardPointsForCompletedService($request); // Seller points  
+            PointsController::awardBuyerPointsForCompletedService($request); // Buyer points
             
-            return back()->with('success', 'Report cancelled. Order marked as completed. Seller earned 1 point.');
+            return back()->with('success', 'Report cancelled. Order marked as completed. Both parties earned 1 point each.');
         }
 
         return back()->with('error', 'Cannot cancel report at this stage.');
@@ -876,13 +878,14 @@ class ServiceRequestController extends BaseController
             'hsr_completed_at' => now(), // Rekod masa tamat kerja
         ]);
 
-        // Award seller points for completed service
-        PointsController::awardPointsForCompletedService($serviceRequest);
+        // Award points for completed service
+        PointsController::awardPointsForCompletedService($serviceRequest); // Seller points
+        PointsController::awardBuyerPointsForCompletedService($serviceRequest); // Buyer points
 
         // Notify Requester
         $serviceRequest->requester->notify(new ServiceRequestStatusUpdated($serviceRequest, 'completed'));
 
-        return back()->with('success', 'Service marked as completed! Both parties can now leave reviews. You earned 1 point!');
+        return back()->with('success', 'Service marked as completed! Both parties can now leave reviews. You both earned 1 point each!');
     }
 
     public function markAsPaid($id)

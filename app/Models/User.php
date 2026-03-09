@@ -4,6 +4,15 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Models\Review;
+use App\Models\BuyerPoint;
+use App\Models\SellerPoint;
+use App\Models\CertificateRedemption;
+use App\Models\RewardRedemption;
+use App\Models\StudentService;
+use App\Models\ServiceRequest;
+use App\Models\Favorite;
+use App\Models\StudentStatus;
+use App\Models\DatabaseNotification;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -52,7 +61,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'hu_location_verified_at',
         'skills',
         'hu_work_experience_message',
-        'hu_work_experience_file', 
+        'hu_work_experience_file',
         'hu_verification_document_path',
         'hu_verification_note',
         'hu_helper_verified_at',
@@ -102,7 +111,7 @@ class User extends Authenticatable implements MustVerifyEmail
     /** Backward compatibility aliases */
     public function studentServices() { return $this->services(); }
     public function student_services() { return $this->services(); }
-    
+
     public function reviewsReceived()
     {
         return $this->hasMany(Review::class, 'hr_reviewee_id', 'hu_id');
@@ -112,7 +121,7 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(Review::class, 'hr_reviewer_id', 'hu_id');
     }
-    
+
 
 
 public function favoriteServices()
@@ -134,7 +143,7 @@ public function favoriteServices()
 
     public function notifications(): MorphMany
     {
-        return $this->morphMany(DatabaseNotification::class, 'hn_notifiable')
+        return $this->morphMany(DatabaseNotification::class, 'hn_notifiable', 'hn_notifiable_type', 'hn_notifiable_id')
             ->orderBy('created_at', 'desc');
     }
 
@@ -240,9 +249,19 @@ public function favoriteServices()
         return $this->hasMany(SellerPoint::class, 'hsp_user_id', 'hu_id');
     }
 
+    public function buyerPoints()
+    {
+        return $this->hasMany(BuyerPoint::class, 'hbp_user_id', 'hu_id');
+    }
+
     public function certificateRedemptions()
     {
         return $this->hasMany(CertificateRedemption::class, 'hcr_user_id', 'hu_id');
+    }
+
+    public function rewardRedemptions()
+    {
+        return $this->hasMany(RewardRedemption::class, 'hrr_user_id', 'hu_id');
     }
 
     /**
@@ -251,6 +270,50 @@ public function favoriteServices()
     public function getTotalSellerPoints(): int
     {
         return $this->sellerPoints()->where('hsp_status', 'earned')->sum('hsp_points_earned');
+    }
+
+    /**
+     * Get total buyer points for this user
+     */
+    public function getTotalBuyerPoints(): int
+    {
+        return $this->buyerPoints()->where('hbp_status', 'earned')->sum('hbp_points_earned');
+    }
+
+    /**
+     * Get total points (seller + buyer) for this user
+     */
+    public function getTotalPoints(): int
+    {
+        return $this->getTotalSellerPoints() + $this->getTotalBuyerPoints();
+    }
+
+    /**
+     * Get accessible total points based on user role
+     */
+    public function getAccessibleTotalPoints(): int
+    {
+        if ($this->canAccessSellerFeatures()) {
+            return $this->getTotalPoints(); // Students: both seller + buyer points
+        } else {
+            return $this->getTotalBuyerPoints(); // Community: only buyer points
+        }
+    }
+
+    /**
+     * Check if user can access seller features (students only)
+     */
+    public function canAccessSellerFeatures(): bool
+    {
+        return $this->hu_role === 'student';
+    }
+
+    /**
+     * Check if user can access buyer features (all users)
+     */
+    public function canAccessBuyerFeatures(): bool
+    {
+        return true; // All users can request services and earn buyer points
     }
 
     /**
@@ -291,5 +354,63 @@ public function favoriteServices()
         return $this->forceFill([
             'hu_email_verified_at' => $this->freshTimestamp(),
         ])->save();
+    }
+
+    /**
+     * Override Notifiable trait methods to use custom column names
+     */
+    public function unreadNotifications()
+    {
+        return $this->morphMany(DatabaseNotification::class, 'hn_notifiable', 'hn_notifiable_type', 'hn_notifiable_id')
+            ->whereNull('hn_read_at')
+            ->orderBy('created_at', 'desc');
+    }
+
+    public function readNotifications()
+    {
+        return $this->morphMany(DatabaseNotification::class, 'hn_notifiable', 'hn_notifiable_type', 'hn_notifiable_id')
+            ->whereNotNull('hn_read_at')
+            ->orderBy('created_at', 'desc');
+    }
+
+    /**
+     * Get the entity's read notifications count.
+     */
+    public function getReadNotificationsCountAttribute()
+    {
+        return $this->readNotifications()->count();
+    }
+
+    /**
+     * Get the entity's unread notifications count.
+     */
+    public function getUnreadNotificationsCountAttribute()  
+    {
+        return $this->unreadNotifications()->count();
+    }
+
+    /**
+     * Override the notify method to ensure proper routing
+     */
+    public function routeNotificationFor($driver, $notification = null)
+    {
+        if ($driver === 'database') {
+            return $this;
+        }
+
+        return parent::routeNotificationFor($driver, $notification);
+    }
+
+    /**
+     * Override morphMany for notifications to use custom columns
+     */
+    public function morphMany($related, $name, $type = null, $id = null, $localKey = null)
+    {
+        if ($related === DatabaseNotification::class && $name === 'hn_notifiable') {
+            // Force the correct column names for this specific relationship
+            return parent::morphMany($related, $name, $type ?? 'hn_notifiable_type', $id ?? 'hn_notifiable_id', $localKey);
+        }
+        
+        return parent::morphMany($related, $name, $type, $id, $localKey);
     }
 }

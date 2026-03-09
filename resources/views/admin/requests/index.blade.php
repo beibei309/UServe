@@ -185,12 +185,12 @@
 
     {{-- VIEW DETAIL MODAL --}}
     <div id="viewDetailModal"
-        class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center backdrop-blur-sm p-4">
+        class="modal-overlay fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center backdrop-blur-sm p-4">
         <div class="rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden max-h-[90vh] overflow-y-auto transition-all duration-300"
              style="background-color: var(--bg-primary);">
 
             {{-- Gradient Header --}}
-            <div class="relative bg-gradient-to-r from-cyan-600 to-indigo-700 px-6 py-5 flex justify-between items-center sticky top-0 z-10">
+            <div class="bg-gradient-to-r from-cyan-600 to-indigo-700 px-6 py-5 flex justify-between items-center sticky top-0 z-10">
                 <div>
                     <div class="flex items-center gap-3 mb-1">
                         <div class="w-10 h-10 rounded-xl bg-white bg-opacity-20 flex items-center justify-center">
@@ -328,7 +328,7 @@
 
     {{-- DISPUTE RESOLUTION MODAL --}}
     <div id="disciplineModal"
-        class="fixed inset-0 bg-gray-900 bg-opacity-60 hidden z-50 flex items-start sm:items-center justify-center backdrop-blur-sm p-3 sm:p-4">
+        class="modal-overlay fixed inset-0 bg-gray-900 bg-opacity-60 z-50 items-start sm:items-center justify-center backdrop-blur-sm p-3 sm:p-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[92vh] overflow-hidden flex flex-col">
 
             <div class="bg-gray-900 px-6 py-4 flex justify-between items-center">

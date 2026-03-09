@@ -12,6 +12,15 @@ class DatabaseNotification extends BaseDatabaseNotification
     public $incrementing = false;
     protected $keyType = 'string';
 
+    // Set the morphable column names
+    protected $morphClass = 'App\\Models\\DatabaseNotification';
+    
+    // Override the morph column names
+    public function getMorphClass()
+    {
+        return 'App\\Models\\DatabaseNotification';
+    }
+
     protected $casts = [
         'hn_data' => 'array',
         'hn_read_at' => 'datetime',
@@ -85,5 +94,36 @@ class DatabaseNotification extends BaseDatabaseNotification
     public function getReadAtAttribute()
     {
         return $this->attributes['hn_read_at'] ?? null;
+    }
+
+    /**
+     * Get the notifiable entity that the notification belongs to.
+     */
+    public function notifiable()
+    {
+        return $this->morphTo('hn_notifiable', 'hn_notifiable_type', 'hn_notifiable_id');
+    }
+
+    /**
+     * Override to use custom column names
+     */
+    public function getNotifiableTypeAttribute()
+    {
+        return $this->attributes['hn_notifiable_type'] ?? null;
+    }
+
+    public function setNotifiableTypeAttribute($value)
+    {
+        $this->attributes['hn_notifiable_type'] = $value;
+    }
+
+    public function getNotifiableIdAttribute()
+    {
+        return $this->attributes['hn_notifiable_id'] ?? null;
+    }
+
+    public function setNotifiableIdAttribute($value)
+    {
+        $this->attributes['hn_notifiable_id'] = $value;
     }
 }

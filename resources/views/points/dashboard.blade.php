@@ -18,7 +18,7 @@
                     </div>
                 </div>
                 <div class="mt-4 sm:mt-0">
-                    <a href="{{ route('points.history') }}" 
+                    <a href="{{ route('points.history') }}"
                        class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors w-full sm:w-auto justify-center">
                         <i class="fas fa-history mr-2"></i>
                         View History
@@ -81,7 +81,7 @@
                     // Ensure minimum 15% width for visibility when points > 0
                     $displayWidth = $totalPoints > 0 ? max(15, $progressPercentage) : 0;
                 @endphp
-                <div class="h-full rounded-full transition-all duration-500" 
+                <div class="h-full rounded-full transition-all duration-500"
                      style="width: {{ $displayWidth }}%; background: linear-gradient(to right, #10b981, #059669);">
                 </div>
             </div>
@@ -93,11 +93,11 @@
                 @else
                     <p class="text-gray-600 text-sm sm:text-base">Complete {{ $pointsNeededForCertificate }} more sale to unlock the certificate achievement!</p>
                 @endif
-                
+
                 <div class="w-full sm:w-auto mt-4 sm:mt-0">
                     @if ($hasCertificateAchievement)
                         <div class="w-full sm:w-auto" style="display: block; width: 100%;">
-                            <button disabled 
+                            <button disabled
                                     style="display: block !important; visibility: visible !important; opacity: 1 !important; background: #10b981 !important; color: white !important; padding: 16px 24px !important; min-height: 50px !important; width: 100% !important; border: none !important; border-radius: 8px !important; font-weight: 500 !important; cursor: default !important;"
                                     class="transition-all duration-200">
                                 <i class="fas fa-trophy mr-2"></i>
@@ -105,16 +105,16 @@
                             </button>
                         </div>
                     @elseif ($canRedeemCertificate)
-                        <button type="button" 
+                        <button type="button"
                                 onclick="redeemCertificate()"
-                                style="display: block !important; visibility: visible !important; opacity: 1 !important; background: linear-gradient(to right, #059669, #047857) !important; color: white !important; padding: 16px 24px !important; min-height: 50px !important; width: 100% !important; border: none !important; border-radius: 8px !important; font-weight: 500 !important;" 
+                                style="display: block !important; visibility: visible !important; opacity: 1 !important; background: linear-gradient(to right, #059669, #047857) !important; color: white !important; padding: 16px 24px !important; min-height: 50px !important; width: 100% !important; border: none !important; border-radius: 8px !important; font-weight: 500 !important;"
                                 class="hover:from-green-700 hover:to-green-800 transition-all duration-200 shadow-lg hover:shadow-xl">
                             <i class="fas fa-trophy mr-2"></i>
                             <span>Unlock Certificate Achievement ({{ $totalPoints }}/1)</span>
                         </button>
                     @else
                         <div class="w-full sm:w-auto" style="display: block; width: 100%;">
-                            <button disabled 
+                            <button disabled
                                     style="display: block !important; visibility: visible !important; opacity: 1 !important; background: #d1d5db !important; color: #6b7280 !important; padding: 16px 24px !important; min-height: 50px !important; width: 100% !important; border: none !important; border-radius: 8px !important; font-weight: 500 !important; cursor: not-allowed !important;"
                                     class="transition-all duration-200">
                                 <i class="fas fa-lock mr-2"></i>
@@ -230,7 +230,7 @@ function redeemCertificate() {
                             @endforeach
                         </div>
                         <div class="mt-6 text-center">
-                            <a href="{{ route('points.history') }}" 
+                            <a href="{{ route('points.history') }}"
                                class="text-blue-600 hover:text-blue-700 font-medium">
                                 View Full History →
                             </a>
@@ -262,14 +262,14 @@ function redeemCertificate() {
                                         <div>
                                             <p class="font-medium text-gray-900">{{ $certificate->hcr_certificate_number }}</p>
                                             <p class="text-sm text-gray-600">
-                                                {{ $certificate->hcr_status === 'issued' ? 'Issued' : 'Pending' }} • 
+                                                {{ $certificate->hcr_status === 'issued' ? 'Issued' : 'Pending' }} •
                                                 {{ $certificate->created_at->format('M j, Y') }}
                                             </p>
                                         </div>
                                     </div>
                                     <div class="flex items-center space-x-2">
                                         @if ($certificate->hcr_status === 'issued')
-                                            <a href="{{ route('points.certificate', $certificate) }}" 
+                                            <a href="{{ route('points.certificate', $certificate) }}"
                                                class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm font-medium transition-colors">
                                                 View
                                             </a>
@@ -277,7 +277,7 @@ function redeemCertificate() {
                                             <form action="{{ route('points.cancel-redemption', $certificate) }}" method="POST" class="inline">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" 
+                                                <button type="submit"
                                                         class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm font-medium transition-colors"
                                                         onclick="return confirm('Are you sure you want to cancel this redemption? Points will be refunded.')">
                                                     Cancel

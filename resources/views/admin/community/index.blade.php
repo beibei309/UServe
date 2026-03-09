@@ -347,7 +347,7 @@
 
     <!-- BLACKLIST MODAL -->
     <div id="blacklistModal"
-        class="hidden fixed inset-0 bg-black bg-opacity-75 backdrop-blur-sm
+        class="modal-overlay fixed inset-0 bg-black bg-opacity-75 backdrop-blur-sm
             flex items-center justify-center z-50">
 
         <div class="w-full max-w-md p-6 rounded-lg shadow-xl border transition-all duration-300"

@@ -1,0 +1,413 @@
+{
+	"info": {
+		"_postman_id": "userve-api-collection",
+		"name": "UServe API Collection",
+		"description": "Complete API collection for UServe services marketplace",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Health Check",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response has success status\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.status).to.eql('ok');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/health",
+					"host": ["{{baseUrl}}"],
+					"path": ["health"]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get All Services",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response has success field\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.success).to.eql(true);",
+							"});",
+							"",
+							"pm.test(\"Response has data array\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.data).to.be.an('array');",
+							"});",
+							"",
+							"pm.test(\"Response has pagination info\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.pagination).to.be.an('object');",
+							"});",
+							"",
+							"// Save first service ID for use in other requests",
+							"if (pm.response.json().data.length > 0) {",
+							"    pm.environment.set('serviceId', pm.response.json().data[0].id);",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/services?per_page=10",
+					"host": ["{{baseUrl}}"],
+					"path": ["services"],
+					"query": [
+						{
+							"key": "per_page",
+							"value": "10"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Search Services",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response has correct filters\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.filters.search).to.exist;",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/services?search=app&sort=rating&per_page=5",
+					"host": ["{{baseUrl}}"],
+					"path": ["services"],
+					"query": [
+						{
+							"key": "search",
+							"value": "app",
+							"description": "Search term"
+						},
+						{
+							"key": "sort",
+							"value": "rating",
+							"description": "Sort by: newest, oldest, price_low, price_high, rating"
+						},
+						{
+							"key": "per_page",
+							"value": "5"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Filter by Category",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response has category filter\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.filters.category_id).to.exist;",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/services?category_id=7&available_only=true&sort=price_low",
+					"host": ["{{baseUrl}}"],
+					"path": ["services"],
+					"query": [
+						{
+							"key": "category_id",
+							"value": "7",
+							"description": "Filter by category ID"
+						},
+						{
+							"key": "available_only",
+							"value": "true",
+							"description": "Show only available services"
+						},
+						{
+							"key": "sort",
+							"value": "price_low",
+							"description": "Sort by price low to high"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Service Details",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response has service data\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.success).to.eql(true);",
+							"    pm.expect(jsonData.data).to.be.an('object');",
+							"    pm.expect(jsonData.data.title).to.exist;",
+							"    pm.expect(jsonData.data.provider).to.exist;",
+							"    pm.expect(jsonData.data.pricing).to.exist;",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/services/{{serviceId}}",
+					"host": ["{{baseUrl}}"],
+					"path": ["services", "{{serviceId}}"]
+				},
+				"description": "Gets detailed information about a specific service. The serviceId variable is automatically set from the 'Get All Services' request."
+			},
+			"response": []
+		},
+		{
+			"name": "Get Categories",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response has categories\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.success).to.eql(true);",
+							"    pm.expect(jsonData.data).to.be.an('array');",
+							"});",
+							"",
+							"// Save category IDs for testing",
+							"var categories = pm.response.json().data;",
+							"if (categories.length > 0) {",
+							"    pm.environment.set('categoryId', categories[0].id);",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/categories",
+					"host": ["{{baseUrl}}"],
+					"path": ["categories"]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Pagination Test",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Pagination structure is correct\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.pagination.current_page).to.exist;",
+							"    pm.expect(jsonData.pagination.per_page).to.exist;",
+							"    pm.expect(jsonData.pagination.total).to.exist;",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/services?page=2&per_page=3",
+					"host": ["{{baseUrl}}"],
+					"path": ["services"],
+					"query": [
+						{
+							"key": "page",
+							"value": "2"
+						},
+						{
+							"key": "per_page",
+							"value": "3"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Error Test - Invalid Service ID",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 404\", function () {",
+							"    pm.response.to.have.status(404);",
+							"});",
+							"",
+							"pm.test(\"Error response has correct structure\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.success).to.eql(false);",
+							"    pm.expect(jsonData.message).to.exist;",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/services/99999",
+					"host": ["{{baseUrl}}"],
+					"path": ["services", "99999"]
+				},
+				"description": "Tests error handling for non-existent service ID"
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8000/api/v1",
+			"type": "string"
+		}
+	]
+}
