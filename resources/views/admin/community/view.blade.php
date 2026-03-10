@@ -256,7 +256,7 @@
             </div>
         </div>
         <div id="documentModal"
-            class="modal-overlay fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/90 backdrop-blur-md p-4">
+            class="modal-overlay hidden fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/90 backdrop-blur-md p-4">
             <div class="absolute inset-0" data-document-close></div>
 
             <div class="relative max-w-5xl w-full h-[90vh] bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col">
@@ -280,7 +280,7 @@
         </div>
 
         <div id="selfieModal"
-            class="modal-overlay fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-sm transition-all duration-300">
+            class="modal-overlay hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-sm transition-all duration-300">
 
             <div class="absolute inset-0 cursor-zoom-out" data-selfie-close></div>
 
@@ -370,7 +370,7 @@
 
 
     <!-- BLACKLIST MODAL -->
-    <div id="blacklistModal" class="modal-overlay fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
+    <div id="blacklistModal" class="modal-overlay hidden fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
 
         <div class="bg-white w-full max-w-md p-6 rounded-lg shadow-xl">
 

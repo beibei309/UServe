@@ -87,32 +87,20 @@
                 <h3 class="text-lg font-semibold transition-colors duration-300" style="color: var(--text-primary);">Monthly Redemptions (Last 12 Months)</h3>
             </div>
             <div class="p-6">
-                @if($redemptionsByMonth->count() > 0)
+                @if($redemptionMonthRows->count() > 0)
                     <div class="space-y-4">
-                        @php
-                            $maxRedemptions = $redemptionsByMonth->max('total');
-                            $months = [
-                                1 => 'January', 2 => 'February', 3 => 'March', 4 => 'April',
-                                5 => 'May', 6 => 'June', 7 => 'July', 8 => 'August',
-                                9 => 'September', 10 => 'October', 11 => 'November', 12 => 'December'
-                            ];
-                        @endphp
-                        
-                        @foreach($redemptionsByMonth as $month)
-                        @php
-                            $percentage = $maxRedemptions > 0 ? ($month->total / $maxRedemptions) * 100 : 0;
-                        @endphp
+                        @foreach($redemptionMonthRows as $month)
                         <div class="flex items-center">
                             <div class="w-24 text-sm font-medium transition-colors duration-300" style="color: var(--text-secondary);">
-                                {{ $months[$month->month] ?? 'Month ' . $month->month }}
+                                {{ $month['label'] }}
                             </div>
                             <div class="flex-1 mx-4">
                                 <div class="rounded-full h-4 transition-colors duration-300" style="background-color: var(--bg-tertiary);">
-                                    <div class="bg-blue-600 h-4 rounded-full" style="width: {{ $percentage }}%"></div>
+                                    <div class="bg-blue-600 h-4 rounded-full" style="width: {{ $month['percentage'] }}%"></div>
                                 </div>
                             </div>
                             <div class="w-16 text-right text-sm font-semibold transition-colors duration-300" style="color: var(--text-primary);">
-                                {{ $month->total }}
+                                {{ $month['total'] }}
                             </div>
                         </div>
                         @endforeach
@@ -136,7 +124,7 @@
                 <div class="ml-4">
                     <p class="text-sm font-medium transition-colors duration-300" style="color: var(--text-secondary);">Total Redemptions</p>
                     <p class="text-2xl font-semibold transition-colors duration-300" style="color: var(--text-primary);">
-                        {{ $redemptionsByType->sum('total') }}
+                        {{ $summaryTotals['redemptions'] }}
                     </p>
                 </div>
             </div>
@@ -152,7 +140,7 @@
                 <div class="ml-4">
                     <p class="text-sm font-medium transition-colors duration-300" style="color: var(--text-secondary);">Points Redeemed</p>
                     <p class="text-2xl font-semibold transition-colors duration-300" style="color: var(--text-primary);">
-                        {{ $topRedeemers->sum('total_points') }}
+                        {{ $summaryTotals['points'] }}
                     </p>
                 </div>
             </div>
@@ -168,7 +156,7 @@
                 <div class="ml-4">
                     <p class="text-sm font-medium transition-colors duration-300" style="color: var(--text-secondary);">Active Redeemers</p>
                     <p class="text-2xl font-semibold transition-colors duration-300" style="color: var(--text-primary);">
-                        {{ $topRedeemers->count() }}
+                        {{ $summaryTotals['activeRedeemers'] }}
                     </p>
                 </div>
             </div>
@@ -184,7 +172,7 @@
                 <div class="ml-4">
                     <p class="text-sm font-medium transition-colors duration-300" style="color: var(--text-secondary);">This Month</p>
                     <p class="text-2xl font-semibold transition-colors duration-300" style="color: var(--text-primary);">
-                        {{ $redemptionsByMonth->where('month', now()->month)->first()->total ?? 0 }}
+                        {{ $summaryTotals['thisMonth'] }}
                     </p>
                 </div>
             </div>

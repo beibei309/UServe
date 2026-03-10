@@ -43,14 +43,14 @@
                 </div>
             </a>
 
-            <!-- CARD: Pending Requests -->
-            <a href="#"
+            <!-- CARD: Pending Services -->
+            <a href="{{ route('admin.services.index', ['status' => 'pending']) }}"
                 class="group relative p-6 rounded-2xl shadow-xl hover:shadow-2xl hover:shadow-yellow-500/20 hover:scale-[1.02] transition-all duration-300 block overflow-hidden border"
                 style="background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%); border-color: var(--border-color);">
                 <div class="absolute inset-0 bg-gradient-to-r from-yellow-500 to-orange-600 opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
                 <div class="relative z-10">
-                    <p class="font-medium text-sm transition-colors duration-300" style="color: var(--text-secondary);">Pending Requests</p>
-                    <p class="text-3xl sm:text-4xl lg:text-5xl font-bold text-yellow-400 mt-4">{{ $pendingRequests }}</p>
+                    <p class="font-medium text-sm transition-colors duration-300" style="color: var(--text-secondary);">Pending Services</p>
+                    <p class="text-3xl sm:text-4xl lg:text-5xl font-bold text-yellow-400 mt-4">{{ $pendingServices }}</p>
                 </div>
             </a>
 
@@ -94,7 +94,7 @@
                 style="background-color: rgba(234, 88, 12, 0.1); border-color: #ea580c; color: #fb923c;">
                 <div>
                     <strong>⚠ Action Required</strong><br>
-                    {{ $studentsWithoutStatus }} student(s) do not have an academic status assigned.
+                    {{ $studentsWithoutStatus }} student/helper account(s) do not have an academic status assigned.
                 </div>
 
                 <a href="{{ route('admin.student_status.index') }}"

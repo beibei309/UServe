@@ -78,10 +78,8 @@
     <!-- Quick Actions -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         <a href="{{ route('admin.rewards.list') }}" 
-           class="block rounded-lg shadow p-6 hover:shadow-lg transition-all duration-200" 
-           style="background-color: var(--bg-primary); border: 1px solid var(--border-color);" 
-           onmouseover="this.style.backgroundColor='var(--hover-bg)'" 
-           onmouseout="this.style.backgroundColor='var(--bg-primary)'">
+              class="block rounded-lg shadow p-6 hover:shadow-lg transition-all duration-200 surface-hover" 
+              style="background-color: var(--bg-primary); border: 1px solid var(--border-color);">
             <div class="flex items-center">
                 <i class="fas fa-list text-blue-500 text-2xl mr-4"></i>
                 <div>
@@ -92,10 +90,8 @@
         </a>
 
         <a href="{{ route('admin.rewards.redemptions') }}" 
-           class="block rounded-lg shadow p-6 hover:shadow-lg transition-all duration-200" 
-           style="background-color: var(--bg-primary); border: 1px solid var(--border-color);" 
-           onmouseover="this.style.backgroundColor='var(--hover-bg)'" 
-           onmouseout="this.style.backgroundColor='var(--bg-primary)'">
+              class="block rounded-lg shadow p-6 hover:shadow-lg transition-all duration-200 surface-hover" 
+              style="background-color: var(--bg-primary); border: 1px solid var(--border-color);">
             <div class="flex items-center">
                 <i class="fas fa-history text-purple-500 text-2xl mr-4"></i>
                 <div>
@@ -106,10 +102,8 @@
         </a>
 
         <a href="{{ route('admin.rewards.analytics') }}" 
-           class="block rounded-lg shadow p-6 hover:shadow-lg transition-all duration-200" 
-           style="background-color: var(--bg-primary); border: 1px solid var(--border-color);" 
-           onmouseover="this.style.backgroundColor='var(--hover-bg)'" 
-           onmouseout="this.style.backgroundColor='var(--bg-primary)'">
+              class="block rounded-lg shadow p-6 hover:shadow-lg transition-all duration-200 surface-hover" 
+              style="background-color: var(--bg-primary); border: 1px solid var(--border-color);">
             <div class="flex items-center">
                 <i class="fas fa-chart-bar text-green-500 text-2xl mr-4"></i>
                 <div>
@@ -216,14 +210,10 @@
     </div>
 </div>
 
-@if(session('success'))
-<script>
-    Swal.fire({
-        title: 'Success!',
-        text: '{{ session('success') }}',
-        icon: 'success',
-        confirmButtonText: 'OK'
-    });
-</script>
-@endif
+@endsection
+
+@section('scripts')
+    <div id="adminModuleRewardsIndexConfig"
+        data-success-message="{{ session('success') }}"></div>
+    <script src="{{ asset('js/admin-rewards-index.js') }}"></script>
 @endsection

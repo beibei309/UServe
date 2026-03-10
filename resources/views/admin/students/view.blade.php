@@ -316,7 +316,7 @@
 
         {{-- SELFIE MODAL --}}
         <div id="selfieModal" 
-             class="modal-overlay fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-sm p-4 transition-all duration-300">
+               class="modal-overlay hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-sm p-4 transition-all duration-300">
             
             <div class="absolute inset-0 cursor-pointer" data-selfie-close></div>
 
@@ -485,7 +485,7 @@
     </div>
 
         {{-- BAN MODAL --}}
-        <div id="banModal" class="modal-overlay fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-md flex items-center justify-center z-50 p-4">
+        <div id="banModal" class="modal-overlay hidden fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-md flex items-center justify-center z-50 p-4">
             
             <div class="w-full max-w-lg rounded-2xl shadow-2xl border transition-all duration-500 transform scale-95 hover:scale-100"
                  style="background-color: var(--bg-secondary); border-color: var(--border-color);">

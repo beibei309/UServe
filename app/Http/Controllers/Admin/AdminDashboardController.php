@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\StudentService;
-use App\Models\ServiceRequest;
 use App\Models\StudentStatus;
 
 class AdminDashboardController extends Controller
@@ -13,10 +12,9 @@ class AdminDashboardController extends Controller
     public function index()
 {
     // TOTAL COUNTS
-        $totalStudents = User::where('hu_role', 'student')->count();
+        $totalStudents = User::whereIn('hu_role', ['student', 'helper'])->count();
         $totalCommunityUsers = User::where('hu_role', 'community')->count();
     $totalServices = StudentService::count();
-        $pendingRequests = ServiceRequest::where('hsr_status', 'pending')->count();
 
     // ===============================
         // 🔔 ADMIN ACTION REQUIRED
@@ -35,7 +33,7 @@ class AdminDashboardController extends Controller
         // Pending services approval
         $pendingServices = StudentService::where('hss_approval_status', 'pending')->count();
 
-        $studentsWithoutStatus = User::where('hu_role', 'student')
+        $studentsWithoutStatus = User::whereIn('hu_role', ['student', 'helper'])
     ->whereNotIn('hu_id', function ($query) {
         $query->select('hss_student_id')
               ->from('h2u_student_statuses');
@@ -72,7 +70,6 @@ class AdminDashboardController extends Controller
         'totalStudents',
         'totalCommunityUsers',
         'totalServices',
-        'pendingRequests',
         'pendingStudents',
         'pendingHelpers',  
         'pendingServices',   

@@ -178,13 +178,6 @@
                         </div>
                         
                         <div id="terms-list" class="space-y-2">
-                            @php
-                                $terms = old('hr_terms', $reward->hr_terms ?: []);
-                                if (empty($terms)) {
-                                    $terms = [''];
-                                }
-                            @endphp
-                            
                             @foreach($terms as $index => $term)
                             <div class="flex items-center space-x-2 term-row">
                                 <input type="text" name="hr_terms[]" value="{{ $term }}" 
@@ -232,7 +225,7 @@
     </div>
 
     <!-- Redemption Statistics -->
-    @if($reward->redemptions()->count() > 0)
+    @if($redemptionStats['total'] > 0)
     <div class="rounded-lg shadow mt-6 transition-colors duration-300" style="background-color: var(--bg-primary); border: 1px solid var(--border-color);">
         <div class="px-6 py-4 transition-colors duration-300" style="border-bottom: 1px solid var(--border-color);">
             <h3 class="text-lg font-semibold transition-colors duration-300" style="color: var(--text-primary);">Redemption Statistics</h3>
@@ -240,15 +233,15 @@
         <div class="p-6">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="text-center">
-                    <div class="text-2xl font-bold text-blue-600">{{ $reward->redemptions()->count() }}</div>
+                    <div class="text-2xl font-bold text-blue-600">{{ $redemptionStats['total'] }}</div>
                     <div class="text-sm transition-colors duration-300" style="color: var(--text-secondary);">Total Redemptions</div>
                 </div>
                 <div class="text-center">
-                    <div class="text-2xl font-bold text-green-600">{{ $reward->redemptions()->where('hrr_status', 'approved')->count() }}</div>
+                    <div class="text-2xl font-bold text-green-600">{{ $redemptionStats['approved'] }}</div>
                     <div class="text-sm transition-colors duration-300" style="color: var(--text-secondary);">Approved</div>
                 </div>
                 <div class="text-center">
-                    <div class="text-2xl font-bold text-yellow-600">{{ $reward->redemptions()->where('hrr_status', 'pending')->count() }}</div>
+                    <div class="text-2xl font-bold text-yellow-600">{{ $redemptionStats['pending'] }}</div>
                     <div class="text-sm transition-colors duration-300" style="color: var(--text-secondary);">Pending</div>
                 </div>
             </div>
@@ -257,36 +250,9 @@
     @endif
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const termsContainer = document.getElementById('terms-list');
-    const addTermBtn = document.getElementById('add-term');
+@endsection
 
-    // Add new term input
-    addTermBtn.addEventListener('click', function() {
-        const newTermRow = document.createElement('div');
-        newTermRow.className = 'flex items-center space-x-2 term-row';
-        newTermRow.innerHTML = `
-            <input type="text" name="hr_terms[]" 
-                   class="flex-1 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-300"
-                   style="background-color: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-primary);"
-                   placeholder="Enter a term or condition">
-            <button type="button" class="text-red-600 hover:text-red-800 remove-term">
-                <i class="fas fa-times"></i>
-            </button>
-        `;
-        termsContainer.appendChild(newTermRow);
-    });
-
-    // Remove term input
-    termsContainer.addEventListener('click', function(e) {
-        if (e.target.classList.contains('remove-term') || e.target.closest('.remove-term')) {
-            const termRows = termsContainer.querySelectorAll('.term-row');
-            if (termRows.length > 1) {
-                e.target.closest('.term-row').remove();
-            }
-        }
-    });
-});
-</script>
+@section('scripts')
+    <div id="adminModuleRewardsEditConfig"></div>
+    <script src="{{ asset('js/admin-rewards-form.js') }}"></script>
 @endsection

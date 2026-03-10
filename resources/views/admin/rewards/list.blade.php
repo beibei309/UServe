@@ -63,18 +63,18 @@
                 <thead class="transition-colors duration-300" style="background-color: var(--bg-secondary); border-bottom: 1px solid var(--border-color);">
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider transition-colors duration-300" style="color: var(--text-secondary);">Reward</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider transition-colors duration-300" style="color: var(--text-secondary);">Type</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider transition-colors duration-300" style="color: var(--text-secondary);">Cost</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider transition-colors duration-300" style="color: var(--text-secondary);">Value</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider transition-colors duration-300" style="color: var(--text-secondary);">Redemptions</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider transition-colors duration-300" style="color: var(--text-secondary);">Status</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider transition-colors duration-300" style="color: var(--text-secondary);">Actions</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider transition-colors duration-300" style="color: var(--text-secondary);">Type</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider transition-colors duration-300" style="color: var(--text-secondary);">Cost</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider transition-colors duration-300" style="color: var(--text-secondary);">Value</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider transition-colors duration-300" style="color: var(--text-secondary);">Redemptions</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider transition-colors duration-300" style="color: var(--text-secondary);">Status</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider transition-colors duration-300" style="color: var(--text-secondary);">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="transition-colors duration-300" style="border-color: var(--border-color);">
                     @forelse($rewards as $reward)
                     <tr class="hover:opacity-80 transition-all duration-200" style="border-bottom: 1px solid var(--border-color);">
-                        <td class="px-6 py-4 whitespace-nowrap">
+                        <td class="px-6 py-4">
                             <div>
                                 <div class="text-sm font-medium transition-colors duration-300" style="color: var(--text-primary);">{{ $reward->hr_title }}</div>
                                 <div class="text-sm transition-colors duration-300" style="color: var(--text-secondary);">{{ Str::limit($reward->hr_description, 50) }}</div>
@@ -85,7 +85,7 @@
                                 @endif
                             </div>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
                             <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full
                                 @if($reward->hr_type === 'discount') bg-blue-100 text-blue-800
                                 @elseif($reward->hr_type === 'service_credit') bg-green-100 text-green-800
@@ -94,39 +94,27 @@
                                 {{ ucfirst(str_replace('_', ' ', $reward->hr_type)) }}
                             </span>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
                             <div class="text-sm font-medium transition-colors duration-300" style="color: var(--text-primary);">{{ $reward->hr_points_cost }} pts</div>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
                             <div class="text-sm font-medium transition-colors duration-300" style="color: var(--text-primary);">RM {{ number_format($reward->hr_value, 2) }}</div>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm font-medium transition-colors duration-300" style="color: var(--text-primary);">{{ $reward->redemptions_count }}</div>
-                            @if($reward->hr_usage_limit)
-                            <div class="text-xs transition-colors duration-300" style="color: var(--text-secondary);">/ {{ $reward->hr_usage_limit }} limit</div>
-                            @endif
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            @php
-                                $isExpired = $reward->hr_expires_at && $reward->hr_expires_at->isPast();
-                                $isActive = $reward->hr_is_active && !$isExpired;
-                            @endphp
-                            <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full
-                                @if($isActive) bg-green-100 text-green-800
-                                @elseif($isExpired) bg-red-100 text-red-800
-                                @else bg-gray-100 text-gray-800
-                                @endif">
-                                @if($isExpired)
-                                    Expired
-                                @elseif($reward->hr_is_active)
-                                    Active
-                                @else
-                                    Inactive
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            <div class="text-sm font-medium transition-colors duration-300 inline-flex items-baseline justify-center gap-1" style="color: var(--text-primary);">
+                                {{ $reward->redemptions_count }}
+                                @if($reward->hr_usage_limit)
+                                    <span class="text-xs transition-colors duration-300" style="color: var(--text-secondary);">/ {{ $reward->hr_usage_limit }} limit</span>
                                 @endif
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full {{ $reward->ui_status_badge }}">
+                                {{ $reward->ui_status_label }}
                             </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <div class="flex space-x-2">
+                            <div class="flex justify-center items-center space-x-2">
                                 <a href="{{ route('admin.rewards.edit', $reward) }}" 
                                    class="text-blue-600 hover:text-blue-900" title="Edit">
                                     <i class="fas fa-edit"></i>
@@ -169,38 +157,10 @@
     </div>
 </div>
 
-@if(session('success'))
-<script>
-    Swal.fire({
-        title: 'Success!',
-        text: '{{ session('success') }}',
-        icon: 'success',
-        confirmButtonText: 'OK'
-    });
-</script>
-@endif
+@endsection
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.delete-form').forEach(function(form) {
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            Swal.fire({
-                title: 'Are you sure?',
-                text: 'This action cannot be undone!',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Yes, delete it!'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    form.submit();
-                }
-            });
-        });
-    });
-});
-</script>
+@section('scripts')
+    <div id="adminModuleRewardsListConfig"
+        data-success-message="{{ session('success') }}"></div>
+    <script src="{{ asset('js/admin-rewards-list.js') }}"></script>
 @endsection

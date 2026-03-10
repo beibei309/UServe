@@ -84,6 +84,18 @@ class AdminRewardController extends Controller
         $rewards = $query->withCount('redemptions')
             ->orderBy('created_at', 'desc')
             ->paginate(15);
+
+        $rewards->through(function ($reward) {
+            $isExpired = $reward->hr_expires_at && $reward->hr_expires_at->isPast();
+            $isActive = $reward->hr_is_active && !$isExpired;
+
+            $reward->ui_status_label = $isExpired ? 'Expired' : ($reward->hr_is_active ? 'Active' : 'Inactive');
+            $reward->ui_status_badge = $isActive
+                ? 'bg-green-100 text-green-800'
+                : ($isExpired ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800');
+
+            return $reward;
+        });
         
         return view('admin.rewards.list', compact('rewards'));
     }
@@ -125,7 +137,19 @@ class AdminRewardController extends Controller
      */
     public function edit(Reward $reward)
     {
-        return view('admin.rewards.edit', compact('reward'));
+        $terms = old('hr_terms', $reward->hr_terms ?: []);
+        if (empty($terms)) {
+            $terms = [''];
+        }
+
+        $redemptionsQuery = $reward->redemptions();
+        $redemptionStats = [
+            'total' => (clone $redemptionsQuery)->count(),
+            'approved' => (clone $redemptionsQuery)->where('hrr_status', 'approved')->count(),
+            'pending' => (clone $redemptionsQuery)->where('hrr_status', 'pending')->count(),
+        ];
+
+        return view('admin.rewards.edit', compact('reward', 'terms', 'redemptionStats'));
     }
 
     /**
@@ -269,11 +293,38 @@ class AdminRewardController extends Controller
             ->orderBy('redemption_count', 'desc')
             ->limit(10)
             ->get();
+
+        $monthLabels = [
+            1 => 'January', 2 => 'February', 3 => 'March', 4 => 'April',
+            5 => 'May', 6 => 'June', 7 => 'July', 8 => 'August',
+            9 => 'September', 10 => 'October', 11 => 'November', 12 => 'December',
+        ];
+
+        $maxRedemptions = max((int) $redemptionsByMonth->max('total'), 1);
+        $redemptionMonthRows = $redemptionsByMonth->map(function ($monthRow) use ($monthLabels, $maxRedemptions) {
+            $monthNumber = (int) $monthRow->month;
+            $total = (int) $monthRow->total;
+            return [
+                'label' => $monthLabels[$monthNumber] ?? ('Month ' . $monthNumber),
+                'month' => $monthNumber,
+                'total' => $total,
+                'percentage' => ($total / $maxRedemptions) * 100,
+            ];
+        });
+
+        $summaryTotals = [
+            'redemptions' => (int) $redemptionsByType->sum('total'),
+            'points' => (int) $topRedeemers->sum('total_points'),
+            'activeRedeemers' => (int) $topRedeemers->count(),
+            'thisMonth' => (int) optional($redemptionMonthRows->firstWhere('month', (int) now()->month))['total'] ?? 0,
+        ];
             
         return view('admin.rewards.analytics', compact(
             'redemptionsByMonth', 
             'redemptionsByType', 
-            'topRedeemers'
+            'topRedeemers',
+            'redemptionMonthRows',
+            'summaryTotals'
         ));
     }
 

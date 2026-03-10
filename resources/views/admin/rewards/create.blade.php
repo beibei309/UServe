@@ -198,9 +198,7 @@
             <div class="flex justify-end space-x-4 mt-8 pt-6 transition-colors duration-300" style="border-top: 1px solid var(--border-color);">
                 <a href="{{ route('admin.rewards.list') }}" 
                    class="px-6 py-2 rounded-lg transition-all duration-200"
-                   style="background-color: var(--bg-tertiary); color: var(--text-secondary);" 
-                   onmouseover="this.style.opacity='0.8'" 
-                   onmouseout="this.style.opacity='1'">
+                         style="background-color: var(--bg-tertiary); color: var(--text-secondary);">
                     Cancel
                 </a>
                 <button type="submit" 
@@ -212,35 +210,9 @@
     </div>
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const termsContainer = document.getElementById('terms-list');
-    const addTermBtn = document.getElementById('add-term');
+@endsection
 
-    // Add new term input
-    addTermBtn.addEventListener('click', function() {
-        const newTermRow = document.createElement('div');
-        newTermRow.className = 'flex items-center space-x-2 term-row';
-        newTermRow.innerHTML = `
-            <input type="text" name="hr_terms[]" 
-                   class="flex-1 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-blue-500"
-                   placeholder="Enter a term or condition">
-            <button type="button" class="text-red-600 hover:text-red-800 remove-term">
-                <i class="fas fa-times"></i>
-            </button>
-        `;
-        termsContainer.appendChild(newTermRow);
-    });
-
-    // Remove term input
-    termsContainer.addEventListener('click', function(e) {
-        if (e.target.classList.contains('remove-term') || e.target.closest('.remove-term')) {
-            const termRows = termsContainer.querySelectorAll('.term-row');
-            if (termRows.length > 1) {
-                e.target.closest('.term-row').remove();
-            }
-        }
-    });
-});
-</script>
+@section('scripts')
+    <div id="adminModuleRewardsCreateConfig"></div>
+    <script src="{{ asset('js/admin-rewards-form.js') }}"></script>
 @endsection

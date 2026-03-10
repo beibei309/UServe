@@ -141,7 +141,11 @@
                             @endif
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <button onclick="openStatusModal({{ $redemption->hrr_id }}, '{{ $redemption->hrr_status }}', '{{ $redemption->hrr_notes }}')" 
+                            <button type="button"
+                                    data-redemption-open-status
+                                    data-redemption-id="{{ $redemption->hrr_id }}"
+                                    data-current-status="{{ $redemption->hrr_status }}"
+                                    data-current-notes="{{ $redemption->hrr_notes ?? '' }}"
                                     class="text-blue-600 hover:text-blue-900" title="Update Status">
                                 <i class="fas fa-edit"></i>
                             </button>
@@ -203,11 +207,9 @@
                 </div>
 
                 <div class="flex justify-end space-x-3">
-                    <button type="button" onclick="closeStatusModal()" 
+                    <button type="button" data-redemption-close-status
                             class="px-4 py-2 rounded-lg transition-all duration-200"
-                            style="background-color: var(--bg-tertiary); color: var(--text-secondary);" 
-                            onmouseover="this.style.opacity='0.8'" 
-                            onmouseout="this.style.opacity='1'">
+                            style="background-color: var(--bg-tertiary); color: var(--text-secondary);">
                         Cancel
                     </button>
                     <button type="submit" 
@@ -220,45 +222,11 @@
     </div>
 </div>
 
-@if(session('success'))
-<script>
-    Swal.fire({
-        title: 'Success!',
-        text: '{{ session('success') }}',
-        icon: 'success',
-        confirmButtonText: 'OK'
-    });
-</script>
-@endif
+@endsection
 
-<script>
-function openStatusModal(redemptionId, currentStatus, currentNotes) {
-    const modal = document.getElementById('statusModal');
-    const form = document.getElementById('statusForm');
-    const statusSelect = document.getElementById('status');
-    const notesTextarea = document.getElementById('notes');
-
-    // Update form action
-    form.action = `/admin/rewards/redemptions/${redemptionId}/status`;
-    
-    // Set current values
-    statusSelect.value = currentStatus;
-    notesTextarea.value = currentNotes || '';
-    
-    // Show modal
-    modal.classList.remove('hidden');
-}
-
-function closeStatusModal() {
-    const modal = document.getElementById('statusModal');
-    modal.classList.add('hidden');
-}
-
-// Close modal when clicking outside
-document.getElementById('statusModal').addEventListener('click', function(e) {
-    if (e.target === this) {
-        closeStatusModal();
-    }
-});
-</script>
+@section('scripts')
+    <div id="adminModuleRewardsRedemptionsConfig"
+        data-success-message="{{ session('success') }}"
+        data-update-status-route-template="{{ route('admin.rewards.redemptions.update-status', 'REDEMPTION_ID') }}"></div>
+    <script src="{{ asset('js/admin-rewards-redemptions.js') }}"></script>
 @endsection

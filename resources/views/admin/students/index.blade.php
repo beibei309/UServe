@@ -169,7 +169,7 @@
 
     {{-- BAN MODAL --}}
     <div id="banModal"
-        class="modal-overlay fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-md flex items-center justify-center z-50 p-4">
+        class="modal-overlay hidden fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-md flex items-center justify-center z-50 p-4">
         
         <div class="w-full max-w-lg rounded-2xl shadow-2xl border transition-all duration-500 transform scale-95 hover:scale-100"
              style="background-color: var(--bg-secondary); border-color: var(--border-color);">
