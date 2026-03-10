@@ -2,9 +2,9 @@
     RewriteEngine On
     
     # Set the base for subdirectory
-    RewriteBase /UServe/
+    RewriteBase /home2u/
     
     # Redirect all requests to public folder (visible in browser)
-    RewriteCond %{REQUEST_URI} !^/UServe/public/
-    RewriteRule ^(.*)$ /UServe/public/$1 [R=301,L]
+    RewriteCond %{REQUEST_URI} !^/home2u/public/
+    RewriteRule ^(.*)$ /home2u/public/$1 [R=301,L]
 </IfModule>
