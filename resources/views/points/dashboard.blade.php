@@ -81,13 +81,8 @@
                 <span class="text-sm sm:text-base text-gray-600 font-medium">{{ $totalPoints }}/1 points</span>
             </div>
             <div class="w-full bg-gray-200 rounded-full h-4 sm:h-5 mb-4 overflow-hidden">
-                @php
-                    $progressPercentage = ($totalPoints / 1) * 100;
-                    // Ensure minimum 15% width for visibility when points > 0
-                    $displayWidth = $totalPoints > 0 ? max(15, $progressPercentage) : 0;
-                @endphp
                 <div class="h-full rounded-full transition-all duration-500"
-                     style="width: {{ $displayWidth }}%; background: linear-gradient(to right, #10b981, #059669);">
+                     style="width: {{ $displayProgressWidth }}%; background: linear-gradient(to right, #10b981, #059669);">
                 </div>
             </div>
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
@@ -111,7 +106,7 @@
                         </div>
                     @elseif ($canRedeemCertificate)
                         <button type="button"
-                                onclick="redeemCertificate()"
+                                data-points-redeem-certificate
                                 style="display: block !important; visibility: visible !important; opacity: 1 !important; background: linear-gradient(to right, #059669, #047857) !important; color: white !important; padding: 16px 24px !important; min-height: 50px !important; width: 100% !important; border: none !important; border-radius: 8px !important; font-weight: 500 !important;"
                                 class="hover:from-green-700 hover:to-green-800 transition-all duration-200 shadow-lg hover:shadow-xl">
                             <i class="fas fa-trophy mr-2"></i>
@@ -128,76 +123,6 @@
                         </div>
                     @endif
                 </div>
-
-<script>
-function redeemCertificate() {
-    Swal.fire({
-        title: '� Unlock Certificate Achievement?',
-        text: 'Congratulations! You have earned enough points to unlock your certificate achievement.',
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: '#059669',
-        cancelButtonColor: '#6b7280',
-        confirmButtonText: 'Yes, Unlock Achievement!',
-        cancelButtonText: 'Cancel'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            // Show loading
-            Swal.fire({
-                title: 'Processing...',
-                text: 'Unlocking your certificate achievement',
-                icon: 'info',
-                allowOutsideClick: false,
-                showConfirmButton: false,
-                willOpen: () => {
-                    Swal.showLoading();
-                }
-            });
-
-            // Make AJAX request
-            fetch('{{ route("points.redeem.ajax") }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                },
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    Swal.fire({
-                        title: '🏆 Achievement Unlocked!',
-                        html: `<p>Congratulations! You have unlocked your certificate achievement!</p>
-                               <p><strong>Certificate Number:</strong> ${data.certificate_number}</p>`,
-                        icon: 'success',
-                        confirmButtonColor: '#059669',
-                        confirmButtonText: 'View Certificate'
-                    }).then(() => {
-                        // Redirect to certificate or refresh page
-                        window.location.href = data.certificate_url || window.location.href;
-                    });
-                } else {
-                    Swal.fire({
-                        title: 'Error',
-                        text: data.message || 'An error occurred while unlocking your achievement.',
-                        icon: 'error',
-                        confirmButtonColor: '#dc2626'
-                    });
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                Swal.fire({
-                    title: 'Error',
-                    text: 'An unexpected error occurred. Please try again.',
-                    icon: 'error',
-                    confirmButtonColor: '#dc2626'
-                });
-            });
-        }
-    });
-}
-</script>
             </div>
         </div>
 
@@ -283,8 +208,9 @@ function redeemCertificate() {
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit"
+                                                        data-points-cancel-redemption
                                                         class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm font-medium transition-colors"
-                                                        onclick="return confirm('Are you sure you want to cancel this redemption? Points will be refunded.')">
+                                                        >
                                                     Cancel
                                                 </button>
                                             </form>
@@ -337,5 +263,12 @@ function redeemCertificate() {
 {{-- Points Styling Component --}}
 @push('styles')
 <link href="{{ asset('css/points-dashboard.css') }}" rel="stylesheet">
+@endpush
+
+@push('scripts')
+<div id="pointsDashboardConfig"
+    data-redeem-url="{{ route('points.redeem.ajax') }}"
+    data-csrf-token="{{ csrf_token() }}"></div>
+<script src="{{ asset('js/points-dashboard.js') }}"></script>
 @endpush
 @endsection

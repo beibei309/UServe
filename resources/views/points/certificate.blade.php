@@ -110,12 +110,12 @@
         {{-- Action Buttons --}}
         <div class="flex flex-col sm:flex-row gap-4 mt-8">
             @if ($redemption->hcr_status === 'issued')
-                <button onclick="window.print()" 
+                <button type="button" data-certificate-print
                         class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center justify-center">
                     <i class="fas fa-print mr-2"></i>
                     Print Certificate
                 </button>
-                <button onclick="downloadPDF()" 
+                <button type="button" data-certificate-download
                         class="flex-1 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center justify-center">
                     <i class="fas fa-download mr-2"></i>
                     Download PDF
@@ -162,11 +162,6 @@
 @endpush
 
 @push('scripts')
-<script>
-function downloadPDF() {
-    // In a real implementation, you would call a PDF generation endpoint
-    alert('PDF download functionality would be implemented here');
-}
-</script>
+<script src="{{ asset('js/points-certificate.js') }}"></script>
 @endpush
 @endsection

@@ -294,18 +294,18 @@ public function favoriteServices()
     public function getAccessibleTotalPoints(): int
     {
         if ($this->canAccessSellerFeatures()) {
-            return $this->getTotalPoints(); // Students: both seller + buyer points
+            return $this->getTotalPoints(); // Helpers: both seller + buyer points
         } else {
             return $this->getTotalBuyerPoints(); // Community: only buyer points
         }
     }
 
     /**
-     * Check if user can access seller features (students only)
+     * Check if user can access seller features (helpers only)
      */
     public function canAccessSellerFeatures(): bool
     {
-        return $this->hu_role === 'student';
+        return $this->hu_role === 'helper' && !$this->hu_is_blocked;
     }
 
     /**

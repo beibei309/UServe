@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Controller as BaseController;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class PointsController extends BaseController
 {
@@ -29,6 +30,7 @@ class PointsController extends BaseController
     public function dashboard(): View
     {
         $user = Auth::user();
+        $this->ensureSellerAccess($user);
 
         // Get user's points data
         $totalPoints = $user->getTotalSellerPoints();
@@ -53,6 +55,8 @@ class PointsController extends BaseController
 
         // Get points needed for next certificate
         $pointsNeededForCertificate = max(0, 1 - $totalPoints);
+        $progressPercentage = ($totalPoints / 1) * 100;
+        $displayProgressWidth = $totalPoints > 0 ? max(15, $progressPercentage) : 0;
 
         return view('points.dashboard', compact(
             'totalPoints',
@@ -60,7 +64,8 @@ class PointsController extends BaseController
             'certificates',
             'canRedeemCertificate',
             'hasCertificateAchievement',
-            'pointsNeededForCertificate'
+            'pointsNeededForCertificate',
+            'displayProgressWidth'
         ));
     }
 
@@ -130,6 +135,7 @@ class PointsController extends BaseController
     public function redeemCertificateAjax(Request $request)
     {
         $user = Auth::user();
+        $this->ensureSellerAccess($user);
         $requiredPoints = 1;
 
         // Check if user has enough points
@@ -199,6 +205,7 @@ class PointsController extends BaseController
     public function redeemCertificate(Request $request): RedirectResponse
     {
         $user = Auth::user();
+        $this->ensureSellerAccess($user);
         $requiredPoints = 1;
 
         // Check if user has enough points
@@ -254,9 +261,10 @@ class PointsController extends BaseController
     public function cancelRedemption(CertificateRedemption $redemption): RedirectResponse
     {
         $user = Auth::user();
+        $this->ensureSellerAccess($user);
 
         // Authorization check
-        if ($redemption->hcr_user_id !== $user->hu_id) {
+        if ((int) $redemption->hcr_user_id !== (int) $user->hu_id) {
             return back()->with('error', 'Unauthorized action.');
         }
 
@@ -299,6 +307,7 @@ class PointsController extends BaseController
     public function history(): View
     {
         $user = Auth::user();
+        $this->ensureSellerAccess($user);
 
         $pointsHistory = $user->sellerPoints()
                               ->with('serviceRequest.studentService')
@@ -314,9 +323,10 @@ class PointsController extends BaseController
     public function certificate(CertificateRedemption $redemption): View
     {
         $user = Auth::user();
+        $this->ensureSellerAccess($user);
 
         // Authorization check
-        if ($redemption->hcr_user_id !== $user->hu_id) {
+        if ((int) $redemption->hcr_user_id !== (int) $user->hu_id) {
             abort(403, 'Unauthorized access to certificate.');
         }
 
@@ -426,8 +436,52 @@ class PointsController extends BaseController
         // Get available rewards
         $availableRewards = $this->getAvailableRewards();
 
+        $userRedemptionCounts = RewardRedemption::where('hrr_user_id', $user->hu_id)
+            ->whereIn('hrr_status', ['active', 'used'])
+            ->selectRaw('hrr_reward_id, COUNT(*) as total')
+            ->groupBy('hrr_reward_id')
+            ->pluck('total', 'hrr_reward_id');
+
+        $availableRewards = $availableRewards->map(function ($reward) use ($user, $userRedemptionCounts) {
+            if ($reward->hr_type === 'discount') {
+                $reward->ui_card_classes = 'border rounded-lg p-4 sm:p-6 hover:shadow-md transition-shadow bg-purple-50 border-purple-200';
+                $reward->ui_badge_classes = 'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800';
+                $reward->ui_price_classes = 'text-lg font-bold mb-3 text-purple-600';
+                $reward->ui_button_classes = 'w-full px-3 py-2 rounded-lg text-sm font-medium text-white transition-colors bg-purple-600 hover:bg-purple-700';
+            } elseif ($reward->hr_type === 'service_credit') {
+                $reward->ui_card_classes = 'border rounded-lg p-4 sm:p-6 hover:shadow-md transition-shadow bg-blue-50 border-blue-200';
+                $reward->ui_badge_classes = 'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800';
+                $reward->ui_price_classes = 'text-lg font-bold mb-3 text-blue-600';
+                $reward->ui_button_classes = 'w-full px-3 py-2 rounded-lg text-sm font-medium text-white transition-colors bg-blue-600 hover:bg-blue-700';
+            } else {
+                $reward->ui_card_classes = 'border rounded-lg p-4 sm:p-6 hover:shadow-md transition-shadow bg-green-50 border-green-200';
+                $reward->ui_badge_classes = 'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800';
+                $reward->ui_price_classes = 'text-lg font-bold mb-3 text-green-600';
+                $reward->ui_button_classes = 'w-full px-3 py-2 rounded-lg text-sm font-medium text-white transition-colors bg-green-600 hover:bg-green-700';
+            }
+
+            $reward->ui_user_redemptions_count = (int) ($userRedemptionCounts[$reward->hr_id] ?? 0);
+            $reward->ui_can_redeem = $reward->canUserRedeem($user);
+
+            return $reward;
+        });
+
         // Get user's reward redemptions
         $rewardRedemptions = $this->getUserRewardRedemptions($user, 5);
+
+        $rewardRedemptions = $rewardRedemptions->map(function ($redemption) {
+            if ($redemption->hrr_status === 'active') {
+                $redemption->ui_status_classes = 'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800';
+            } elseif ($redemption->hrr_status === 'used') {
+                $redemption->ui_status_classes = 'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800';
+            } elseif ($redemption->hrr_status === 'expired') {
+                $redemption->ui_status_classes = 'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800';
+            } else {
+                $redemption->ui_status_classes = 'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800';
+            }
+
+            return $redemption;
+        });
 
         return view('points.buyer-dashboard', compact(
             'buyerPoints',
@@ -463,10 +517,20 @@ class PointsController extends BaseController
         // Get both leaderboards for all users (view-only for community)
         $sellerLeaderboard = $this->getSellerLeaderboard(10);
         $buyerLeaderboard = $this->getBuyerLeaderboard(10);
+        $sellerRankedCount = $this->getSellerLeaderboardCount();
+        $buyerRankedCount = $this->getBuyerLeaderboardCount();
+        $userSellerRank = $user->canAccessSellerFeatures() ? $this->getUserSellerRank($user->hu_id) : null;
+        $userBuyerRank = $this->getUserBuyerRank($user->hu_id);
+        $canViewSellerStanding = $user->hu_role !== 'community';
 
         return view('points.leaderboard', compact(
             'sellerLeaderboard',
-            'buyerLeaderboard'
+            'buyerLeaderboard',
+            'sellerRankedCount',
+            'buyerRankedCount',
+            'userSellerRank',
+            'userBuyerRank',
+            'canViewSellerStanding'
         ));
     }
 
@@ -485,7 +549,7 @@ class PointsController extends BaseController
                        'h2u_users.updated_at'
                    )
                    ->selectRaw('COALESCE(SUM(h2u_seller_points.hsp_points_earned), 0) as seller_points_sum_hsp_points_earned')
-                   ->whereIn('hu_role', ['student', 'helper'])
+                   ->where('hu_role', 'helper')
                    ->join('h2u_seller_points', 'h2u_users.hu_id', '=', 'h2u_seller_points.hsp_user_id')
                    ->where('h2u_seller_points.hsp_status', 'earned')
                    ->groupBy(
@@ -560,10 +624,29 @@ class PointsController extends BaseController
         $buyerLeaderboard = $this->getBuyerLeaderboard(50);
         $userRank = $this->getUserBuyerRank(Auth::id());
 
-        return view('points.buyer-leaderboard', compact(
-            'buyerLeaderboard',
-            'userRank'
-        ));
+        $availableRewards = Reward::active()
+            ->orderBy('hr_points_cost')
+            ->take(3)
+            ->get()
+            ->map(function ($reward) {
+                if ($reward->hr_type === 'discount') {
+                    $reward->ui_card_classes = 'bg-green-50 border border-green-200';
+                    $reward->ui_icon = 'fas fa-percentage';
+                    $reward->ui_icon_classes = 'text-green-600';
+                } elseif ($reward->hr_type === 'service_credit') {
+                    $reward->ui_card_classes = 'bg-blue-50 border border-blue-200';
+                    $reward->ui_icon = 'fas fa-money-bill-wave';
+                    $reward->ui_icon_classes = 'text-blue-600';
+                } else {
+                    $reward->ui_card_classes = 'bg-yellow-50 border border-yellow-200';
+                    $reward->ui_icon = 'fas fa-star';
+                    $reward->ui_icon_classes = 'text-yellow-600';
+                }
+
+                return $reward;
+            });
+
+        return view('points.buyer-leaderboard', compact('buyerLeaderboard', 'userRank', 'availableRewards'));
     }
 
     /**
@@ -573,7 +656,7 @@ class PointsController extends BaseController
     {
         $allUsersWithPoints = User::select('h2u_users.hu_id')
                                   ->selectRaw('COALESCE(SUM(h2u_seller_points.hsp_points_earned), 0) as total_points')
-                                  ->whereIn('hu_role', ['student', 'helper'])
+                                  ->where('hu_role', 'helper')
                                   ->join('h2u_seller_points', 'h2u_users.hu_id', '=', 'h2u_seller_points.hsp_user_id')
                                   ->where('h2u_seller_points.hsp_status', 'earned')
                                   ->groupBy('h2u_users.hu_id')
@@ -584,6 +667,13 @@ class PointsController extends BaseController
 
         $rank = array_search($userId, $allUsersWithPoints);
         return $rank !== false ? $rank + 1 : null;
+    }
+
+    private function ensureSellerAccess($user): void
+    {
+        if (!$user || !$user->canAccessSellerFeatures()) {
+            throw new HttpException(403, 'Seller access required.');
+        }
     }
 
     /**
@@ -603,5 +693,28 @@ class PointsController extends BaseController
 
         $rank = array_search($userId, $allUsersWithPoints);
         return $rank !== false ? $rank + 1 : null;
+    }
+
+    private function getSellerLeaderboardCount(): int
+    {
+        return User::select('h2u_users.hu_id')
+            ->where('hu_role', 'helper')
+            ->join('h2u_seller_points', 'h2u_users.hu_id', '=', 'h2u_seller_points.hsp_user_id')
+            ->where('h2u_seller_points.hsp_status', 'earned')
+            ->groupBy('h2u_users.hu_id')
+            ->havingRaw('COALESCE(SUM(h2u_seller_points.hsp_points_earned), 0) > 0')
+            ->get()
+            ->count();
+    }
+
+    private function getBuyerLeaderboardCount(): int
+    {
+        return User::select('h2u_users.hu_id')
+            ->join('h2u_buyer_points', 'h2u_users.hu_id', '=', 'h2u_buyer_points.hbp_user_id')
+            ->where('h2u_buyer_points.hbp_status', 'earned')
+            ->groupBy('h2u_users.hu_id')
+            ->havingRaw('COALESCE(SUM(h2u_buyer_points.hbp_points_earned), 0) > 0')
+            ->get()
+            ->count();
     }
 }

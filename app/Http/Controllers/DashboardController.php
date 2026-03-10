@@ -14,6 +14,11 @@ class DashboardController extends Controller
 
 public function index(Request $request)
 {
+    $user = $request->user();
+    if ($user && $user->hu_role === 'helper' && session('view_mode', 'buyer') === 'seller') {
+        return redirect()->route('students.index');
+    }
+
     // --- 1. Get Inputs ---
     $q = $request->input('q'); 
     $category_id = $request->input('category_id'); 

@@ -84,31 +84,7 @@
             @if($availableRewards->count() > 0)
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                     @foreach($availableRewards as $reward)
-                        @php
-                            $cardClasses = 'border rounded-lg p-4 sm:p-6 hover:shadow-md transition-shadow';
-                            $badgeClasses = 'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium';
-                            $priceClasses = 'text-lg font-bold mb-3';
-                            $buttonClasses = 'w-full px-3 py-2 rounded-lg text-sm font-medium text-white transition-colors';
-                            
-                            if($reward->hr_type === 'discount') {
-                                $cardClasses .= ' bg-purple-50 border-purple-200';
-                                $badgeClasses .= ' bg-purple-100 text-purple-800';
-                                $priceClasses .= ' text-purple-600';
-                                $buttonClasses .= ' bg-purple-600 hover:bg-purple-700';
-                            } elseif($reward->hr_type === 'service_credit') {
-                                $cardClasses .= ' bg-blue-50 border-blue-200';
-                                $badgeClasses .= ' bg-blue-100 text-blue-800';
-                                $priceClasses .= ' text-blue-600';
-                                $buttonClasses .= ' bg-blue-600 hover:bg-blue-700';
-                            } else {
-                                $cardClasses .= ' bg-green-50 border-green-200';
-                                $badgeClasses .= ' bg-green-100 text-green-800';
-                                $priceClasses .= ' text-green-600';
-                                $buttonClasses .= ' bg-green-600 hover:bg-green-700';
-                            }
-                        @endphp
-                        
-                        <div class="{{ $cardClasses }}">
+                        <div class="{{ $reward->ui_card_classes }}">
                             
                             <div class="flex items-start justify-between mb-3">
                                 <div class="flex-1">
@@ -116,14 +92,14 @@
                                     <p class="text-xs sm:text-sm text-gray-600 mt-1">{{ $reward->hr_description }}</p>
                                 </div>
                                 <div class="ml-2 text-right">
-                                    <span class="{{ $badgeClasses }}">
+                                    <span class="{{ $reward->ui_badge_classes }}">
                                         {{ $reward->hr_points_cost }} pts
                                     </span>
                                 </div>
                             </div>
 
                             @if($reward->hr_value > 0)
-                                <div class="{{ $priceClasses }}">
+                                <div class="{{ $reward->ui_price_classes }}">
                                     @if($reward->hr_type === 'discount')
                                         {{ $reward->hr_value }}% OFF
                                     @else
@@ -133,11 +109,11 @@
                             @endif
 
                             <div class="flex items-center justify-between">
-                                @if($reward->canUserRedeem(auth()->user()))
+                                @if($reward->ui_can_redeem)
                                     <form action="{{ route('points.rewards.redeem') }}" method="POST" class="w-full">
                                         @csrf
                                         <input type="hidden" name="reward_id" value="{{ $reward->hr_id }}">
-                                        <button type="submit" class="{{ $buttonClasses }}">
+                                        <button type="submit" class="{{ $reward->ui_button_classes }}">
                                             Redeem Now
                                         </button>
                                     </form>
@@ -153,11 +129,8 @@
                             </div>
 
                             @if($reward->hr_user_limit > 1)
-                                @php
-                                    $userRedemptions = $reward->redemptions()->where('hrr_user_id', auth()->user()->hu_id)->whereIn('hrr_status', ['active', 'used'])->count();
-                                @endphp
                                 <div class="mt-2 text-xs text-gray-500 text-center">
-                                    Used {{ $userRedemptions }}/{{ $reward->hr_user_limit }} times
+                                    Used {{ $reward->ui_user_redemptions_count }}/{{ $reward->hr_user_limit }} times
                                 </div>
                             @endif
                         </div>
@@ -207,19 +180,7 @@
                             <div class="border border-gray-200 rounded-lg p-3">
                                 <div class="flex items-center justify-between mb-2">
                                     <h4 class="text-sm font-medium text-gray-900">{{ $redemption->reward->hr_title }}</h4>
-                                    @php
-                                        $statusClasses = 'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium';
-                                        if($redemption->hrr_status === 'active') {
-                                            $statusClasses .= ' bg-green-100 text-green-800';
-                                        } elseif($redemption->hrr_status === 'used') {
-                                            $statusClasses .= ' bg-blue-100 text-blue-800';
-                                        } elseif($redemption->hrr_status === 'expired') {
-                                            $statusClasses .= ' bg-red-100 text-red-800';
-                                        } else {
-                                            $statusClasses .= ' bg-gray-100 text-gray-800';
-                                        }
-                                    @endphp
-                                    <span class="{{ $statusClasses }}">
+                                    <span class="{{ $redemption->ui_status_classes }}">
                                         {{ ucfirst($redemption->hrr_status) }}
                                     </span>
                                 </div>

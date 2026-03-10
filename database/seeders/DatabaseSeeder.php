@@ -41,6 +41,11 @@ class DatabaseSeeder extends Seeder
 
             $this->seedSampleRequestsAndReviews($communityUser, $services);
 
+            $this->call([
+                RewardSeeder::class,
+                PointsLeaderboardSeeder::class,
+            ]);
+
             $this->call(IntegrationSnapshotSeeder::class);
 
             $this->call(AdminSeeder::class);
@@ -49,11 +54,32 @@ class DatabaseSeeder extends Seeder
 
     private function resetTables(): void
     {
-        Review::query()->delete();
-        ServiceRequest::query()->delete();
-        StudentService::query()->delete();
-        Category::query()->delete();
-        User::query()->delete();
+        $tables = [
+            'h2u_reward_redemptions',
+            'h2u_buyer_points',
+            'h2u_seller_points',
+            'h2u_rewards',
+            'h2u_reviews',
+            'h2u_service_requests',
+            'h2u_student_services',
+            'h2u_categories',
+            'h2u_users',
+        ];
+
+        $existingTables = array_values(array_filter($tables, fn (string $table) => Schema::hasTable($table)));
+        if (empty($existingTables)) {
+            return;
+        }
+
+        if (DB::getDriverName() === 'pgsql') {
+            $quotedTables = array_map(fn (string $table) => '"'.$table.'"', $existingTables);
+            DB::statement('TRUNCATE TABLE '.implode(', ', $quotedTables).' RESTART IDENTITY CASCADE');
+            return;
+        }
+
+        foreach ($existingTables as $table) {
+            DB::table($table)->delete();
+        }
     }
 
     private function seedCommunityUser(): User

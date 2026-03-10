@@ -257,13 +257,18 @@
                 body: JSON.stringify({ selfie_image: selfieDataUrl }),
                 headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
             })
-                .then(() => {
+                .then(async (response) => {
+                    const data = await response.json().catch(() => ({}));
+                    if (!response.ok || data.success === false) {
+                        throw new Error(data.message || 'Verification failed. Please try again.');
+                    }
+
                     Swal.close();
                     goToStep('success');
                 })
-                .catch(() => {
+                .catch((error) => {
                     Swal.close();
-                    goToStep('success');
+                    Swal.fire({ icon: 'error', text: error.message || 'Verification failed. Please try again.' });
                 });
         });
     }

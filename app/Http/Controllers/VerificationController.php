@@ -223,13 +223,14 @@ class VerificationController extends Controller
             $user->hu_helper_verified_at = now();
             
             $user->save();
+            session(['view_mode' => 'seller']);
 
             \Illuminate\Support\Facades\Log::info('Student converted to helper. User ID: ' . $user->hu_id);
 
             return response()->json([
                 'success' => true, 
                 'message' => 'Verification complete! You are now a helper.',
-                'redirect' => route('dashboard') . '?mode=seller'
+                'redirect' => route('students.create')
             ]);
 
         } catch (\Exception $e) {

@@ -53,80 +53,55 @@
             </div>
 
             @if($buyerLeaderboard->count() > 0)
-                <div class="divide-y divide-gray-100">
-                    @foreach($buyerLeaderboard as $index => $user)
-                    <div class="p-4 sm:p-6 {{ $index < 3 ? 'bg-purple-50' : '' }} 
-                              {{ Auth::id() == $user->hu_id ? 'ring-2 ring-purple-300 bg-purple-25' : '' }}">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-4">
-                                {{-- Rank Badge --}}
-                                <div class="flex-shrink-0">
-                                    @if($index === 0)
-                                        <div class="w-12 h-12 bg-yellow-500 text-white rounded-full flex items-center justify-center">
-                                            <i class="fas fa-crown text-lg"></i>
-                                        </div>
-                                    @elseif($index === 1)
-                                        <div class="w-12 h-12 bg-gray-400 text-white rounded-full flex items-center justify-center">
-                                            <i class="fas fa-medal text-lg"></i>
-                                        </div>
-                                    @elseif($index === 2)
-                                        <div class="w-12 h-12 bg-orange-500 text-white rounded-full flex items-center justify-center">
-                                            <i class="fas fa-award text-lg"></i>
-                                        </div>
-                                    @else
-                                        <div class="w-12 h-12 bg-gray-100 text-gray-600 rounded-full flex items-center justify-center">
-                                            <span class="text-lg font-bold">{{ $index + 1 }}</span>
-                                        </div>
-                                    @endif
-                                </div>
-
-                                {{-- User Info --}}
-                                <div class="min-w-0">
-                                    <div class="flex items-center space-x-2">
-                                        <p class="text-lg font-semibold text-gray-900 truncate">
-                                            {{ $user->hu_name }}
-                                        </p>
-                                        @if(Auth::id() == $user->hu_id)
-                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                                                You
-                                            </span>
-                                        @endif
-                                    </div>
-                                    <p class="text-sm text-gray-600">{{ ucfirst($user->hu_role) }} • Service Requester</p>
-                                    
-                                    {{-- Additional stats if available --}}
-                                    @if($user->relationLoaded('buyerPoints'))
-                                    <p class="text-xs text-gray-500 mt-1">
-                                        {{ $user->buyerPoints->where('hbp_status', 'earned')->where('hbp_points_earned', '>', 0)->count() }} completed requests
-                                    </p>
-                                    @endif
-                                </div>
+                @if($buyerLeaderboard->count() >= 3)
+                    <div class="bg-gradient-to-b from-indigo-500 to-blue-600 p-5 text-white">
+                        <div class="grid grid-cols-3 gap-4 items-end text-center">
+                            <div>
+                                <img src="{{ $buyerLeaderboard->get(1)?->hu_profile_photo_path ? asset($buyerLeaderboard->get(1)?->hu_profile_photo_path) : ('https://ui-avatars.com/api/?name=' . urlencode($buyerLeaderboard->get(1)?->hu_name ?? 'User')) }}"
+                                     alt="{{ $buyerLeaderboard->get(1)?->hu_name }}"
+                                     class="w-14 h-14 rounded-full mx-auto mb-2 border-2 border-white/70 object-cover shadow" />
+                                <p class="text-sm font-semibold truncate">{{ $buyerLeaderboard->get(1)?->hu_name }}</p>
+                                <p class="text-xs text-indigo-100">2nd • {{ $buyerLeaderboard->get(1)?->buyer_points_sum_hbp_points_earned ?? 0 }} pts</p>
+                                <div class="mt-2 h-16 rounded-t-lg bg-cyan-300/90 border border-white/25 border-b-0 flex items-center justify-center text-2xl font-bold">2</div>
                             </div>
-
-                            {{-- Points Display --}}
-                            <div class="text-right">
-                                <div class="flex items-center space-x-2">
-                                    @if($index < 3)
-                                        <div class="bg-purple-500 text-white px-4 py-2 rounded-lg">
-                                            <div class="flex items-center space-x-1">
-                                                <i class="fas fa-star text-sm"></i>
-                                                <span class="font-bold text-lg">{{ $user->buyer_points_sum_hbp_points_earned ?? 0 }}</span>
-                                            </div>
-                                            <p class="text-xs text-purple-100">points</p>
-                                        </div>
-                                    @else
-                                        <div class="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg">
-                                            <div class="flex items-center space-x-1">
-                                                <i class="fas fa-star text-sm"></i>
-                                                <span class="font-bold text-lg">{{ $user->buyer_points_sum_hbp_points_earned ?? 0 }}</span>
-                                            </div>
-                                            <p class="text-xs text-gray-500">points</p>
-                                        </div>
-                                    @endif
-                                </div>
+                            <div>
+                                <img src="{{ $buyerLeaderboard->get(0)?->hu_profile_photo_path ? asset($buyerLeaderboard->get(0)?->hu_profile_photo_path) : ('https://ui-avatars.com/api/?name=' . urlencode($buyerLeaderboard->get(0)?->hu_name ?? 'User')) }}"
+                                     alt="{{ $buyerLeaderboard->get(0)?->hu_name }}"
+                                     class="w-16 h-16 rounded-full mx-auto mb-2 border-2 border-white object-cover shadow" />
+                                <p class="text-base font-semibold truncate">{{ $buyerLeaderboard->get(0)?->hu_name }}</p>
+                                <p class="text-xs text-indigo-100">1st • {{ $buyerLeaderboard->get(0)?->buyer_points_sum_hbp_points_earned ?? 0 }} pts</p>
+                                <div class="mt-2 h-24 rounded-t-lg bg-amber-300/90 border border-white/25 border-b-0 flex items-center justify-center text-3xl font-bold">1</div>
+                            </div>
+                            <div>
+                                <img src="{{ $buyerLeaderboard->get(2)?->hu_profile_photo_path ? asset($buyerLeaderboard->get(2)?->hu_profile_photo_path) : ('https://ui-avatars.com/api/?name=' . urlencode($buyerLeaderboard->get(2)?->hu_name ?? 'User')) }}"
+                                     alt="{{ $buyerLeaderboard->get(2)?->hu_name }}"
+                                     class="w-14 h-14 rounded-full mx-auto mb-2 border-2 border-white/70 object-cover shadow" />
+                                <p class="text-sm font-semibold truncate">{{ $buyerLeaderboard->get(2)?->hu_name }}</p>
+                                <p class="text-xs text-indigo-100">3rd • {{ $buyerLeaderboard->get(2)?->buyer_points_sum_hbp_points_earned ?? 0 }} pts</p>
+                                <div class="mt-2 h-12 rounded-t-lg bg-sky-200/90 border border-white/25 border-b-0 flex items-center justify-center text-2xl font-bold">3</div>
                             </div>
                         </div>
+                        <div class="h-3 rounded-b-lg bg-white/25 border border-white/20 border-t-0"></div>
                     </div>
+                @endif
+
+                <div class="divide-y divide-gray-100">
+                    @foreach(($buyerLeaderboard->count() >= 3 ? $buyerLeaderboard->slice(3)->values() : $buyerLeaderboard->values()) as $index => $user)
+                        <div class="px-4 sm:px-6 py-4 {{ Auth::id() == $user->hu_id ? 'bg-purple-50 border-l-4 border-purple-500' : 'bg-white' }}">
+                            <div class="flex items-center justify-between gap-4">
+                                <div class="flex items-center gap-3 min-w-0">
+                                    <span class="w-7 text-sm text-gray-500">{{ ($buyerLeaderboard->count() >= 3 ? 4 : 1) + $index }}</span>
+                                    <img src="{{ $user->hu_profile_photo_path ? asset($user->hu_profile_photo_path) : ('https://ui-avatars.com/api/?name=' . urlencode($user->hu_name ?? 'User')) }}"
+                                         alt="{{ $user->hu_name }}"
+                                         class="w-8 h-8 rounded-full object-cover border border-gray-200" />
+                                    <span class="text-sm font-medium text-gray-900 truncate">{{ $user->hu_name }}</span>
+                                    @if(Auth::id() == $user->hu_id)
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">You</span>
+                                    @endif
+                                </div>
+                                <span class="text-sm font-semibold text-gray-700">{{ $user->buyer_points_sum_hbp_points_earned ?? 0 }} pts</span>
+                            </div>
+                        </div>
                     @endforeach
                 </div>
             @else
@@ -173,21 +148,17 @@
                 </a>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div class="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
-                    <i class="fas fa-percentage text-green-600 text-2xl mb-2"></i>
-                    <p class="font-semibold text-gray-900">10% Discount</p>
-                    <p class="text-sm text-gray-600">2 points</p>
-                </div>
-                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
-                    <i class="fas fa-money-bill-wave text-blue-600 text-2xl mb-2"></i>
-                    <p class="font-semibold text-gray-900">RM 5 Credit</p>
-                    <p class="text-sm text-gray-600">3 points</p>
-                </div>
-                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-center">
-                    <i class="fas fa-star text-yellow-600 text-2xl mb-2"></i>
-                    <p class="font-semibold text-gray-900">Priority Support</p>
-                    <p class="text-sm text-gray-600">5 points</p>
-                </div>
+                @forelse($availableRewards as $reward)
+                    <div class="{{ $reward->ui_card_classes }} rounded-lg p-4 text-center">
+                        <i class="{{ $reward->ui_icon }} {{ $reward->ui_icon_classes }} text-2xl mb-2"></i>
+                        <p class="font-semibold text-gray-900">{{ $reward->hr_title }}</p>
+                        <p class="text-sm text-gray-600">{{ $reward->hr_points_cost }} points</p>
+                    </div>
+                @empty
+                    <div class="sm:col-span-2 lg:col-span-3 text-sm text-gray-500 text-center py-4">
+                        No active rewards available right now.
+                    </div>
+                @endforelse
             </div>
         </div>
     </div>

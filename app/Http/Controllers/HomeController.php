@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\User;
 use App\Models\StudentService;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class HomeController extends Controller
 {
@@ -43,7 +44,7 @@ class HomeController extends Controller
             return view('welcome', compact('services', 'categories','q', 'category_id', 'min_rating', 'available', 'topStudents'));
         } catch (\Exception $e) {
             // In case of any error, return a simple view with empty data
-            \Log::error('Error in HomeController@home: ' . $e->getMessage());
+            Log::error('Error in HomeController@home: ' . $e->getMessage());
             
             return view('welcome', [
                 'services' => collect([]),
