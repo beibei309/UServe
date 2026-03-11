@@ -28,12 +28,12 @@ return new class extends Migration
         });
 
         Schema::create('h2u_sessions', function (Blueprint $table) {
-            $table->string('hs_id')->primary();
-            $table->foreignId('hs_user_id')->nullable()->index();
-            $table->string('hs_ip_address', 45)->nullable();
-            $table->text('hs_user_agent')->nullable();
-            $table->longText('hs_payload');
-            $table->integer('hs_last_activity')->index();
+            $table->string('id')->primary();
+            $table->foreignId('user_id')->nullable()->index();
+            $table->string('ip_address', 45)->nullable();
+            $table->text('user_agent')->nullable();
+            $table->longText('payload');
+            $table->integer('last_activity')->index();
         });
     }
 

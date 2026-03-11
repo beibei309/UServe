@@ -12,15 +12,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('h2u_cache', function (Blueprint $table) {
-            $table->string('hc_key')->primary();
-            $table->mediumText('hc_value');
-            $table->integer('hc_expiration');
+            $table->string('key')->primary();
+            $table->mediumText('value');
+            $table->integer('expiration');
         });
 
         Schema::create('h2u_cache_locks', function (Blueprint $table) {
-            $table->string('hcl_key')->primary();
-            $table->string('hcl_owner');
-            $table->integer('hcl_expiration');
+            $table->string('key')->primary();
+            $table->string('owner');
+            $table->integer('expiration');
         });
     }
 

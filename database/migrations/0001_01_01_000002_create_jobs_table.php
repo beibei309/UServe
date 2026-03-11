@@ -12,32 +12,32 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('h2u_jobs', function (Blueprint $table) {
-            $table->bigIncrements('hj_id');
-            $table->string('hj_queue')->index();
-            $table->longText('hj_payload');
-            $table->unsignedTinyInteger('hj_attempts');
-            $table->unsignedInteger('hj_reserved_at')->nullable();
-            $table->unsignedInteger('hj_available_at');
-            $table->unsignedInteger('hj_created_at');
+            $table->bigIncrements('id');
+            $table->string('queue')->index();
+            $table->longText('payload');
+            $table->unsignedTinyInteger('attempts');
+            $table->unsignedInteger('reserved_at')->nullable();
+            $table->unsignedInteger('available_at');
+            $table->unsignedInteger('created_at');
         });
 
         Schema::create('h2u_job_batches', function (Blueprint $table) {
-            $table->string('hjb_id')->primary();
-            $table->string('hjb_name');
-            $table->integer('hjb_total_jobs');
-            $table->integer('hjb_pending_jobs');
-            $table->integer('hjb_failed_jobs');
-            $table->longText('hjb_failed_job_ids');
-            $table->mediumText('hjb_options')->nullable();
-            $table->integer('hjb_cancelled_at')->nullable();
-            $table->integer('hjb_created_at');
-            $table->integer('hjb_finished_at')->nullable();
+            $table->string('id')->primary();
+            $table->string('name');
+            $table->integer('total_jobs');
+            $table->integer('pending_jobs');
+            $table->integer('failed_jobs');
+            $table->longText('failed_job_ids');
+            $table->mediumText('options')->nullable();
+            $table->integer('cancelled_at')->nullable();
+            $table->integer('created_at');
+            $table->integer('finished_at')->nullable();
         });
 
         Schema::create('h2u_failed_jobs', function (Blueprint $table) {
-            $table->bigIncrements('hfj_id');
-            $table->string('hfj_uuid')->unique();
-            $table->text('hfj_connection');
+            $table->bigIncrements('id');
+            $table->string('uuid')->unique();
+            $table->text('connection');
             $table->text('queue');
             $table->longText('payload');
             $table->longText('exception');
