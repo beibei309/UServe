@@ -27,6 +27,13 @@
             <form method="POST" action="{{ route('register') }}" class="space-y-5" id="registerForm">
                 @csrf
 
+                @if($errors->has('registration'))
+                    <div class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                        <div class="font-semibold">Registration failed</div>
+                        <div class="mt-1">{{ $errors->first('registration') }}</div>
+                    </div>
+                @endif
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-3">I am registering as:</label>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">

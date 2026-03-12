@@ -27,6 +27,36 @@
                 </div>
             </div>
 
+            @if (session('status') === 'profile-updated')
+                <div class="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-emerald-700 font-semibold">
+                    <i class="fa-solid fa-circle-check mr-2"></i> Profile updated successfully.
+                </div>
+            @endif
+
+            @if (session('status') === 'password-updated')
+                <div class="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-emerald-700 font-semibold">
+                    <i class="fa-solid fa-shield-check mr-2"></i> Password updated successfully.
+                </div>
+            @endif
+
+            @if (session('staff-verification-sent'))
+                <div class="mb-6 rounded-2xl border border-indigo-200 bg-indigo-50 px-5 py-4 text-indigo-700 font-semibold">
+                    <i class="fa-solid fa-envelope-circle-check mr-2"></i> {{ session('staff-verification-sent') }}
+                </div>
+            @endif
+
+            @if ($errors->updatePassword->any())
+                <div class="mb-6 rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4 text-rose-700 font-semibold">
+                    <i class="fa-solid fa-triangle-exclamation mr-2"></i> Password update failed. {{ $errors->updatePassword->first() }}
+                </div>
+            @endif
+
+            @if ($errors->any() && ! $errors->updatePassword->any())
+                <div class="mb-6 rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4 text-rose-700 font-semibold">
+                    <i class="fa-solid fa-triangle-exclamation mr-2"></i> Profile update failed. {{ $errors->first() }}
+                </div>
+            @endif
+
             <div class="flex flex-col lg:flex-row gap-8 items-start" id="profileEditRoot">
                 
                 {{-- SIDEBAR NAVIGATION --}}

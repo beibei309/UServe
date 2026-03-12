@@ -177,19 +177,26 @@ class StudentsController extends Controller
 
         // Profile photo upload (normalized with app convention: public/profile-photos)
         if ($request->hasFile('profile_photo')) {
-            if ($user->hu_profile_photo_path && file_exists(public_path($user->hu_profile_photo_path))) {
-                unlink(public_path($user->hu_profile_photo_path));
+            $oldPath = ltrim((string) $user->hu_profile_photo_path, '/');
+
+            if ($oldPath !== '') {
+                if (Str::startsWith($oldPath, 'storage/')) {
+                    Storage::disk('public')->delete(Str::after($oldPath, 'storage/'));
+                } else {
+                    Storage::disk('public')->delete($oldPath);
+
+                    if (file_exists(public_path($oldPath))) {
+                        @unlink(public_path($oldPath));
+                    }
+                }
             }
 
-            $file = $request->file('profile_photo');
-            $filename = $file->hashName();
-
-            if (!file_exists(public_path('profile-photos'))) {
-                mkdir(public_path('profile-photos'), 0755, true);
+            $storedPath = $request->file('profile_photo')->store('profile-photos', 'public');
+            if (! $storedPath) {
+                return back()->withInput()->withErrors(['profile_photo' => 'Profile photo upload failed. Please try again.']);
             }
 
-            $file->move(public_path('profile-photos'), $filename);
-            $user->hu_profile_photo_path = 'profile-photos/' . $filename;
+            $user->hu_profile_photo_path = 'storage/' . $storedPath;
         }
 
         $facultyMap = [
@@ -424,21 +431,26 @@ class StudentsController extends Controller
 
     // 4. Handle Profile Photo Upload
     if ($request->hasFile('profile_photo_path')) {
-        
-        if ($user->hu_profile_photo_path && file_exists(public_path($user->hu_profile_photo_path))) {
-            unlink(public_path($user->hu_profile_photo_path));
+        $oldPath = ltrim((string) $user->hu_profile_photo_path, '/');
+
+        if ($oldPath !== '') {
+            if (Str::startsWith($oldPath, 'storage/')) {
+                Storage::disk('public')->delete(Str::after($oldPath, 'storage/'));
+            } else {
+                Storage::disk('public')->delete($oldPath);
+
+                if (file_exists(public_path($oldPath))) {
+                    @unlink(public_path($oldPath));
+                }
+            }
         }
 
-        $file = $request->file('profile_photo_path');
-        $filename = $file->hashName();
-
-        if (!file_exists(public_path('profile-photos'))) {
-            mkdir(public_path('profile-photos'), 0755, true);
+        $storedPath = $request->file('profile_photo_path')->store('profile-photos', 'public');
+        if (! $storedPath) {
+            return back()->withInput()->withErrors(['profile_photo_path' => 'Profile photo upload failed. Please try again.']);
         }
 
-        $file->move(public_path('profile-photos'), $filename);
-
-        $user->hu_profile_photo_path = 'profile-photos/' . $filename;
+        $user->hu_profile_photo_path = 'storage/' . $storedPath;
     }
 
     $user->save();

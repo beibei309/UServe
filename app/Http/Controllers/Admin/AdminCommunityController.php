@@ -177,32 +177,25 @@ public function update(Request $request, $id)
 
     // Upload new profile photo
     if ($request->hasFile('profile_photo')) {
+        $oldPath = ltrim((string) $user->hu_profile_photo_path, '/');
+        if ($oldPath !== '') {
+            if (Str::startsWith($oldPath, 'storage/')) {
+                Storage::disk('public')->delete(Str::after($oldPath, 'storage/'));
+            } else {
+                Storage::disk('public')->delete($oldPath);
 
-        // Delete old photo if exists (support both legacy and current paths)
-        if ($user->hu_profile_photo_path) {
-            if (Storage::disk('public')->exists($user->hu_profile_photo_path)) {
-                Storage::disk('public')->delete($user->hu_profile_photo_path);
-            }
-
-            if (file_exists(public_path($user->hu_profile_photo_path))) {
-                unlink(public_path($user->hu_profile_photo_path));
+                if (file_exists(public_path($oldPath))) {
+                    @unlink(public_path($oldPath));
+                }
             }
         }
 
-        $file = $request->file('profile_photo');
-        $filename = $file->hashName();
-
-        if (!file_exists(public_path('profile-photos'))) {
-            mkdir(public_path('profile-photos'), 0755, true);
-        }
-
-        $file->move(public_path('profile-photos'), $filename);
-
-        if (!file_exists(public_path('profile-photos/' . $filename))) {
+        $storedPath = $request->file('profile_photo')->store('profile-photos', 'public');
+        if (! $storedPath) {
             return back()->withErrors(['profile_photo' => 'Profile photo upload failed. Please try again.']);
         }
 
-        $user->hu_profile_photo_path = 'profile-photos/' . $filename;
+        $user->hu_profile_photo_path = 'storage/' . $storedPath;
     }
 
     // Blacklist / Unblacklist

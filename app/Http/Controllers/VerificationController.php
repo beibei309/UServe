@@ -145,25 +145,26 @@ class VerificationController extends Controller
         $user = Auth::user();
 
         if ($request->hasFile('profile_photo')) {
+            $oldPath = ltrim((string) $user->hu_profile_photo_path, '/');
 
-            // 1. Delete old image if it exists
-            if ($user->hu_profile_photo_path && file_exists(public_path($user->hu_profile_photo_path))) {
-                unlink(public_path($user->hu_profile_photo_path));
+            if ($oldPath !== '') {
+                if (Str::startsWith($oldPath, 'storage/')) {
+                    Storage::disk('public')->delete(Str::after($oldPath, 'storage/'));
+                } else {
+                    Storage::disk('public')->delete($oldPath);
+
+                    if (file_exists(public_path($oldPath))) {
+                        @unlink(public_path($oldPath));
+                    }
+                }
             }
 
-            $file = $request->file('profile_photo');
-            $filename = $file->hashName();
-
-            // 2. Make sure folder exists
-            if (!file_exists(public_path('profile-photos'))) {
-                mkdir(public_path('profile-photos'), 0755, true);
+            $storedPath = $request->file('profile_photo')->store('profile-photos', 'public');
+            if (! $storedPath) {
+                return redirect()->back()->withErrors(['profile_photo' => 'Profile photo upload failed. Please try again.']);
             }
 
-            // 3. Move file directly to public/profile-photos
-            $file->move(public_path('profile-photos'), $filename);
-
-            // 4. Save relative path to DB
-            $user->hu_profile_photo_path = 'profile-photos/' . $filename;
+            $user->hu_profile_photo_path = 'storage/' . $storedPath;
             
             // Only save if the move was successful
             $user->save();

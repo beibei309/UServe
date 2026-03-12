@@ -12,6 +12,7 @@ use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class StudentServiceController extends Controller
@@ -198,24 +199,29 @@ class StudentServiceController extends Controller
 
         // 3. Handle Image
         if ($request->hasFile('image')) {
+            $oldPath = ltrim((string) $service->hss_image_path, '/');
+            if ($oldPath !== '') {
+                if (Str::startsWith($oldPath, 'storage/')) {
+                    Storage::disk('public')->delete(Str::after($oldPath, 'storage/'));
+                } else {
+                    Storage::disk('public')->delete($oldPath);
 
-            // Delete old image if exists
-            if ($service->hss_image_path && file_exists(public_path($service->hss_image_path))) {
-                unlink(public_path($service->hss_image_path));
+                    if (file_exists(public_path($oldPath))) {
+                        @unlink(public_path($oldPath));
+                    }
+                }
             }
 
-            $file = $request->file('image');
-            $filename = $file->hashName();
-
-            // Make sure folder exists
-            if (! file_exists(public_path('storage/services'))) {
-                mkdir(public_path('storage/services'), 0755, true);
+            $storedPath = $request->file('image')->store('services', 'public');
+            if (! $storedPath) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Service image upload failed. Please try again.',
+                    'error' => 'Service image upload failed. Please try again.',
+                ], 422);
             }
 
-            // Move new file
-            $file->move(public_path('storage/services'), $filename);
-
-            $service->hss_image_path = 'storage/services/'.$filename;
+            $service->hss_image_path = 'storage/'.$storedPath;
 
         } elseif ($request->filled('template_image') && ! $service->hss_image_path) {
 
@@ -481,15 +487,25 @@ class StudentServiceController extends Controller
 
             // 5. Image
             if ($request->hasFile('image')) {
-                $file = $request->file('image');
-                $filename = $file->hashName();
+                $oldPath = ltrim((string) $service->hss_image_path, '/');
+                if ($oldPath !== '') {
+                    if (Str::startsWith($oldPath, 'storage/')) {
+                        Storage::disk('public')->delete(Str::after($oldPath, 'storage/'));
+                    } else {
+                        Storage::disk('public')->delete($oldPath);
 
-                if (! file_exists(public_path('storage/services'))) {
-                    mkdir(public_path('storage/services'), 0755, true);
+                        if (file_exists(public_path($oldPath))) {
+                            @unlink(public_path($oldPath));
+                        }
+                    }
                 }
 
-                $file->move(public_path('storage/services'), $filename);
-                $service->hss_image_path = 'storage/services/'.$filename;
+                $storedPath = $request->file('image')->store('services', 'public');
+                if (! $storedPath) {
+                    return back()->withErrors(['image' => 'Service image upload failed. Please try again.']);
+                }
+
+                $service->hss_image_path = 'storage/'.$storedPath;
             } elseif ($request->filled('template_image')) {
                 $service->hss_image_path = $request->input('template_image');
             }
