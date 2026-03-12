@@ -21,7 +21,7 @@ class HomeController extends Controller
 
             $services = StudentService::with('category', 'user')
                         ->where('hss_is_active', true)
-                        ->latest()
+                        ->recommended()
                         ->get();        
                         
             $categories = Category::withCount(['services' => function ($q) {
@@ -96,7 +96,7 @@ class HomeController extends Controller
         ) >= ?', [$minRating]);
     }
 
-    $query->orderByDesc('hss_id');
+    $query->recommended();
 
     $services = $query->get();
 

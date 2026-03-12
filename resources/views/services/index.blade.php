@@ -215,9 +215,10 @@
                                 </div>
 
                                 <div class="flex flex-wrap md:flex-nowrap gap-2">
-                                    <div class="relative flex-1 md:w-44 group">
+                                    <div class="relative flex-1 md:w-52 group">
                                         <select name="sort" data-auto-submit
                                             class="block w-full pl-4 pr-10 py-4 bg-slate-50 border-none rounded-[1.5rem] text-slate-700 focus:bg-white focus:ring-2 focus:ring-indigo-500 text-sm cursor-pointer appearance-none font-bold transition-all">
+                                            <option value="recommended" {{ $sort == 'recommended' ? 'selected' : '' }}>⭐Recommended</option>
                                             <option value="newest" {{ $sort == 'newest' ? 'selected' : '' }}>Newest
                                                 First</option>
                                             <option value="oldest" {{ $sort == 'oldest' ? 'selected' : '' }}>Oldest

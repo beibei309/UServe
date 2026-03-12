@@ -42,6 +42,8 @@ class DatabaseSeeder extends Seeder
             $this->seedSampleRequestsAndReviews($communityUser, $services);
 
             $this->call([
+                RequestSeeder::class,
+                ReviewSeeder::class,
                 RewardSeeder::class,
                 PointsLeaderboardSeeder::class,
             ]);

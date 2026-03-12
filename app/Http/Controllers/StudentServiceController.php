@@ -23,7 +23,7 @@ class StudentServiceController extends Controller
         // --- 1. Get and Sanitize Inputs ---
         $q = $request->string('q')->toString();
         $category_id = $request->category_id;
-        $sort = $request->sort ?? 'newest';
+        $sort = $request->sort ?? 'recommended';
         $available_only = $request->available_only;
 
         $currentUserId = Auth::id();
@@ -71,7 +71,9 @@ class StudentServiceController extends Controller
         }
 
         // --- 6. Sorting ---
-        if ($sort == 'newest') {
+        if ($sort == 'recommended') {
+            $query->recommended();
+        } elseif ($sort == 'newest') {
             $query->orderBy('created_at', 'desc');
         } elseif ($sort == 'oldest') {
             $query->orderBy('created_at', 'asc');

@@ -10,63 +10,82 @@ class ReviewSeeder extends Seeder
 {
     public function run(): void
     {
-        $users = DB::table('h2u_users')->pluck('hu_id')->toArray();
-
-        if (count($users) < 2) {
-            $ts = now();
-            for ($i = count($users); $i < 2; $i++) {
-                DB::table('h2u_users')->insert([
-                    'hu_name' => 'Reviewer Tester ' . ($i + 1),
-                    'hu_email' => "reviewer{$i}@test.com",
-                    'hu_password' => bcrypt('password'),
-                    'hu_role' => 'community',
-                    'hu_verification_status' => 'approved',
-                    'created_at' => $ts,
-                    'updated_at' => $ts,
-                ]);
-            }
-            $users = DB::table('h2u_users')->pluck('hu_id')->toArray();
-        }
-
-        if (!Schema::hasTable('h2u_student_services')) {
+        if (!Schema::hasTable('h2u_reviews') || !Schema::hasTable('h2u_student_services') || !Schema::hasTable('h2u_service_requests') || !Schema::hasTable('h2u_users')) {
             return;
         }
 
-        $serviceId = DB::table('h2u_student_services')->value('hss_id');
-        if (!$serviceId) {
+        $completedRequests = DB::table('h2u_service_requests')
+            ->where('hsr_status', 'completed')
+            ->whereNotNull('hsr_student_service_id')
+            ->whereNotNull('hsr_requester_id')
+            ->whereNotNull('hsr_provider_id')
+            ->orderByDesc('hsr_id')
+            ->limit(5)
+            ->get();
+
+        if ($completedRequests->isEmpty()) {
             return;
         }
 
-        $reviews = [
-            ['rating' => 5, 'comment' => 'Servis sangat mantap! Laju buat kerja.'],
-            ['rating' => 4, 'comment' => 'Okay not bad, tapi lambat sikit reply.'],
-            ['rating' => 1, 'comment' => 'Tidak memuaskan. Cancel last minute.'],
-            ['rating' => 5, 'comment' => 'Terbaik boh! Recommended.'],
-            ['rating' => 3, 'comment' => 'Boleh la, kena improve lagi.'],
-        ];
+        foreach ($completedRequests as $request) {
+            $serviceId = (int) $request->hsr_student_service_id;
+            $requestId = (int) $request->hsr_id;
+            $requesterId = (int) $request->hsr_requester_id;
+            $providerId = (int) $request->hsr_provider_id;
 
-        foreach ($reviews as $index => $data) {
-            $reviewerId = $users[array_rand($users)];
-            $revieweePool = array_values(array_filter($users, fn ($id) => $id !== $reviewerId));
-            if (empty($revieweePool)) {
+            if ($requesterId === $providerId) {
                 continue;
             }
-            $revieweeId = $revieweePool[array_rand($revieweePool)];
 
-            $insertData = [
-                'hr_reviewer_id' => $reviewerId,
-                'hr_reviewee_id' => $revieweeId,
-                'hr_student_service_id' => $serviceId,
-                'hr_service_request_id' => null,
-                'hr_rating' => $data['rating'],
-                'hr_comment' => $data['comment'],
-                'hr_reply' => null,
-                'hr_replied_at' => null,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ];
+            $this->upsertReview(
+                $requestId,
+                $serviceId,
+                $requesterId,
+                $providerId,
+                5,
+                'Great service and smooth communication.'
+            );
 
-            DB::table('h2u_reviews')->insertOrIgnore($insertData);
+            $this->upsertReview(
+                $requestId,
+                $serviceId,
+                $providerId,
+                $requesterId,
+                4,
+                'Pleasant client and clear requirements.'
+            );
         }
+    }
+
+    private function upsertReview(int $requestId, int $serviceId, int $reviewerId, int $revieweeId, int $rating, string $comment): void
+    {
+        $existing = DB::table('h2u_reviews')
+            ->where('hr_service_request_id', $requestId)
+            ->where('hr_reviewer_id', $reviewerId)
+            ->where('hr_reviewee_id', $revieweeId)
+            ->first();
+
+        $payload = [
+            'hr_student_service_id' => $serviceId,
+            'hr_rating' => $rating,
+            'hr_comment' => $comment,
+            'hr_reply' => null,
+            'hr_replied_at' => null,
+            'updated_at' => now(),
+        ];
+
+        if ($existing) {
+            DB::table('h2u_reviews')
+                ->where('hr_id', $existing->hr_id)
+                ->update($payload);
+            return;
+        }
+
+        DB::table('h2u_reviews')->insert(array_merge($payload, [
+            'hr_service_request_id' => $requestId,
+            'hr_reviewer_id' => $reviewerId,
+            'hr_reviewee_id' => $revieweeId,
+            'created_at' => now(),
+        ]));
     }
 }

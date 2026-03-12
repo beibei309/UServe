@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Services\RecommendationService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -135,6 +136,15 @@ public function getIsFavouritedAttribute()
 }
 
 
+    /**
+     * Order services by recommendation score.
+     * Score = (rating × 0.40) + (completions × 0.30) + (favorites × 0.15)
+     *       + (availability × 0.10) + newcomer_boost - age_decay
+     */
+    public function scopeRecommended($query)
+    {
+        return app(RecommendationService::class)->applyToQuery($query);
+    }
 
 
 
