@@ -637,5 +637,30 @@ class IntegrationSnapshotSeeder extends Seeder
                 array_merge($faq, ['updated_at' => $now, 'created_at' => $now])
             );
         }
+
+        $this->syncPostgresSequences();
+    }
+
+    private function syncPostgresSequences(): void
+    {
+        if (DB::getDriverName() !== 'pgsql') {
+            return;
+        }
+
+        $this->syncSequence('h2u_users', 'hu_id');
+        $this->syncSequence('h2u_student_statuses', 'hss_id');
+        $this->syncSequence('h2u_student_services', 'hss_id');
+        $this->syncSequence('h2u_categories', 'hc_id');
+        $this->syncSequence('h2u_reviews', 'hr_id');
+        $this->syncSequence('h2u_faqs', 'hfq_id');
+    }
+
+    private function syncSequence(string $table, string $column): void
+    {
+        if (! Schema::hasTable($table) || ! Schema::hasColumn($table, $column)) {
+            return;
+        }
+
+        DB::statement("SELECT setval(pg_get_serial_sequence('{$table}', '{$column}'), COALESCE((SELECT MAX({$column}) FROM {$table}), 1), true)");
     }
 }
