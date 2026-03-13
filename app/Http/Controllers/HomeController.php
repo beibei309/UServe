@@ -184,5 +184,4 @@ public function about()
 
         return view('legal.privacy', compact('legalPage'));
     }
-
 }
