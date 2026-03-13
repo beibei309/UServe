@@ -228,7 +228,7 @@ class DatabaseSeeder extends Seeder
     {
         return [
             ['name' => 'Academic Tutoring', 'description' => 'Help with studies and assignments', 'image_path' => 'tutor.png', 'color' => '#4F46E5', 'is_active' => true],
-            ['name' => 'Programming & Tech', 'description' => 'Web development, mobile apps, and technical services', 'image_path' => 'tech.svg', 'color' => '#10B981', 'is_active' => true],
+            ['name' => 'Technologies', 'description' => 'Web development, mobile apps, and technical services', 'image_path' => 'tech.svg', 'color' => '#10B981', 'is_active' => true],
             ['name' => 'Design & Creative', 'description' => 'Graphic design, video editing, and creative services', 'image_path' => 'graphic.svg', 'color' => '#F59E0B', 'is_active' => true],
             ['name' => 'Housechores', 'description' => 'Ironing services, house cleaning, laundry helper', 'image_path' => 'cleaning.png', 'color' => '#540863', 'is_active' => true],
             ['name' => 'Event Planning', 'description' => 'Event organization and planning services', 'image_path' => 'event.png', 'color' => '#4FB7B3', 'is_active' => true],
@@ -246,7 +246,7 @@ class DatabaseSeeder extends Seeder
                 'services' => [
                     [
                         'title' => 'Mathematics Tutoring',
-                        'image_path' => 'service_tutor.jpg',
+                        'image_path' => 'storage/services/service_tutor.jpg',
                         'description' => 'Expert help in calculus, algebra, and statistics.',
                         'category' => 'Academic Tutoring',
                         'packages' => [
@@ -279,7 +279,7 @@ class DatabaseSeeder extends Seeder
                 'services' => [
                     [
                         'title' => 'Web Development (Laravel/React)',
-                        'image_path' => 'programming_service.jpg',
+                        'image_path' => 'storage/services/programming_service.jpg',
                         'description' => 'Full-stack web development services using Laravel and React.',
                         'category' => 'Programming & Tech',
                         'packages' => [
@@ -312,7 +312,7 @@ class DatabaseSeeder extends Seeder
                 'services' => [
                     [
                         'title' => 'Logo & Branding Design',
-                        'image_path' => 'service_planning.jpg',
+                        'image_path' => 'storage/services/service_planning.jpg',
                         'description' => 'Professional logo design, posters, and branding materials.',
                         'category' => 'Design & Creative',
                         'packages' => [
@@ -345,7 +345,7 @@ class DatabaseSeeder extends Seeder
                 'services' => [
                     [
                         'title' => 'Laundry & Ironing Helper',
-                        'image_path' => 'laundry_service.jpg',
+                        'image_path' => 'storage/services/laundry_service.jpg',
                         'description' => 'Washing and ironing assistance in the campus area.',
                         'category' => 'Housechores',
                         'packages' => [
@@ -378,7 +378,7 @@ class DatabaseSeeder extends Seeder
                 'services' => [
                     [
                         'title' => 'Runner & Parcel Pickup',
-                        'image_path' => 'runner_service.jpg',
+                        'image_path' => 'storage/services/runner_service.jpg',
                         'description' => 'Help pick up parcels, buy food/items, or run errands around Tanjong Malim.',
                         'category' => 'Runner & Errands',
                         'packages' => [
