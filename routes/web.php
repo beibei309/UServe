@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\AdminFaqsController;
 use App\Http\Controllers\Admin\AdminFeedbackController;
 use App\Http\Controllers\Admin\AdminRequestController;
 use App\Http\Controllers\Admin\AdminRewardController;
+use App\Http\Controllers\Admin\AdminLegalPagesController;
 use App\Http\Controllers\Admin\AdminServicesController;
 use App\Http\Controllers\Admin\AdminStudentController;
 use App\Http\Controllers\Admin\AdminStudentStatusController;
@@ -306,6 +307,10 @@ Route::middleware(['auth:admin', 'prevent-back-history'])->prefix('admin')->grou
     Route::put('/faqs/{faq}', [AdminFaqsController::class, 'update'])->name('admin.faqs.update');
     Route::delete('/faqs/{faq}', [AdminFaqsController::class, 'destroy'])->name('admin.faqs.destroy');
     Route::patch('/faqs/{faq}/toggle', [AdminFaqsController::class, 'toggle'])->name('admin.faqs.toggle');
+
+    // LEGAL PAGE MANAGEMENT
+    Route::get('/legal-pages', [AdminLegalPagesController::class, 'index'])->name('admin.legal-pages.index');
+    Route::put('/legal-pages/{legalPage}', [AdminLegalPagesController::class, 'update'])->name('admin.legal-pages.update');
 
     // ========================================
     // COMMUNITY USER MANAGEMENT

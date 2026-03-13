@@ -1,38 +1,19 @@
 <x-guest-layout>
     <div class="max-w-4xl mx-auto py-8 px-4">
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
-            <h1 class="text-3xl font-bold text-gray-900 mb-6">Terms of Service</h1>
-            
-            <div class="prose max-w-none">
-                <h2 class="text-xl font-semibold text-gray-900 mt-6 mb-4">1. Acceptance of Terms</h2>
-                <p class="text-gray-700 mb-4">
-                    By accessing and using UpsiConnect, you accept and agree to be bound by the terms and provision of this agreement.
-                </p>
+            <h1 class="text-3xl font-bold text-gray-900 mb-6">{{ $legalPage->hlp_title }}</h1>
 
-                <h2 class="text-xl font-semibold text-gray-900 mt-6 mb-4">2. Use License</h2>
-                <p class="text-gray-700 mb-4">
-                    Permission is granted to temporarily use UpsiConnect for personal, non-commercial transitory viewing only. This is the grant of a license, not a transfer of title.
-                </p>
+            <style>
+                .legal-content h1, .legal-content h2, .legal-content h3 { color: #0f172a; font-weight: 700; }
+                .legal-content h1 { font-size: 1.5rem; margin: 1.2rem 0 0.75rem; }
+                .legal-content h2 { font-size: 1.15rem; margin: 1rem 0 0.5rem; }
+                .legal-content p { color: #334155; margin-bottom: 0.75rem; line-height: 1.75; }
+                .legal-content ul, .legal-content ol { margin: 0.75rem 0 1rem 1.25rem; color: #334155; }
+                .legal-content li { margin: 0.25rem 0; }
+            </style>
 
-                <h2 class="text-xl font-semibold text-gray-900 mt-6 mb-4">3. User Accounts</h2>
-                <p class="text-gray-700 mb-4">
-                    Users are responsible for maintaining the confidentiality of their account information and for all activities that occur under their account.
-                </p>
-
-                <h2 class="text-xl font-semibold text-gray-900 mt-6 mb-4">4. Student Services</h2>
-                <p class="text-gray-700 mb-4">
-                    UpsiConnect facilitates connections between UPSI students and community members. We do not guarantee the quality of services provided by students.
-                </p>
-
-                <h2 class="text-xl font-semibold text-gray-900 mt-6 mb-4">5. Community Guidelines</h2>
-                <p class="text-gray-700 mb-4">
-                    All users must maintain respectful communication and follow community standards. Inappropriate behavior may result in account suspension.
-                </p>
-
-                <h2 class="text-xl font-semibold text-gray-900 mt-6 mb-4">6. Contact Information</h2>
-                <p class="text-gray-700 mb-4">
-                    For questions about these Terms of Service, please contact us through the platform's support system.
-                </p>
+            <div class="legal-content max-w-none">
+                <x-legal-content :content="$legalPage->hlp_content" />
             </div>
 
             <div class="mt-8 pt-6 border-t border-gray-200">

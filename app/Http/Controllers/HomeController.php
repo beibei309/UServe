@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Models\Category;
+use App\Models\LegalPage;
 use App\Models\User;
 use App\Models\StudentService;
 use Illuminate\Support\Facades\Auth;
@@ -158,12 +159,30 @@ public function about()
 
     public function terms()
     {
-        return view('legal.terms');
+        $legalPage = LegalPage::where('hlp_slug', 'terms')->where('hlp_is_active', true)->first();
+
+        if (! $legalPage) {
+            $legalPage = new LegalPage([
+                'hlp_title' => 'Terms of Service',
+                'hlp_content' => '1. Introduction' . "\n" . 'This page is currently being prepared.',
+            ]);
+        }
+
+        return view('legal.terms', compact('legalPage'));
     }
 
     public function privacy()
     {
-        return view('legal.privacy');
+        $legalPage = LegalPage::where('hlp_slug', 'privacy')->where('hlp_is_active', true)->first();
+
+        if (! $legalPage) {
+            $legalPage = new LegalPage([
+                'hlp_title' => 'Privacy Policy',
+                'hlp_content' => '1. Policy Overview' . "\n" . 'This page is currently being prepared.',
+            ]);
+        }
+
+        return view('legal.privacy', compact('legalPage'));
     }
 
 }
