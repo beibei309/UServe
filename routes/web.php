@@ -121,7 +121,6 @@ Route::middleware(['auth'])->group(function () {
         ->name('service-requests.cancel-dispute');
     Route::post('/service-requests/{id}/report-issue', [App\Http\Controllers\ServiceRequestController::class, 'reportIssue'])->name('service-requests.report-issue');
 
-    Route::post('/service-requests/{serviceRequest}/mark-completed', [ServiceRequestController::class, 'markCompleted'])->name('service-requests.mark-completed');
     Route::post('/service-requests/{serviceRequest}/cancel', [ServiceRequestController::class, 'cancel'])->name('service-requests.cancel');
 });
 Route::get('/services/{id}', [StudentServiceController::class, 'details'])->name('services.details');

@@ -117,7 +117,6 @@ class CheckUserStatus
                 'service-requests.reject',
                 'service-requests.mark-in-progress',
                 'service-requests.mark-work-finished',
-                'service-requests.mark-completed',
                 'service-requests.mark-paid',
             ];
 

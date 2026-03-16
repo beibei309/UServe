@@ -859,34 +859,6 @@ class ServiceRequestController extends BaseController
         return back()->with('error', 'Cannot cancel report at this stage.');
     }
 
-    public function markCompleted(ServiceRequest $serviceRequest)
-    {
-        $user = Auth::user();
-
-        // Only the provider can mark as completed
-        if ($serviceRequest->hsr_requester_id != $user->hu_id && $serviceRequest->hsr_provider_id != $user->hu_id) {
-            abort(403, 'You are not authorized to update this request.');
-        }
-
-        if (! $serviceRequest->isInProgress()) {
-            return back()->with('error', 'This request must be in progress first.');
-        }
-
-        // --- UBAH KAT SINI ---
-        $serviceRequest->update([
-            'hsr_status' => 'completed',
-            'hsr_completed_at' => now(), // Rekod masa tamat kerja
-        ]);
-
-        // Award points for completed service
-        PointsController::awardPointsForCompletedService($serviceRequest); // Seller points
-        PointsController::awardBuyerPointsForCompletedService($serviceRequest); // Buyer points
-
-        // Notify Requester
-        $serviceRequest->requester->notify(new ServiceRequestStatusUpdated($serviceRequest, 'completed'));
-
-        return back()->with('success', 'Service marked as completed! Both parties can now leave reviews. You both earned 1 point each!');
-    }
 
     public function markAsPaid($id)
     {

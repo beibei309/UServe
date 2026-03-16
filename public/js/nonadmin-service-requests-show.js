@@ -15,7 +15,7 @@
             accept: 'accept',
             reject: 'reject',
             'in-progress': 'mark-in-progress',
-            complete: 'mark-completed',
+            'finish-work': 'mark-work-finished',
             cancel: 'cancel',
         };
         return actionUrlTemplate.replace('__ID__', requestId).replace('__ACTION__', actionMap[action] || action);
@@ -63,13 +63,16 @@
             });
             if (!result.isConfirmed) return;
         } else {
+            const isFinishWork = action === 'finish-work';
             const result = await Swal.fire({
-                title: 'Confirm Action',
-                text: 'Are you sure you want to proceed?',
+                title: isFinishWork ? 'Finish Work?' : 'Confirm Action',
+                text: isFinishWork
+                    ? 'This will move the request to Waiting Payment for buyer confirmation.'
+                    : 'Are you sure you want to proceed?',
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonColor: '#3085d6',
-                confirmButtonText: 'Yes, proceed',
+                confirmButtonText: isFinishWork ? 'Yes, Finish Work' : 'Yes, proceed',
             });
             if (!result.isConfirmed) return;
         }

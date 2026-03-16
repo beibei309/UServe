@@ -285,7 +285,7 @@
                                 <div class="flex flex-col md:flex-row gap-6">
                                     {{-- IMAGE SECTION --}}
                                     <div
-                                        class="md:w-72 h-64 md:h-auto flex-shrink-0 relative rounded-[1.5rem] overflow-hidden bg-slate-50">
+                                        class="w-full md:w-64 aspect-square flex-shrink-0 relative rounded-[1.5rem] overflow-hidden bg-slate-50">
                                    <img src="{{ $service->ui_image_url }}"
     alt="{{ $service->hss_title }}"
      class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"

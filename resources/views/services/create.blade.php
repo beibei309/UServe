@@ -243,6 +243,7 @@
                                     <option value="90">90 Minutes</option>
                                     <option value="120">2 Hours</option>
                                 </select>
+                                <p class="mt-3 text-xs text-slate-500">Tip: for time-slot services, keep package durations aligned with this slot length (for example, 2 Hours with 60-minute slots means students choose 2 slots).</p>
                             </div>
 
                             {{-- Weekly Schedule --}}

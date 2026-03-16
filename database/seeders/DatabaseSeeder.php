@@ -251,19 +251,19 @@ class DatabaseSeeder extends Seeder
                         'category' => 'Academic Tutoring',
                         'packages' => [
                             'basic' => [
-                                'duration' => '1',
+                                'duration' => '1 Hour',
                                 'frequency' => 'One Session',
                                 'price' => 25.00,
                                 'description' => 'Quick session focusing on 1-2 difficult topics.'
                             ],
                             'standard' => [
-                                'duration' => '3',
+                                'duration' => '3 Hours',
                                 'frequency' => 'One Session',
                                 'price' => 70.00,
                                 'description' => 'In-depth study session including practice exercises.'
                             ],
                             'premium' => [
-                                'duration' => '4',
+                                'duration' => '4 Hours',
                                 'frequency' => 'Weekly',
                                 'price' => 250.00,
                                 'description' => 'Intensive guidance for a month leading up to the final exam.'
@@ -284,19 +284,19 @@ class DatabaseSeeder extends Seeder
                         'category' => 'Programming & Tech',
                         'packages' => [
                             'basic' => [
-                                'duration' => '3',
+                                'duration' => '3 Days',
                                 'frequency' => 'Small Project',
                                 'price' => 150.00,
                                 'description' => 'Bug fixing or small feature additions.'
                             ],
                             'standard' => [
-                                'duration' => '1',
+                                'duration' => '1 Week',
                                 'frequency' => 'Simple Project',
                                 'price' => 500.00,
                                 'description' => 'Landing page website or full portfolio.'
                             ],
                             'premium' => [
-                                'duration' => '3',
+                                'duration' => '3 Weeks',
                                 'frequency' => 'Complex Project',
                                 'price' => 1500.00,
                                 'description' => 'Complete CRUD system (e.g., simple inventory management system).'
@@ -317,19 +317,19 @@ class DatabaseSeeder extends Seeder
                         'category' => 'Design & Creative',
                         'packages' => [
                             'basic' => [
-                                'duration' => '2',
+                                'duration' => '2 Days',
                                 'frequency' => '1 Concept',
                                 'price' => 35.00,
                                 'description' => 'Simple text logo design with 2x revisions.'
                             ],
                             'standard' => [
-                                'duration' => '4',
+                                'duration' => '4 Days',
                                 'frequency' => '3 Concepts',
                                 'price' => 90.00,
                                 'description' => 'Iconic logo with 5x revisions and source files.'
                             ],
                             'premium' => [
-                                'duration' => '1',
+                                'duration' => '1 Week',
                                 'frequency' => 'Full Branding',
                                 'price' => 250.00,
                                 'description' => 'Logo, business cards, and brand usage guide.'
@@ -350,19 +350,19 @@ class DatabaseSeeder extends Seeder
                         'category' => 'Housechores',
                         'packages' => [
                             'basic' => [
-                                'duration' => '2',
+                                'duration' => '2 Hours',
                                 'frequency' => 'One Session',
                                 'price' => 30.00,
                                 'description' => 'Washing and folding clothes (max 10kg).'
                             ],
                             'standard' => [
-                                'duration' => '3',
+                                'duration' => '3 Hours',
                                 'frequency' => 'One Session',
                                 'price' => 45.00,
                                 'description' => 'Washing, folding, and ironing (max 10kg).'
                             ],
                             'premium' => [
-                                'duration' => '3',
+                                'duration' => '3 Hours',
                                 'frequency' => 'Weekly',
                                 'price' => 160.00,
                                 'description' => 'Weekly ironing and folding service for one month.'
@@ -383,19 +383,19 @@ class DatabaseSeeder extends Seeder
                         'category' => 'Runner & Errands',
                         'packages' => [
                             'basic' => [
-                                'duration' => '30',
+                                'duration' => '30 Min',
                                 'frequency' => '1 Location',
                                 'price' => 10.00,
                                 'description' => 'Parcel pickup from the nearest post office.'
                             ],
                             'standard' => [
-                                'duration' => '1',
+                                'duration' => '1 Hour',
                                 'frequency' => '2 Locations',
                                 'price' => 25.00,
                                 'description' => 'Buying food/items from 2 different locations.'
                             ],
                             'premium' => [
-                                'duration' => '2',
+                                'duration' => '2 Hours',
                                 'frequency' => 'Unlimited (Local)',
                                 'price' => 40.00,
                                 'description' => 'All local errands within a 2-hour limit.'

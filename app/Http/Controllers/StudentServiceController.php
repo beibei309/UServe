@@ -84,7 +84,7 @@ class StudentServiceController extends Controller
             $query->orderBy('hss_basic_price', 'desc');
         }
 
-        $services = $query->paginate(5);
+        $services = $query->paginate(10);
         $isAuthenticated = Auth::check();
         $services->getCollection()->transform(function (StudentService $service) use ($isAuthenticated) {
             $service->ui_image_url = $this->resolveServiceCardImageUrl($service->hss_image_path, $service->hss_title);

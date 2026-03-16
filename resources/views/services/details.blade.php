@@ -464,12 +464,12 @@
                                 {{-- ?? UPDATED: Simple Data Display (No labels) --}}
                                 <div class="text-sm font-medium text-gray-500 mt-1 flex items-center gap-1"
                                     x-show="packages[currentPackage].duration || packages[currentPackage].frequency">
-                                    <span x-text="packages[currentPackage].duration"></span>
+                                    <span x-text="formatPackageDuration(packages[currentPackage].duration)"></span>
 
                                     {{-- Show divider/text only if both exist --}}
                                     <span
                                         x-show="packages[currentPackage].duration && packages[currentPackage].frequency">
-
+                                        •
                                     </span>
 
                                     <span x-text="packages[currentPackage].frequency"></span>
@@ -501,6 +501,7 @@
                                         </button>
                                     </template>
                                 </div>
+                                <p class="mt-2 text-[11px] text-indigo-600" x-show="packageDurationHint" x-text="packageDurationHint"></p>
                             </div>
 
                             <div class="w-full h-px bg-gray-100 mb-6"></div>

@@ -403,6 +403,7 @@
                                                     @endforeach
                                                 </select>
                                             </div>
+                                            <p class="mt-3 text-xs text-slate-500">Tip: for time-slot services, align package durations with this slot length (for example, 2 Hours with 60-minute slots means students choose 2 slots).</p>
                                         </div>
                                     </div>
                                 </div>

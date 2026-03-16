@@ -52,6 +52,7 @@
             upcomingDays: [],
             timeSlots: [],
             sessionDuration: detailsConfig.sessionDuration,
+            packageDurationHint: '',
             showFullCalendar: false,
             calendarInstance: null,
 
@@ -68,8 +69,98 @@
                 return `${hours.toFixed(1).replace('.0', '')}h`;
             },
 
+            formatPackageDuration(durationText) {
+                if (!durationText) return '';
+
+                const raw = String(durationText).trim();
+                if (!raw) return '';
+
+                if (/^[0-9]+(\.[0-9]+)?$/.test(raw)) {
+                    const numericValue = parseFloat(raw);
+                    if (Number.isNaN(numericValue)) return raw;
+
+                    if (this.isSessionBased) {
+                        return this.formatDuration(numericValue * this.sessionDuration);
+                    }
+
+                    return `${numericValue % 1 === 0 ? numericValue.toFixed(0) : numericValue} Day${numericValue === 1 ? '' : 's'}`;
+                }
+
+                return raw;
+            },
+
             init() {
+                this.autoSelectDurationFromPackage(this.currentPackage);
                 this.generateCalendar();
+            },
+
+            parsePackageDurationToMinutes(durationText) {
+                if (!durationText) return null;
+
+                const raw = String(durationText).trim();
+                if (!raw) return null;
+
+                if (/day|days|week|weeks|month|months/i.test(raw)) {
+                    return null;
+                }
+
+                if (/^[0-9]+(\.[0-9]+)?$/.test(raw)) {
+                    const numericValue = parseFloat(raw);
+                    if (Number.isNaN(numericValue) || numericValue <= 0) return null;
+                    return Math.round(numericValue * this.sessionDuration);
+                }
+
+                let totalMinutes = 0;
+                const matches = raw.matchAll(/(\d+(?:\.\d+)?)\s*(hours?|hrs?|hr|h|minutes?|mins?|min|m|sessions?|session|slots?|slot)/gi);
+                for (const match of matches) {
+                    const value = parseFloat(match[1]);
+                    const unit = String(match[2]).toLowerCase();
+                    if (Number.isNaN(value) || value <= 0) continue;
+
+                    if (unit.startsWith('h')) {
+                        totalMinutes += value * 60;
+                    } else if (unit.startsWith('m')) {
+                        totalMinutes += value;
+                    } else if (unit.startsWith('session') || unit.startsWith('slot')) {
+                        totalMinutes += value * this.sessionDuration;
+                    }
+                }
+
+                return totalMinutes > 0 ? Math.round(totalMinutes) : null;
+            },
+
+            refreshTimeSlotsForSelectedDate() {
+                if (!this.selectedDate) return;
+                const dayObj = this.upcomingDays.find((d) => d.dateStr === this.selectedDate);
+                if (dayObj) {
+                    this.generateTimeSlots(dayObj.dayKey);
+                    return;
+                }
+                const dateObj = new Date(this.selectedDate);
+                const jsDays = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+                this.generateTimeSlots(jsDays[dateObj.getDay()]);
+            },
+
+            autoSelectDurationFromPackage(packageKey) {
+                if (!this.isSessionBased) {
+                    this.packageDurationHint = '';
+                    return;
+                }
+
+                const packageData = this.packages[packageKey] || {};
+                const packageDuration = packageData.duration;
+                const durationMinutes = this.parsePackageDurationToMinutes(packageDuration);
+
+                if (!durationMinutes || this.sessionDuration <= 0) {
+                    this.packageDurationHint = '';
+                    return;
+                }
+
+                const slotCount = Math.min(5, Math.max(1, Math.ceil(durationMinutes / this.sessionDuration)));
+                this.selectedDuration = slotCount;
+                this.packageDurationHint = `Auto-selected ${this.formatDuration(slotCount * this.sessionDuration)} based on package duration.`;
+                this.selectedTime = null;
+                this.refreshTimeSlotsForSelectedDate();
             },
 
             calculateTotal() {
@@ -148,7 +239,7 @@
                 let currentMinutes = startH * 60 + startM;
                 const endMinutes = endH * 60 + endM;
                 const stepMinutes = this.sessionDuration;
-                const durationMinutes = this.selectedDuration * 60;
+                const durationMinutes = this.selectedDuration * this.sessionDuration;
                 const daysBookings = this.bookedSlots.filter((slot) => slot.date === this.selectedDate);
 
                 const now = new Date();
@@ -200,7 +291,7 @@
 
             switchPackage(pkg) {
                 this.currentPackage = pkg;
-                this.selectedTime = null;
+                this.autoSelectDurationFromPackage(pkg);
             },
 
             formatTimeDisplay(timeStr) {
@@ -208,7 +299,7 @@
                 const [h, m] = timeStr.split(':').map(Number);
                 const startMinutes = h * 60 + m;
                 if (!this.isSessionBased) return this.minutesToTime(startMinutes);
-                const endMinutes = startMinutes + this.selectedDuration * 60;
+                const endMinutes = startMinutes + this.selectedDuration * this.sessionDuration;
                 return `${this.minutesToTime(startMinutes)} - ${this.minutesToTime(endMinutes)}`;
             },
 
@@ -224,7 +315,7 @@
             calculateEndTime(startTime) {
                 if (!startTime) return '00:00';
                 const [h, m] = startTime.split(':').map(Number);
-                let totalMinutes = h * 60 + m + this.selectedDuration * 60;
+                let totalMinutes = h * 60 + m + this.selectedDuration * this.sessionDuration;
                 let endH = Math.floor(totalMinutes / 60);
                 const endM = totalMinutes % 60;
                 endH %= 24;
@@ -282,7 +373,7 @@
                     <div class="text-left bg-gray-50 p-4 rounded-lg border border-gray-200 text-sm mb-4">
                         <p class="mb-1"><strong>Date:</strong> ${this.selectedDate}</p>
                         <p class="mb-1"><strong>Time:</strong> ${displayTime}</p>
-                        <p class="mb-1"><strong>Duration:</strong> ${this.selectedDuration} Hours</p>
+                        <p class="mb-1"><strong>Duration:</strong> ${this.formatDuration(this.selectedDuration * this.sessionDuration)}</p>
                         <p class="text-lg font-bold text-indigo-600 mt-2">Total: RM${this.calculateTotal()}</p>
                     </div>
                     <div class="text-left">
@@ -313,7 +404,7 @@
                     });
 
                     const userNote = result.value;
-                    const finalMessage = `BOOKING DETAILS:\nTime: ${displayTime}\nDuration: ${this.selectedDuration}h\n\nNote: ${userNote}`;
+                    const finalMessage = `BOOKING DETAILS:\nTime: ${displayTime}\nDuration: ${this.formatDuration(this.selectedDuration * this.sessionDuration)}\n\nNote: ${userNote}`;
 
                     fetch(detailsConfig.storeRequestUrl, {
                         method: 'POST',

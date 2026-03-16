@@ -376,7 +376,7 @@
                                         @endif
 
                                         @if ($isProvider && $serviceRequest->isInProgress())
-                                            <button type="button" data-request-action="complete" data-request-id="{{ $serviceRequest->hsr_id }}" class="w-full py-2.5 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 shadow-sm transition">Mark as Completed</button>
+                                            <button type="button" data-request-action="finish-work" data-request-id="{{ $serviceRequest->hsr_id }}" class="w-full py-2.5 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 shadow-sm transition">Finish Work</button>
                                         @endif
 
                                         @if ($isRequester && $serviceRequest->hsr_status === 'pending')

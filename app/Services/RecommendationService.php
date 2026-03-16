@@ -6,25 +6,11 @@ use Illuminate\Support\Facades\DB;
 
 class RecommendationService
 {
-    // Weights for the scoring formula
-    const WEIGHT_RATING      = 0.40;
-    const WEIGHT_COMPLETIONS = 0.30;
-    const WEIGHT_FAVORITES   = 0.15;
-    const WEIGHT_AVAILABILITY = 0.10;
-
-    // Newcomer boost: +1.0 for services ≤ 14 days old
-    const NEWCOMER_DAYS  = 14;
-    const NEWCOMER_BOOST = 1.0;
-
-    // Age decay: -5% per 30-day period after the newcomer window expires
-    const DECAY_START_DAYS = 14;
-    const DECAY_RATE       = 0.05; // 5% per period
-    const DECAY_PERIOD_DAYS = 30;
-
     /**
      * Apply a ORDER BY recommendation score to a StudentService query builder.
      *
-     * Compatible with both Eloquent and raw DB query builders.
+     * All tuning values are read from config/recommendation.php, which reads
+     * from .env. Change values in .env and run `php artisan config:clear`.
      *
      * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
@@ -32,6 +18,32 @@ class RecommendationService
     public function applyToQuery($query): mixed
     {
         $table = 'h2u_student_services';
+
+        // ── Weights ────────────────────────────────────────────────────────
+        $w_rating      = config('recommendation.weights.rating',       0.40);
+        $w_completions = config('recommendation.weights.completions',   0.30);
+        $w_favorites   = config('recommendation.weights.favorites',     0.15);
+        $w_avail       = config('recommendation.weights.availability',  0.10);
+
+        // ── New-seller launch boost ────────────────────────────────────────
+        $newSellerMaxCompletedOrders = config('recommendation.new_seller.max_completed_orders', 5);
+        $newSellerMaxAccountAgeDays  = config('recommendation.new_seller.max_account_age_days', 30);
+        $newSellerStrongDays         = config('recommendation.new_seller.strong_boost_days',    3);
+        $newSellerSoftDays           = config('recommendation.new_seller.soft_boost_days',      5);
+        $newSellerStrongBoost        = config('recommendation.new_seller.strong_boost',         0.80);
+        $newSellerSoftBoost          = config('recommendation.new_seller.soft_boost',           0.30);
+
+        // ── Existing-seller launch boost ───────────────────────────────────
+        $existingSellerBoostDays = config('recommendation.existing_seller.boost_days', 1);
+        $existingSellerBoost     = config('recommendation.existing_seller.boost',      0.20);
+
+        // ── Hard priority bucket: show fresh listings first ────────────────
+        $newListingFirstDays = config('recommendation.priority.new_listing_first_days', 3);
+
+        // ── Age decay ─────────────────────────────────────────────────────
+        $decayStart  = config('recommendation.decay.start_days',   14);
+        $decayRate   = config('recommendation.decay.rate',          0.05);
+        $decayPeriod = config('recommendation.decay.period_days',   30);
 
         // --- Sub-query: Average rating for this service ---
         $ratingSubqueryQuery = DB::table('h2u_reviews')
@@ -55,47 +67,102 @@ class RecommendationService
 
         $favoritesSubquery = $favoritesSubqueryQuery->toSql();
 
-        $w_rating      = self::WEIGHT_RATING;
-        $w_completions = self::WEIGHT_COMPLETIONS;
-        $w_favorites   = self::WEIGHT_FAVORITES;
-        $w_avail       = self::WEIGHT_AVAILABILITY;
-        $newcomerDays  = self::NEWCOMER_DAYS;
-        $newcomerBoost = self::NEWCOMER_BOOST;
-        $decayStart    = self::DECAY_START_DAYS;
-        $decayRate     = self::DECAY_RATE;
-        $decayPeriod   = self::DECAY_PERIOD_DAYS;
+        // --- Sub-query: Seller completed orders across all their services ---
+        $sellerCompletedOrdersSubqueryQuery = DB::table('h2u_service_requests as hsr2')
+            ->join('h2u_student_services as hss2', 'hss2.hss_id', '=', 'hsr2.hsr_student_service_id')
+            ->selectRaw('COUNT(*)')
+            ->whereColumn('hss2.hss_user_id', "{$table}.hss_user_id")
+            ->where('hsr2.hsr_status', 'completed');
+
+        $sellerCompletedOrdersSubquery = $sellerCompletedOrdersSubqueryQuery->toSql();
+
+        // --- Sub-query: Seller account age in days ---
+        $sellerAccountAgeDaysSubqueryQuery = DB::table('h2u_users as hu')
+            ->selectRaw('COALESCE(EXTRACT(DAY FROM (NOW() - hu.created_at)), 9999)')
+            ->whereColumn('hu.hu_id', "{$table}.hss_user_id")
+            ->limit(1);
+
+        $sellerAccountAgeDaysSubquery = $sellerAccountAgeDaysSubqueryQuery->toSql();
+
+        // ── Build SQL expressions ──────────────────────────────────────────
+        $serviceAgeExpr       = "EXTRACT(DAY FROM (NOW() - {$table}.created_at))";
+        $sellerCompletedExpr  = "({$sellerCompletedOrdersSubquery})";
+        $sellerAccountAgeExpr = "({$sellerAccountAgeDaysSubquery})";
+
+        $isNewSellerExpr = "(
+            ({$sellerCompletedExpr} < {$newSellerMaxCompletedOrders})
+            OR ({$sellerAccountAgeExpr} < {$newSellerMaxAccountAgeDays})
+        )";
+
+        $launchBoostExpr = "
+            CASE
+                WHEN {$isNewSellerExpr} AND {$serviceAgeExpr} <= {$newSellerStrongDays}
+                    THEN {$newSellerStrongBoost}
+                WHEN {$isNewSellerExpr} AND {$serviceAgeExpr} <= {$newSellerSoftDays}
+                    THEN {$newSellerSoftBoost}
+                WHEN NOT ({$isNewSellerExpr}) AND {$serviceAgeExpr} <= {$existingSellerBoostDays}
+                    THEN {$existingSellerBoost}
+                ELSE 0
+            END
+        ";
+
+        $newListingPriorityExpr = "
+            CASE
+                WHEN {$serviceAgeExpr} <= {$newListingFirstDays} THEN 1
+                ELSE 0
+            END
+        ";
+
+        $newListingCreatedAtExpr = "
+            CASE
+                WHEN {$serviceAgeExpr} <= {$newListingFirstDays} THEN {$table}.created_at
+                ELSE NULL
+            END
+        ";
 
         // Build the full score expression:
         //   base_score = (rating_weight × avg_rating)
         //              + (completions_weight × completed_count)
         //              + (favorites_weight × favorites_count)
         //              + (availability_weight × is_available)
-        //   + newcomer_boost IF age in days ≤ NEWCOMER_DAYS
-        //   - decay_rate × FLOOR(MAX(age_days - DECAY_START, 0) / DECAY_PERIOD) × base_score  (capped ≥ 0)
+        //              + launch_boost (tiered by seller freshness + service age)
+        //   final_score = base_score × (1 - decay_rate × periods_after_decay_start)
         $scoreExpr = "
             GREATEST(0, (
                 ({$w_rating}      * ({$ratingSubquery}))
               + ({$w_completions} * ({$completionsSubquery}))
               + ({$w_favorites}   * ({$favoritesSubquery}))
               + ({$w_avail}       * CASE WHEN {$table}.hss_status = 'available' THEN 1 ELSE 0 END)
-              + CASE
-                    WHEN EXTRACT(DAY FROM (NOW() - {$table}.created_at)) <= {$newcomerDays}
-                    THEN {$newcomerBoost}
-                    ELSE 0
-                END
+              + ({$launchBoostExpr})
             ) * (1 - ({$decayRate} * FLOOR(
-                GREATEST(0, EXTRACT(DAY FROM (NOW() - {$table}.created_at)) - {$decayStart})
+                GREATEST(0, {$serviceAgeExpr} - {$decayStart})
                 / {$decayPeriod}
             )))
         )";
 
+        // $isNewSellerExpr is embedded 3 times in $launchBoostExpr (one per CASE WHEN branch).
+        // Each embedding contains $sellerCompletedOrdersSubquery which has 1 bound `?` parameter.
+        // The bindings must be supplied once per embedding, in SQL order.
         $scoreBindings = array_merge(
-            $ratingSubqueryQuery->getBindings(),
-            $completionsSubqueryQuery->getBindings(),
-            $favoritesSubqueryQuery->getBindings()
+            $ratingSubqueryQuery->getBindings(),                 // 0 bindings (uses whereColumn)
+            $completionsSubqueryQuery->getBindings(),            // 1 binding: 'completed'
+            $favoritesSubqueryQuery->getBindings(),              // 0 bindings (uses whereColumn)
+            // CASE WHEN 1 — new seller strong boost check
+            $sellerCompletedOrdersSubqueryQuery->getBindings(),  // 1 binding: 'completed'
+            $sellerAccountAgeDaysSubqueryQuery->getBindings(),   // 0 bindings (uses whereColumn)
+            // CASE WHEN 2 — new seller soft boost check
+            $sellerCompletedOrdersSubqueryQuery->getBindings(),  // 1 binding: 'completed'
+            $sellerAccountAgeDaysSubqueryQuery->getBindings(),   // 0 bindings
+            // CASE WHEN NOT — existing seller boost check
+            $sellerCompletedOrdersSubqueryQuery->getBindings(),  // 1 binding: 'completed'
+            $sellerAccountAgeDaysSubqueryQuery->getBindings(),   // 0 bindings
         );
 
-        return $query->orderByRaw("{$scoreExpr} DESC", $scoreBindings);
+        return $query
+            ->orderByRaw("{$newListingPriorityExpr} DESC")
+            ->orderByRaw("{$newListingCreatedAtExpr} DESC")
+            ->orderByRaw("{$scoreExpr} DESC", $scoreBindings)
+            ->orderBy("{$table}.created_at", 'DESC');
     }
 
     /**
@@ -103,8 +170,6 @@ class RecommendationService
      */
     public function getScoreExpression(): string
     {
-        // Re-uses applyToQuery logic — not meant for direct production use,
-        // only as a debug/documentation helper.
         return 'See applyToQuery() for the full SQL expression.';
     }
 }

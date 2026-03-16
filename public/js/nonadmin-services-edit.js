@@ -183,12 +183,39 @@
                 return;
             }
         }
+        
         if (currentId === 'pricing' && nextId === 'description') {
-            if (!document.getElementById('basic_price').value) {
-                Swal.fire({ icon: 'warning', title: 'Required Fields', text: 'Please set a price for the Basic Package.' });
+            const basicPrice = document.getElementById('basic_price').value;
+            const basicDuration = document.querySelector('input[name="packages[0][duration]"]').value;
+            const basicDesc = document.getElementById('input-basic').value;
+
+            if (!basicPrice) {
+                Swal.fire({ icon: 'warning', title: 'Missing Price', text: 'Please set a price (RM) for the Basic Package.' });
+                return;
+            }
+            if (!basicDuration) {
+                Swal.fire({ 
+                    icon: 'warning', 
+                    title: 'Missing Duration', 
+                    html: `Please tell students how long this package takes.<br><br><span class="text-sm text-gray-500">Examples: <b>"1 Hour"</b>, <b>"2 Days"</b>, or <b>"1 Week"</b></span>` 
+                });
+                return;
+            }
+            if (!basicDesc || basicDesc === '<p><br></p>') {
+                Swal.fire({ 
+                    icon: 'warning', 
+                    title: 'Missing Details', 
+                    html: `Please describe what's included in the Basic Package so students know what they're paying for.` 
+                });
                 return;
             }
         }
+
+        if (currentId === 'description' && nextId === 'availability' && (!document.getElementById('input-main').value || document.getElementById('input-main').value === '<p><br></p>')) {
+            Swal.fire({ icon: 'warning', title: 'Missing Description', text: 'Please provide a full description for your service.' });
+            return;
+        }
+
         switchTab(nextId);
     }
 
