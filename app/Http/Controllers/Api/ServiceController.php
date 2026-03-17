@@ -24,10 +24,18 @@ class ServiceController extends Controller
         try {
             // Get and sanitize inputs
             $search = $request->input('search', '');
-            $categoryId = $request->input('category_id');
-            $sort = $request->input('sort', 'newest');
+            $categoryIdRaw = $request->input('category_id');
+            $categoryId = filter_var($categoryIdRaw, FILTER_VALIDATE_INT, [
+                'options' => ['min_range' => 1],
+            ]) ?: null;
+            $sort = $request->input('sort', 'recommended');
             $availableOnly = $request->input('available_only');
-            $perPage = min((int) $request->input('per_page', 15), 50); // Max 50 items per page
+            $perPage = max(1, min((int) $request->input('per_page', 15), 50)); // 1..50 items per page
+
+            $allowedSorts = ['recommended', 'newest', 'oldest', 'price_low', 'price_high', 'rating'];
+            if (!in_array($sort, $allowedSorts, true)) {
+                $sort = 'recommended';
+            }
 
             // Build query
             $query = StudentService::with(['user', 'category'])
@@ -58,14 +66,17 @@ class ServiceController extends Controller
                 $query->where('hss_category_id', $categoryId);
             }
 
-            if ($availableOnly === '1' || $availableOnly === 'true') {
+            if ($availableOnly === '1' || $availableOnly === 'true' || $availableOnly === true) {
                 $query->where('hss_status', 'available');
-            } elseif ($availableOnly === '0' || $availableOnly === 'false') {
+            } elseif ($availableOnly === '0' || $availableOnly === 'false' || $availableOnly === false) {
                 $query->where('hss_status', 'unavailable');
             }
 
             // Apply sorting
             switch ($sort) {
+                case 'recommended':
+                    $query->recommended();
+                    break;
                 case 'oldest':
                     $query->orderBy('created_at', 'asc');
                     break;

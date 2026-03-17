@@ -30,14 +30,14 @@ Retrieve a paginated list of all available services with filtering and search ca
 |-----------|------|---------|-------------|
 | `search` | string | - | Search in service title and description |
 | `category_id` | integer | - | Filter by category ID |
-| `sort` | string | `newest` | Sort order: `newest`, `oldest`, `price_low`, `price_high`, `rating` |
+| `sort` | string | `recommended` | Sort order: `recommended`, `newest`, `oldest`, `price_low`, `price_high`, `rating` |
 | `available_only` | boolean | - | Filter by availability: `true` (available only), `false` (unavailable only) |
 | `per_page` | integer | 15 | Items per page (max 50) |
 | `page` | integer | 1 | Page number |
 
 #### Example Request
 ```bash
-curl -X GET "https://your-domain.com/api/v1/services?search=tutoring&category_id=1&sort=rating&per_page=20&page=1"
+curl -X GET "https://your-domain.com/api/v1/services?search=tutoring&category_id=1&sort=recommended&per_page=20&page=1"
 ```
 
 #### Example Response

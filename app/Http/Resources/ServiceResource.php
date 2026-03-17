@@ -15,6 +15,9 @@ class ServiceResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $provider = $this->user;
+        $category = $this->category;
+
         return [
             'id' => $this->hss_id,
             'title' => $this->hss_title,
@@ -60,21 +63,21 @@ class ServiceResource extends JsonResource
 
             // Provider information (limited for privacy)
             'provider' => [
-                'id' => $this->user->hu_id,
-                'name' => $this->user->hu_name,
-                'role' => $this->user->hu_role,
-                'avatar_url' => $this->user->hu_profile_photo_path
-                    ? asset($this->user->hu_profile_photo_path)
-                    : 'https://ui-avatars.com/api/?name=' . urlencode($this->user->hu_name),
-                'is_available' => $this->user->hu_is_available,
-                'faculty' => $this->user->hu_faculty,
+                'id' => $provider?->hu_id,
+                'name' => $provider?->hu_name,
+                'role' => $provider?->hu_role,
+                'avatar_url' => $provider?->hu_profile_photo_path
+                    ? asset($provider->hu_profile_photo_path)
+                    : 'https://ui-avatars.com/api/?name=' . urlencode($provider?->hu_name ?? 'User'),
+                'is_available' => (bool) ($provider?->hu_is_available ?? false),
+                'faculty' => $provider?->hu_faculty,
             ],
 
             // Category information
             'category' => [
-                'id' => $this->category->hc_id,
-                'name' => $this->category->hc_name,
-                'description' => $this->category->hc_description,
+                'id' => $category?->hc_id,
+                'name' => $category?->hc_name,
+                'description' => $category?->hc_description,
             ],
 
             // Statistics
