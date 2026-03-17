@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Review;
 use App\Models\ServiceRequest;
 use App\Models\StudentService;
-use App\Models\Cat;
 use App\Http\Controllers\PointsController;
 use App\Notifications\ServiceRequestStatusUpdated;
 use App\Services\ServiceImageUrlResolver;
@@ -22,7 +21,7 @@ class ServiceRequestController extends BaseController
 {
     public function __construct(
         private readonly ServiceRequestNotificationService $serviceRequestNotificationService,
-        private readonly ServiceImageUrlResolver $serviceImageUrlResolver,
+        private readonly ServiceImageUrlResolver $serviceImageUrlResolver
     ) {
         $this->middleware('auth');
     }
@@ -34,6 +33,7 @@ class ServiceRequestController extends BaseController
     {
         try {
             $user = Auth::user();
+            // ...existing code...
 
             // 1. Validate basic fields (Make times nullable for flexibility)
             $validated = $request->validate([
@@ -51,40 +51,44 @@ class ServiceRequestController extends BaseController
             // Check availability
             if (! $studentService->hss_is_active || ! $studentService->user->hu_is_available) {
                 return response()->json([
+                    'code' => 400,
+                    'status' => 'error',
                     'success' => false,
                     'message' => 'Service or provider unavailable.',
+                    'data' => null
                 ], 400);
             }
 
             // Check for existing active requests from this user
             $hasActiveRequest = ServiceRequest::where('hsr_requester_id', $user->hu_id)
-                ->where('hsr_student_service_id', $studentService->hss_id) // <--- CHANGED: Check specific service ID
+                ->where('hsr_student_service_id', $studentService->hss_id)
                 ->whereIn('hsr_status', ['pending', 'accepted', 'in_progress'])
                 ->exists();
-
             if ($hasActiveRequest) {
                 return response()->json([
+                    'code' => 400,
+                    'status' => 'error',
                     'success' => false,
                     'message' => 'You already have an active request with this helper.',
+                    'data' => null
                 ], 400);
             }
 
             // --- LOGIC SPLIT: Session vs Task ---
             $startTime = $validated['start_time'];
             $endTime = $validated['end_time'];
-
-            // If it is Session Based, we MUST have times and check overlap
             if ($studentService->hss_session_duration) {
                 if (! $startTime || ! $endTime) {
                     return response()->json([
+                        'code' => 422,
+                        'status' => 'error',
                         'success' => false,
                         'message' => 'Start and End time are required for this service.',
+                        'data' => null
                     ], 422);
                 }
 
-                // Check Overlap logic ONLY for session-based services
                 $selectedDateJson = json_encode($validated['selected_dates']);
-
                 $overlapping = ServiceRequest::where('hsr_student_service_id', $studentService->hss_id)
                     ->whereRaw('hsr_selected_dates::text = ?', [$selectedDateJson])
                     ->whereIn('hsr_status', ['pending', 'accepted', 'in_progress', 'approved'])
@@ -93,17 +97,18 @@ class ServiceRequestController extends BaseController
                             ->where('hsr_end_time', '>', $startTime);
                     })
                     ->exists();
-
                 if ($overlapping) {
                     return response()->json([
+                        'code' => 400,
+                        'status' => 'error',
                         'success' => false,
                         'message' => 'This time slot is booked. Please select another.',
+                        'data' => null
                     ], 400);
                 }
             } else {
                 $startTime = $startTime ?? '00:00';
                 $endTime = $endTime ?? '23:59';
-
             }
 
             // Create Request
@@ -123,157 +128,62 @@ class ServiceRequestController extends BaseController
             $this->serviceRequestNotificationService->notifyCreated($serviceRequest, $studentService, $user);
 
             return response()->json([
+                'code' => 200,
+                'status' => 'ok',
                 'success' => true,
                 'message' => 'Service request sent successfully!',
-                'request_id' => $serviceRequest->hsr_id,
-            ]);
-
+                'data' => [
+                    'request_id' => $serviceRequest->hsr_id
+                ]
+            ], 200);
+            // ...existing code...
         } catch (\Exception $e) {
             Log::error('ServiceRequest store error: '.$e->getMessage());
-
             return response()->json([
+                'code' => 500,
+                'status' => 'error',
                 'success' => false,
                 'message' => 'Server error occurred.',
+                'data' => null
             ], 500);
         }
     }
 
     public function index(Request $request)
     {
-        $user = Auth::user();
-        $defaultStatusTab = $request->input('tab', 'pending');
+        try {
+            $user = Auth::user();
+            $perPage = (int) $request->input('per_page', 15);
+            $page = (int) $request->input('page', 1);
+            $query = ServiceRequest::query();
+            // Optionally filter by user
+            // $query->where('hsr_requester_id', $user->hu_id);
+            $requests = $query->with(['studentService.category', 'requester', 'provider'])
+                ->paginate($perPage, ['*'], 'page', $page);
 
-        // --- 1. DATA FOR DROPDOWNS ---
-        $categories = \App\Models\Category::all();
+            $data = $requests->items();
+            $pagination = [
+                'total' => $requests->total(),
+                'per_page' => $requests->perPage(),
+                'current_page' => $requests->currentPage(),
+                'last_page' => $requests->lastPage(),
+                'from' => $requests->firstItem(),
+                'to' => $requests->lastItem(),
+            ];
 
-        // --- 2. CAPTURE INPUTS ---
-        $search = $request->input('search');
-        $categoryId = $request->input('category');
-        $selectedServiceId = $request->input('service_type');
-        $status = $request->input('status'); // NEW: Capture Status
-
-        // Safety: Reset service ID if it's invalid
-        if (is_array($selectedServiceId) || json_decode((string) $selectedServiceId)) {
-            $selectedServiceId = null;
-        }
-
-        $viewMode = session('view_mode', 'buyer');
-
-        // ==========================================
-        // 3. HELPER MODE (Seller View)
-        // ==========================================
-        if ($user->hu_role === 'helper' && $viewMode === 'seller') {
-
-            // Fetch only THIS seller's services for the dropdown
-            $myServices = \App\Models\StudentService::where('hss_user_id', $user->hu_id)
-                ->selectRaw('hss_id as id, hss_title as title')
-                ->get();
-
-            $query = \App\Models\ServiceRequest::where('hsr_provider_id', $user->hu_id)
-                ->with(['requester', 'provider', 'studentService.category', 'reviewForHelper', 'reviewByHelper']);
-
-            // A. Search
-            if ($search) {
-                $query->where(function ($q) use ($search) {
-                    $q->whereHas('studentService', function ($subQ) use ($search) {
-                        $subQ->where('hss_title', 'LIKE', "%{$search}%");
-                    })
-                        ->orWhereHas('requester', function ($subQ) use ($search) {
-                            $subQ->where('hu_name', 'LIKE', "%{$search}%");
-                        });
-                });
-            }
-
-            // B. Category Filter
-            if ($categoryId) {
-                $query->whereHas('studentService', function ($q) use ($categoryId) {
-                    $q->where('hss_category_id', $categoryId);
-                });
-            }
-
-            // C. Service Type Filter
-            if ($selectedServiceId) {
-                $query->where('hsr_student_service_id', $selectedServiceId);
-            }
-
-            // D. Status Filter (NEW)
-            if ($status) {
-                $query->where('hsr_status', $status);
-            }
-
-            // Default Sort: Always Newest First
-            $query->orderBy('created_at', 'desc');
-
-            $receivedRequests = $query->get();
-            $this->decorateRequestsForUi($receivedRequests, $user->hu_id, true);
-
-            return view('service-requests.helper', [
-                'receivedRequests' => $receivedRequests,
-                'categories' => $categories,
-                'serviceTypes' => $myServices,
-                'defaultStatusTab' => $defaultStatusTab,
-            ]);
-        }
-
-        // ==========================================
-        // 4. BUYER MODE (Student View)
-        // ==========================================
-        else {
-            // Buyers see all services in the dropdown
-            $allServiceTypes = \App\Models\StudentService::selectRaw('hss_id as id, hss_title as title')->get();
-
-            $query = \App\Models\ServiceRequest::where('hsr_requester_id', $user->hu_id)
-                ->with(['requester', 'provider', 'studentService.category']);
-
-            // A. Search
-            if ($search) {
-                $query->where(function ($q) use ($search) {
-                    $q->whereHas('studentService', function ($subQ) use ($search) {
-                        $subQ->where('hss_title', 'LIKE', "%{$search}%");
-                    })
-                        ->orWhereHas('provider', function ($subQ) use ($search) {
-                            $subQ->where('hu_name', 'LIKE', "%{$search}%");
-                        });
-                });
-            }
-
-            // B. Category Filter
-            if ($categoryId) {
-                $query->whereHas('studentService', function ($q) use ($categoryId) {
-                    $q->where('hss_category_id', $categoryId);
-                });
-            }
-
-            // C. Service Type Filter
-            if ($selectedServiceId) {
-                $query->where('hsr_student_service_id', $selectedServiceId);
-            }
-
-            // D. Status Filter (NEW)
-            if ($status) {
-                $query->where('hsr_status', $status);
-            }
-
-            // Default Sort: Always Newest First
-            $query->orderBy('created_at', 'desc');
-
-            $sentRequests = $query->get();
-            $this->decorateRequestsForUi($sentRequests, $user->hu_id, false);
-            $uniqueCategories = $sentRequests
-                ->map(function (ServiceRequest $serviceRequest) {
-                    return optional(optional($serviceRequest->studentService)->category)->hc_name ?? 'Other';
-                })
-                ->unique()
-                ->sort()
-                ->values();
-
-            return view('service-requests.index', [
-                'sentRequests' => $sentRequests,
-                'categories' => $categories,
-                'serviceTypes' => $allServiceTypes,
-                'uniqueCategories' => $uniqueCategories,
-                'defaultStatusTab' => $defaultStatusTab,
-            ]);
+            return response()->json([
+                'success' => true,
+                'data' => $data,
+                'pagination' => $pagination
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('ServiceRequest index error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'data' => [],
+                'pagination' => null,
+                'message' => 'Server error occurred.'
+            ], 500);
         }
     }
 
@@ -848,11 +758,11 @@ class ServiceRequestController extends BaseController
         if ($request->hsr_status === 'disputed') {
             $request->hsr_status = 'completed'; // Set directly to completed as requested
             $request->save();
-            
+
             // Award points for completed service
-            PointsController::awardPointsForCompletedService($request); // Seller points  
+            PointsController::awardPointsForCompletedService($request); // Seller points
             PointsController::awardBuyerPointsForCompletedService($request); // Buyer points
-            
+
             return back()->with('success', 'Report cancelled. Order marked as completed. Both parties earned 1 point each.');
         }
 

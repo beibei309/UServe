@@ -52,7 +52,8 @@ class ServiceController extends Controller
                       ->where('hu_is_suspended', 0)
                       ->where('hu_is_blacklisted', 0)
                       ->where('hu_is_blocked', 0);
-                });
+                })
+                ->whereHas('category');
 
             // Apply filters
             if ($search) {
@@ -133,7 +134,7 @@ class ServiceController extends Controller
      * @param int $id
      * @return JsonResponse
      */
-    public function show(int $id): JsonResponse
+    public function show($id): JsonResponse
     {
         try {
             $service = StudentService::with([
@@ -150,6 +151,14 @@ class ServiceController extends Controller
                 $query->whereColumn('h2u_reviews.hr_reviewee_id', 'h2u_student_services.hss_user_id');
             }], 'hr_rating')
             ->findOrFail($id);
+
+            // Check for missing relationships
+            if (!$service->user || !$service->category) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Service provider or category not found'
+                ], 404);
+            }
 
             // Check if service provider is suspended/blocked
             if ($service->user->hu_is_suspended || $service->user->hu_is_blacklisted || $service->user->hu_is_blocked) {
