@@ -22,9 +22,13 @@ class ServiceDetailResource extends JsonResource
             ->whereIn('hsr_status', ['completed', 'accepted'])
             ->get();
 
-        $completedOrders = $this->orders()
-            ->whereIn('hsr_status', ['completed', 'accepted'])
-            ->count();
+        $completedOrders = method_exists($this, 'orders') && $this->orders()
+            ? $this->orders()->whereIn('hsr_status', ['completed', 'accepted'])->count()
+            : 0;
+
+        $user = $this->user ?? null;
+        $category = $this->category ?? null;
+        $reviews = $this->reviews ?? collect();
 
         return [
             'id' => $this->hss_id,
@@ -33,8 +37,8 @@ class ServiceDetailResource extends JsonResource
             'status' => $this->hss_status,
             'is_active' => $this->hss_is_active,
             'approval_status' => $this->hss_approval_status,
-            'created_at' => $this->created_at->toISOString(),
-            'updated_at' => $this->updated_at->toISOString(),
+            'created_at' => $this->created_at ? $this->created_at->toISOString() : null,
+            'updated_at' => $this->updated_at ? $this->updated_at->toISOString() : null,
 
             // Complete pricing information
             'pricing' => [
@@ -76,35 +80,35 @@ class ServiceDetailResource extends JsonResource
             ],
 
             // Complete provider information
-            'provider' => [
-                'id' => $this->user->hu_id,
-                'name' => $this->user->hu_name,
-                'role' => $this->user->hu_role,
-                'email' => $this->user->hu_email,
-                'phone' => $this->user->hu_phone,
-                'student_id' => $this->user->hu_student_id,
-                'bio' => $this->user->hu_bio,
-                'faculty' => $this->user->hu_faculty,
-                'course' => $this->user->hu_course,
-                'skills' => $this->user->skills,
-                'avatar_url' => $this->user->hu_profile_photo_path
-                    ? asset($this->user->hu_profile_photo_path)
-                    : 'https://ui-avatars.com/api/?name=' . urlencode($this->user->hu_name),
-                'is_available' => $this->user->hu_is_available,
-                'verification_status' => $this->user->hu_verification_status,
-                'public_verified_at' => $this->user->hu_public_verified_at,
-                'staff_verified_at' => $this->user->hu_staff_verified_at,
-                'helper_verified_at' => $this->user->hu_helper_verified_at,
-                'trust_badge' => $this->user->trust_badge,
-                'average_rating' => $this->user->average_rating,
-            ],
+            'provider' => $user ? [
+                'id' => $user->hu_id ?? null,
+                'name' => $user->hu_name ?? null,
+                'role' => $user->hu_role ?? null,
+                'email' => $user->hu_email ?? null,
+                'phone' => $user->hu_phone ?? null,
+                'student_id' => $user->hu_student_id ?? null,
+                'bio' => $user->hu_bio ?? null,
+                'faculty' => $user->hu_faculty ?? null,
+                'course' => $user->hu_course ?? null,
+                'skills' => $user->skills ?? [],
+                'avatar_url' => $user->hu_profile_photo_path
+                    ? asset($user->hu_profile_photo_path)
+                    : 'https://ui-avatars.com/api/?name=' . urlencode($user->hu_name ?? 'Provider'),
+                'is_available' => $user->hu_is_available ?? false,
+                'verification_status' => $user->hu_verification_status ?? null,
+                'public_verified_at' => $user->hu_public_verified_at ?? null,
+                'staff_verified_at' => $user->hu_staff_verified_at ?? null,
+                'helper_verified_at' => $user->hu_helper_verified_at ?? null,
+                'trust_badge' => $user->trust_badge ?? null,
+                'average_rating' => $user->average_rating ?? 0,
+            ] : null,
 
             // Category information
-            'category' => [
-                'id' => $this->category->hc_id,
-                'name' => $this->category->hc_name,
-                'description' => $this->category->hc_description,
-            ],
+            'category' => $category ? [
+                'id' => $category->hc_id ?? null,
+                'name' => $category->hc_name ?? null,
+                'description' => $category->hc_description ?? null,
+            ] : null,
 
             // Detailed statistics
             'stats' => [
@@ -127,22 +131,22 @@ class ServiceDetailResource extends JsonResource
             ],
 
             // Reviews
-            'reviews' => $this->reviews->map(function($review) {
+            'reviews' => $reviews->map(function($review) {
                 return [
-                    'id' => $review->hr_id,
-                    'rating' => $review->hr_rating,
-                    'comment' => $review->hr_comment,
-                    'reply' => $review->hr_reply,
-                    'created_at' => $review->hr_created_at ? Carbon::parse($review->hr_created_at)->toISOString() : null,
-                    'replied_at' => $review->hr_replied_at ? Carbon::parse($review->hr_replied_at)->toISOString() : null,
-                    'reviewer' => [
-                        'id' => $review->reviewer->hu_id,
-                        'name' => $review->reviewer->hu_name,
-                        'role' => $review->reviewer->hu_role,
+                    'id' => $review->hr_id ?? null,
+                    'rating' => $review->hr_rating ?? null,
+                    'comment' => $review->hr_comment ?? null,
+                    'reply' => $review->hr_reply ?? null,
+                    'created_at' => isset($review->hr_created_at) ? Carbon::parse($review->hr_created_at)->toISOString() : null,
+                    'replied_at' => isset($review->hr_replied_at) ? Carbon::parse($review->hr_replied_at)->toISOString() : null,
+                    'reviewer' => isset($review->reviewer) ? [
+                        'id' => $review->reviewer->hu_id ?? null,
+                        'name' => $review->reviewer->hu_name ?? null,
+                        'role' => $review->reviewer->hu_role ?? null,
                         'avatar_url' => $review->reviewer->hu_profile_photo_path
                             ? asset($review->reviewer->hu_profile_photo_path)
-                            : 'https://ui-avatars.com/api/?name=' . urlencode($review->reviewer->hu_name),
-                    ],
+                            : 'https://ui-avatars.com/api/?name=' . urlencode($review->reviewer->hu_name ?? 'Reviewer'),
+                    ] : null,
                 ];
             }),
 
