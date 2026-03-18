@@ -350,7 +350,7 @@
                         </div>
                     </div>
 
-                    @if ($student->work_experience_message)
+                    @if ($student->hu_work_experience_message)
                         <div class="mb-8 p-6 rounded-xl border transition-all duration-300" style="background-color: var(--bg-primary); border-color: var(--border-color);">
                             <div class="flex items-center gap-3 mb-4">
                                 <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -361,7 +361,7 @@
                                 </h3>
                             </div>
                             <div class="text-sm leading-relaxed whitespace-pre-line transition-colors duration-300" style="color: var(--text-secondary);">
-                                {{ $student->work_experience_message }}
+                                {{ $student->hu_work_experience_message }}
                             </div>
                         </div>
                     @endif
@@ -385,7 +385,7 @@
                     @endif
 
                     {{-- RESUME / CV --}}
-                    @if ($student->work_experience_file)
+                    @if ($student->hu_work_experience_file)
                         <div class="p-6 rounded-xl border transition-all duration-300" style="background-color: var(--bg-primary); border-color: var(--border-color);">
                             <div class="flex items-center gap-3 mb-4">
                                 <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
@@ -395,7 +395,7 @@
                                     Resume / CV
                                 </h3>
                             </div>
-                            <a href="{{ asset('storage/' . $student->work_experience_file) }}" target="_blank"
+                            <a href="{{ asset('storage/' . $student->hu_work_experience_file) }}" target="_blank"
                                class="inline-flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-400 hover:to-emerald-500 text-white rounded-lg transition-all duration-300 font-medium shadow-lg hover:shadow-xl">
                                 <i class="fas fa-download"></i>
                                 Download Resume (PDF)

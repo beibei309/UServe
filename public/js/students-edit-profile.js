@@ -10,6 +10,7 @@
     const fileDropArea = document.getElementById('file-drop-area');
     const currentFileContainer = document.getElementById('current-file-container');
     const successMessage = config.dataset.successMessage || '';
+    const errorMessage = config.dataset.errorMessage || '';
 
     if (deleteFileTrigger && deleteFileForm) {
         deleteFileTrigger.addEventListener('click', () => {
@@ -55,12 +56,20 @@
 
     if (successMessage) {
         Swal.fire({
-            title: 'Successfull!',
+            title: 'Successful!',
             text: successMessage,
             icon: 'success',
             timer: 3000,
             timerProgressBar: true,
             showConfirmButton: false,
+        });
+    }
+
+    if (errorMessage) {
+        Swal.fire({
+            title: 'Update Failed',
+            text: errorMessage,
+            icon: 'error',
         });
     }
 

@@ -199,23 +199,10 @@ class StudentsController extends Controller
             $user->hu_profile_photo_path = 'storage/' . $storedPath;
         }
 
-        $facultyMap = [
-            'FKMT' => 'Fakulti Komputeran dan Meta-Teknologi',
-            'FBK' => 'Fakulti Bahasa dan Komunikasi',
-            'FPM' => 'Fakulti Pembangunan Manusia',
-            'FSMT' => 'Fakulti Sains dan Matematik',
-            'FPE' => 'Fakulti Pengurusan dan Ekonomi',
-            'FSKIK' => 'Fakulti Seni, Komputeran dan Industri Kreatif',
-            'FMUP' => 'Fakulti Muzik dan Seni Persembahan',
-            'FSSKJ' => 'Fakulti Sains Sukan dan Kejurulatihan',
-            'FTV' => 'Fakulti Teknikal dan Vokasional',
-            'FSK' => 'Fakulti Sains Kemanusiaan',
-        ];
-
         // Update basic fields
         if ($request->filled('faculty')) {
             $incomingFaculty = trim((string) $validated['faculty']);
-            $user->hu_faculty = $facultyMap[$incomingFaculty] ?? $incomingFaculty;
+            $user->hu_faculty = $this->normalizeFacultyName($incomingFaculty);
         }
 
         if ($request->filled('course')) {
@@ -294,21 +281,9 @@ class StudentsController extends Controller
             abort(403);
         }
 
-        $facultyMap = [
-            'FKMT' => 'Fakulti Komputeran dan Meta-Teknologi',
-            'FBK' => 'Fakulti Bahasa dan Komunikasi',
-            'FPM' => 'Fakulti Pembangunan Manusia',
-            'FSMT' => 'Fakulti Sains dan Matematik',
-            'FPE' => 'Fakulti Pengurusan dan Ekonomi',
-            'FSKIK' => 'Fakulti Seni, Komputeran dan Industri Kreatif',
-            'FMUP' => 'Fakulti Muzik dan Seni Persembahan',
-            'FSSKJ' => 'Fakulti Sains Sukan dan Kejurulatihan',
-            'FTV' => 'Fakulti Teknikal dan Vokasional',
-            'FSK' => 'Fakulti Sains Kemanusiaan',
-        ];
+        $facultyMap = $this->facultyCanonicalMap();
         $facultyOptions = array_values($facultyMap);
-        $selectedFaculty = old('faculty', $user->hu_faculty ?? $user->faculty);
-        $selectedFaculty = $facultyMap[$selectedFaculty] ?? $selectedFaculty;
+        $selectedFaculty = old('faculty', $this->normalizeFacultyName($user->hu_faculty ?? $user->faculty));
 
         return view('students.edit-profile', compact('user', 'facultyOptions', 'selectedFaculty'));
         
@@ -318,19 +293,6 @@ class StudentsController extends Controller
     public function update(Request $request)
 {
     $user = Auth::user();
-
-        $facultyMap = [
-            'FKMT' => 'Fakulti Komputeran dan Meta-Teknologi',
-            'FBK' => 'Fakulti Bahasa dan Komunikasi',
-            'FPM' => 'Fakulti Pembangunan Manusia',
-            'FSMT' => 'Fakulti Sains dan Matematik',
-            'FPE' => 'Fakulti Pengurusan dan Ekonomi',
-            'FSKIK' => 'Fakulti Seni, Komputeran dan Industri Kreatif',
-            'FMUP' => 'Fakulti Muzik dan Seni Persembahan',
-            'FSSKJ' => 'Fakulti Sains Sukan dan Kejurulatihan',
-            'FTV' => 'Fakulti Teknikal dan Vokasional',
-            'FSK' => 'Fakulti Sains Kemanusiaan',
-        ];
 
     // 1. Validate inputs
     $validated = $request->validate([
@@ -347,14 +309,12 @@ class StudentsController extends Controller
     // 2. Update Basic Information
     $user->hu_name = $validated['name'];
 
-    if ($request->filled('faculty')) {
-        $incomingFaculty = trim((string) $request->input('faculty'));
-        $user->hu_faculty = $facultyMap[$incomingFaculty] ?? $incomingFaculty;
-    }
+    $incomingFaculty = trim((string) $request->input('faculty', ''));
+    $user->hu_faculty = $incomingFaculty !== ''
+        ? $this->normalizeFacultyName($incomingFaculty)
+        : null;
 
-    if ($request->filled('course')) {
-        $user->hu_course = trim((string) $request->input('course'));
-    }
+    $user->hu_course = trim((string) $request->input('course', '')) ?: null;
 
     if ($request->has('bio')) {
         $user->hu_bio = $validated['bio'];
@@ -456,8 +416,50 @@ class StudentsController extends Controller
     $user->save();
 
     return redirect()
-        ->route('students.index', $user->hu_id)
+        ->route('students.edit')
         ->with('success', 'Profile updated successfully!');
+}
+
+private function facultyCanonicalMap(): array
+{
+    return [
+        'FKMT' => 'Fakulti Komputeran dan Meta-Teknologi',
+        'FBK' => 'Fakulti Bahasa dan Komunikasi',
+        'FPM' => 'Fakulti Pembangunan Manusia',
+        'FSMT' => 'Fakulti Sains dan Matematik',
+        'FPE' => 'Fakulti Pengurusan dan Ekonomi',
+        'FSKIK' => 'Fakulti Seni, Komputeran dan Industri Kreatif',
+        'FMUP' => 'Fakulti Muzik dan Seni Persembahan',
+        'FSSKJ' => 'Fakulti Sains Sukan dan Kejurulatihan',
+        'FTV' => 'Fakulti Teknikal dan Vokasional',
+        'FSK' => 'Fakulti Sains Kemanusiaan',
+    ];
+}
+
+private function normalizeFacultyName(?string $faculty): ?string
+{
+    $value = trim((string) $faculty);
+    if ($value === '') {
+        return null;
+    }
+
+    $aliases = [
+        'Fakulti Komputeran & Meta-Teknologi' => 'Fakulti Komputeran dan Meta-Teknologi',
+        'Fakulti Pengurusan & Ekonomi' => 'Fakulti Pengurusan dan Ekonomi',
+        'Fakulti Sains & Matematik' => 'Fakulti Sains dan Matematik',
+        'Fakulti Bahasa & Komunikasi' => 'Fakulti Bahasa dan Komunikasi',
+        'Fakulti Muzik & Seni Persembahan' => 'Fakulti Muzik dan Seni Persembahan',
+        'Fakulti Sains Sukan & Kejurulatihan' => 'Fakulti Sains Sukan dan Kejurulatihan',
+        'Fakulti Teknikal & Vokasional' => 'Fakulti Teknikal dan Vokasional',
+        'Fakulti Seni, Kelestarian & Industri Kreatif' => 'Fakulti Seni, Komputeran dan Industri Kreatif',
+    ];
+
+    if (isset($aliases[$value])) {
+        return $aliases[$value];
+    }
+
+    $map = $this->facultyCanonicalMap();
+    return $map[$value] ?? $value;
 }
 
 public function deleteWorkExperienceFile()

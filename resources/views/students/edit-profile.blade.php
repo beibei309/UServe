@@ -224,7 +224,8 @@
     @method('DELETE')
 </form>
     <div id="studentsEditProfileConfig"
-        data-success-message="{{ session('success') ?? '' }}"></div>
+        data-success-message="{{ session('success') ?? '' }}"
+        data-error-message="{{ $errors->any() ? $errors->first() : '' }}"></div>
     @push('scripts')
         <script src="{{ asset('js/students-edit-profile.js') }}"></script>
     @endpush

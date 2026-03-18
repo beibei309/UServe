@@ -99,19 +99,7 @@ class AdminStudentController extends Controller
     public function edit($id)
 {
     $student = User::whereIn('hu_role', ['student', 'helper'])->findOrFail($id);
-    $facultyMap = [
-        'FKMT' => 'Fakulti Komputeran dan Meta-Teknologi',
-        'FBK' => 'Fakulti Bahasa dan Komunikasi',
-        'FPM' => 'Fakulti Pembangunan Manusia',
-        'FSMT' => 'Fakulti Sains dan Matematik',
-        'FPE' => 'Fakulti Pengurusan dan Ekonomi',
-        'FSKIK' => 'Fakulti Seni, Komputeran dan Industri Kreatif',
-        'FMUP' => 'Fakulti Muzik dan Seni Persembahan',
-        'FSSKJ' => 'Fakulti Sains Sukan dan Kejurulatihan',
-        'FTV' => 'Fakulti Teknikal dan Vokasional',
-        'FSK' => 'Fakulti Sains Kemanusiaan',
-    ];
-    $student->faculty_display = $facultyMap[$student->hu_faculty] ?? $student->hu_faculty;
+        $student->faculty_display = $this->normalizeFacultyName($student->hu_faculty);
 
     return view('admin.students.edit', compact('student'));
 }
@@ -122,18 +110,6 @@ class AdminStudentController extends Controller
     // Only allow student OR helper
     $student = User::whereIn('hu_role', ['student', 'helper'])->findOrFail($id);
 
-        $facultyMap = [
-            'FKMT' => 'Fakulti Komputeran dan Meta-Teknologi',
-            'FBK' => 'Fakulti Bahasa dan Komunikasi',
-            'FPM' => 'Fakulti Pembangunan Manusia',
-            'FSMT' => 'Fakulti Sains dan Matematik',
-            'FPE' => 'Fakulti Pengurusan dan Ekonomi',
-            'FSKIK' => 'Fakulti Seni, Komputeran dan Industri Kreatif',
-            'FMUP' => 'Fakulti Muzik dan Seni Persembahan',
-            'FSSKJ' => 'Fakulti Sains Sukan dan Kejurulatihan',
-            'FTV' => 'Fakulti Teknikal dan Vokasional',
-            'FSK' => 'Fakulti Sains Kemanusiaan',
-        ];
 
     // VALIDATION
     $request->validate([
@@ -166,7 +142,7 @@ class AdminStudentController extends Controller
 
     if ($request->filled('faculty')) {
         $incomingFaculty = trim((string) $request->input('faculty'));
-        $updateData['hu_faculty'] = $facultyMap[$incomingFaculty] ?? $incomingFaculty;
+        $updateData['hu_faculty'] = $this->normalizeFacultyName($incomingFaculty);
     }
 
     if ($request->filled('course')) {
@@ -274,6 +250,48 @@ class AdminStudentController extends Controller
 
     return redirect()->route('admin.students.index')
         ->with('success', 'User reactivated and email notification sent.');
+}
+
+private function facultyCanonicalMap(): array
+{
+    return [
+        'FKMT' => 'Fakulti Komputeran dan Meta-Teknologi',
+        'FBK' => 'Fakulti Bahasa dan Komunikasi',
+        'FPM' => 'Fakulti Pembangunan Manusia',
+        'FSMT' => 'Fakulti Sains dan Matematik',
+        'FPE' => 'Fakulti Pengurusan dan Ekonomi',
+        'FSKIK' => 'Fakulti Seni, Komputeran dan Industri Kreatif',
+        'FMUP' => 'Fakulti Muzik dan Seni Persembahan',
+        'FSSKJ' => 'Fakulti Sains Sukan dan Kejurulatihan',
+        'FTV' => 'Fakulti Teknikal dan Vokasional',
+        'FSK' => 'Fakulti Sains Kemanusiaan',
+    ];
+}
+
+private function normalizeFacultyName(?string $faculty): ?string
+{
+    $value = trim((string) $faculty);
+    if ($value === '') {
+        return null;
+    }
+
+    $aliases = [
+        'Fakulti Komputeran & Meta-Teknologi' => 'Fakulti Komputeran dan Meta-Teknologi',
+        'Fakulti Pengurusan & Ekonomi' => 'Fakulti Pengurusan dan Ekonomi',
+        'Fakulti Sains & Matematik' => 'Fakulti Sains dan Matematik',
+        'Fakulti Bahasa & Komunikasi' => 'Fakulti Bahasa dan Komunikasi',
+        'Fakulti Muzik & Seni Persembahan' => 'Fakulti Muzik dan Seni Persembahan',
+        'Fakulti Sains Sukan & Kejurulatihan' => 'Fakulti Sains Sukan dan Kejurulatihan',
+        'Fakulti Teknikal & Vokasional' => 'Fakulti Teknikal dan Vokasional',
+        'Fakulti Seni, Kelestarian & Industri Kreatif' => 'Fakulti Seni, Komputeran dan Industri Kreatif',
+    ];
+
+    if (isset($aliases[$value])) {
+        return $aliases[$value];
+    }
+
+    $map = $this->facultyCanonicalMap();
+    return $map[$value] ?? $value;
 }
 
 // Show helper verification selfie
