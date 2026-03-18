@@ -65,6 +65,12 @@
         </div>
     @endif
 
+    @if (session('error'))
+        <div class="p-4 bg-red-900 bg-opacity-30 border border-red-700 rounded-md mb-6 transition-all duration-300">
+            <p class="text-red-200">{{ session('error') }}</p>
+        </div>
+    @endif
+
     {{-- MOBILE RESPONSIVE TABLE --}}
     <div class="hidden md:block">
         <div class="shadow-xl rounded-lg border overflow-hidden transition-all duration-300"

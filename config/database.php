@@ -106,6 +106,21 @@ return [
             'sslmode' => 'prefer',
         ],
 
+        'upsi_pgsql' => [
+            'driver' => 'pgsql',
+            'url' => env('UPSI_DB_URL'),
+            'host' => env('UPSI_DB_HOST', env('DB_HOST', '127.0.0.1')),
+            'port' => env('UPSI_DB_PORT', '5432'),
+            'database' => env('UPSI_DB_DATABASE', ''),
+            'username' => env('UPSI_DB_USERNAME', ''),
+            'password' => env('UPSI_DB_PASSWORD', ''),
+            'charset' => env('UPSI_DB_CHARSET', 'utf8'),
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'search_path' => env('UPSI_DB_SCHEMA', 'home2u,public'),
+            'sslmode' => env('UPSI_DB_SSLMODE', 'prefer'),
+        ],
+
         'sqlsrv' => [
             'driver' => 'sqlsrv',
             'url' => env('DB_URL'),

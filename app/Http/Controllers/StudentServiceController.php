@@ -389,8 +389,8 @@ class StudentServiceController extends Controller
     public function create(Request $request)
     {
         $user = $request->user();
-        if (! $user || $user->hu_role !== 'helper') {
-            abort(403, 'Only students can create services.');
+        if (! $user || ! $user->canAccessSellerFeatures()) {
+            abort(403, 'Seller access is not available for your current account status.');
         }
 
         // Get categories for the form
@@ -414,11 +414,11 @@ class StudentServiceController extends Controller
             $user = $request->user();
 
             // 1. Authorization
-            if (! $user || $user->hu_role !== 'helper') {
+            if (! $user || ! $user->canAccessSellerFeatures()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Only helpers can create services.',
-                    'error' => 'Only helpers can create services.',
+                    'message' => 'Seller access is not available for your current account status.',
+                    'error' => 'Seller access is not available for your current account status.',
                 ], 403);
             }
 

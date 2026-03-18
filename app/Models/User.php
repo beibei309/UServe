@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Carbon;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -305,7 +306,36 @@ public function favoriteServices()
      */
     public function canAccessSellerFeatures(): bool
     {
-        return $this->hu_role === 'helper' && !$this->hu_is_blocked;
+        if ($this->hu_role !== 'helper' || $this->isSellerRestricted()) {
+            return false;
+        }
+
+        $studentStatus = $this->relationLoaded('studentStatus')
+            ? $this->studentStatus
+            : $this->studentStatus()->first();
+
+        if (! $studentStatus) {
+            return false;
+        }
+
+        if (strtolower((string) $studentStatus->hss_status) !== 'active') {
+            return false;
+        }
+
+        if (! $studentStatus->hss_graduation_date) {
+            return true;
+        }
+
+        try {
+            $monthsUntilGraduation = Carbon::now()->floatDiffInMonths(
+                Carbon::parse($studentStatus->hss_graduation_date),
+                false
+            );
+
+            return $monthsUntilGraduation >= 3;
+        } catch (\Throwable) {
+            return false;
+        }
     }
 
     /**

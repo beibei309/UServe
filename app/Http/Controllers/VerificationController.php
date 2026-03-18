@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Carbon\Carbon;
 
 class VerificationController extends Controller
 {
@@ -191,6 +192,47 @@ class VerificationController extends Controller
         \Illuminate\Support\Facades\Log::info('Student Helper Selfie Upload Started for user: ' . Auth::id());
 
         $user = Auth::user();
+
+        $studentStatus = DB::table('h2u_student_statuses')
+            ->where('hss_student_id', $user->hu_id)
+            ->latest()
+            ->first();
+
+        if (! $studentStatus) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Student status record not found. Please contact admin.'
+            ], 422);
+        }
+
+        $isActive = strtolower((string) $studentStatus->hss_status) === 'active';
+        if (! $isActive) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Your current student status does not allow seller access.'
+            ], 422);
+        }
+
+        if (! empty($studentStatus->hss_graduation_date)) {
+            try {
+                $monthsUntilGrad = Carbon::now()->floatDiffInMonths(
+                    Carbon::parse($studentStatus->hss_graduation_date),
+                    false
+                );
+
+                if ($monthsUntilGrad < 3) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'You must have at least 3 months remaining before graduation to use seller features.'
+                    ], 422);
+                }
+            } catch (\Throwable) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unable to validate graduation timeline. Please contact admin.'
+                ], 422);
+            }
+        }
         
         try {
             $image = $request->input('selfie_image'); // Base64 string

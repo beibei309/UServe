@@ -15,8 +15,12 @@ class DashboardController extends Controller
 public function index(Request $request)
 {
     $user = $request->user();
-    if ($user && $user->hu_role === 'helper' && session('view_mode', 'buyer') === 'seller') {
-        return redirect()->route('students.index');
+    if ($user && session('view_mode', 'buyer') === 'seller') {
+        if ($user->canAccessSellerFeatures()) {
+            return redirect()->route('students.index');
+        }
+
+        session(['view_mode' => 'buyer']);
     }
 
     // --- 1. Get Inputs ---
@@ -160,14 +164,9 @@ public function index(Request $request)
     {
         $user = Auth::user();
 
-        // Only helpers can switch modes
-        if ($user->hu_role !== 'helper') {
+        // Only eligible helpers can switch modes
+        if (! $user || ! $user->canAccessSellerFeatures()) {
             return back()->with('error', 'Unauthorized action.');
-        }
-
-        if ($user->hu_is_blocked) {
-            session(['view_mode' => 'buyer']);
-            return redirect()->route('dashboard')->with('error', 'Your account is blocked from seller actions. You can continue using buyer features.');
         }
 
         // Get current mode (default to buyer when not set to avoid first-click inversion)

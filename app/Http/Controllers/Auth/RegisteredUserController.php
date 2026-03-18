@@ -96,14 +96,7 @@ class RegisteredUserController extends Controller
                         ? trim($semesterValue)
                         : null;
 
-                    StudentStatus::create([
-                        'hss_student_id' => $createdUser->hu_id,
-                        'hss_matric_no' => $createdUser->hu_student_id,
-                        'hss_semester' => $semesterValue,
-                        'hss_status' => 'active',
-                        'hss_graduation_date' => null,
-                        'hss_effective_date' => now(),
-                    ]);
+                    $this->createStudentStatusWithFallback($createdUser, $semesterValue);
                 }
 
                 return $createdUser;
@@ -196,14 +189,12 @@ class RegisteredUserController extends Controller
 
     private function createStudentStatusWithFallback(User $user, ?string $semesterValue): void
     {
+        $payload = $this->buildStudentStatusPayload($user, $semesterValue);
+
         try {
             StudentStatus::create([
                 'hss_student_id' => $user->hu_id,
-                'hss_matric_no' => $user->hu_student_id,
-                'hss_semester' => $semesterValue,
-                'hss_status' => 'active',
-                'hss_graduation_date' => null,
-                'hss_effective_date' => now(),
+                ...$payload,
             ]);
         } catch (QueryException $exception) {
             if (! $this->isSequencePermissionError($exception, 'h2u_student_statuses_hss_id_seq')) {
@@ -215,18 +206,141 @@ class RegisteredUserController extends Controller
             $nextStatusId = (int) DB::table('h2u_student_statuses')->max('hss_id') + 1;
             $now = now();
 
-            DB::table('h2u_student_statuses')->insert([
+            $insertPayload = [
                 'hss_id' => $nextStatusId,
                 'hss_student_id' => $user->hu_id,
-                'hss_matric_no' => $user->hu_student_id,
-                'hss_semester' => $semesterValue,
-                'hss_status' => 'active',
-                'hss_graduation_date' => null,
-                'hss_effective_date' => $now,
+                ...$payload,
                 'created_at' => $now,
                 'updated_at' => $now,
+            ];
+
+            $columns = DB::getSchemaBuilder()->getColumnListing('h2u_student_statuses');
+            $insertPayload = array_intersect_key($insertPayload, array_flip($columns));
+
+            DB::table('h2u_student_statuses')->insert($insertPayload);
+        }
+    }
+
+    private function buildStudentStatusPayload(User $user, ?string $semesterValue): array
+    {
+        $source = $this->findUpsiSourceRecord($user->hu_student_id, $user->hu_email);
+
+        $sourceStatus = $this->cleanString($source->ss_status_desc ?? null);
+        $sourceSemester = $this->cleanString($source->sm_level ?? null);
+
+        return [
+            'hss_matric_no' => $this->cleanString($source->sm_student_id ?? null) ?? $user->hu_student_id,
+            'hss_program' => $this->cleanString($source->sm_program ?? null),
+            'hss_program_desc' => $this->cleanString($source->pm_program_desc ?? null),
+            'hss_source_student_name' => $this->cleanString($source->sm_student_name ?? null),
+            'hss_source_email' => $this->normalizeEmail($source->sm_siswa_email ?? null),
+            'hss_source_status_desc' => $sourceStatus,
+            'hss_semester' => $sourceSemester ?? $semesterValue,
+            'hss_status' => $this->mapUpsiStatusToInternal($sourceStatus),
+            'hss_graduation_date' => $this->normalizeDate($source->sm_graduation_date ?? null),
+            'hss_effective_date' => now()->toDateString(),
+        ];
+    }
+
+    private function findUpsiSourceRecord(?string $studentId, ?string $email): ?object
+    {
+        if (! $this->isUpsiSourceConfigured()) {
+            return null;
+        }
+
+        try {
+            $connection = DB::connection('upsi_pgsql');
+            $sourceView = (string) config('upsi.student_view', 'home2u.h2u_student');
+
+            $cleanStudentId = $this->cleanString($studentId);
+            if ($cleanStudentId) {
+                $record = $connection->table($sourceView)
+                    ->where('sm_student_id', $cleanStudentId)
+                    ->first();
+
+                if ($record) {
+                    return $record;
+                }
+            }
+
+            $normalizedEmail = $this->normalizeEmail($email);
+            if ($normalizedEmail) {
+                return $connection->table($sourceView)
+                    ->whereRaw('LOWER(sm_siswa_email) = ?', [$normalizedEmail])
+                    ->first();
+            }
+        } catch (\Throwable $exception) {
+            Log::warning('UPSI source lookup failed during registration; fallback status will be used.', [
+                'student_id' => $studentId,
+                'email' => $email,
+                'error' => $exception->getMessage(),
             ]);
         }
+
+        return null;
+    }
+
+    private function isUpsiSourceConfigured(): bool
+    {
+        $connection = (array) config('database.connections.upsi_pgsql', []);
+
+        return ! empty($connection['host'])
+            && ! empty($connection['database'])
+            && ! empty($connection['username']);
+    }
+
+    private function normalizeEmail(mixed $value): ?string
+    {
+        $clean = $this->cleanString($value);
+        return $clean ? strtolower($clean) : null;
+    }
+
+    private function cleanString(mixed $value): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        $trimmed = trim((string) $value);
+        return $trimmed === '' ? null : $trimmed;
+    }
+
+    private function normalizeDate(mixed $value): ?string
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        try {
+            return \Carbon\Carbon::parse((string) $value)->toDateString();
+        } catch (\Throwable) {
+            return null;
+        }
+    }
+
+    private function mapUpsiStatusToInternal(?string $statusDesc): string
+    {
+        $raw = $this->cleanString($statusDesc);
+        if (! $raw) {
+            return 'Active';
+        }
+
+        $normalized = mb_strtolower($raw);
+        $mapping = [
+            'aktif' => 'Active',
+            'dibenarkan meneruskan pengajian' => 'Active',
+            'digantung kerana tatatertib' => 'Probation',
+            'tangguh - pjj' => 'Deferred',
+            'tangguh pengajian (tidak kira semester)' => 'Deferred',
+            'tangguh pengajian (kira semester)' => 'Deferred',
+            'tangguh pengajian-accident (tidak kira)' => 'Deferred',
+            'tamat' => 'Graduated',
+            'layak konvo' => 'Graduated',
+            'disertasi disemak' => 'Graduated',
+            'telah melengkapkan struktur pengajian' => 'Graduated',
+        ];
+
+        return $mapping[$normalized] ?? 'Active';
     }
 
     private function isSequencePermissionError(QueryException $exception, ?string $sequenceName = null): bool

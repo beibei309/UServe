@@ -2,12 +2,18 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\User;
+use App\Services\UpsiStudentStatusService;
 use Closure;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
 class CheckUserStatus
 {
+    public function __construct(private readonly UpsiStudentStatusService $upsiStudentStatusService)
+    {
+    }
+
     public function handle(Request $request, Closure $next)
     {
         // Do not apply web user status restrictions inside admin portal.
@@ -16,8 +22,14 @@ class CheckUserStatus
         }
 
         if (Auth::check()) {
+            /** @var User $user */
             $user = Auth::user();
             $wantsJson = $request->expectsJson() || $request->isJson();
+
+            if (in_array($user->hu_role, ['student', 'helper'], true)) {
+                $this->upsiStudentStatusService->refreshForUser($user);
+                $user->unsetRelation('studentStatus');
+            }
 
             $emailVerificationRoutes = [
                 'verification.notice',
@@ -120,35 +132,21 @@ class CheckUserStatus
                 'service-requests.mark-paid',
             ];
 
-            if ($request->routeIs('service-requests.index') && session('view_mode', 'buyer') === 'seller' && $user->hu_role === 'helper' && $user->hu_is_blocked) {
+            if ($request->routeIs('service-requests.index') && session('view_mode', 'buyer') === 'seller' && $user->hu_role === 'helper' && ! $user->canAccessSellerFeatures()) {
                 session(['view_mode' => 'buyer']);
 
                 if ($wantsJson) {
                     return response()->json([
-                        'message' => 'Your account is blocked from seller actions. Buying is still available.',
+                        'message' => 'Seller access is currently unavailable based on your latest student status. Buying is still available.',
                     ], 403);
                 }
 
                 return redirect()
                     ->route('dashboard')
-                    ->with('error', 'Your account is blocked from seller actions. You can continue using buyer features.');
+                    ->with('error', 'Seller access is currently unavailable based on your latest student status. You can continue using buyer features.');
             }
 
             if ($request->routeIs($sellerOnlyRoutes)) {
-                if ($user->hu_role === 'helper' && $user->hu_is_blocked) {
-                    session(['view_mode' => 'buyer']);
-
-                    if ($wantsJson) {
-                        return response()->json([
-                            'message' => 'Your account is blocked from seller actions. Buying is still available.',
-                        ], 403);
-                    }
-
-                    return redirect()
-                        ->route('dashboard')
-                        ->with('error', 'Your account is blocked from seller actions. You can continue using buyer features.');
-                }
-
                 $isVerifiedHelper = $user->hu_role === 'helper' && !empty($user->hu_helper_verified_at);
 
                 if (!$isVerifiedHelper) {
@@ -161,6 +159,20 @@ class CheckUserStatus
                     return redirect()
                         ->route('dashboard')
                         ->with('info', 'This page is for verified helpers only.');
+                }
+
+                if (! $user->canAccessSellerFeatures()) {
+                    session(['view_mode' => 'buyer']);
+
+                    if ($wantsJson) {
+                        return response()->json([
+                            'message' => 'Only active students can provide services. Your latest student status currently blocks seller access.',
+                        ], 403);
+                    }
+
+                    return redirect()
+                        ->route('dashboard')
+                        ->with('error', 'Only active students can provide services. Your latest student status currently blocks seller access.');
                 }
             }
 

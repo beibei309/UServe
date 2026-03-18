@@ -16,6 +16,11 @@ class StudentStatus extends Model
     protected $fillable = [
         'hss_student_id',
         'hss_matric_no',
+        'hss_program',
+        'hss_program_desc',
+        'hss_source_student_name',
+        'hss_source_email',
+        'hss_source_status_desc',
         'hss_semester',
         'hss_status',
         'hss_effective_date',

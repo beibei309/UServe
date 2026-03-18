@@ -168,19 +168,16 @@
                                     <label for="semester" class="block text-sm font-semibold mb-3 transition-colors duration-300" style="color: var(--text-primary);">
                                         <i class="fas fa-calendar-alt mr-2"></i>2. Current Semester
                                     </label>
-                                    <select name="semester" 
-                                            id="semester"
-                                            class="w-full rounded-lg px-4 py-3 transition-all duration-300 border-2 focus:outline-none focus:ring-2 focus:ring-green-500/20 @error('semester') border-red-500 @enderror"
-                                            style="background-color: var(--bg-primary); border-color: var(--border-color); color: var(--text-primary);">
-                                        <option value="" disabled>Select Semester</option>
-                                        @for ($i = 1; $i <= 12; $i++)
-                                            <option value="Semester {{ $i }}"
-                                                {{ old('semester', $status->hss_semester) == "Semester $i" ? 'selected' : '' }}>
-                                                Semester {{ $i }}
-                                            </option>
-                                        @endfor
-                                        <option value="Extended" {{ old('semester', $status->hss_semester) == 'Extended' ? 'selected' : '' }}>Extended Semester</option>
-                                    </select>
+                                    <input type="text"
+                                           name="semester"
+                                           id="semester"
+                                           value="{{ old('semester', $status->hss_semester) }}"
+                                           placeholder="e.g. 5, Semester 5, Final"
+                                           class="w-full rounded-lg px-4 py-3 transition-all duration-300 border-2 focus:outline-none focus:ring-2 focus:ring-green-500/20 @error('semester') border-red-500 @enderror"
+                                           style="background-color: var(--bg-primary); border-color: var(--border-color); color: var(--text-primary);">
+                                    <p class="text-xs mt-2 transition-colors duration-300" style="color: var(--text-muted);">
+                                        Supports UPSI synced value format (example: <strong>5</strong>) or manual labels.
+                                    </p>
                                     @error('semester')
                                         <p class="text-red-500 text-sm mt-1 flex items-center gap-1">
                                             <i class="fas fa-exclamation-triangle"></i>
@@ -189,10 +186,41 @@
                                     @enderror
                                 </div>
 
-                                {{-- 3. EXPECTED COMPLETION / GRADUATION DATE --}}
+                                <div>
+                                    <label class="block text-sm font-semibold mb-3 transition-colors duration-300" style="color: var(--text-primary);">
+                                        <i class="fas fa-database mr-2"></i>3. UPSI Source Snapshot
+                                    </label>
+                                    <p class="text-xs mb-3 transition-colors duration-300" style="color: var(--text-muted);">
+                                        Read-only values captured from UPSI source when status was auto-linked.
+                                    </p>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        <div class="rounded-lg border p-3 transition-all duration-300" style="background-color: var(--bg-primary); border-color: var(--border-color);">
+                                            <p class="text-xs font-semibold uppercase tracking-wider mb-1 transition-colors duration-300" style="color: var(--text-muted);">Program</p>
+                                            <p class="transition-colors duration-300" style="color: var(--text-secondary);">{{ $status->hss_program ?? '-' }}</p>
+                                        </div>
+                                        <div class="rounded-lg border p-3 transition-all duration-300" style="background-color: var(--bg-primary); border-color: var(--border-color);">
+                                            <p class="text-xs font-semibold uppercase tracking-wider mb-1 transition-colors duration-300" style="color: var(--text-muted);">Status</p>
+                                            <p class="transition-colors duration-300" style="color: var(--text-secondary);">{{ $status->hss_source_status_desc ?? '-' }}</p>
+                                        </div>
+                                        <div class="rounded-lg border p-3 transition-all duration-300 md:col-span-2" style="background-color: var(--bg-primary); border-color: var(--border-color);">
+                                            <p class="text-xs font-semibold uppercase tracking-wider mb-1 transition-colors duration-300" style="color: var(--text-muted);">Program Description</p>
+                                            <p class="transition-colors duration-300" style="color: var(--text-secondary);">{{ $status->hss_program_desc ?? '-' }}</p>
+                                        </div>
+                                        <div class="rounded-lg border p-3 transition-all duration-300" style="background-color: var(--bg-primary); border-color: var(--border-color);">
+                                            <p class="text-xs font-semibold uppercase tracking-wider mb-1 transition-colors duration-300" style="color: var(--text-muted);">Student Name</p>
+                                            <p class="transition-colors duration-300" style="color: var(--text-secondary);">{{ $status->hss_source_student_name ?? '-' }}</p>
+                                        </div>
+                                        <div class="rounded-lg border p-3 transition-all duration-300" style="background-color: var(--bg-primary); border-color: var(--border-color);">
+                                            <p class="text-xs font-semibold uppercase tracking-wider mb-1 transition-colors duration-300" style="color: var(--text-muted);">Siswa Email</p>
+                                            <p class="transition-colors duration-300 break-all" style="color: var(--text-secondary);">{{ $status->hss_source_email ?? '-' }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {{-- 4. EXPECTED COMPLETION / GRADUATION DATE --}}
                                 <div id="graduation-date-container">
                                     <label for="graduation_date" class="block text-sm font-semibold mb-2 transition-colors duration-300" style="color: var(--text-primary);">
-                                        <i class="fas fa-calendar-check mr-2"></i>3. Expected Completion / Graduation Date
+                                        <i class="fas fa-calendar-check mr-2"></i>4. Expected Completion / Graduation Date
                                     </label>
                                     
                                     <div class="mb-3 p-3 rounded-lg border transition-all duration-300" style="background-color: var(--bg-primary); border-color: var(--border-color);">
