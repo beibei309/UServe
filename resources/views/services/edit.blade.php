@@ -152,7 +152,9 @@
                             <label class="block text-sm font-semibold text-gray-700 mb-1">Service Title <span
                                     class="text-red-500">*</span></label>
                             <input type="text" id="title" name="title" value="{{ $service->hss_title }}"
+                                maxlength="255"
                                 class="w-full rounded-lg border-gray-300 focus:ring-indigo-500 focus:border-indigo-500">
+                                <p class="text-xs text-gray-400 mt-1">Maximum 255 characters.</p>
                         </div>
 
                         <div>
@@ -180,6 +182,7 @@
 
                             <input type="file" id="image" name="image" accept="image/*"
                                 class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+                            <p class="text-xs text-gray-400 mt-1">Optional. Maximum file size: 1MB.</p>
 
                         </div>
                     </div>
@@ -218,11 +221,11 @@
                                     class="w-full mt-1 border-gray-300 rounded-md focus:ring-gray-500 focus:border-gray-500">
                             </div>
                              <div><label class="text-xs font-bold text-gray-600 uppercase">Duration</label><input
-                                        type="text" name="packages[0][duration]" value="{{ $service->hss_basic_duration }}" placeholder="e.g. 1 hour"
+                                        type="text" name="packages[0][duration]" value="{{ $service->hss_basic_duration }}" maxlength="100" placeholder="e.g. 1 hour"
                                         class="w-full mt-1 border-gray-200 rounded-md"></div>
                             <div>
                                 <label class="text-xs font-bold text-gray-500 uppercase">Billing Unit</label>
-                                <input type="text" name="packages[0][frequency]" value="{{ $service->hss_basic_frequency }}" placeholder="e.g. per session"
+                                <input type="text" name="packages[0][frequency]" value="{{ $service->hss_basic_frequency }}" maxlength="100" placeholder="e.g. per session"
                                     class="w-full mt-1 border-gray-300 rounded-md">
                                 <p class="mt-1 text-[11px] text-gray-400">Examples: per session, per hour, per day, per task</p>
                             </div>
@@ -258,10 +261,10 @@
                                         type="number" name="packages[1][price]" value="{{ $service->hss_standard_price }}"
                                         class="w-full mt-1 border-blue-200 rounded-md"></div>
                                 <div><label class="text-xs font-bold text-blue-600 uppercase">Duration (shown to student)</label><input
-                                    type="text" name="packages[1][duration]" value="{{ $service->hss_standard_duration }}" placeholder="e.g. 2 hours"
+                                    type="text" name="packages[1][duration]" value="{{ $service->hss_standard_duration }}" maxlength="100" placeholder="e.g. 2 hours"
                                         class="w-full mt-1 border-blue-200 rounded-md"></div>
                                 <div><label class="text-xs font-bold text-blue-600 uppercase">Billing Unit</label>
-                                    <input type="text" name="packages[1][frequency]" value="{{ $service->hss_standard_frequency }}" placeholder="e.g. per session, per hour"
+                                    <input type="text" name="packages[1][frequency]" value="{{ $service->hss_standard_frequency }}" maxlength="100" placeholder="e.g. per session, per hour"
                                     class="w-full mt-1 border-blue-300 rounded-md">
                                     <p class="mt-1 text-[11px] text-blue-400">Examples: per session, per hour, per day, per task</p>
                                 </div>
@@ -282,10 +285,10 @@
                                         type="number" name="packages[2][price]" value="{{ $service->hss_premium_price }}"
                                         class="w-full mt-1 border-purple-200 rounded-md"></div>
                                  <div><label class="text-xs font-bold text-purple-600 uppercase">Duration (shown to student)</label><input
-                                    type="text" name="packages[2][duration]" value="{{ $service->hss_premium_duration }}" placeholder="e.g. 3 hours"
+                                    type="text" name="packages[2][duration]" value="{{ $service->hss_premium_duration }}" maxlength="100" placeholder="e.g. 3 hours"
                                         class="w-full mt-1 border-purple-200 rounded-md"></div>
                                 <div><label class="text-xs font-bold text-purple-600 uppercase">Billing Unit</label>
-                                     <input type="text" name="packages[2][frequency]" value="{{ $service->hss_premium_frequency }}" placeholder="e.g. per session, per hour"
+                                     <input type="text" name="packages[2][frequency]" value="{{ $service->hss_premium_frequency }}" maxlength="100" placeholder="e.g. per session, per hour"
                                     class="w-full mt-1 border-purple-300 rounded-md">
                                       <p class="mt-1 text-[11px] text-purple-400">Examples: per session, per hour, per day, per task</p>
                                 </div>
@@ -325,7 +328,7 @@
                             <div id="editor-main" class="h-64">{!! $service->hss_description !!}</div>
                         </div>
                         <input type="hidden" name="description" id="input-main" value="{{ $service->hss_description }}">
-                        <p class="text-xs text-gray-400 mt-2 text-right">Be descriptive and professional.</p>
+                        <p class="text-xs text-gray-400 mt-2 text-right">Be descriptive and professional. Maximum 5000 characters.</p>
                     </div>
 
                     <div class="mt-8 pt-6 border-t border-gray-100 flex justify-between">

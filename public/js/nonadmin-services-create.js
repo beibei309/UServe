@@ -6,6 +6,51 @@
     const storeUrl = config.dataset.storeUrl || '';
     const manageUrl = config.dataset.manageUrl || '';
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+    const MAX_IMAGE_SIZE_BYTES = 1024 * 1024;
+    const MAX_TITLE_CHARS = 255;
+    const MAX_DESC_CHARS = 5000;
+    const MAX_PACKAGE_DESC_CHARS = 1500;
+
+    function plainTextLengthFromHtml(html) {
+        if (!html) return 0;
+        const temp = document.createElement('div');
+        temp.innerHTML = html;
+        return (temp.textContent || temp.innerText || '').trim().length;
+    }
+
+    function validateClientLimitsBeforeSubmit() {
+        const title = (document.getElementById('title')?.value || '').trim();
+        if (title.length > MAX_TITLE_CHARS) {
+            return `Service title cannot exceed ${MAX_TITLE_CHARS} characters.`;
+        }
+
+        const imageFile = document.getElementById('image')?.files?.[0];
+        if (imageFile && imageFile.size > MAX_IMAGE_SIZE_BYTES) {
+            return 'Service image must not be larger than 1 MB.';
+        }
+
+        const mainDescLength = plainTextLengthFromHtml(document.getElementById('input-main')?.value || '');
+        if (mainDescLength > MAX_DESC_CHARS) {
+            return `Service description cannot exceed ${MAX_DESC_CHARS} characters.`;
+        }
+
+        const basicDescLength = plainTextLengthFromHtml(document.getElementById('input-basic')?.value || '');
+        if (basicDescLength > MAX_PACKAGE_DESC_CHARS) {
+            return `Basic package description cannot exceed ${MAX_PACKAGE_DESC_CHARS} characters.`;
+        }
+
+        const standardDescLength = plainTextLengthFromHtml(document.getElementById('input-standard')?.value || '');
+        if (standardDescLength > MAX_PACKAGE_DESC_CHARS) {
+            return `Standard package description cannot exceed ${MAX_PACKAGE_DESC_CHARS} characters.`;
+        }
+
+        const premiumDescLength = plainTextLengthFromHtml(document.getElementById('input-premium')?.value || '');
+        if (premiumDescLength > MAX_PACKAGE_DESC_CHARS) {
+            return `Premium package description cannot exceed ${MAX_PACKAGE_DESC_CHARS} characters.`;
+        }
+
+        return null;
+    }
 
     const toolbarOptions = [['bold', 'italic', 'underline'], [{ list: 'bullet' }]];
     function setupQuill(editorId, inputId, placeholder) {
@@ -94,6 +139,14 @@
             return;
         }
 
+        if (currentId === 'overview' && nextId === 'pricing') {
+            const titleLength = (document.getElementById('title')?.value || '').trim().length;
+            if (titleLength > MAX_TITLE_CHARS) {
+                Swal.fire({ icon: 'warning', title: 'Title Too Long', text: `Service title cannot exceed ${MAX_TITLE_CHARS} characters.` });
+                return;
+            }
+        }
+
         if (currentId === 'pricing' && nextId === 'description') {
             const basicPrice = document.getElementById('basic_price').value;
             const basicDuration = document.querySelector('input[name="packages[0][duration]"]').value;
@@ -135,6 +188,13 @@
     async function submitForm() {
         const form = document.getElementById('createServiceForm');
         if (fpInstance) document.getElementById('unavailableDates').value = fpInstance.input.value;
+
+        const validationError = validateClientLimitsBeforeSubmit();
+        if (validationError) {
+            Swal.fire({ icon: 'warning', title: 'Validation Error', text: validationError });
+            return;
+        }
+
         const formData = new FormData(form);
         Swal.fire({ title: 'Publishing...', didOpen: () => Swal.showLoading() });
 
@@ -185,6 +245,20 @@
         document.getElementById('offer_packages')?.addEventListener('change', function onToggle() {
             const extra = document.getElementById('extraPackages');
             this.checked ? extra.classList.remove('hidden') : extra.classList.add('hidden');
+        });
+
+        const imageInput = document.getElementById('image');
+        imageInput?.addEventListener('change', () => {
+            const selectedFile = imageInput.files?.[0];
+            if (!selectedFile) return;
+            if (selectedFile.size > MAX_IMAGE_SIZE_BYTES) {
+                imageInput.value = '';
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Image Too Large',
+                    text: 'Service image must not be larger than 1 MB.',
+                });
+            }
         });
     });
 

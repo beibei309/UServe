@@ -595,9 +595,19 @@
   ],
   "variable": [
     {
-      "id": "5a2a13ed-8a4c-4c83-9e58-3d02b0186300",
+      "id": "da3f9d46-e7d4-4b08-ab6e-4b012ea366bc",
       "key": "baseUrl",
       "value": "http://localhost:8000/api/v1"
+    },
+    {
+      "id": "39edd9da-a899-417a-b160-5ba749cf4352",
+      "key": "categoryId",
+      "value": ""
+    },
+    {
+      "id": "7eaf7e50-5e5a-42ff-8ad4-9512323d6983",
+      "key": "serviceId",
+      "value": ""
     }
   ]
 }

@@ -80,7 +80,8 @@
                 <div class="grid grid-cols-1 gap-6 max-w-3xl">
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-1">Service Title <span class="text-red-500">*</span></label>
-                        <input type="text" id="title" name="title" class="w-full rounded-lg border-gray-300 focus:ring-indigo-500 focus:border-indigo-500" placeholder="e.g. Professional Mathematics Tutoring">
+                        <input type="text" id="title" name="title" maxlength="255" class="w-full rounded-lg border-gray-300 focus:ring-indigo-500 focus:border-indigo-500" placeholder="e.g. Professional Mathematics Tutoring">
+                        <p class="text-xs text-gray-400 mt-1">Maximum 255 characters.</p>
                     </div>
 
                     <div>
@@ -96,6 +97,7 @@
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Service Cover Image</label>
                         <input type="file" id="image" name="image" accept="image/*" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+                        <p class="text-xs text-gray-400 mt-1">Optional. Maximum file size: 1MB.</p>
                     </div>
                 </div>
 
@@ -127,11 +129,11 @@
                         </div>
                         <div>
                             <label class="text-xs font-bold text-gray-500 uppercase">Duration (shown to student)</label>
-                            <input type="text" name="packages[0][duration]" placeholder="e.g. 1 hour" class="w-full mt-1 border-gray-300 rounded-md">
+                            <input type="text" name="packages[0][duration]" maxlength="100" placeholder="e.g. 1 hour" class="w-full mt-1 border-gray-300 rounded-md">
                         </div>
                         <div>
                             <label class="text-xs font-bold text-gray-500 uppercase">Billing Unit</label>
-                            <input type="text" name="packages[0][frequency]" placeholder="e.g. per session" class="w-full mt-1 border-gray-300 rounded-md">
+                            <input type="text" name="packages[0][frequency]" maxlength="100" placeholder="e.g. per session" class="w-full mt-1 border-gray-300 rounded-md">
                             <p class="mt-1 text-[11px] text-gray-400">Examples: per session, per hour, per day, per task, per page</p>
                         </div>
                     </div>
@@ -160,8 +162,8 @@
                         <input type="hidden" name="packages[1][package_type]" value="standard">
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                             <div><label class="text-xs font-bold text-blue-600 uppercase">Price (RM)</label><input type="number" name="packages[1][price]" class="w-full mt-1 border-blue-200 rounded-md"></div>
-                            <div><label class="text-xs font-bold text-blue-600 uppercase">Duration (shown to student)</label><input type="text" name="packages[1][duration]" placeholder="e.g. 2 hours" class="w-full mt-1 border-blue-200 rounded-md"></div>
-                            <div><label class="text-xs font-bold text-blue-600 uppercase">Billing Unit</label><input type="text" name="packages[1][frequency]" placeholder="e.g. per session" class="w-full mt-1 border-blue-300 rounded-md"><p class="mt-1 text-[11px] text-blue-400">Examples: per session, per hour, per day, per task, per page</p></div>
+                            <div><label class="text-xs font-bold text-blue-600 uppercase">Duration (shown to student)</label><input type="text" name="packages[1][duration]" maxlength="100" placeholder="e.g. 2 hours" class="w-full mt-1 border-blue-200 rounded-md"></div>
+                            <div><label class="text-xs font-bold text-blue-600 uppercase">Billing Unit</label><input type="text" name="packages[1][frequency]" maxlength="100" placeholder="e.g. per session" class="w-full mt-1 border-blue-300 rounded-md"><p class="mt-1 text-[11px] text-blue-400">Examples: per session, per hour, per day, per task, per page</p></div>
                         </div>
                         <div class="bg-white rounded-md border border-blue-200 overflow-hidden"><div id="editor-standard" class="h-20"></div></div>
                         <input type="hidden" name="packages[1][description]" id="input-standard">
@@ -172,8 +174,8 @@
                         <input type="hidden" name="packages[2][package_type]" value="premium">
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                             <div><label class="text-xs font-bold text-purple-600 uppercase">Price (RM)</label><input type="number" name="packages[2][price]" class="w-full mt-1 border-purple-200 rounded-md"></div>
-                            <div><label class="text-xs font-bold text-purple-600 uppercase">Duration (shown to student)</label><input type="text" name="packages[2][duration]" placeholder="e.g. 3 hours" class="w-full mt-1 border-purple-200 rounded-md"></div>
-                            <div><label class="text-xs font-bold text-purple-600 uppercase">Billing Unit</label><input type="text" name="packages[2][frequency]" placeholder="e.g. per session" class="w-full mt-1 border-purple-300 rounded-md"><p class="mt-1 text-[11px] text-purple-400">Examples: per session, per hour, per day, per task, per page</p></div>
+                            <div><label class="text-xs font-bold text-purple-600 uppercase">Duration (shown to student)</label><input type="text" name="packages[2][duration]" maxlength="100" placeholder="e.g. 3 hours" class="w-full mt-1 border-purple-200 rounded-md"></div>
+                            <div><label class="text-xs font-bold text-purple-600 uppercase">Billing Unit</label><input type="text" name="packages[2][frequency]" maxlength="100" placeholder="e.g. per session" class="w-full mt-1 border-purple-300 rounded-md"><p class="mt-1 text-[11px] text-purple-400">Examples: per session, per hour, per day, per task, per page</p></div>
                         </div>
                         <div class="bg-white rounded-md border border-purple-200 overflow-hidden"><div id="editor-premium" class="h-20"></div></div>
                         <input type="hidden" name="packages[2][description]" id="input-premium">
@@ -199,7 +201,7 @@
                         <div id="editor-main" class="h-64"></div>
                     </div>
                     <input type="hidden" name="description" id="input-main">
-                    <p class="text-xs text-gray-400 mt-2 text-right">Be descriptive and professional.</p>
+                    <p class="text-xs text-gray-400 mt-2 text-right">Be descriptive and professional. Maximum 5000 characters.</p>
                 </div>
                 <div class="mt-8 pt-6 border-t border-gray-100 flex justify-between">
                     <button type="button" data-next-step="description|pricing" class="px-5 py-2.5 text-gray-600 hover:text-gray-900 font-medium"> ← Back</button>

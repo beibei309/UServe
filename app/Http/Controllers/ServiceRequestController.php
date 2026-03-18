@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Review;
+use App\Models\Category;
 use App\Models\ServiceRequest;
 use App\Models\StudentService;
 use App\Http\Controllers\PointsController;
@@ -153,37 +154,150 @@ class ServiceRequestController extends BaseController
     {
         try {
             $user = Auth::user();
-            $perPage = (int) $request->input('per_page', 15);
-            $page = (int) $request->input('page', 1);
-            $query = ServiceRequest::query();
-            // Optionally filter by user
-            // $query->where('hsr_requester_id', $user->hu_id);
-            $requests = $query->with(['studentService.category', 'requester', 'provider'])
-                ->paginate($perPage, ['*'], 'page', $page);
+            $currentUserId = (int) ($user->hu_id ?? $user->id);
+            $isHelperView = ($user->hu_role ?? null) === 'helper';
 
-            $data = $requests->items();
-            $pagination = [
-                'total' => $requests->total(),
-                'per_page' => $requests->perPage(),
-                'current_page' => $requests->currentPage(),
-                'last_page' => $requests->lastPage(),
-                'from' => $requests->firstItem(),
-                'to' => $requests->lastItem(),
-            ];
+            $query = ServiceRequest::query()
+                ->with(['studentService.category', 'requester', 'provider'])
+                ->orderByDesc('created_at');
 
-            return response()->json([
-                'success' => true,
-                'data' => $data,
-                'pagination' => $pagination
-            ], 200);
+            if ($isHelperView) {
+                $query->where('hsr_provider_id', $currentUserId);
+
+                if ($request->filled('search')) {
+                    $search = trim((string) $request->input('search'));
+                    $query->where(function ($sub) use ($search) {
+                        $sub->whereHas('studentService', function ($q) use ($search) {
+                            $q->where('hss_title', 'like', "%{$search}%");
+                        })->orWhereHas('requester', function ($q) use ($search) {
+                            $q->where('hu_name', 'like', "%{$search}%")
+                                ->orWhere('hu_email', 'like', "%{$search}%");
+                        });
+                    });
+                }
+
+                if ($request->filled('category')) {
+                    $categoryId = (int) $request->input('category');
+                    $query->whereHas('studentService', function ($q) use ($categoryId) {
+                        $q->where('hss_category_id', $categoryId);
+                    });
+                }
+
+                if ($request->filled('service_type')) {
+                    $serviceTypeId = (int) $request->input('service_type');
+                    $query->where('hsr_student_service_id', $serviceTypeId);
+                }
+
+                if ($request->filled('status')) {
+                    $status = (string) $request->input('status');
+                    if ($status === 'disputed') {
+                        $query->where(function ($sub) {
+                            $sub->where('hsr_status', 'disputed')
+                                ->orWhere('hsr_payment_status', 'dispute');
+                        });
+                    } else {
+                        $query->where('hsr_status', $status);
+                    }
+                }
+            } else {
+                $query->where('hsr_requester_id', $currentUserId);
+            }
+
+            if ($request->expectsJson() || $request->ajax()) {
+                $perPage = (int) $request->input('per_page', 15);
+                $page = (int) $request->input('page', 1);
+                $requests = $query->paginate($perPage, ['*'], 'page', $page);
+
+                return response()->json([
+                    'success' => true,
+                    'data' => $requests->items(),
+                    'pagination' => [
+                        'total' => $requests->total(),
+                        'per_page' => $requests->perPage(),
+                        'current_page' => $requests->currentPage(),
+                        'last_page' => $requests->lastPage(),
+                        'from' => $requests->firstItem(),
+                        'to' => $requests->lastItem(),
+                    ],
+                ], 200);
+            }
+
+            $requests = $query->get();
+            $this->decorateRequestsForUi($requests, $currentUserId, $isHelperView);
+
+            $requestedTab = (string) $request->input('tab', '');
+            $validTabs = ['pending', 'in-progress', 'completed'];
+
+            if (in_array($requestedTab, $validTabs, true)) {
+                $defaultStatusTab = $requestedTab;
+            } else {
+                $pendingCount = $requests->where('hsr_status', 'pending')->count();
+                $inProgressCount = $requests->whereIn('hsr_status', ['accepted', 'in_progress', 'waiting_payment', 'disputed'])->count();
+                $completedCount = $requests->whereIn('hsr_status', ['completed', 'cancelled', 'rejected'])->count();
+
+                if ($pendingCount > 0) {
+                    $defaultStatusTab = 'pending';
+                } elseif ($inProgressCount > 0) {
+                    $defaultStatusTab = 'in-progress';
+                } elseif ($completedCount > 0) {
+                    $defaultStatusTab = 'completed';
+                } else {
+                    $defaultStatusTab = 'pending';
+                }
+            }
+
+            if ($isHelperView) {
+                $serviceTypes = StudentService::query()
+                    ->where('hss_user_id', $currentUserId)
+                    ->orderBy('hss_title')
+                    ->get(['hss_id', 'hss_title']);
+
+                $categoryIds = StudentService::query()
+                    ->where('hss_user_id', $currentUserId)
+                    ->whereNotNull('hss_category_id')
+                    ->pluck('hss_category_id')
+                    ->unique()
+                    ->values();
+
+                $categories = Category::query()
+                    ->whereIn('hc_id', $categoryIds)
+                    ->orderBy('hc_name')
+                    ->get();
+
+                $receivedRequests = $requests;
+
+                return view('service-requests.helper', compact(
+                    'receivedRequests',
+                    'categories',
+                    'serviceTypes',
+                    'defaultStatusTab'
+                ));
+            }
+
+            $sentRequests = $requests;
+            $uniqueCategories = $sentRequests
+                ->map(fn ($sr) => optional(optional($sr->studentService)->category)->hc_name)
+                ->filter()
+                ->unique()
+                ->values();
+
+            return view('service-requests.index', compact(
+                'sentRequests',
+                'uniqueCategories',
+                'defaultStatusTab'
+            ));
         } catch (\Exception $e) {
             Log::error('ServiceRequest index error: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'data' => [],
-                'pagination' => null,
-                'message' => 'Server error occurred.'
-            ], 500);
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'data' => [],
+                    'pagination' => null,
+                    'message' => 'Server error occurred.'
+                ], 500);
+            }
+
+            return back()->with('error', 'Unable to load service requests right now.');
         }
     }
 

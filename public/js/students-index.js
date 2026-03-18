@@ -158,12 +158,21 @@
             showModal: false,
             startDate: startDateInitial,
             endDate: endDateInitial,
+            draftIsAvailable: isAvailableInitial,
+            draftStartDate: startDateInitial,
+            draftEndDate: endDateInitial,
 
             openModal() {
+                this.draftIsAvailable = this.isAvailable;
+                this.draftStartDate = this.startDate;
+                this.draftEndDate = this.endDate;
                 this.showModal = true;
             },
 
             closeModal() {
+                this.draftIsAvailable = this.isAvailable;
+                this.draftStartDate = this.startDate;
+                this.draftEndDate = this.endDate;
                 this.showModal = false;
             },
 
@@ -179,39 +188,38 @@
             quickToggle() {
                 if (this.isSaving) return;
                 if (this.isAvailable) {
-                    this.isAvailable = false;
+                    this.draftIsAvailable = false;
+                    this.draftStartDate = this.startDate;
+                    this.draftEndDate = this.endDate;
                     this.openModal();
                     return;
                 }
-                this.isAvailable = true;
-                this.startDate = '';
-                this.endDate = '';
                 this.doSave(true, null, null);
             },
 
             addDuration(daysToAdd, monthsToAdd) {
-                if (!this.startDate) {
-                    this.startDate = new Date().toISOString().split('T')[0];
+                if (!this.draftStartDate) {
+                    this.draftStartDate = new Date().toISOString().split('T')[0];
                 }
 
-                const baseString = this.endDate || this.startDate;
+                const baseString = this.draftEndDate || this.draftStartDate;
                 const dateObj = new Date(`${baseString}T12:00:00`);
                 if (daysToAdd > 0) dateObj.setDate(dateObj.getDate() + daysToAdd);
                 if (monthsToAdd > 0) dateObj.setMonth(dateObj.getMonth() + monthsToAdd);
-                this.endDate = dateObj.toISOString().split('T')[0];
+                this.draftEndDate = dateObj.toISOString().split('T')[0];
             },
 
             deleteDates() {
-                this.startDate = '';
-                this.endDate = '';
-                this.isAvailable = true;
+                this.draftStartDate = '';
+                this.draftEndDate = '';
+                this.draftIsAvailable = true;
             },
 
             saveChanges() {
-                let finalStartDate = this.startDate;
-                let finalEndDate = this.endDate;
+                let finalStartDate = this.draftStartDate;
+                let finalEndDate = this.draftEndDate;
 
-                if (!this.isAvailable) {
+                if (!this.draftIsAvailable) {
                     if (!finalStartDate || !finalEndDate) {
                         Swal.fire({
                             icon: 'warning',
@@ -235,7 +243,7 @@
                     finalEndDate = null;
                 }
 
-                this.doSave(this.isAvailable, finalStartDate, finalEndDate);
+                this.doSave(this.draftIsAvailable, finalStartDate, finalEndDate);
             },
 
             doSave(isAvailable, startDate, endDate) {
@@ -265,6 +273,9 @@
                         this.isAvailable = data.is_available;
                         this.startDate = data.start_date || '';
                         this.endDate = data.end_date || '';
+                        this.draftIsAvailable = this.isAvailable;
+                        this.draftStartDate = this.startDate;
+                        this.draftEndDate = this.endDate;
                         this.isSaving = false;
                         this.closeModal();
                         Swal.fire({

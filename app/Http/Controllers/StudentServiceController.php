@@ -174,28 +174,10 @@ class StudentServiceController extends Controller
         }
 
         // 2. Validation
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'category_id' => 'required|exists:h2u_categories,hc_id',
-            'image' => 'nullable|image|max:2048',
-            'template_image' => 'nullable|string',
-            'description' => 'nullable|string',
-            'blocked_slots' => 'nullable|string',
-            'is_unavailable' => 'nullable',
-            // Packages
-            'packages' => 'nullable|array',
-            'packages.*.duration' => 'nullable|string',
-            'packages.*.frequency' => 'nullable|string',
-            'packages.*.price' => 'nullable|numeric|min:0',
-            'packages.*.description' => 'nullable|string',
-            'offer_packages' => 'nullable',
-
-            // Schedule & Availability
-            'operating_hours' => 'nullable|array',
-            'session_duration' => 'nullable|string',
-            'unavailable_dates' => 'nullable|string',
-            'is_session_based' => 'nullable', // 🟢 Added this so validation allows it
-        ]);
+        $validated = $request->validate(
+            $this->serviceValidationRules(false),
+            $this->serviceValidationMessages()
+        );
 
         // 3. Handle Image
         if ($request->hasFile('image')) {
@@ -461,24 +443,10 @@ class StudentServiceController extends Controller
             }
 
             // 3. Validation
-            $rules = [
-                'title' => 'required|string|max:255',
-                'category_id' => 'required|exists:h2u_categories,hc_id',
-                'image' => 'nullable|image|max:10240',
-                'template_image' => 'nullable|string',
-                'description' => 'required|string',
-                'unavailable_dates' => 'nullable|string',
-                'is_session_based' => 'nullable',
-                'session_duration' => 'nullable|integer',
-
-                // Packages...
-                'packages.0.price' => 'required|numeric|min:0',
-                'packages.0.duration' => 'nullable|string',
-                'packages.0.frequency' => 'nullable|string',
-                'packages.0.description' => 'nullable|string',
-            ];
-
-            $validated = $request->validate($rules);
+            $validated = $request->validate(
+                $this->serviceValidationRules(true),
+                $this->serviceValidationMessages()
+            );
 
             // 4. Save Overview
             $service->hss_title = $this->sanitizeInput($validated['title']);
@@ -596,6 +564,61 @@ class StudentServiceController extends Controller
      * Sanitize input strings to remove or replace special characters
      * that might cause SQL encoding errors (e.g., non-breaking hyphens, multiplication signs).
      */
+    private function serviceValidationRules(bool $isCreate): array
+    {
+        return [
+            'title' => 'required|string|max:255',
+            'category_id' => 'required|exists:h2u_categories,hc_id',
+            'image' => 'nullable|image|max:1024',
+            'template_image' => 'nullable|string|max:2048',
+            'description' => ($isCreate ? 'required' : 'nullable').'|string|max:5000',
+            'blocked_slots' => 'nullable|string|max:10000',
+            'is_unavailable' => 'nullable',
+
+            'packages' => 'nullable|array',
+            'packages.*.duration' => 'nullable|string|max:100',
+            'packages.*.frequency' => 'nullable|string|max:100',
+            'packages.*.price' => 'nullable|numeric|min:0',
+            'packages.*.description' => 'nullable|string|max:1500',
+            'packages.0.price' => 'required|numeric|min:0',
+            'packages.0.duration' => 'required|string|max:100',
+            'packages.0.description' => 'required|string|max:1500',
+            'offer_packages' => 'nullable',
+
+            'operating_hours' => 'nullable|array',
+            'session_duration' => 'nullable|integer|min:15|max:240',
+            'unavailable_dates' => 'nullable|string|max:3000',
+            'is_session_based' => 'nullable',
+        ];
+    }
+
+    private function serviceValidationMessages(): array
+    {
+        return [
+            'title.required' => 'Service title is required.',
+            'title.max' => 'Service title cannot exceed 255 characters.',
+            'category_id.required' => 'Please choose a service category.',
+            'category_id.exists' => 'Selected category is invalid.',
+            'description.required' => 'Service description is required.',
+            'description.max' => 'Service description cannot exceed 5000 characters.',
+            'image.image' => 'Service image must be a valid image file.',
+            'image.max' => 'Service image must not be larger than 1 MB.',
+            'template_image.max' => 'Selected template image reference is too long.',
+            'packages.0.price.required' => 'Basic package price is required.',
+            'packages.0.price.min' => 'Basic package price cannot be negative.',
+            'packages.0.duration.required' => 'Basic package duration is required.',
+            'packages.0.duration.max' => 'Basic package duration cannot exceed 100 characters.',
+            'packages.0.description.required' => 'Please describe what is included in the Basic package.',
+            'packages.0.description.max' => 'Basic package description cannot exceed 1500 characters.',
+            'packages.*.duration.max' => 'Package duration cannot exceed 100 characters.',
+            'packages.*.frequency.max' => 'Package billing unit cannot exceed 100 characters.',
+            'packages.*.description.max' => 'Package description cannot exceed 1500 characters.',
+            'session_duration.min' => 'Session duration must be at least 15 minutes.',
+            'session_duration.max' => 'Session duration cannot exceed 240 minutes.',
+            'unavailable_dates.max' => 'Unavailable dates list is too long.',
+        ];
+    }
+
     private function sanitizeInput($text)
     {
         if (is_null($text)) {

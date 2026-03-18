@@ -175,7 +175,8 @@
     </div>
 
     <div id="verifyEmailConfig"
-        data-link-sent="{{ session('status') == 'verification-link-sent' ? 'true' : 'false' }}"></div>
+        data-link-sent="{{ session('status') == 'verification-link-sent' ? 'true' : 'false' }}"
+        data-status-check-url="{{ route('verification.notice') }}"></div>
     <script src="{{ asset('js/auth-verify-email.js') }}"></script>
 </body>
 

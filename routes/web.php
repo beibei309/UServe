@@ -99,7 +99,6 @@ Route::get('/student-services/{service}', [StudentServiceController::class, 'sho
 
 Route::get('/services/apply', [HomeController::class, 'serviceApply'])->middleware(['auth'])->name('services.apply');
 
-Route::get('/service-requests', [ServiceRequestController::class, 'index'])->middleware(['auth'])->name('service-requests.index');
 Route::post('/service-request', [ServiceRequestController::class, 'store'])->middleware(['auth'])->name('service-request.store');
 
 // Service Request routes

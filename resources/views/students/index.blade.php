@@ -237,25 +237,25 @@
                             <span class="text-xs text-indigo-700">Toggle to pause all services</span>
                         </div>
                         <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" class="sr-only peer" x-model="isAvailable">
+                            <input type="checkbox" class="sr-only peer" x-model="draftIsAvailable">
                             <div
                                 class="w-11 h-6 bg-gray-300 rounded-full peer peer-focus:ring-4 peer-focus:ring-indigo-300 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600">
                             </div>
                         </label>
                     </div>
 
-                    <div x-show="!isAvailable" x-transition class="space-y-4">
+                    <div x-show="!draftIsAvailable" x-transition class="space-y-4">
                         <p class="text-sm text-gray-500">Please select the dates you will be away. Your services will be
                             hidden during this period.</p>
                         <div class="grid grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Start Date</label>
-                                <input type="date" x-model="startDate"
+                                <input type="date" x-model="draftStartDate"
                                     class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm py-2.5">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold uppercase text-gray-500 mb-1">End Date</label>
-                                <input type="date" x-model="endDate"
+                                <input type="date" x-model="draftEndDate"
                                     class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm py-2.5">
                             </div>
                         </div>
@@ -276,9 +276,9 @@
                 </div>
 
                 <div class="px-6 py-4 bg-gray-50 flex justify-between items-center">
-                    <button @click="deleteDates()" x-show="!isAvailable"
+                    <button @click="deleteDates()" x-show="!draftIsAvailable"
                         class="text-red-600 text-sm font-semibold hover:text-red-800 transition">Clear Dates</button>
-                    <span x-show="isAvailable"></span>
+                    <span x-show="draftIsAvailable"></span>
                     <button @click="saveChanges()"
                         class="px-6 py-2.5 bg-indigo-600 text-white rounded-lg text-sm font-bold hover:bg-indigo-700 transition shadow-md shadow-indigo-200">
                         Save Changes
