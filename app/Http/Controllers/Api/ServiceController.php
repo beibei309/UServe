@@ -137,6 +137,13 @@ class ServiceController extends Controller
     public function show($id): JsonResponse
     {
         try {
+            if (!is_numeric($id) || (int) $id < 1) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Service not found'
+                ], 404);
+            }
+
             $service = StudentService::with([
                 'user',
                 'category',
@@ -150,7 +157,7 @@ class ServiceController extends Controller
             ->withAvg(['reviews as average_rating' => function ($query) {
                 $query->whereColumn('h2u_reviews.hr_reviewee_id', 'h2u_student_services.hss_user_id');
             }], 'hr_rating')
-            ->findOrFail($id);
+            ->findOrFail((int) $id);
 
             // Check for missing relationships
             if (!$service->user || !$service->category) {

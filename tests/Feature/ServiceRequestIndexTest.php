@@ -4,9 +4,7 @@ use Illuminate\Support\Facades\DB;
 
 it('returns all service requests with correct structure', function () {
     // Seed minimal service flow
-    if (!function_exists('seedMinimalServiceFlow')) {
-        require __DIR__.'/SeedersReviewAndPointsTest.php';
-    }
+        require_once __DIR__.'/TestSeederHelper.php';
     $seed = seedMinimalServiceFlow();
 
     // Authenticate as community user (if API requires auth, add token logic here)
