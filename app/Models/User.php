@@ -13,6 +13,7 @@ use App\Models\ServiceRequest;
 use App\Models\Favorite;
 use App\Models\StudentStatus;
 use App\Models\DatabaseNotification;
+use App\Notifications\VerifyEmailRelativeNotification;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -232,6 +233,11 @@ public function favoriteServices()
     public function getAverageRatingAttribute(): ?float
     {
         return $this->reviewsReceived()->avg('hr_rating');
+    }
+
+    public function sendEmailVerificationNotification(): void
+    {
+        $this->notify(new VerifyEmailRelativeNotification());
     }
 
     public function studentStatus()
