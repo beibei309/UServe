@@ -1,15 +1,12 @@
 <?php
 
 namespace App\Http\Controllers;
-use App\Models\StudentService;
 use App\Models\User;
 use Carbon\Carbon;
 
-use App\Models\Category;
 use App\Models\ServiceRequest;
-use App\Models\Review;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage; 
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
@@ -159,8 +156,7 @@ class StudentsController extends Controller
         'range'
     ));
 }
-
-     public function store(Request $request)
+    public function store(Request $request)
     {
         // Validate input
         $validated = $request->validate([
@@ -286,7 +282,7 @@ class StudentsController extends Controller
         $selectedFaculty = old('faculty', $this->normalizeFacultyName($user->hu_faculty ?? $user->faculty));
 
         return view('students.edit-profile', compact('user', 'facultyOptions', 'selectedFaculty'));
-        
+
     }
 
 
@@ -303,7 +299,7 @@ class StudentsController extends Controller
         'skills' => 'nullable|string|max:500',
         'work_experience_message' => 'nullable|string|max:1000',
         'work_experience_file' => 'nullable|file|mimes:pdf,doc,docx,txt,jpg,jpeg,png|max:10240', // 10MB
-        'profile_photo_path' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4096', 
+        'profile_photo_path' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4096',
     ]);
 
     // 2. Update Basic Information
@@ -489,17 +485,17 @@ public function deleteWorkExperienceFile()
         $viewer = Auth::user();
         $user->load([
             'reviewsReceived' => function($query) {
-                $query->latest(); 
+                $query->latest();
             },
-            'reviewsReceived.reviewer', 
-            'reviewsReceived.service' 
+            'reviewsReceived.reviewer',
+            'reviewsReceived.service'
         ]);
-        
+
 
         // AMBIL SERVIS: Tukar 'is_available' kepada 'is_active'
         $services = $user->student_services()
                         ->withCount('reviews')
-                        ->withAvg('reviews as reviews_avg_rating', 'hr_rating') 
+                        ->withAvg('reviews as reviews_avg_rating', 'hr_rating')
                         ->where('hss_is_active', true) // <--- PASTIKAN GUNA NAMA COLUMN YANG BETUL (is_active)
                         ->where('hss_approval_status', 'approved')
                         ->latest()

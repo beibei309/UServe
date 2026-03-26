@@ -51,7 +51,7 @@
             <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6">
                 <div class="flex items-center">
                     <div class="bg-orange-100 p-2 sm:p-3 rounded-xl flex-shrink-0">
-                        <i class="fas fa-target text-orange-600 text-lg sm:text-xl"></i>
+                        <i class="fas fa-bullseye text-orange-600 text-lg sm:text-xl"></i>
                     </div>
                     <div class="ml-3 sm:ml-4 min-w-0">
                         <p class="text-xs sm:text-sm font-medium text-gray-600">Points to Certificate</p>
