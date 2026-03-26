@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'connection' => env('UPSI_DB_CONNECTION', env('DB_CONNECTION', 'pgsql')),
+
     'student_view' => env('UPSI_STUDENT_VIEW', 'home2u.h2u_student'),
 
     'live_refresh' => [

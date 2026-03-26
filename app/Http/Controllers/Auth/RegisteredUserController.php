@@ -249,7 +249,8 @@ class RegisteredUserController extends Controller
         }
 
         try {
-            $connection = DB::connection('upsi_pgsql');
+            $connectionName = (string) config('upsi.connection', 'pgsql');
+            $connection = DB::connection($connectionName);
             $sourceView = (string) config('upsi.student_view', 'home2u.h2u_student');
 
             $cleanStudentId = $this->cleanString($studentId);
@@ -282,7 +283,8 @@ class RegisteredUserController extends Controller
 
     private function isUpsiSourceConfigured(): bool
     {
-        $connection = (array) config('database.connections.upsi_pgsql', []);
+        $connectionName = (string) config('upsi.connection', 'pgsql');
+        $connection = (array) config("database.connections.{$connectionName}", []);
 
         return ! empty($connection['host'])
             && ! empty($connection['database'])

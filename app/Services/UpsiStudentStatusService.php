@@ -35,7 +35,8 @@ class UpsiStudentStatusService
 
         try {
             $sourceView = (string) config('upsi.student_view', 'home2u.h2u_student');
-            $connection = DB::connection('upsi_pgsql');
+            $connectionName = (string) config('upsi.connection', 'pgsql');
+            $connection = DB::connection($connectionName);
 
             $source = $this->findSourceRow(
                 $connection,
@@ -112,7 +113,8 @@ class UpsiStudentStatusService
 
     private function isSourceConnectionConfigured(): bool
     {
-        $connection = (array) config('database.connections.upsi_pgsql', []);
+        $connectionName = (string) config('upsi.connection', 'pgsql');
+        $connection = (array) config("database.connections.{$connectionName}", []);
 
         return ! empty($connection['host'])
             && ! empty($connection['database'])

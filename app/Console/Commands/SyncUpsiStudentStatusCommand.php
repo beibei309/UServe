@@ -13,7 +13,7 @@ class SyncUpsiStudentStatusCommand extends Command
     protected $signature = 'upsi:sync-student-status
         {--apply : Persist changes to local h2u_student_statuses (default is dry-run)}
         {--limit=0 : Limit number of source rows processed}
-        {--connection=upsi_pgsql : Source database connection name}';
+        {--connection= : Source database connection name (defaults to config upsi.connection)}';
 
     protected $description = 'Sync UPSI student status view into local student statuses (dry-run by default).';
 
@@ -21,11 +21,11 @@ class SyncUpsiStudentStatusCommand extends Command
     {
         $apply = (bool) $this->option('apply');
         $limit = max(0, (int) $this->option('limit'));
-        $connectionName = (string) $this->option('connection');
+        $connectionName = (string) ($this->option('connection') ?: config('upsi.connection', 'pgsql'));
         $sourceView = (string) config('upsi.student_view', 'home2u.h2u_student');
 
-        if (! $this->isSourceConnectionConfigured()) {
-            $this->error('UPSI source connection is not fully configured. Please set UPSI_DB_HOST, UPSI_DB_DATABASE, UPSI_DB_USERNAME, and UPSI_DB_PASSWORD in .env.');
+        if (! $this->isSourceConnectionConfigured($connectionName)) {
+            $this->error("UPSI source connection [{$connectionName}] is not fully configured.");
             return self::FAILURE;
         }
 
@@ -160,9 +160,9 @@ class SyncUpsiStudentStatusCommand extends Command
         return self::SUCCESS;
     }
 
-    private function isSourceConnectionConfigured(): bool
+    private function isSourceConnectionConfigured(string $connectionName): bool
     {
-        $connection = (array) config('database.connections.upsi_pgsql', []);
+        $connection = (array) config("database.connections.{$connectionName}", []);
 
         return ! empty($connection['host'])
             && ! empty($connection['database'])
