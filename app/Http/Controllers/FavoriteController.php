@@ -4,13 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\StudentService;
+use App\Services\ServiceImageUrlResolver;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class FavoriteController extends Controller
 {
+    public function __construct(private readonly ServiceImageUrlResolver $serviceImageUrlResolver) {}
+
    public function toggleService(Request $request): JsonResponse
 {
     try {
@@ -89,6 +93,28 @@ public function index()
         ->where('hss_approval_status', 'approved')
         ->orderBy('created_at', 'desc')
         ->paginate(12);
+
+    $favourites->getCollection()->transform(function (StudentService $service) {
+        $service->ui_image_url = $this->serviceImageUrlResolver->resolveGeneralImageUrl(
+            $service->hss_image_path,
+            'https://via.placeholder.com/800x600?text=No+Image'
+        );
+
+        $sellerPhotoPath = (string) ($service->user->hu_profile_photo_path ?? '');
+        if ($sellerPhotoPath !== '') {
+            if (Str::startsWith($sellerPhotoPath, ['http://', 'https://'])) {
+                $service->ui_seller_avatar_url = $sellerPhotoPath;
+            } elseif (Str::startsWith($sellerPhotoPath, 'storage/')) {
+                $service->ui_seller_avatar_url = asset($sellerPhotoPath);
+            } else {
+                $service->ui_seller_avatar_url = asset('storage/' . ltrim($sellerPhotoPath, '/'));
+            }
+        } else {
+            $service->ui_seller_avatar_url = 'https://ui-avatars.com/api/?name=' . urlencode((string) $service->user->hu_name);
+        }
+
+        return $service;
+    });
 
     return view('favorites.index', compact('favourites'));
 }

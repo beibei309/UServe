@@ -87,38 +87,7 @@
 @endsection
 
 @section('scripts')
+    <div id="adminLegalPagesConfig"></div>
     <script src="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.min.js"></script>
-    <script>
-        function initLegalEditor(editorId, inputId) {
-            const editorElement = document.getElementById(editorId);
-            const hiddenInput = document.getElementById(inputId);
-            if (!editorElement || !hiddenInput) {
-                return;
-            }
-
-            const quill = new Quill(editorElement, {
-                theme: 'snow',
-                modules: {
-                    toolbar: [
-                        [{ header: [1, 2, 3, false] }],
-                        ['bold', 'italic', 'underline'],
-                        [{ list: 'ordered' }, { list: 'bullet' }],
-                        ['link', 'clean']
-                    ]
-                }
-            });
-
-            quill.root.innerHTML = hiddenInput.value || '';
-
-            const form = editorElement.closest('form');
-            if (form) {
-                form.addEventListener('submit', function () {
-                    hiddenInput.value = quill.root.innerHTML;
-                });
-            }
-        }
-
-        initLegalEditor('terms-editor', 'terms-content-input');
-        initLegalEditor('privacy-editor', 'privacy-content-input');
-    </script>
+    <script src="{{ asset('js/admin-legal-pages.js') }}"></script>
 @endsection

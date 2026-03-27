@@ -26,6 +26,8 @@
     const challengeText = document.getElementById('challenge_text');
     const faceGuide = document.getElementById('face_guide');
     const mainForm = document.getElementById('verificationForm');
+    const verificationDocumentInput = mainForm?.querySelector('input[name="verification_document"]');
+    const maxDocumentSizeBytes = 1024 * 1024;
 
     let stream = null;
     let selfieDataUrl = null;
@@ -226,6 +228,17 @@
     if (mainForm) {
         mainForm.addEventListener('submit', (e) => {
             e.preventDefault();
+
+            const file = verificationDocumentInput?.files?.[0];
+            if (file && file.size > maxDocumentSizeBytes) {
+                Swal.fire({
+                    title: 'File too large',
+                    text: 'Verification document must be 1MB or smaller.',
+                    icon: 'error',
+                });
+                return;
+            }
+
             Swal.fire({
                 title: 'Confirm Submission',
                 text: 'Are you sure you want to submit your final verification?',

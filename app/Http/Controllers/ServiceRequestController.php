@@ -714,7 +714,10 @@ class ServiceRequestController extends BaseController
 
         // 2. Validate (File is optional, but if present must be an image/pdf)
         $request->validate([
-            'payment_proof' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048', // Max 2MB
+            'payment_proof' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:1024',
+        ], [
+            'payment_proof.max' => 'Payment proof must be 1MB or smaller.',
+            'payment_proof.mimes' => 'Payment proof must be a JPG, PNG, or PDF file.',
         ]);
 
         // 3. Handle File Upload

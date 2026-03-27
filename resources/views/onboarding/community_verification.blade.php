@@ -154,6 +154,10 @@
                                 <label class="block text-sm font-medium text-slate-700 mb-2">Select Document (Image or PDF)</label>
                                 <input type="file" name="verification_document" accept=".jpg,.jpeg,.png,.pdf" required
                                     class="block w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 transition-all border border-slate-200 rounded-lg"/>
+                                <p class="mt-2 text-xs text-slate-500">Allowed: PDF/JPG/PNG, maximum 1MB.</p>
+                                @error('verification_document')
+                                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
                             </div>
 
                             <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white py-3 rounded-xl font-medium transition-all shadow-lg">

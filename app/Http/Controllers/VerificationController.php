@@ -403,7 +403,10 @@ class VerificationController extends Controller
     public function submitDoc(Request $request)
     {
         $request->validate([
-            'verification_document' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120', // Max 5MB
+            'verification_document' => 'required|file|mimes:pdf,jpg,jpeg,png|max:1024',
+        ], [
+            'verification_document.max' => 'Verification document must be 1MB or smaller.',
+            'verification_document.mimes' => 'Verification document must be a PDF, JPG, or PNG file.',
         ]);
 
         $user = Auth::user();

@@ -155,7 +155,7 @@
                                                 </label>
                                                 <p class="pl-1">or drag and drop</p>
                                             </div>
-                                            <p class="text-xs text-gray-500" id="file-name-display">PDF, DOC, DOCX up to 10MB</p>
+                                            <p class="text-xs text-gray-500" id="file-name-display">PDF, DOC, DOCX up to 1MB</p>
                                         </div>
                                     </div>
 

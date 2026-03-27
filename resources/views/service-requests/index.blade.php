@@ -461,7 +461,7 @@
                                                             </span>
                                                         @else
                                                             {{-- 1. Cancel Button (Only if NOT waiting payment/disputed/completed) --}}
-                                                            @if (!in_array($request->hsr_status, ['waiting_payment', 'disputed', 'completed', 'canceled']))
+                                                            @if (!in_array($request->hsr_status, ['in_progress', 'waiting_payment', 'disputed', 'completed', 'cancelled', 'canceled']))
                                                                 <button data-cancel-request="{{ $request->hsr_id }}"
                                                                     class="text-sm font-medium text-red-600 hover:text-red-700 hover:underline">
                                                                     Cancel Request
@@ -798,7 +798,7 @@
                                 </svg>
                                 <p class="text-xs text-gray-500"><span class="font-semibold">Click to upload</span>
                                 </p>
-                                <p class="text-[10px] text-gray-400">JPG, PNG or PDF (MAX. 2MB)</p>
+                                <p class="text-[10px] text-gray-400">JPG, PNG or PDF (MAX. 1MB)</p>
                             </div>
                             <input id="dropzone-file" name="payment_proof" type="file" class="hidden"
                                 accept="image/*,application/pdf" />

@@ -63,7 +63,7 @@
                         {{-- Image Section --}}
                         <div class="relative h-56 bg-slate-200 overflow-hidden block">
                             <a href="{{ route('services.details', $service->hss_id) }}">
-                                <img src="{{ $service->hss_image_path ? asset('storage/' . $service->hss_image_path) : 'https://via.placeholder.com/800x600?text=No+Image' }}"
+                                <img src="{{ $service->ui_image_url }}"
                                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
                             </a>
 
@@ -87,7 +87,7 @@
                         <div class="p-5 flex flex-col flex-1">
                             {{-- User Info & Rating Row --}}
                             <div class="flex items-center gap-3 mb-3">
-                                <img src="{{ $service->user->hu_profile_photo_path ? asset('storage/' . $service->user->hu_profile_photo_path) : 'https://ui-avatars.com/api/?name=' . urlencode($service->user->hu_name) }}"
+                                <img src="{{ $service->ui_seller_avatar_url }}"
                                     class="w-8 h-8 rounded-full object-cover border border-slate-100">
                                 
                                 <div class="flex flex-col">

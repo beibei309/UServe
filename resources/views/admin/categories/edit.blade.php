@@ -92,19 +92,11 @@
                                 <i class="fas fa-list text-emerald-500"></i>
                                 Category Name <span class="text-red-500">*</span>
                             </label>
-                            <select name="name" 
-                                   class="w-full px-4 py-3 rounded-xl border transition-all duration-300 focus:ring-2 focus:ring-emerald-500 focus:border-transparent" 
-                                   style="background-color: var(--bg-primary); border-color: var(--border-color); color: var(--text-primary);" 
-                                   required>
-                                <option value="" disabled {{ empty(old('name', $category->hc_name ?? '')) ? 'selected' : '' }}>Select a category...</option>
-                                <option value="Academic Tutoring" {{ old('name', $category->hc_name ?? '') == 'Academic Tutoring' ? 'selected' : '' }}>Academic Tutoring</option>
-                                <option value="Programming & Tech" {{ old('name', $category->hc_name ?? '') == 'Programming & Tech' ? 'selected' : '' }}>Programming & Tech</option>
-                                <option value="Design & Creative" {{ old('name', $category->hc_name ?? '') == 'Design & Creative' ? 'selected' : '' }}>Design & Creative</option>
-                                <option value="Housechores" {{ old('name', $category->hc_name ?? '') == 'Housechores' ? 'selected' : '' }}>Housechores</option>
-                                <option value="Event Planning" {{ old('name', $category->hc_name ?? '') == 'Event Planning' ? 'selected' : '' }}>Event Planning</option>
-                                <option value="Runner & Errands" {{ old('name', $category->hc_name ?? '') == 'Runner & Errands' ? 'selected' : '' }}>Runner & Errands</option>
-                            </select>
-                            <p class="text-xs mt-2 transition-colors duration-300" style="color: var(--text-muted);">Choose from existing UServe service categories</p>
+                            <input type="text" name="name" value="{{ old('name', $category->hc_name ?? '') }}"
+                                   class="w-full px-4 py-3 rounded-xl border transition-all duration-300 focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                                   style="background-color: var(--bg-primary); border-color: var(--border-color); color: var(--text-primary);"
+                                   placeholder="Enter category name" required>
+                            <p class="text-xs mt-2 transition-colors duration-300" style="color: var(--text-muted);">Edit the category name freely — slug will auto-update if left blank</p>
                         </div>
 
                         {{-- Slug --}}

@@ -139,7 +139,7 @@
                                       file:text-xs file:font-semibold
                                       file:bg-indigo-50 file:text-indigo-700
                                       hover:file:bg-indigo-100 transition-all cursor-pointer"/>
-                                <p class="text-xs text-gray-500 mt-2">PDF, DOC, DOCX up to 4MB.</p>
+                                <p class="text-xs text-gray-500 mt-2">PDF, DOC, DOCX up to 1MB.</p>
                                 @error('work_experience_file')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror

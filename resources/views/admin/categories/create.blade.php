@@ -5,6 +5,17 @@
 
 <div class="max-w-6xl mx-auto">
 
+    @if ($errors->any())
+        <div class="mb-6 rounded-xl border border-red-200 bg-red-50 px-5 py-4">
+            <p class="text-sm font-semibold text-red-700">Category could not be created. Please fix the fields below.</p>
+            <ul class="mt-2 list-disc pl-5 text-sm text-red-600">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     {{-- Back Navigation --}}
     <div class="mb-8">
         <a href="{{ route('admin.categories.index') }}" 

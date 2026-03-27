@@ -14,6 +14,7 @@
     const paymentModalPrice = document.getElementById('paymentModalPrice');
     const fileInput = document.getElementById('dropzone-file');
     const fileNamePreview = document.getElementById('fileNamePreview');
+    const maxPaymentProofSizeBytes = 1024 * 1024;
     const reviewModal = document.getElementById('reviewModal');
     const reviewForm = document.getElementById('reviewForm');
     const reviewServiceRequestId = document.getElementById('reviewServiceRequestId');
@@ -114,8 +115,46 @@
         fileInput.addEventListener('change', () => {
             const file = fileInput.files && fileInput.files[0];
             if (!file || !fileNamePreview) return;
+
+            if (file.size > maxPaymentProofSizeBytes) {
+                fileInput.value = '';
+                fileNamePreview.textContent = '';
+                fileNamePreview.classList.add('hidden');
+                Swal.fire({
+                    title: 'File too large',
+                    text: 'Payment proof must be 1MB or smaller.',
+                    icon: 'error',
+                    confirmButtonColor: '#d33',
+                });
+                return;
+            }
+
             fileNamePreview.textContent = `Selected: ${file.name}`;
             fileNamePreview.classList.remove('hidden');
+        });
+    }
+
+    if (paymentProofForm) {
+        paymentProofForm.addEventListener('submit', (event) => {
+            const selectedFile = fileInput?.files?.[0];
+            if (!selectedFile) {
+                return;
+            }
+
+            if (selectedFile.size > maxPaymentProofSizeBytes) {
+                event.preventDefault();
+                if (fileInput) fileInput.value = '';
+                if (fileNamePreview) {
+                    fileNamePreview.textContent = '';
+                    fileNamePreview.classList.add('hidden');
+                }
+                Swal.fire({
+                    title: 'File too large',
+                    text: 'Payment proof must be 1MB or smaller.',
+                    icon: 'error',
+                    confirmButtonColor: '#d33',
+                });
+            }
         });
     }
 

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class AdminCategoryController extends Controller
 {
@@ -40,16 +41,19 @@ class AdminCategoryController extends Controller
     {
         $data = $request->validate([
             'name' => 'required|string|max:255',
-            'slug' => 'required|string|max:255|unique:h2u_categories,hc_slug',
+            'slug' => 'nullable|string|max:255|unique:h2u_categories,hc_slug',
             'description' => 'nullable|string',
             'icon' => 'nullable|string',
             'color' => 'nullable|string|max:7',
             'is_active' => 'required|boolean',
+            'image_path' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:1024',
         ]);
+
+        $resolvedSlug = $this->resolveSlug((string) $data['name'], $data['slug'] ?? null);
 
         $payload = [
             'hc_name' => $data['name'],
-            'hc_slug' => $data['slug'],
+            'hc_slug' => $resolvedSlug,
             'hc_description' => $data['description'] ?? null,
             'hc_icon' => $data['icon'] ?? null,
             'hc_color' => $data['color'] ?? null,
@@ -74,16 +78,19 @@ class AdminCategoryController extends Controller
     {
         $data = $request->validate([
             'name' => 'required|string|max:255',
-            'slug' => 'required|string|max:255|unique:h2u_categories,hc_slug,' . $category->hc_id . ',hc_id',
+            'slug' => 'nullable|string|max:255|unique:h2u_categories,hc_slug,' . $category->hc_id . ',hc_id',
             'description' => 'nullable|string',
             'icon' => 'nullable|string',
             'color' => 'nullable|string|max:7',
             'is_active' => 'required|boolean',
+            'image_path' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:1024',
         ]);
+
+        $resolvedSlug = $this->resolveSlug((string) $data['name'], $data['slug'] ?? null, $category);
 
         $payload = [
             'hc_name' => $data['name'],
-            'hc_slug' => $data['slug'],
+            'hc_slug' => $resolvedSlug,
             'hc_description' => $data['description'] ?? null,
             'hc_icon' => $data['icon'] ?? null,
             'hc_color' => $data['color'] ?? null,
@@ -102,6 +109,31 @@ class AdminCategoryController extends Controller
     {
         $category->delete();
         return redirect()->route('admin.categories.index')->with('success', 'Category deleted successfully.');
+    }
+
+    private function resolveSlug(string $name, ?string $slug = null, ?Category $ignoreCategory = null): string
+    {
+        $baseSlug = Str::slug(trim($slug ?: $name));
+        if ($baseSlug === '') {
+            $baseSlug = 'category';
+        }
+
+        $candidate = $baseSlug;
+        $counter = 1;
+
+        while (true) {
+            $query = Category::query()->where('hc_slug', $candidate);
+            if ($ignoreCategory) {
+                $query->where('hc_id', '!=', $ignoreCategory->hc_id);
+            }
+
+            if (! $query->exists()) {
+                return $candidate;
+            }
+
+            $candidate = $baseSlug . '-' . $counter;
+            $counter++;
+        }
     }
 
 }

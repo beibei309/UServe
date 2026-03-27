@@ -166,7 +166,7 @@ class StudentsController extends Controller
             'bio' => 'nullable|string|max:1000',
             'skills' => 'nullable|string|max:500',
             'work_experience_message' => 'nullable|string|max:1000',
-            'work_experience_file' => 'nullable|file|mimes:pdf,doc,docx,txt,jpg,jpeg,png|max:4096',
+            'work_experience_file' => 'nullable|file|mimes:pdf,doc,docx,txt,jpg,jpeg,png|max:1024',
         ]);
 
         $user = Auth::user(); // logged-in user
@@ -298,7 +298,7 @@ class StudentsController extends Controller
         'bio' => 'nullable|string|max:1000',
         'skills' => 'nullable|string|max:500',
         'work_experience_message' => 'nullable|string|max:1000',
-        'work_experience_file' => 'nullable|file|mimes:pdf,doc,docx,txt,jpg,jpeg,png|max:10240', // 10MB
+        'work_experience_file' => 'nullable|file|mimes:pdf,doc,docx,txt,jpg,jpeg,png|max:1024',
         'profile_photo_path' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4096',
     ]);
 

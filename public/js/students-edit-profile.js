@@ -11,6 +11,7 @@
     const currentFileContainer = document.getElementById('current-file-container');
     const successMessage = config.dataset.successMessage || '';
     const errorMessage = config.dataset.errorMessage || '';
+    const maxWorkFileSizeBytes = 1024 * 1024;
 
     if (deleteFileTrigger && deleteFileForm) {
         deleteFileTrigger.addEventListener('click', () => {
@@ -33,7 +34,25 @@
     if (fileInput && fileNameDisplay && fileDropArea) {
         fileInput.addEventListener('change', () => {
             if (fileInput.files && fileInput.files.length > 0) {
-                const fileName = fileInput.files[0].name;
+                const selectedFile = fileInput.files[0];
+                if (selectedFile.size > maxWorkFileSizeBytes) {
+                    fileInput.value = '';
+                    fileNameDisplay.textContent = 'PDF, DOC, DOCX up to 1MB';
+                    fileNameDisplay.classList.remove('text-indigo-600', 'font-medium');
+                    fileNameDisplay.classList.add('text-gray-500');
+                    fileDropArea.classList.remove('border-indigo-500', 'bg-indigo-50');
+                    if (currentFileContainer) {
+                        currentFileContainer.classList.remove('opacity-50');
+                    }
+                    Swal.fire({
+                        title: 'File too large',
+                        text: 'Supporting document must be 1MB or smaller.',
+                        icon: 'error',
+                    });
+                    return;
+                }
+
+                const fileName = selectedFile.name;
                 fileNameDisplay.textContent = `Selected file: ${fileName}`;
                 fileNameDisplay.classList.add('text-indigo-600', 'font-medium');
                 fileNameDisplay.classList.remove('text-gray-500');
@@ -44,7 +63,7 @@
                 return;
             }
 
-            fileNameDisplay.textContent = 'PDF, DOC, DOCX up to 10MB';
+            fileNameDisplay.textContent = 'PDF, DOC, DOCX up to 1MB';
             fileNameDisplay.classList.remove('text-indigo-600', 'font-medium');
             fileNameDisplay.classList.add('text-gray-500');
             fileDropArea.classList.remove('border-indigo-500', 'bg-indigo-50');
@@ -75,6 +94,17 @@
 
     if (form) {
         form.addEventListener('submit', (e) => {
+            const selectedFile = fileInput?.files?.[0];
+            if (selectedFile && selectedFile.size > maxWorkFileSizeBytes) {
+                e.preventDefault();
+                Swal.fire({
+                    title: 'File too large',
+                    text: 'Supporting document must be 1MB or smaller.',
+                    icon: 'error',
+                });
+                return;
+            }
+
             e.preventDefault();
             Swal.fire({
                 title: 'Save Changes?',
