@@ -42,6 +42,18 @@
                                     Student
                                 </span>
                             @endif
+
+                            @auth
+                                @if ((int) auth()->id() !== (int) $user->hu_id)
+                                    <button
+                                        type="button"
+                                        id="open-report-user-modal"
+                                        class="mt-3 inline-flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-bold text-red-700 hover:bg-red-100 transition-colors">
+                                        <i class="fas fa-flag"></i>
+                                        Report User
+                                    </button>
+                                @endif
+                            @endauth
                         </div>
 
                         <div class="w-full md:flex-1">
@@ -188,4 +200,55 @@
 
         </div>
     </div>
+
+    @auth
+        @if ((int) auth()->id() !== (int) $user->hu_id)
+            <div id="report-user-modal" class="fixed inset-0 z-50 hidden" aria-hidden="true">
+                <div class="absolute inset-0 bg-slate-900/60" id="report-user-modal-overlay"></div>
+                <div class="relative min-h-screen flex items-center justify-center p-4">
+                    <div class="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl bg-white shadow-2xl border border-slate-200">
+                        <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                            <h3 class="text-lg font-bold text-slate-900">Report User</h3>
+                            <button type="button" id="close-report-user-modal" class="text-slate-400 hover:text-slate-600">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+
+                        <form id="report-user-form" class="px-6 py-5 space-y-4">
+                            <input type="hidden" name="target_user_id" value="{{ $user->hu_id }}">
+
+                            <div>
+                                <label for="report-reason" class="block text-sm font-semibold text-slate-700 mb-1">Reason</label>
+                                <select id="report-reason" name="reason" required class="w-full rounded-lg border-slate-300 bg-slate-50 text-slate-800 focus:bg-white focus:border-red-400 focus:ring-2 focus:ring-red-400/30">
+                                    <option value="" disabled selected>Select reason</option>
+                                    <option value="Scam">Scam</option>
+                                    <option value="Fake profile">Fake profile</option>
+                                    <option value="Harassment">Harassment</option>
+                                    <option value="Spam">Spam</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="report-details" class="block text-sm font-semibold text-slate-700 mb-1">Details (optional)</label>
+                                <textarea id="report-details" name="details" rows="4" class="w-full rounded-lg border-slate-300 bg-slate-50 text-slate-800 placeholder-slate-400 focus:bg-white focus:border-red-400 focus:ring-2 focus:ring-red-400/30" placeholder="Add supporting details..."></textarea>
+                            </div>
+
+                            <p id="report-user-feedback" class="hidden text-sm rounded-lg px-3 py-2 border"></p>
+
+                            <div class="flex justify-end gap-3 pt-2">
+                                <button type="button" id="cancel-report-user-modal" class="px-4 py-2 rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-50">Cancel</button>
+                                <button type="submit" id="submit-report-user" class="px-4 py-2 rounded-lg bg-red-600 text-white font-semibold hover:bg-red-700">Submit Report</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div id="publicProfileReportConfig"
+                 data-report-url="{{ url('/reports') }}"
+                 data-csrf-token="{{ csrf_token() }}"></div>
+            <script src="{{ asset('js/nonadmin-public-profile-report.js') }}"></script>
+        @endif
+    @endauth
 </x-app-layout>

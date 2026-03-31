@@ -5,14 +5,24 @@
 <div class="px-2 sm:px-4 lg:px-6 py-4">
 
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2 gap-4">
-        <h1 class="text-3xl font-bold transition-colors duration-300" style="color: var(--text-primary);">Feedback & Moderation</h1>
+        <div class="relative inline-flex items-center gap-2">
+            <h1 class="text-3xl font-bold transition-colors duration-300" style="color: var(--text-primary);">Feedback & Moderation</h1>
+            <button type="button"
+                class="group relative inline-flex items-center justify-center w-6 h-6 rounded-full border text-xs font-bold transition-colors duration-300"
+                style="background-color: var(--bg-tertiary); border-color: var(--border-color); color: var(--text-secondary);"
+                aria-label="Moderation guidance">
+                ?
+                <span
+                    class="pointer-events-none absolute left-0 top-full z-50 mt-2 hidden w-80 rounded-xl border p-3 text-left text-xs font-medium shadow-xl group-hover:block group-focus:block"
+                    style="background-color: var(--bg-secondary); border-color: var(--border-color); color: var(--text-secondary);">
+                    Warning is shared across student, community, and helper accounts.<br><br>
+                    At {{ $userWarningLimit }}/{{ $userWarningLimit }} warnings: helper = BLOCK SELLER ACCESS, student/community = SUSPEND ACCOUNT.<br><br>
+                    Suspended and blacklisted both restrict platform login; naming differs by role context. Blocked applies to helpers only (seller actions blocked, buyer access still allowed).
+                </span>
+            </button>
+        </div>
     </div>
-    <p class="text-xs mb-2 transition-colors duration-300" style="color: var(--text-muted);">
-        Feedback moderation covers student, community and helper accounts. Warning is shared, final action is role-based.
-    </p>
-    <p class="text-xs mb-6 transition-colors duration-300" style="color: var(--text-muted);">
-        At {{ $userWarningLimit }}/{{ $userWarningLimit }} warnings: helper = {{ $finalActions['helper'] }}, student/community = {{ $finalActions['student'] }}.
-    </p>
+    <div class="mb-6"></div>
 
     {{-- Search Bar --}}
     <div class="rounded-xl border shadow-sm mb-6 p-4 transition-colors duration-300"
@@ -131,9 +141,10 @@
                                         data-feedback-open-unsuspend
                                         data-url="{{ route('admin.feedback.unsuspend', $user->hu_id) }}"
                                         data-name="{{ $user->hu_name }}"
+                                        data-action="{{ $user->feedback_reactivate_label }}"
                                         class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-100 hover:bg-green-200 text-green-700 rounded-lg text-xs font-semibold transition-all duration-200">
                                         <i class="fa-solid fa-rotate-left text-xs"></i>
-                                        Unsuspend
+                                        {{ $user->feedback_reactivate_label }}
                                     </button>
                                 @elseif ($user->feedback_can_unblock)
                                     <button type="button"
@@ -183,7 +194,7 @@
                         </div>
                         <div class="flex-1">
                             <h3 class="text-xl font-bold transition-colors duration-300 mb-1" style="color: var(--text-primary);" id="feedback-unsuspend-modal-title">
-                                Unsuspend Account
+                                Reactivate Account
                             </h3>
                             <p class="text-sm transition-colors duration-300 mb-4" style="color: var(--text-secondary);" id="feedbackUnsuspendSubtitle"></p>
                             <p class="text-sm transition-colors duration-300" style="color: var(--text-muted);">
@@ -201,7 +212,7 @@
                     </button>
                     <button type="submit"
                             class="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-400 hover:to-green-500 text-white px-6 py-3 rounded-lg transition-all duration-300 font-medium shadow-lg hover:shadow-xl">
-                        Confirm Unsuspend
+                        Confirm Reactivation
                     </button>
                 </div>
             </form>

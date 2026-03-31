@@ -40,7 +40,7 @@ class AdminStudentController extends Controller
         })
 
         // STATUS FILTERS
-        ->when($status === 'suspended', function ($query) {
+        ->when(in_array($status, ['suspended', 'banned'], true), function ($query) {
             $query->where('hu_is_suspended', 1);
         })
 

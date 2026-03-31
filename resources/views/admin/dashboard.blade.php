@@ -81,7 +81,7 @@
                     {{ $pendingHelpers }} helper(s) are waiting for verification.
                 </div>
 
-                <a href="{{ route('admin.verifications.index') }}"
+                <a href="{{ route('admin.verifications.page') }}"
                     class="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 transition-colors duration-300">
                     Review Helpers
                 </a>

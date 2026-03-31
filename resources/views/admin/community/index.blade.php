@@ -83,11 +83,19 @@
 
             <!-- BLACKLISTED -->
             <a href="{{ route('admin.community.index', ['status' => 'suspended'] + request()->except('page')) }}"
+                class="px-6 py-3 rounded-xl text-sm font-medium transition-all duration-300 shadow-lg {{ request('status') == 'suspended' ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-cyan-500/25 hover:shadow-xl' : 'border shadow-md hover:shadow-lg' }}"
+                @if(request('status') != 'suspended')
+                style="color: var(--text-secondary); background-color: var(--bg-tertiary); border-color: var(--border-color);"
+                @endif>
+                Suspended
+            </a>
+
+            <a href="{{ route('admin.community.index', ['status' => 'blacklisted'] + request()->except('page')) }}"
                 class="px-6 py-3 rounded-xl text-sm font-medium transition-all duration-300 shadow-lg {{ request('status') == 'blacklisted' ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-cyan-500/25 hover:shadow-xl' : 'border shadow-md hover:shadow-lg' }}"
                 @if(request('status') != 'blacklisted')
                 style="color: var(--text-secondary); background-color: var(--bg-tertiary); border-color: var(--border-color);"
                 @endif>
-                Suspended
+                Blacklisted
             </a>
 
         </div>
@@ -190,7 +198,7 @@
                                 </a>
 
                                 {{-- BLACKLIST / UNBLACKLIST --}}
-                                @if (!$user->hu_is_blacklisted && !$user->hu_is_suspended)
+                                @if (!$user->hu_is_blacklisted && !$user->hu_is_suspended && !$user->hu_is_blocked)
                                     <button type="button" data-blacklist-open data-user-id="{{ $user->hu_id }}"
                                         class="inline-flex items-center justify-center w-8 h-8 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg text-xs font-semibold transition-all duration-200" title="Blacklist">
                                         <i class="fa-solid fa-ban"></i>

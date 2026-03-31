@@ -31,8 +31,8 @@ class AdminPageController extends Controller
 
     public function reports()
     {
-        $user = Auth::user();
-        if (!$user || !in_array($user->hu_role, ['staff', 'admin'])) {
+        $user = Auth::guard('admin')->user();
+        if (!$user) {
             abort(Response::HTTP_FORBIDDEN);
         }
 

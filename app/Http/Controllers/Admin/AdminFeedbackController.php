@@ -7,6 +7,7 @@ use App\Mail\AccountBannedMail;
 use App\Mail\AccountWarnedMail;
 use App\Mail\SellerBlockedMail;
 use App\Mail\SellerUnblockedMail;
+use App\Mail\UserBlacklisted;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -22,14 +23,20 @@ class AdminFeedbackController extends Controller
 
     private function finalActionForRole(string $role): string
     {
-        return $role === 'helper' ? 'block' : 'suspend';
+        return match ($role) {
+            'helper' => 'block',
+            'community' => 'blacklist',
+            default => 'suspend',
+        };
     }
 
     private function finalActionLabelForRole(string $role): string
     {
-        return $this->finalActionForRole($role) === 'block'
-            ? 'BLOCK SELLER ACCESS'
-            : 'SUSPEND ACCOUNT';
+        return match ($this->finalActionForRole($role)) {
+            'block' => 'BLOCK SELLER ACCESS',
+            'blacklist' => 'BLACKLIST ACCOUNT',
+            default => 'SUSPEND ACCOUNT',
+        };
     }
 
     private function statusBadgeClass(string $statusKey): string
@@ -76,7 +83,8 @@ class AdminFeedbackController extends Controller
             $user->feedback_can_warn = $canWarn;
             $user->feedback_can_enforce = $statusKey === 'active' && !$canWarn;
             $user->feedback_can_unblock = $statusKey === 'blocked';
-            $user->feedback_can_unsuspend = $statusKey === 'suspended';
+            $user->feedback_can_unsuspend = in_array($statusKey, ['suspended', 'blacklisted'], true);
+            $user->feedback_reactivate_label = $statusKey === 'blacklisted' ? 'Unblacklist' : 'Unsuspend';
             $user->feedback_next_warning_count = min($userWarningLimit, (int) $user->hu_warning_count + 1);
 
             return $user;
@@ -155,6 +163,8 @@ class AdminFeedbackController extends Controller
 
         if ($this->finalActionForRole($user->hu_role) === 'block') {
             $user->hu_is_blocked = true;
+            $user->hu_is_suspended = false;
+            $user->hu_is_blacklisted = false;
             $user->hu_blacklist_reason = $reason;
             $user->save();
             Mail::to($user->hu_email)->send(new SellerBlockedMail($user, $reason));
@@ -162,8 +172,20 @@ class AdminFeedbackController extends Controller
             return back()->with('success', "Helper {$user->hu_name} has been blocked from seller actions.");
         }
 
+        if ($this->finalActionForRole($user->hu_role) === 'blacklist') {
+            $user->hu_is_blacklisted = true;
+            $user->hu_is_suspended = false;
+            $user->hu_is_blocked = false;
+            $user->hu_blacklist_reason = $reason;
+            $user->save();
+            Mail::to($user->hu_email)->send(new UserBlacklisted($user, $reason));
+
+            return back()->with('success', "Community user {$user->hu_name} has been blacklisted after reaching {$limit} warnings.");
+        }
+
         $user->hu_is_suspended = true;
         $user->hu_is_blacklisted = false;
+        $user->hu_is_blocked = false;
         $user->hu_blacklist_reason = $reason;
         $user->save();
         Mail::to($user->hu_email)->send(new AccountBannedMail($user, $reason));
@@ -190,15 +212,17 @@ class AdminFeedbackController extends Controller
 
     public function unsuspendUser(User $user)
     {
-        if (!$user->hu_is_suspended) {
-            return back()->with('info', 'User is not currently suspended.');
+        if (!$user->hu_is_suspended && !$user->hu_is_blacklisted) {
+            return back()->with('info', 'User is not currently restricted.');
         }
 
         $user->hu_is_suspended = false;
+        $user->hu_is_blacklisted = false;
+        $user->hu_is_blocked = false;
         $user->hu_blacklist_reason = null;
         $user->save();
 
-        return back()->with('success', "User {$user->hu_name} has been unsuspended.");
+        return back()->with('success', "User {$user->hu_name} has been reactivated.");
     }
 
     public function blockUser(Request $request, User $user)

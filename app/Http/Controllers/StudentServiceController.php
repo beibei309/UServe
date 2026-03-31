@@ -61,7 +61,7 @@ class StudentServiceController extends Controller
         // --- 4. Search filter ---
         if ($q) {
             $query->where(function ($sub) use ($q) {
-                $sub->where('hss_title', 'like', "%$q%");
+                $sub->where('hss_title', 'ilike', "%$q%");
             });
         }
 

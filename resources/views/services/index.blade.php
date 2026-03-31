@@ -333,6 +333,25 @@
                                                 title="Share Service">
                                                 <i class="fas fa-share-alt"></i>
                                             </button>
+
+                                            @auth
+                                                @if ((int) auth()->id() !== (int) $service->user->hu_id)
+                                                    <button type="button"
+                                                        data-report-user-trigger
+                                                        data-target-user-id="{{ $service->user->hu_id }}"
+                                                        data-target-user-name="{{ $service->user->hu_name }}"
+                                                        class="w-10 h-10 flex items-center justify-center rounded-2xl bg-red-50 text-red-500 hover:bg-red-600 hover:text-white transition-all duration-300 shadow-sm"
+                                                        title="Report User">
+                                                        <i class="fas fa-flag"></i>
+                                                    </button>
+                                                @endif
+                                            @else
+                                                <a href="{{ route('login') }}"
+                                                    class="w-10 h-10 flex items-center justify-center rounded-2xl bg-slate-50 text-slate-400 hover:bg-slate-200 transition-all duration-300 shadow-sm"
+                                                    title="Sign in to Report">
+                                                    <i class="fas fa-flag"></i>
+                                                </a>
+                                            @endauth
                                         </div>
 
                                         <h2
@@ -462,8 +481,54 @@
             </div>
         </div>
 
+        <div id="reportUserModal"
+            class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto border border-slate-200">
+                <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                    <h3 class="text-lg font-bold text-slate-900">Report User</h3>
+                    <button type="button" data-close-report-user class="text-slate-400 hover:text-slate-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <form id="reportUserForm" class="px-6 py-5 space-y-4">
+                    <input type="hidden" name="target_user_id" id="reportUserTargetId">
+
+                    <p class="text-sm text-slate-500">Reporting: <span id="reportUserTargetName" class="font-semibold text-slate-700">-</span></p>
+
+                    <div>
+                        <label for="reportUserReason" class="block text-sm font-semibold text-slate-700 mb-1">Reason</label>
+                        <select id="reportUserReason" name="reason" required class="w-full rounded-lg border-slate-300 bg-slate-50 text-slate-800 focus:bg-white focus:border-red-400 focus:ring-2 focus:ring-red-400/30">
+                            <option value="" disabled selected>Select reason</option>
+                            <option value="Scam">Scam</option>
+                            <option value="Fake profile">Fake profile</option>
+                            <option value="Harassment">Harassment</option>
+                            <option value="Spam">Spam</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="reportUserDetails" class="block text-sm font-semibold text-slate-700 mb-1">Details (optional)</label>
+                        <textarea id="reportUserDetails" name="details" rows="4" class="w-full rounded-lg border-slate-300 bg-slate-50 text-slate-800 placeholder-slate-400 focus:bg-white focus:border-red-400 focus:ring-2 focus:ring-red-400/30" placeholder="Add supporting details..."></textarea>
+                    </div>
+
+                    <p id="reportUserFeedback" class="hidden text-sm rounded-lg px-3 py-2 border"></p>
+
+                    <div class="flex justify-end gap-3 pt-2">
+                        <button type="button" data-close-report-user class="px-4 py-2 rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-50">Cancel</button>
+                        <button type="submit" id="reportUserSubmitBtn" class="px-4 py-2 rounded-lg bg-red-600 text-white font-semibold hover:bg-red-700">Submit Report</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <div id="servicesIndexConfig" data-page="services-index"></div>
+        <div id="servicesIndexReportConfig"
+             data-report-url="{{ url('/reports') }}"
+             data-csrf-token="{{ csrf_token() }}"></div>
         <script src="{{ asset('js/nonadmin-services-index.js') }}"></script>
+        <script src="{{ asset('js/nonadmin-services-index-report.js') }}"></script>
     </div>
 
     {{-- Footer bar --}}

@@ -54,9 +54,9 @@
                 Sellers
             </a>
 
-            <a href="{{ route('admin.students.index', ['status' => 'banned'] + request()->except('page')) }}"
-                class="px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 {{ request('status') == 'banned' ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white' : 'border' }}"
-                @if(request('status') != 'banned')
+            <a href="{{ route('admin.students.index', ['status' => 'suspended'] + request()->except('page')) }}"
+                class="px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 {{ in_array(request('status'), ['suspended','banned'], true) ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white' : 'border' }}"
+                @if(!in_array(request('status'), ['suspended','banned'], true))
                 style="color: var(--text-secondary); background-color: var(--bg-tertiary); border-color: var(--border-color);"
                 @endif>
                 Suspended
@@ -109,8 +109,12 @@
                             <td class="py-3 px-4 text-sm transition-colors duration-300" style="color: var(--text-secondary);">{{ $student->hu_student_id ?? '-' }}</td>
 
                             <td class="py-3 px-4">
-                                @if ($student->hu_is_suspended)
+                                @if ($student->hu_is_blacklisted)
+                                    <span class="px-3 py-1 text-xs font-bold bg-red-100 text-red-700 rounded-full">Blacklisted</span>
+                                @elseif ($student->hu_is_suspended)
                                     <span class="px-3 py-1 text-xs font-bold bg-red-100 text-red-700 rounded-full">Suspended</span>
+                                @elseif ($student->hu_is_blocked)
+                                    <span class="px-3 py-1 text-xs font-bold bg-amber-100 text-amber-700 rounded-full">Blocked</span>
                                 @elseif ($student->hu_verification_status === 'approved')
                                         <span class="px-3 py-1 text-xs font-bold bg-green-100 text-green-700 rounded-full">Verified</span>
                                 @else
@@ -134,13 +138,13 @@
                                     </a>
 
                                     {{-- BAN / UNBAN --}}
-                                    @if ($student->hu_is_suspended)
+                                    @if ($student->hu_is_suspended || $student->hu_is_blacklisted || $student->hu_is_blocked)
                                         <form action="{{ route('admin.students.unban', $student->hu_id) }}" method="POST"
                                             class="unban-form inline-flex">
                                             @csrf
                                             <button type="button"
                                                 class="inline-flex items-center justify-center w-8 h-8 bg-green-100 hover:bg-green-200 text-green-700 rounded-lg text-xs font-semibold transition-all duration-200 unban-btn"
-                                                title="Unban">
+                                                title="Reactivate">
                                                 <i class="fa-solid fa-unlock"></i>
                                             </button>
                                         </form>

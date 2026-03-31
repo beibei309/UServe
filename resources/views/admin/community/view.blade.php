@@ -81,14 +81,22 @@
                         </div>
 
                         {{-- Suspension Status --}}
-                        @if ($user->hu_is_blacklisted)
+                        @if ($user->hu_is_blacklisted || $user->hu_is_suspended || $user->hu_is_blocked)
                             <div class="mb-6 p-4 rounded-lg border border-red-200" style="background-color: #fee2e2;">
                                 <div class="flex items-start gap-3">
                                     <i class="fas fa-ban text-red-600 mt-1"></i>
                                     <div>
-                                        <h3 class="font-bold text-red-700">Account Suspended</h3>
+                                        <h3 class="font-bold text-red-700">
+                                            @if ($user->hu_is_blacklisted)
+                                                Account Blacklisted
+                                            @elseif ($user->hu_is_suspended)
+                                                Account Suspended
+                                            @else
+                                                Seller Access Blocked
+                                            @endif
+                                        </h3>
                                         <p class="text-sm text-red-600 mt-1">
-                                            <strong>Reason:</strong> {{ $user->hu_blacklist_reason }}
+                                            <strong>Reason:</strong> {{ $user->hu_blacklist_reason ?: 'Restricted by admin moderation' }}
                                         </p>
                                     </div>
                                 </div>
@@ -103,12 +111,12 @@
                                 Edit User
                             </a>
 
-                            @if ($user->hu_is_blacklisted)
+                            @if ($user->hu_is_blacklisted || $user->hu_is_suspended || $user->hu_is_blocked)
                                 <form action="{{ route('admin.community.unblacklist', $user->hu_id) }}" method="POST" class="flex-1">
                                     @csrf
                                     <button type="submit" class="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-400 hover:to-emerald-500 text-white px-6 py-3 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 font-medium">
                                         <i class="fas fa-unlock"></i>
-                                        Remove Suspension
+                                        Reactivate User
                                     </button>
                                 </form>
                             @else

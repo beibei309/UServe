@@ -266,6 +266,7 @@ Route::middleware(['auth:admin', 'prevent-back-history'])->prefix('admin')->grou
     // REPORTS & FEEDBACK
     // ========================================
     Route::get('/reports', [AdminPageController::class, 'reports'])->name('admin.reports.page');
+    Route::post('/reports/{report}/resolve', [ReportAdminController::class, 'resolve'])->name('admin.reports.resolve');
     Route::get('/feedback', [AdminFeedbackController::class, 'index'])->name('admin.feedback.index');
     Route::post('/feedback/{user}/warning', [AdminFeedbackController::class, 'sendWarning'])->name('admin.feedback.warning');
     Route::post('/feedback/{user}/enforce', [AdminFeedbackController::class, 'enforceRoleAction'])->name('admin.feedback.enforce');

@@ -36,6 +36,42 @@ window.UServeAdmin.register('studentsIndex', 'adminModuleStudentsIndexConfig', (
             return;
         }
 
+        const unbanButton = event.target.closest('.unban-btn');
+        if (unbanButton) {
+            const form = unbanButton.closest('form');
+            Swal.fire({
+                title: 'Reactivate student account?',
+                text: 'This student will regain access to the system immediately.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#10b981',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Yes, Reactivate',
+                cancelButtonText: 'Cancel',
+            }).then((result) => {
+                if (result.isConfirmed && form) form.submit();
+            });
+            return;
+        }
+
+        const deleteButton = event.target.closest('.delete-student-btn');
+        if (deleteButton) {
+            const form = deleteButton.closest('form');
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'This student record will be permanently deleted!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#4f46e5',
+                cancelButtonColor: '#ef4444',
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'Cancel',
+            }).then((result) => {
+                if (result.isConfirmed && form) form.submit();
+            });
+            return;
+        }
+
         if (event.target.closest('[data-ban-close]')) {
             window.closeBanModal();
             return;
@@ -47,42 +83,6 @@ window.UServeAdmin.register('studentsIndex', 'adminModuleStudentsIndexConfig', (
     });
 
     document.addEventListener('DOMContentLoaded', () => {
-        document.querySelectorAll('.delete-student-btn').forEach((button) => {
-            button.addEventListener('click', () => {
-                const form = button.closest('form');
-                Swal.fire({
-                    title: 'Are you sure?',
-                    text: 'This student record will be permanently deleted!',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#4f46e5',
-                    cancelButtonColor: '#ef4444',
-                    confirmButtonText: 'Yes, delete it!',
-                    cancelButtonText: 'Cancel',
-                }).then((result) => {
-                    if (result.isConfirmed) form.submit();
-                });
-            });
-        });
-
-        document.querySelectorAll('.unban-btn').forEach((button) => {
-            button.addEventListener('click', () => {
-                const form = button.closest('form');
-                Swal.fire({
-                    title: 'Reactivate student account?',
-                    text: 'This student will regain access to the system immediately.',
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonColor: '#10b981',
-                    cancelButtonColor: '#6b7280',
-                    confirmButtonText: 'Yes, Reactivate',
-                    cancelButtonText: 'Cancel',
-                }).then((result) => {
-                    if (result.isConfirmed) form.submit();
-                });
-            });
-        });
-
         if (successMessage) {
             Swal.fire({
                 icon: 'success',

@@ -80,9 +80,9 @@ window.UServeAdmin.register('feedback', 'adminModuleFeedbackConfig', (config) =>
     const unsuspendBackdrop = document.getElementById('feedbackUnsuspendBackdrop');
     const unsuspendCancel   = document.getElementById('feedbackUnsuspendCancel');
 
-    function openUnsuspendModal(url, name) {
+    function openUnsuspendModal(url, name, actionLabel = 'Reactivate') {
         unsuspendForm.action = url;
-        unsuspendSubtitle.textContent = `Restoring account access for ${name}.`;
+        unsuspendSubtitle.textContent = `${actionLabel} action for ${name}.`;
         unsuspendModal.classList.remove('hidden');
     }
 
@@ -139,7 +139,8 @@ window.UServeAdmin.register('feedback', 'adminModuleFeedbackConfig', (config) =>
         if (unsuspendTrigger) {
             openUnsuspendModal(
                 unsuspendTrigger.dataset.url,
-                unsuspendTrigger.dataset.name
+                unsuspendTrigger.dataset.name,
+                unsuspendTrigger.dataset.action || 'Reactivate'
             );
             return;
         }
