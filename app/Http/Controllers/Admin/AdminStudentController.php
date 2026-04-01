@@ -192,7 +192,7 @@ class AdminStudentController extends Controller
     return redirect()
         ->route('admin.students.index')
         ->with('success', 'Student account deleted successfully.');
-
+        
 }
 
 
@@ -298,11 +298,11 @@ private function normalizeFacultyName(?string $faculty): ?string
 public function showSelfie($id)
 {
     $student = User::findOrFail($id);
-
+    
     if (!$student->hu_selfie_media_path || !Storage::disk('local')->exists($student->hu_selfie_media_path)) {
         abort(404, 'Selfie not found.');
     }
-
+    
     return response()->file(Storage::disk('local')->path($student->hu_selfie_media_path));
 }
 
@@ -310,13 +310,13 @@ public function showSelfie($id)
 public function revokeHelper($id)
 {
     $student = User::findOrFail($id);
-
+    
     if ($student->hu_role !== 'helper') {
         return redirect()->back()->with('error', 'User is not a seller.');
     }
 
     StudentService::where('hss_user_id', $id)->delete();
-
+    
     // Revoke the role
     $student->update([
         'hu_role' => 'student',

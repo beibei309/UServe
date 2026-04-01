@@ -3,7 +3,7 @@
 @section('content')
 
 
-
+ 
 
 
 <div class="max-w-xl bg-slate-800 p-6 rounded-2xl shadow-xl border border-slate-700" style="background-color: var(--bg-secondary); border-color: var(--border-color);">

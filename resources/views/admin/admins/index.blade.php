@@ -8,7 +8,7 @@
         data-error-message="{{ session('error') }}"
     ></div>
     <div class="px-4 sm:px-6 py-4">
-
+        
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
             <h1 class="text-3xl font-bold transition-colors duration-300" style="color: var(--text-primary);">Manage Admin Accounts</h1>
             <a href="{{ route('admin.super.admins.create') }}"
@@ -18,7 +18,7 @@
         </div>
 
         @if($admins->count() >= 3)
-            <div class="mb-4 p-3 rounded-lg border transition-colors duration-300"
+            <div class="mb-4 p-3 rounded-lg border transition-colors duration-300" 
                  style="background-color: var(--bg-secondary); border-color: var(--border-color);">
                 <p class="text-sm transition-colors duration-300" style="color: var(--text-secondary);">
                     ⚠️ You already have 3 admin accounts. Delete one to add another.
