@@ -40,7 +40,12 @@ public function index(Request $request)
             // Calculate average rating where the person reviewed is the service owner
             $query->whereColumn('h2u_reviews.hr_reviewee_id', 'h2u_student_services.hss_user_id');
         }], 'hr_rating')
-        ->where('hss_approval_status', 'approved');
+        ->where('hss_approval_status', 'approved')
+        ->whereHas('user', function ($sub) {
+            $sub->where('hu_is_suspended', 0)
+                ->where('hu_is_blacklisted', 0)
+                ->where('hu_is_blocked', 0);
+        });
 
     // --- 3. Apply Filters ---
     
@@ -79,6 +84,9 @@ public function index(Request $request)
         ->when($currentUserId, function ($query) use ($currentUserId) {
             return $query->where('hu_id', '!=', $currentUserId);
         })
+        ->where('hu_is_suspended', 0)
+        ->where('hu_is_blacklisted', 0)
+        ->where('hu_is_blocked', 0)
         ->whereHas('services', function ($q) {
             $q->where('hss_approval_status', 'approved');
         })
@@ -114,7 +122,12 @@ public function index(Request $request)
         $query = StudentService::query()
             ->with(['category', 'user']) // Use 'user' relation standard
             ->withAvg('reviews as reviews_avg_rating', 'hr_rating') // Use Service specific rating
-            ->where('hss_approval_status', 'approved');
+            ->where('hss_approval_status', 'approved')
+            ->whereHas('user', function ($sub) {
+                $sub->where('hu_is_suspended', 0)
+                    ->where('hu_is_blacklisted', 0)
+                    ->where('hu_is_blocked', 0);
+            });
 
         if ($q) {
             $query->where(function ($sub) use ($q) {

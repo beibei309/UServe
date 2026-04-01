@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Models\StudentService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class HomeController extends Controller
 {
@@ -22,6 +23,11 @@ class HomeController extends Controller
 
             $services = StudentService::with('category', 'user')
                         ->where('hss_is_active', true)
+                        ->whereHas('user', function ($query) {
+                            $query->where('hu_is_suspended', 0)
+                                  ->where('hu_is_blacklisted', 0)
+                                  ->where('hu_is_blocked', 0);
+                        })
                         ->recommended()
                         ->get();        
                         
@@ -31,6 +37,9 @@ class HomeController extends Controller
 
             //Display top provider
             $topStudents = \App\Models\User::where('hu_role', 'student')
+            ->where('hu_is_suspended', 0)
+            ->where('hu_is_blacklisted', 0)
+            ->where('hu_is_blocked', 0)
             ->whereHas('services', function ($q) {
                 $q->where('hss_is_active', true);
             })
@@ -42,7 +51,34 @@ class HomeController extends Controller
             ->take(6)
             ->get();
 
-            return view('welcome', compact('services', 'categories','q', 'category_id', 'min_rating', 'available', 'topStudents'));
+            $popularSearches = StudentService::query()
+                ->where('hss_is_active', true)
+                ->whereHas('user', function ($query) {
+                    $query->where('hu_is_suspended', 0)
+                        ->where('hu_is_blacklisted', 0)
+                        ->where('hu_is_blocked', 0);
+                })
+                ->orderByDesc('hss_id')
+                ->pluck('hss_title')
+                ->filter(fn ($title) => is_string($title) && trim($title) !== '')
+                ->unique()
+                ->take(4)
+                ->map(fn ($title) => [
+                    'label' => Str::limit($title, 20),
+                    'query' => $title,
+                ])
+                ->values();
+
+            if ($popularSearches->isEmpty()) {
+                $popularSearches = collect([
+                    ['label' => 'Iron Baju', 'query' => 'iron baju'],
+                    ['label' => 'Video Editing', 'query' => 'video editing'],
+                    ['label' => 'Poster Design', 'query' => 'poster design'],
+                    ['label' => 'Pickup Parcel', 'query' => 'pickup parcel'],
+                ]);
+            }
+
+            return view('welcome', compact('services', 'categories','q', 'category_id', 'min_rating', 'available', 'topStudents', 'popularSearches'));
         } catch (\Exception $e) {
             // In case of any error, return a simple view with empty data
             Log::error('Error in HomeController@home: ' . $e->getMessage());
@@ -54,7 +90,13 @@ class HomeController extends Controller
                 'category_id' => null,
                 'min_rating' => null,
                 'available' => null,
-                'topStudents' => collect([])
+                'topStudents' => collect([]),
+                'popularSearches' => collect([
+                    ['label' => 'Iron Baju', 'query' => 'iron baju'],
+                    ['label' => 'Video Editing', 'query' => 'video editing'],
+                    ['label' => 'Poster Design', 'query' => 'poster design'],
+                    ['label' => 'Pickup Parcel', 'query' => 'pickup parcel'],
+                ])
             ]);
         }
     }

@@ -12,8 +12,6 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
@@ -63,7 +61,7 @@
         {{-- Navigation bar --}}
         @include('layouts.navbar')
 
-        <section class="relative pt-28 pb-20 overflow-hidden">
+        <section class="relative pt-10 md:pt-14 pb-20 overflow-hidden">
 
             {{-- 1. BACKGROUND IMAGE START --}}
             <div class="absolute inset-0"> {{-- Removed -z-10 --}}
@@ -137,12 +135,26 @@
                     <div>
                         <h2 class="text-2xl font-bold text-slate-900">Explore Categories</h2>
                     </div>
+                    <div class="flex gap-2">
+                        <button id="dashboardCategoriesScrollLeft"
+                            class="p-2 rounded-full border bg-white hover:bg-gray-50 transition text-gray-600">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                            </svg>
+                        </button>
+                        <button id="dashboardCategoriesScrollRight"
+                            class="p-2 rounded-full border bg-white hover:bg-gray-50 transition text-gray-600">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
 
-                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-5">
+                <div id="dashboardCategoriesScrollContainer" class="flex gap-5 overflow-x-auto pb-3 hide-scroll snap-x snap-mandatory">
                     @foreach ($categories as $category)
                         <a href="{{ route('services.index', ['category_id' => $category->hc_id]) }}"
-                            class="group p-5 rounded-2xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 text-center flex flex-col items-center justify-center h-full"
+                            class="group shrink-0 snap-start w-64 p-6 rounded-2xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-center flex flex-col items-center justify-center"
                             style="background-color: {{ $category->hc_color }};">
 
                             <div
@@ -155,7 +167,7 @@
 
                             </div>
 
-                            <span class="block text-sm font-bold text-white transition-colors group-hover:opacity-90">
+                            <span class="block text-base font-bold text-white transition-colors group-hover:opacity-90">
                                 {{ $category->hc_name }}
                             </span>
                         </a>
@@ -260,18 +272,34 @@
         <section class="py-16 bg-white overflow-hidden">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="mb-10">
-                    <div class="flex items-center gap-3 mb-2">
-                        <span class="relative flex h-3 w-3">
-                            <span
-                                class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                            <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
-                        </span>
-                        <h2 class="text-2xl font-bold text-slate-900">Sellers Available Now</h2>
+                    <div class="flex items-center justify-between gap-3 mb-2">
+                        <div class="flex items-center gap-3">
+                            <span class="relative flex h-3 w-3">
+                                <span
+                                    class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                            </span>
+                            <h2 class="text-2xl font-bold text-slate-900">Sellers Available Now</h2>
+                        </div>
+                        <div class="flex gap-2">
+                            <button id="dashboardHelpersScrollLeft"
+                                class="p-2 rounded-full border bg-white hover:bg-gray-50 transition text-gray-600">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                                </svg>
+                            </button>
+                            <button id="dashboardHelpersScrollRight"
+                                class="p-2 rounded-full border bg-white hover:bg-gray-50 transition text-gray-600">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
                     <p class="text-slate-500">Available right now to take your requests.</p>
                 </div>
 
-                <div class="flex gap-6 overflow-x-auto pb-8 hide-scroll snap-x snap-mandatory">
+                <div id="dashboardHelpersScrollContainer" class="flex gap-6 overflow-x-auto pb-8 hide-scroll snap-x snap-mandatory">
                     @foreach ($availableHelpers as $student)
                         <div class="snap-center shrink-0 w-64 group relative">
                             <div

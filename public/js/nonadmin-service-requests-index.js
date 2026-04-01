@@ -262,6 +262,31 @@
             return;
         }
 
+        const cancelDisputeTrigger = event.target.closest('[data-cancel-dispute]');
+        if (cancelDisputeTrigger) {
+            const requestId = cancelDisputeTrigger.dataset.cancelDispute;
+            Swal.fire({
+                title: 'Withdraw report?',
+                text: 'This will withdraw the dispute and resume the request flow.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Yes, withdraw report',
+            }).then((result) => {
+                if (!result.isConfirmed) return;
+                const form = document.getElementById(`cancel-dispute-form-${requestId}`);
+                if (!form) return;
+                Swal.fire({
+                    title: 'Updating...',
+                    allowOutsideClick: false,
+                    didOpen: () => Swal.showLoading(),
+                });
+                form.submit();
+            });
+            return;
+        }
+
         const paymentTrigger = event.target.closest('[data-open-payment]');
         if (paymentTrigger) {
             const requestId = paymentTrigger.dataset.openPayment;

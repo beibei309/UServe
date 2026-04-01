@@ -13,10 +13,8 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 
     <style>
         body {
@@ -63,14 +61,14 @@
         {{-- Navigation bar --}}
         @include('layouts.navbar')
 
-        <section class="relative min-h-[85vh] flex items-center justify-start overflow-hidden">
+        <section class="relative min-h-[72vh] md:min-h-[78vh] flex items-center justify-start overflow-hidden">
             <video autoplay muted loop playsinline class="absolute inset-0 w-full h-full object-cover z-0">
                 <source src="{{ asset('videos/herobanner.mp4') }}" type="video/mp4">
             </video>
 
             <div class="absolute inset-0 z-10 hero-overlay"></div>
 
-            <div class="relative z-20 w-full max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 pt-20">
+            <div class="relative z-20 w-full max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 pt-8 md:pt-12 pb-8">
                 <div class="max-w-3xl animate-fade-in-up">
                     <h1 class="text-5xl md:text-6xl font-bold text-white leading-tight mb-6">
                         UPSI Student to Community<br>
@@ -81,7 +79,7 @@
                         Secure, reliable, and community-driven.
                     </p>
 
-                    <div class="bg-white p-2 rounded-2xl shadow-2xl max-w-2xl mb-6 flex items-center">
+                    <div class="bg-white p-2 rounded-2xl shadow-2xl max-w-2xl mb-4 flex items-center">
                         <form action="{{ route('services.index') }}" method="GET" class="w-full flex items-center">
                             <div class="pl-4 text-gray-400">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -98,20 +96,12 @@
                         </form>
                     </div>
 
-                    <div class="flex flex-wrap gap-3 text-sm text-white/90">
-                        <span class="py-1">Popular:</span>
-                        <a href="{{ route('services.index', ['q' => 'iron baju']) }}"
-                            class="px-3 py-1 rounded-full border border-white/30 hover:bg-white/10 transition backdrop-blur-sm cursor-pointer">Iron
-                            Baju</a>
-                        <a href="{{ route('services.index', ['q' => 'video editing']) }}"
-                            class="px-3 py-1 rounded-full border border-white/30 hover:bg-white/10 transition backdrop-blur-sm cursor-pointer">Video
-                            Editing</a>
-                        <a href="{{ route('services.index', ['q' => 'poster design']) }}"
-                            class="px-3 py-1 rounded-full border border-white/30 hover:bg-white/10 transition backdrop-blur-sm cursor-pointer">Poster
-                            Design</a>
-                        <a href="{{ route('services.index', ['q' => 'pickup']) }}"
-                            class="px-3 py-1 rounded-full border border-white/30 hover:bg-white/10 transition backdrop-blur-sm cursor-pointer">Pickup
-                            Parcel</a>
+                    <div class="flex flex-wrap items-center gap-2 text-sm text-white/90">
+                        <span class="py-1 mr-1">Popular:</span>
+                        @foreach (($popularSearches ?? []) as $popularSearch)
+                            <a href="{{ route('services.index', ['q' => $popularSearch['query']]) }}"
+                                class="px-3 py-1 rounded-full border border-white/30 hover:bg-white/10 transition backdrop-blur-sm cursor-pointer">{{ $popularSearch['label'] }}</a>
+                        @endforeach
                     </div>
                 </div>
             </div>
@@ -145,21 +135,26 @@
 
                 <div id="scrollContainer"
                     class="flex gap-6 overflow-x-auto hide-scroll-bar pb-20 snap-x snap-mandatory">
-                    @foreach ($categories ?? [] as $category)
+                    @forelse ($categories ?? [] as $category)
+                        @php($categoryColor = $category->hc_color ?: '#4f46e5')
                         <a href="{{ route('services.index', ['category_id' => $category->hc_id]) }}"
                             class="snap-center shrink-0 w-64 p-6 rounded-2xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col items-center text-center group cursor-pointer"
-                            style="background-color: {{ $category->hc_color }}; border: 1px solid {{ $category->hc_color }};">
+                            style="background-color: {{ $categoryColor }}; border: 1px solid {{ $categoryColor }};">
 
                             <div
                                 class="w-16 h-16 rounded-full flex items-center justify-center mb-4 transition-transform group-hover:scale-110 bg-white">
                                 <i class="{{ $category->hc_icon ?? 'fa fa-folder' }} text-3xl"
-                                    style="color: {{ $category->hc_color }};"></i>
+                                    style="color: {{ $categoryColor }};"></i>
                             </div>
 
                             <h3 class="text-lg font-bold text-white mb-2">{{ $category->hc_name }}</h3>
                             <p class="text-sm text-gray-200 line-clamp-2">{{ $category->hc_description }}</p>
                         </a>
-                    @endforeach
+                    @empty
+                        <div class="w-full bg-white border border-slate-200 rounded-2xl p-8 text-center text-slate-600">
+                            No categories available yet.
+                        </div>
+                    @endforelse
                 </div>
             </div>
 

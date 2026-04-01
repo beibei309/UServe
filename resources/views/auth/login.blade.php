@@ -17,7 +17,6 @@
     {{-- <script src="https://cdn.tailwindcss.com"></script> --}}
 
     {{-- SWEETALERT CDN --}}
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body class="font-sans antialiased text-gray-900">

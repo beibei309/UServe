@@ -1,7 +1,17 @@
 <x-guest-layout>
-    <div class="max-w-4xl mx-auto py-8 px-4">
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
-            <h1 class="text-3xl font-bold text-gray-900 mb-6">{{ $legalPage->hlp_title }}</h1>
+    <div class="min-h-screen bg-white py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+        <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-blue-50 blur-[120px] opacity-60 pointer-events-none"></div>
+        <div class="absolute bottom-[0%] right-[-10%] w-[35%] h-[35%] rounded-full bg-indigo-50 blur-[120px] opacity-60 pointer-events-none"></div>
+
+        <div class="max-w-4xl mx-auto relative z-10">
+            <div class="text-center mb-10">
+                <span class="inline-flex items-center px-3 py-1 text-xs font-bold tracking-widest uppercase bg-indigo-50 text-indigo-600 rounded-full border border-indigo-100">
+                    Legal
+                </span>
+                <h1 class="mt-4 text-3xl md:text-4xl font-black text-slate-900 tracking-tight">{{ $legalPage->hlp_title }}</h1>
+            </div>
+
+            <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-6 md:p-8">
 
             <style>
                 .legal-content h1, .legal-content h2, .legal-content h3 { color: #0f172a; font-weight: 700; }
@@ -12,16 +22,17 @@
                 .legal-content li { margin: 0.25rem 0; }
             </style>
 
-            <div class="legal-content max-w-none">
-                <x-legal-content :content="$legalPage->hlp_content" />
-            </div>
+                <div class="legal-content max-w-none">
+                    <x-legal-content :content="$legalPage->hlp_content" />
+                </div>
 
-            <div class="mt-8 pt-6 border-t border-gray-200">
-                <p class="text-sm text-gray-500">Last updated: {{ date('F j, Y') }}</p>
-                <div class="mt-4">
-                    <a href="{{ url()->previous() }}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        ← Back
-                    </a>
+                <div class="mt-8 pt-6 border-t border-slate-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <p class="text-sm text-slate-500">Last updated: {{ date('F j, Y') }}</p>
+                    <div>
+                        <a href="{{ url()->previous() }}" class="inline-flex items-center px-4 py-2 border border-slate-300 rounded-xl text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            ← Back
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>

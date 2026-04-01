@@ -6,7 +6,7 @@
 <div class="min-h-screen bg-gray-50 py-8">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {{-- Header Section --}}
-        <div class="text-center mb-8">
+        <div class="text-center mb-8 no-print">
             <a href="{{ route('points.dashboard') }}" 
                class="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium mb-4">
                 <i class="fas fa-arrow-left mr-2"></i>
@@ -108,7 +108,7 @@
         </div>
 
         {{-- Action Buttons --}}
-        <div class="flex flex-col sm:flex-row gap-4 mt-8">
+        <div class="flex flex-col sm:flex-row gap-4 mt-8 no-print">
             @if ($redemption->hcr_status === 'issued')
                 <button type="button" data-certificate-print
                         class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center justify-center">
@@ -130,7 +130,7 @@
         </div>
 
         {{-- Additional Information --}}
-        <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mt-8">
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mt-8 no-print">
             <h3 class="font-semibold text-blue-900 mb-3 flex items-center">
                 <i class="fas fa-info-circle mr-2"></i>
                 Certificate Information
@@ -152,11 +152,31 @@
 <link href="{{ asset('css/certificate.css') }}" rel="stylesheet">
 <style>
     @media print {
+        @page {
+            size: A4 portrait;
+            margin: 10mm;
+        }
+
+        html, body {
+            width: 210mm;
+            min-height: 297mm;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: visible !important;
+        }
+
         .bg-gray-50 { background: white !important; }
         .shadow-lg { box-shadow: none !important; }
         .border { border: 1px solid #ddd !important; }
         .bg-gradient-to-r { background: #4f46e5 !important; }
-        nav, footer, .print\\:hidden { display: none !important; }
+        nav, footer, .print\\:hidden, .no-print { display: none !important; }
+
+        .max-w-4xl,
+        .max-w-4xl > .bg-white.rounded-xl {
+            max-width: 100% !important;
+            width: 100% !important;
+            page-break-inside: avoid !important;
+        }
     }
 </style>
 @endpush

@@ -13,14 +13,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
-    {{-- Scripts --}}
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
         body {
@@ -83,7 +76,7 @@
 
     @include('layouts.navbar')
 
-    <div class="bg-white border-b border-gray-200 pt-24 pb-6">
+    <div class="bg-white border-b border-gray-200 pt-8 md:pt-10 pb-6">
         <div class="max-w-7xl mx-auto px-6">
             <nav class="flex" aria-label="Breadcrumb">
                 <ol class="inline-flex items-center space-x-1 md:space-x-3 text-sm text-gray-500">
@@ -671,7 +664,7 @@
                                     :class="showHours ? 'rotate-180' : ''"></i>
                             </button>
 
-                            <div x-show="showHours" x-collapse style="display: none;">
+                            <div x-show="showHours" x-transition.origin.top.duration.200ms style="display: none;">
                                 <ul class="space-y-2 text-sm mt-3 pl-6 border-l-2 border-gray-50">
                                     @foreach ($detailsOperatingDays as $day)
                                         <li

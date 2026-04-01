@@ -1,9 +1,9 @@
 <x-app-layout>
-    <div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="min-h-screen bg-gray-50 pt-4 pb-12 px-4 sm:px-6 lg:px-8">
         <div class="max-w-5xl mx-auto">
 
             <!-- Header -->
-            <div class="flex items-center justify-between mb-8 mt-20">
+            <div class="flex items-center justify-between mb-8 mt-4">
                 <div>
                     <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Notifications</h1>
                     <p class="mt-1 text-sm text-gray-500">Stay updated with your latest activities.</p>

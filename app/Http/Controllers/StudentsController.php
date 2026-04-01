@@ -506,9 +506,12 @@ public function deleteWorkExperienceFile()
         });
 
         $averageRating = (float) ($user->reviewsReceived()->avg('hr_rating') ?? 0);
-        $reportCount = (int) ($user->hu_reports_count ?? 0);
-        $latestReportReason = ServiceRequest::where('hsr_requester_id', $user->hu_id)
+        $reportsAgainstUser = ServiceRequest::where('hsr_requester_id', $user->hu_id)
             ->whereNotNull('hsr_dispute_reason')
+            ->whereNotNull('hsr_reported_by')
+            ->where('hsr_reported_by', '!=', $user->hu_id);
+        $reportCount = max((int) ($user->hu_reports_count ?? 0), (clone $reportsAgainstUser)->count());
+        $latestReportReason = (clone $reportsAgainstUser)
             ->orderByDesc('updated_at')
             ->value('hsr_dispute_reason');
         $canShowContactCta = $viewer && $viewer->hu_id !== $user->hu_id;

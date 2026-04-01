@@ -313,8 +313,13 @@ class StudentServiceController extends Controller
             ], 403);
         }
 
-        // Hard delete
-        $service->delete();
+        try {
+            $service->delete();
+        } catch (\Throwable $exception) {
+            $service->hss_is_active = false;
+            $service->hss_status = 'unavailable';
+            $service->save();
+        }
 
         return response()->json([
             'success' => true,

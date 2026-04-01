@@ -105,14 +105,17 @@
                 headers: {
                     'X-CSRF-TOKEN': csrfToken,
                     Accept: 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
                 },
             })
-                .then((res) => res.json())
-                .then((data) => {
-                    if (!data.service) {
-                        Swal.fire('Error', 'Unable to delete.', 'error');
-                        return;
+                .then(async (res) => {
+                    const data = await res.json().catch(() => ({}));
+                    if (!res.ok || !data.success) {
+                        throw new Error(data.message || 'Unable to delete service.');
                     }
+                    return data;
+                })
+                .then((data) => {
                     document.querySelector(`[data-service-id='${serviceId}']`)?.remove();
                     Swal.mixin({
                         toast: true,
@@ -124,6 +127,9 @@
                         icon: 'success',
                         title: 'Service deleted successfully',
                     });
+                })
+                .catch((error) => {
+                    Swal.fire('Error', error.message || 'Unable to delete service.', 'error');
                 });
         });
     }

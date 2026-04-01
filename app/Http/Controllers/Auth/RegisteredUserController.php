@@ -77,6 +77,7 @@ class RegisteredUserController extends Controller
                 $createdUser = User::create([
                     'hu_name' => $request->name,
                     'hu_email' => $request->email,
+                    'hu_staff_email' => ($request->role === 'community' && $request->community_type === 'staff') ? $request->email : null,
                     'hu_password' => Hash::make($request->password),
                     'hu_role' => $request->role,
                     'hu_phone' => $request->phone,
@@ -157,6 +158,7 @@ class RegisteredUserController extends Controller
                 'hu_id' => $nextUserId,
                 'hu_name' => $request->name,
                 'hu_email' => $request->email,
+                'hu_staff_email' => ($request->role === 'community' && $request->community_type === 'staff') ? $request->email : null,
                 'hu_password' => Hash::make($request->password),
                 'hu_role' => $request->role,
                 'hu_phone' => $request->phone,

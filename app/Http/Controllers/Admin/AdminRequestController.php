@@ -19,6 +19,23 @@ class AdminRequestController extends Controller
         return (int) config('moderation.user_warning_limit', 3);
     }
 
+    private function resolveStatusAfterDispute(ServiceRequest $serviceRequest): string
+    {
+        if (!is_null($serviceRequest->hsr_finished_at)) {
+            return 'waiting_payment';
+        }
+
+        if (!is_null($serviceRequest->hsr_started_at)) {
+            return 'in_progress';
+        }
+
+        if (!is_null($serviceRequest->hsr_accepted_at)) {
+            return 'accepted';
+        }
+
+        return 'accepted';
+    }
+
     public function index(Request $request)
 {
     $query = ServiceRequest::query()->with(['requester', 'provider', 'studentService']);
@@ -155,19 +172,32 @@ public function resolveDispute(Request $request, $id)
     $message = 'Action completed.';
 
     if ($action === 'dismiss') {
-        $serviceRequest->update(['hsr_status' => 'cancelled']); 
+        $serviceRequest->update([
+            'hsr_status' => 'cancelled',
+            'hsr_payment_status' => 'unpaid',
+            'hsr_dispute_reason' => null,
+            'hsr_reported_by' => null,
+        ]);
         return redirect()->back()->with('success', 'Dispute dismissed without penalty. Request marked as cancelled.');
     }
 
     if ($action === 'resume') {
-        $serviceRequest->update(['hsr_status' => 'waiting_payment']);
-        return redirect()->back()->with('success', 'Dispute closed without penalty. Request resumed to Waiting Payment.');
+        $resumeStatus = $this->resolveStatusAfterDispute($serviceRequest);
+        $serviceRequest->update([
+            'hsr_status' => $resumeStatus,
+            'hsr_payment_status' => 'unpaid',
+            'hsr_dispute_reason' => null,
+            'hsr_reported_by' => null,
+        ]);
+        return redirect()->back()->with('success', 'Dispute closed without penalty. Request resumed to normal flow.');
     }
 
     if ($action === 'complete_paid') {
         $serviceRequest->update([
             'hsr_status' => 'completed',
             'hsr_payment_status' => 'paid',
+            'hsr_dispute_reason' => null,
+            'hsr_reported_by' => null,
         ]);
         return redirect()->back()->with('success', 'Dispute closed without penalty. Request marked as Completed (Paid).');
     }
@@ -189,13 +219,19 @@ public function resolveDispute(Request $request, $id)
         $user->notify(new \App\Notifications\AdminWarningNotification($user->hu_warning_count, $note));
 
         // RESUME the request (instead of cancelling)
-        $serviceRequest->update(['hsr_status' => 'waiting_payment']);
+        $resumeStatus = $this->resolveStatusAfterDispute($serviceRequest);
+        $serviceRequest->update([
+            'hsr_status' => $resumeStatus,
+            'hsr_payment_status' => 'unpaid',
+            'hsr_dispute_reason' => null,
+            'hsr_reported_by' => null,
+        ]);
 
         $limit = $this->userWarningLimit();
         $remaining = max(0, $limit - (int) $user->hu_warning_count);
         $message = $remaining > 0
-            ? "User warned. {$remaining} warning(s) left before restriction. Request resumed to Waiting Payment."
-            : "User warned and reached warning limit. Request resumed to Waiting Payment.";
+            ? "User warned. {$remaining} warning(s) left before restriction. Request resumed to normal flow."
+            : "User warned and reached warning limit. Request resumed to normal flow.";
 
     } elseif ($action === 'suspend_or_blacklist' || $action === 'restrict' || $action === 'ban') {
        
@@ -210,7 +246,12 @@ public function resolveDispute(Request $request, $id)
         }
         
         // Cancel the request if banned
-        $serviceRequest->update(['hsr_status' => 'cancelled']);
+        $serviceRequest->update([
+            'hsr_status' => 'cancelled',
+            'hsr_payment_status' => 'unpaid',
+            'hsr_dispute_reason' => null,
+            'hsr_reported_by' => null,
+        ]);
     }
 
     return redirect()->route('admin.requests.index')->with('success', $message);

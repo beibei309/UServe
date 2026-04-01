@@ -100,7 +100,7 @@
                                     
                                     <div class="min-w-0 flex-1">
                                         <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-2 mb-1">
-                                            <h4 class="text-sm font-medium text-gray-900 truncate">{{ $point->hbp_description }}</h4>
+                                            <h4 class="text-sm font-medium text-gray-900 break-words">{{ $point->hbp_description }}</h4>
                                             <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
                                                 @if($point->hbp_status === 'earned') bg-blue-100 text-blue-800
                                                 @else bg-gray-100 text-gray-800

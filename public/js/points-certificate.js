@@ -2,15 +2,17 @@
     function handleDownloadPdf() {
         if (typeof Swal !== 'undefined') {
             Swal.fire({
-                title: 'PDF Download',
-                text: 'PDF download functionality will be implemented here.',
+                title: 'Download Certificate',
+                text: 'Your browser print dialog will open. Select "Save as PDF" to download this certificate in A4 format.',
                 icon: 'info',
                 confirmButtonColor: '#2563eb',
+            }).then(() => {
+                window.print();
             });
             return;
         }
 
-        alert('PDF download functionality will be implemented here.');
+        window.print();
     }
 
     document.addEventListener('click', (event) => {

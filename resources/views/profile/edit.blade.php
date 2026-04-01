@@ -1,7 +1,4 @@
 <x-app-layout>
-    {{-- Load FontAwesome if not already loaded in layout --}}
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
     <div class="min-h-screen bg-slate-50/50 py-16 font-sans">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             

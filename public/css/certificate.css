@@ -390,12 +390,17 @@
     
     body {
         background: white !important;
+        margin: 0 !important;
+        padding: 0 !important;
     }
     
     .certificate-container {
         box-shadow: none !important;
         margin: 0 !important;
-        max-width: none !important;
+        max-width: 210mm !important;
+        min-height: 297mm !important;
+        page-break-inside: avoid !important;
+        page-break-after: auto !important;
     }
     
     .certificate-actions,
@@ -408,7 +413,14 @@
         color: white !important;
     }
     
-    page {
-        margin: 0.5in;
+    .certificate-footer,
+    .certificate-actions,
+    .certificate-info {
+        page-break-inside: avoid !important;
+    }
+
+    @page {
+        size: A4 portrait;
+        margin: 10mm;
     }
 }

@@ -398,14 +398,20 @@
                                             <p class="text-xs text-red-600 mt-1">Reason: "{{ $request->hsr_dispute_reason ?? 'Admin review required' }}"</p>
                                         </div>
                                     </div>
-                                    <form id="cancel-dispute-form-{{ $request->hsr_id }}" action="{{ route('service-requests.cancel-dispute', $request->hsr_id) }}" method="POST">
-                                        @csrf
-                                        {{-- Button: Normal Width --}}
-                                        <button type="button" data-cancel-dispute="{{ $request->hsr_id }}"
-                                            class="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-white border border-red-200 text-xs font-bold text-red-600 hover:bg-red-50 transition-all shadow-sm">
-                                            Resolve & Complete
-                                        </button>
-                                    </form>
+                                    @if ((int) auth()->id() === (int) $request->hsr_reported_by)
+                                        <form id="cancel-dispute-form-{{ $request->hsr_id }}" action="{{ route('service-requests.cancel-dispute', $request->hsr_id) }}" method="POST">
+                                            @csrf
+                                            {{-- Button: Normal Width --}}
+                                            <button type="button" data-cancel-dispute="{{ $request->hsr_id }}"
+                                                class="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-white border border-red-200 text-xs font-bold text-red-600 hover:bg-red-50 transition-all shadow-sm">
+                                                Withdraw Report
+                                            </button>
+                                        </form>
+                                    @else
+                                        <p class="text-xs font-semibold text-red-700 bg-white border border-red-200 rounded-lg px-3 py-2 inline-block">
+                                            Reported by other party. Awaiting admin review.
+                                        </p>
+                                    @endif
                                 </div>
 
                             {{-- 3. ACCEPTED (Start Work) --}}
@@ -440,11 +446,11 @@
                                 
                                 {{-- Short Button: Details --}}
                                 <a href="{{ route('service-requests.show', $request) }}" class="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-bold text-gray-600 hover:bg-gray-50 transition-colors">
-                                    Details
+                                    View Details
                                 </a>
 
                                 {{-- Short Square Button: Report (Only if needed) --}}
-                                @if ($request->isWorkFinished() && $request->hsr_status !== 'disputed')
+                                @if (in_array($request->hsr_status, ['in_progress', 'waiting_payment']) && !($request->hsr_status === 'disputed' || $request->hsr_payment_status === 'dispute'))
                                     <button type="button" data-open-dispute="{{ $request->hsr_id }}" class="h-[34px] w-[34px] flex items-center justify-center rounded-lg border border-red-200 bg-white text-red-500 hover:bg-red-50 transition-colors" title="Report Issue">
                                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
                                     </button>
@@ -858,6 +864,6 @@
         data-reviews-store-url="{{ route('reviews.store') }}"
         data-reviews-reply-url-template="{{ url('/reviews/__ID__/reply') }}"></div>
     @push('scripts')
-        <script src="{{ asset('js/nonadmin-service-requests-helper.js') }}"></script>
+        <script src="{{ asset('js/nonadmin-service-requests-helper.js') }}?v={{ filemtime(public_path('js/nonadmin-service-requests-helper.js')) }}"></script>
     @endpush
 @endsection

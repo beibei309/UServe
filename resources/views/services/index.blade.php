@@ -13,8 +13,6 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
@@ -65,7 +63,7 @@
         {{-- Navigation bar --}}
         @include('layouts.navbar')
 
-        <div class="bg-white border-b border-gray-200 pt-24 pb-12">
+        <div class="bg-white border-b border-gray-200 pt-8 md:pt-12 pb-8 md:pb-10">
             <div class="max-w-7xl mx-auto px-6">
                 <nav class="flex mb-6" aria-label="Breadcrumb">
                     <ol class="inline-flex items-center space-x-1 md:space-x-3 text-sm text-gray-500">
@@ -95,7 +93,7 @@
             </div>
         </div>
 
-        <div class="max-w-7xl mx-auto px-6 py-10 ">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8 md:py-10">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 ">
 
                 {{-- ======================= --}}
@@ -103,7 +101,7 @@
                 {{-- ======================= --}}
                 <aside class="lg:col-span-3 space-y-6">
                     <div
-                        class="bg-white rounded-[2rem] shadow-sm border border-slate-100 p-6 sticky top-24 transition-all duration-300">
+                        class="bg-white rounded-[2rem] shadow-sm border border-slate-100 p-5 md:p-6 lg:sticky lg:top-24 transition-all duration-300">
 
                         <div class="flex items-center justify-between mb-6 px-2">
                             <h3 class="font-black text-slate-900 uppercase tracking-tighter text-sm">Explore Categories
@@ -193,7 +191,7 @@
                 <main class="lg:col-span-9">
 
                     {{-- Top Filters --}}
-                    <div class="sticky top-4 z-30 mb-10 px-2 sm:px-0">
+                    <div class="lg:sticky lg:top-24 z-30 mb-8 md:mb-10 px-0 sm:px-0">
                         <div
                             class="bg-white/80 backdrop-blur-md border border-slate-200 shadow-xl shadow-slate-200/50 rounded-[2rem] p-2 transition-all duration-300">
 
@@ -313,7 +311,7 @@
 
                                     {{-- CONTENT SECTION --}}
                                     <div class="flex-1 px-4 py-4 md:py-6 flex flex-col">
-                                        <div class="flex justify-between items-start mb-3">
+                                        <div class="flex items-start justify-between mb-3 gap-3">
                                             <div class="flex items-center gap-3">
                                                 <span
                                                     class="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">
@@ -327,31 +325,14 @@
                                                 </span>
                                             </div>
 
-                                            <button type="button" data-share-trigger
-                                                data-url="{{ $service->ui_details_url }}"
-                                                class="w-10 h-10 flex items-center justify-center rounded-2xl bg-slate-50 text-slate-400 hover:bg-indigo-600 hover:text-white transition-all duration-300 shadow-sm"
-                                                title="Share Service">
-                                                <i class="fas fa-share-alt"></i>
-                                            </button>
-
-                                            @auth
-                                                @if ((int) auth()->id() !== (int) $service->user->hu_id)
-                                                    <button type="button"
-                                                        data-report-user-trigger
-                                                        data-target-user-id="{{ $service->user->hu_id }}"
-                                                        data-target-user-name="{{ $service->user->hu_name }}"
-                                                        class="w-10 h-10 flex items-center justify-center rounded-2xl bg-red-50 text-red-500 hover:bg-red-600 hover:text-white transition-all duration-300 shadow-sm"
-                                                        title="Report User">
-                                                        <i class="fas fa-flag"></i>
-                                                    </button>
-                                                @endif
-                                            @else
-                                                <a href="{{ route('login') }}"
-                                                    class="w-10 h-10 flex items-center justify-center rounded-2xl bg-slate-50 text-slate-400 hover:bg-slate-200 transition-all duration-300 shadow-sm"
-                                                    title="Sign in to Report">
-                                                    <i class="fas fa-flag"></i>
-                                                </a>
-                                            @endauth
+                                            <div class="flex items-center gap-2 shrink-0">
+                                                <button type="button" data-share-trigger
+                                                    data-url="{{ $service->ui_details_url }}"
+                                                    class="w-10 h-10 flex items-center justify-center rounded-2xl bg-slate-50 text-slate-400 hover:bg-indigo-600 hover:text-white transition-all duration-300 shadow-sm"
+                                                    title="Share Service">
+                                                    <i class="fas fa-share-alt"></i>
+                                                </button>
+                                            </div>
                                         </div>
 
                                         <h2
@@ -481,54 +462,8 @@
             </div>
         </div>
 
-        <div id="reportUserModal"
-            class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto border border-slate-200">
-                <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-                    <h3 class="text-lg font-bold text-slate-900">Report User</h3>
-                    <button type="button" data-close-report-user class="text-slate-400 hover:text-slate-600">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-
-                <form id="reportUserForm" class="px-6 py-5 space-y-4">
-                    <input type="hidden" name="target_user_id" id="reportUserTargetId">
-
-                    <p class="text-sm text-slate-500">Reporting: <span id="reportUserTargetName" class="font-semibold text-slate-700">-</span></p>
-
-                    <div>
-                        <label for="reportUserReason" class="block text-sm font-semibold text-slate-700 mb-1">Reason</label>
-                        <select id="reportUserReason" name="reason" required class="w-full rounded-lg border-slate-300 bg-slate-50 text-slate-800 focus:bg-white focus:border-red-400 focus:ring-2 focus:ring-red-400/30">
-                            <option value="" disabled selected>Select reason</option>
-                            <option value="Scam">Scam</option>
-                            <option value="Fake profile">Fake profile</option>
-                            <option value="Harassment">Harassment</option>
-                            <option value="Spam">Spam</option>
-                            <option value="Other">Other</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label for="reportUserDetails" class="block text-sm font-semibold text-slate-700 mb-1">Details (optional)</label>
-                        <textarea id="reportUserDetails" name="details" rows="4" class="w-full rounded-lg border-slate-300 bg-slate-50 text-slate-800 placeholder-slate-400 focus:bg-white focus:border-red-400 focus:ring-2 focus:ring-red-400/30" placeholder="Add supporting details..."></textarea>
-                    </div>
-
-                    <p id="reportUserFeedback" class="hidden text-sm rounded-lg px-3 py-2 border"></p>
-
-                    <div class="flex justify-end gap-3 pt-2">
-                        <button type="button" data-close-report-user class="px-4 py-2 rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-50">Cancel</button>
-                        <button type="submit" id="reportUserSubmitBtn" class="px-4 py-2 rounded-lg bg-red-600 text-white font-semibold hover:bg-red-700">Submit Report</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
         <div id="servicesIndexConfig" data-page="services-index"></div>
-        <div id="servicesIndexReportConfig"
-             data-report-url="{{ url('/reports') }}"
-             data-csrf-token="{{ csrf_token() }}"></div>
         <script src="{{ asset('js/nonadmin-services-index.js') }}"></script>
-        <script src="{{ asset('js/nonadmin-services-index-report.js') }}"></script>
     </div>
 
     {{-- Footer bar --}}

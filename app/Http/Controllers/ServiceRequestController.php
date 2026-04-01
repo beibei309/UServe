@@ -821,6 +821,14 @@ class ServiceRequestController extends BaseController
     {
         $serviceRequest = ServiceRequest::findOrFail($id);
 
+        if ((int) Auth::id() !== (int) $serviceRequest->hsr_requester_id) {
+            return back()->with('error', 'Only the buyer can submit this report.');
+        }
+
+        if (!in_array($serviceRequest->hsr_status, ['in_progress', 'waiting_payment'], true)) {
+            return back()->with('error', 'You can report only when the order is in progress or waiting payment.');
+        }
+
         // Validate
         $request->validate([
             'dispute_reason' => 'required|string',
@@ -835,6 +843,7 @@ class ServiceRequestController extends BaseController
         // Update status to 'disputed'
         $serviceRequest->update([
             'hsr_status' => 'disputed',
+            'hsr_payment_status' => 'dispute',
             'hsr_dispute_reason' => $reason,
             'hsr_reported_by' => Auth::id(),
         ]);
@@ -844,6 +853,14 @@ class ServiceRequestController extends BaseController
 
     public function report(Request $request, ServiceRequest $serviceRequest)
     {
+        if ((int) Auth::id() !== (int) $serviceRequest->hsr_provider_id) {
+            return back()->with('error', 'Only the helper can submit this report.');
+        }
+
+        if (!in_array($serviceRequest->hsr_status, ['in_progress', 'waiting_payment'], true)) {
+            return back()->with('error', 'You can report only when the order is in progress or waiting payment.');
+        }
+
         $request->validate([
             'reason' => 'required|string|max:1000',
         ]);
@@ -869,21 +886,39 @@ class ServiceRequestController extends BaseController
     {
         $request = ServiceRequest::findOrFail($id);
 
-        // Optional: Security check to ensure only the creator of the dispute or admin can do this
-        // if (Auth::id() !== $request->user_id) { abort(403); }
+        if ((int) Auth::id() !== (int) $request->hsr_reported_by) {
+            return back()->with('error', 'Only the user who reported this dispute can withdraw it.');
+        }
 
-        if ($request->hsr_status === 'disputed') {
-            $request->hsr_status = 'completed'; // Set directly to completed as requested
-            $request->save();
+        if ($request->hsr_status === 'disputed' || $request->hsr_payment_status === 'dispute') {
+            $request->update([
+                'hsr_status' => $this->resolveStatusAfterDispute($request),
+                'hsr_payment_status' => 'unpaid',
+                'hsr_dispute_reason' => null,
+                'hsr_reported_by' => null,
+            ]);
 
-            // Award points for completed service
-            PointsController::awardPointsForCompletedService($request); // Seller points
-            PointsController::awardBuyerPointsForCompletedService($request); // Buyer points
-
-            return back()->with('success', 'Report cancelled. Order marked as completed. Both parties earned 1 point each.');
+            return back()->with('success', 'Report withdrawn. Request resumed to normal flow.');
         }
 
         return back()->with('error', 'Cannot cancel report at this stage.');
+    }
+
+    private function resolveStatusAfterDispute(ServiceRequest $serviceRequest): string
+    {
+        if (!is_null($serviceRequest->hsr_finished_at)) {
+            return 'waiting_payment';
+        }
+
+        if (!is_null($serviceRequest->hsr_started_at)) {
+            return 'in_progress';
+        }
+
+        if (!is_null($serviceRequest->hsr_accepted_at)) {
+            return 'accepted';
+        }
+
+        return 'accepted';
     }
 
 

@@ -74,7 +74,7 @@
                                             </span>
                                         </button>
 
-                                        <div x-show="selected === {{ $faq->hfq_id }}" x-collapse
+                                        <div x-show="selected === {{ $faq->hfq_id }}" x-transition.origin.top.duration.200ms
                                             class="bg-slate-50/50">
                                             <div class="px-6 pb-6 text-slate-600 leading-relaxed text-sm pt-2">
                                                 <div class="prose prose-slate prose-sm max-w-none">
@@ -114,7 +114,7 @@
                                 class="inline-flex items-center justify-center px-8 py-4 bg-slate-900 text-white font-bold rounded-2xl hover:bg-indigo-600 transition-all shadow-lg hover:shadow-indigo-200 active:scale-95">
                                 Send an Email
                             </a>
-                            <a href="#"
+                            <a href="mailto:support@U-Serve.upsi.edu.my?subject=U-Serve%20Support%20Request"
                                 class="inline-flex items-center justify-center px-8 py-4 bg-white text-slate-700 font-bold rounded-2xl border border-slate-200 hover:border-indigo-600 hover:text-indigo-600 transition-all">
                                 Contact
                             </a>

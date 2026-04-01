@@ -373,12 +373,12 @@
     function confirmCancelDispute(requestId) {
         Swal.fire({
             title: 'Are you sure?',
-            text: 'This will withdraw your report and immediately mark the order as Completed.',
+            text: 'This will withdraw your report and resume the request flow.',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#10B981',
             cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes, Complete Order',
+            confirmButtonText: 'Yes, Withdraw Report',
             cancelButtonText: 'No',
         }).then((result) => {
             if (!result.isConfirmed) return;

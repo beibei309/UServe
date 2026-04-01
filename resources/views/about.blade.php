@@ -163,10 +163,10 @@
     </style>
 </head>
 
-<body class="antialiased bg-white">
+<body class="antialiased bg-white text-slate-800">
     <div x-data="{
         activeTab: 'seekers'
-    }">
+    }" class="min-h-screen">
 
         <!-- Navigation -->
         @include('layouts.navbar')
@@ -396,7 +396,7 @@
         </section>
 
         <!-- Step-by-Step Guide -->
-       <section class="py-24 bg-slate-50 relative overflow-hidden" x-data="{ activeTab: 'seekers' }">
+    <section class="py-24 bg-slate-50 relative overflow-hidden">
     <div class="absolute top-0 right-0 w-96 h-96 bg-blue-100/50 rounded-full blur-[100px] -mr-48 -mt-48"></div>
     
     <div class="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">

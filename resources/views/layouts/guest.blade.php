@@ -14,7 +14,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
-            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 
 
     <!-- Scripts -->
@@ -102,7 +101,7 @@
 <body class="bg-gray-50 text-gray-900 antialiased" <!-- Navigation (same as welcome page) -->
     @include('layouts.navbar')
 
-    <main class="min-h-screen pt-24 pb-16">
+    <main class="min-h-screen pt-8 md:pt-10 pb-16">
         <div class="max-w-5xl mx-auto px-6">
             {{ $slot }}
         </div>
