@@ -170,15 +170,22 @@
 
         document.addEventListener('click', (e) => {
             const link = e.target.closest('a[href]');
-
             if (
                 link &&
                 link.href.includes('/admin/') &&
                 !link.href.includes('#') &&
                 !link.target &&
-                !link.download &&
                 link.origin === window.location.origin
             ) {
+                // Exclude file downloads (csv, pdf, xls, xlsx, zip, etc.)
+                const fileDownloadPattern = /\.(csv|pdf|xls|xlsx|zip|docx?|pptx?|txt|json|xml)(\?.*)?$/i;
+                const query = link.search || '';
+                const isExportFormat = /([?&]format=(csv|pdf))/i.test(query);
+                const isExportRoute = /\/export(\-|$|\?|\/)/i.test(link.pathname);
+                if (link.hasAttribute('download') || fileDownloadPattern.test(link.pathname) || isExportFormat || isExportRoute) {
+                    // Let the browser handle the download natively
+                    return;
+                }
                 e.preventDefault();
                 closeMobileSidebar();
                 navigateTo(link.href);

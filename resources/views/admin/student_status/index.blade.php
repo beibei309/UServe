@@ -160,8 +160,7 @@
                                     </a>
 
                                     <form action="{{ route('admin.student_status.delete', $student->studentStatus->hss_id) }}"
-                                        method="POST" class="inline-block"
-                                        data-confirm-message="Remove status record?">
+                                        method="POST" class="inline-block">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit"
@@ -265,6 +264,11 @@
 @endsection
 
 @section('scripts')
-    <div id="adminStudentStatusIndexConfig"></div>
+    <div id="adminStudentStatusIndexConfig"
+        @if(session('success'))
+            data-success-message="{{ session('success') }}"
+        @endif
+    ></div>
     <script src="{{ asset('js/admin-student-status-index.js') }}"></script>
+    {{-- admin-confirm.js will be loaded globally from layout --}}
 @endsection

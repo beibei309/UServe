@@ -73,8 +73,12 @@ public function update(Request $request, $id)
         $admin->update(['ha_password' => bcrypt($request->password)]);
     }
 
+    if ($request->ajax() || $request->wantsJson()) {
+        return response()->json(['success' => true, 'message' => 'Admin updated successfully.']);
+    }
+
     return redirect()->route('admin.super.admins.index')
-                     ->with('success', 'Admin updated successfully.');
+        ->with('success', 'Admin updated successfully.');
 }
 
 public function destroy($id)

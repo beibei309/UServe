@@ -315,16 +315,22 @@ public function revokeHelper($id)
         return redirect()->back()->with('error', 'User is not a seller.');
     }
 
-   
     StudentService::where('hss_user_id', $id)->delete();
     
-    // 2. Revoke the role
+    // Revoke the role
     $student->update([
         'hu_role' => 'student',
         'hu_helper_verified_at' => null
     ]);
-    
-    return redirect()->back()->with('success', 'Seller status revoked and all associated services have been deleted.');
+
+    // Notify the user
+    try {
+        $student->notify(new \App\Notifications\SellerStatusRevokedNotification());
+    } catch (\Throwable $e) {
+        // Optionally log error
+    }
+
+    return redirect()->back()->with('success', 'Seller status revoked, user notified, and all associated services have been deleted.');
 }
 
 public function export(Request $request)

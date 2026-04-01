@@ -52,7 +52,10 @@ window.UServeAdmin.register('communityView', 'adminModuleCommunityViewConfig', (
         const loader = document.getElementById('docLoading');
 
         loader.classList.remove('hidden');
-        frame.src = `/admin/verifications/${id}/document`;
+        // Add cache-busting query string to force reload
+        const url = `/admin/verifications/${id}/document`;
+        const cacheBuster = `cb=${Date.now()}`;
+        frame.src = url + (url.includes('?') ? '&' : '?') + cacheBuster;
 
         modal.classList.remove('hidden');
         document.body.style.overflow = 'hidden';
@@ -117,12 +120,36 @@ window.UServeAdmin.register('communityView', 'adminModuleCommunityViewConfig', (
         const documentOpen = event.target.closest('[data-document-open]');
         if (documentOpen) {
             const modal = document.getElementById('documentModal');
-            const frame = document.getElementById('modalDocumentFrame');
             const loader = document.getElementById('docLoading');
-            if (loader) loader.classList.remove('hidden');
-            if (frame) frame.src = documentOpen.dataset.documentUrl || '';
             if (modal) modal.classList.remove('hidden');
             document.body.style.overflow = 'hidden';
+            if (loader) loader.classList.remove('hidden');
+
+            // Remove old iframe if exists
+            const oldFrame = document.getElementById('modalDocumentFrame');
+            if (oldFrame) {
+                oldFrame.parentNode.removeChild(oldFrame);
+            }
+            // Create new iframe
+            const newFrame = document.createElement('iframe');
+            newFrame.id = 'modalDocumentFrame';
+            newFrame.className = 'w-full h-full border-none';
+            newFrame.src = '';
+            // Attach loader hide logic
+            newFrame.addEventListener('load', () => {
+                if (loader) loader.classList.add('hidden');
+            });
+            // Insert new iframe into modal
+            const container = modal.querySelector('.flex-grow.bg-slate-200.relative');
+            if (container) {
+                container.appendChild(newFrame);
+            }
+            // Set src after short delay
+            setTimeout(() => {
+                const url = documentOpen.dataset.documentUrl || '';
+                const cacheBuster = `cb=${Date.now()}`;
+                newFrame.src = url + (url.includes('?') ? '&' : '?') + cacheBuster;
+            }, 50);
             return;
         }
 

@@ -28,7 +28,12 @@ class VerificationController extends Controller
         if (!$user->hu_verification_document_path || !Storage::disk('local')->exists($user->hu_verification_document_path)) {
             abort(404, 'Document not found.');
         }
-        return response()->file(Storage::disk('local')->path($user->hu_verification_document_path));
+        $filePath = Storage::disk('local')->path($user->hu_verification_document_path);
+        return response()->file($filePath, [
+            'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
+            'Pragma' => 'no-cache',
+            'Expires' => '0',
+        ]);
     }
 
     public function showDocumentById($id)

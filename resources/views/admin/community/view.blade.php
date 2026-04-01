@@ -412,4 +412,5 @@
         data-lng="{{ $user->hu_longitude }}"
         data-user-name="{{ $user->hu_name }}"></div>
     <script src="{{ asset('js/admin-community-view.js') }}"></script>
+    {{-- DO NOT include admin-confirm.js here to avoid double confirmation --}}
 @endsection

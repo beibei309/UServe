@@ -3,6 +3,49 @@
 @section('content')
     <link href="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.snow.css" rel="stylesheet">
 
+    <style>
+        /* Theme-align Quill editor with admin dark/light variables */
+        .ql-toolbar.ql-snow,
+        .ql-container.ql-snow {
+            border-color: var(--border-color) !important;
+        }
+
+        .ql-toolbar.ql-snow {
+            background-color: var(--bg-primary) !important;
+        }
+
+        .ql-container.ql-snow {
+            background-color: var(--bg-primary) !important;
+        }
+
+        .ql-editor {
+            color: var(--text-primary) !important;
+        }
+
+        .ql-editor.ql-blank::before {
+            color: var(--text-muted) !important;
+        }
+
+        /* Toolbar icons + picker text */
+        .ql-snow .ql-stroke {
+            stroke: var(--text-secondary) !important;
+        }
+
+        .ql-snow .ql-fill,
+        .ql-snow .ql-stroke.ql-fill {
+            fill: var(--text-secondary) !important;
+        }
+
+        .ql-snow .ql-picker {
+            color: var(--text-secondary) !important;
+        }
+
+        .ql-snow .ql-picker-options {
+            background-color: var(--bg-primary) !important;
+            border-color: var(--border-color) !important;
+        }
+    </style>
+
     <div class="max-w-6xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between mb-6">
             <h1 class="text-2xl font-bold transition-colors duration-300" style="color: var(--text-primary);">Manage Terms & Privacy</h1>
@@ -31,7 +74,7 @@
 
                     <div>
                         <label class="block text-sm font-medium mb-1 transition-colors duration-300" style="color: var(--text-secondary);">Content</label>
-                        <div id="terms-editor" class="bg-white rounded-lg"></div>
+                        <div id="terms-editor" class="rounded-lg"></div>
                         <input type="hidden" name="content" id="terms-content-input" value="{{ old('content', $termsPage->hlp_content) }}">
                         <p class="text-xs mt-2 transition-colors duration-300" style="color: var(--text-muted);">Use toolbar for headings, bold, bullets, numbered lists, and links.</p>
                     </div>
@@ -65,7 +108,7 @@
 
                     <div>
                         <label class="block text-sm font-medium mb-1 transition-colors duration-300" style="color: var(--text-secondary);">Content</label>
-                        <div id="privacy-editor" class="bg-white rounded-lg"></div>
+                        <div id="privacy-editor" class="rounded-lg"></div>
                         <input type="hidden" name="content" id="privacy-content-input" value="{{ old('content', $privacyPage->hlp_content) }}">
                         <p class="text-xs mt-2 transition-colors duration-300" style="color: var(--text-muted);">Use toolbar for headings, bold, bullets, numbered lists, and links.</p>
                     </div>

@@ -1,6 +1,12 @@
 @extends('admin.layout')
 
 @section('content')
+    <div
+        id="adminAdminsIndexConfig"
+        style="display:none"
+        data-success-message="{{ session('success') }}"
+        data-error-message="{{ session('error') }}"
+    ></div>
     <div class="px-4 sm:px-6 py-4">
         
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
@@ -97,4 +103,8 @@
             </ul>
         </div>
     </div>
+@endsection
+
+@section('scripts')
+    <script src="/js/admin-admins-index.js?v=3"></script>
 @endsection

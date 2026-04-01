@@ -153,7 +153,7 @@
                                             </button>
                                         @endif
 
-                                        <form action="{{ route('admin.requests.destroy', $request->hsr_id) }}" method="POST" data-confirm-message="Delete?" class="inline">
+                                        <form action="{{ route('admin.requests.destroy', $request->hsr_id) }}" method="POST" class="inline">
                                             @csrf @method('DELETE')
                                             <button type="submit" class="inline-flex items-center justify-center w-8 h-8 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg text-xs font-semibold transition-all duration-200" title="Delete">
                                                 <i class="fa-solid fa-trash"></i>
@@ -452,6 +452,10 @@
 @section('scripts')
     <div id="adminModuleRequestsConfig"
         data-warning-limit="{{ $warningLimit }}"
-        data-resolve-base-url="{{ url('admin/requests') }}"></div>
+        data-resolve-base-url="{{ url('admin/requests') }}"
+        @if(session('success'))
+            data-success-message="{{ session('success') }}"
+        @endif
+    ></div>
     <script src="{{ asset('js/admin-requests.js') }}"></script>
 @endsection

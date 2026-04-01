@@ -1,6 +1,30 @@
 window.UServeAdmin.register('requests', 'adminModuleRequestsConfig', (config) => {
     if (!config) return;
 
+    // Confirmation and notification for delete action
+    document.addEventListener('submit', (event) => {
+        const form = event.target.closest('form');
+        if (!form) return;
+        // Only target delete forms for service requests
+        if (form.method === 'post' && form.querySelector('input[name="_method"][value="DELETE"]')) {
+            event.preventDefault();
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'This service request will be permanently deleted!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'Cancel',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        }
+    });
+
     const warningLimit = parseInt(config.dataset.warningLimit || '3', 10);
     const resolveBaseUrl = config.dataset.resolveBaseUrl || '';
 
@@ -200,6 +224,16 @@ window.UServeAdmin.register('requests', 'adminModuleRequestsConfig', (config) =>
             window.submitDiscipline(disciplineSubmit.dataset.action, disciplineSubmit.dataset.targetRole);
         }
     });
+    // Show success notification if present in config
+    if (config.dataset.successMessage) {
+        Swal.fire({
+            icon: 'success',
+            title: 'Success!',
+            text: config.dataset.successMessage,
+            showConfirmButton: false,
+            timer: 1800
+        });
+    }
 });
 
 window.UServeAdmin.boot('requests');

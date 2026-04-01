@@ -2,6 +2,21 @@
 
 @section('content')
 
+
+    <script src="/js/admin-admins-index.js?v=3"></script>
+<script>
+    window.addEventListener('DOMContentLoaded', function() {
+        const success = @json(session('success'));
+        const error = @json(session('error'));
+        if (success) {
+            document.body.setAttribute('data-success-message', success);
+        }
+        if (error) {
+            document.body.setAttribute('data-error-message', error);
+        }
+    });
+</script>
+
 <div class="max-w-xl bg-slate-800 p-6 rounded-2xl shadow-xl border border-slate-700">
 
     <h2 class="text-2xl font-bold mb-4 text-white">Add New Admin</h2>

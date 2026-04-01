@@ -1,4 +1,4 @@
-window.UServeAdmin.register('studentStatusIndex', 'adminStudentStatusIndexConfig', () => {
+window.UServeAdmin.register('studentStatusIndex', 'adminStudentStatusIndexConfig', (config) => {
     function triggerReminder(studentId, studentName) {
         if (!studentId) return;
         Swal.fire({
@@ -36,14 +36,39 @@ window.UServeAdmin.register('studentStatusIndex', 'adminStudentStatusIndexConfig
         triggerReminder(reminderTrigger.dataset.studentId, reminderTrigger.dataset.studentName);
     });
 
+    // SweetAlert2 confirmation for delete
     document.addEventListener('submit', (event) => {
-        const form = event.target.closest('form[data-confirm-message]');
+        const form = event.target.closest('form');
         if (!form) return;
-        const message = form.dataset.confirmMessage || 'Are you sure?';
-        if (!window.confirm(message)) {
+        if (form.method === 'post' && form.querySelector('input[name="_method"][value="DELETE"]')) {
             event.preventDefault();
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'This status record will be permanently deleted!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'Cancel',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
         }
     });
+
+    // Show success notification if present in config
+    if (config && config.dataset.successMessage) {
+        Swal.fire({
+            icon: 'success',
+            title: 'Success!',
+            text: config.dataset.successMessage,
+            showConfirmButton: false,
+            timer: 1800
+        });
+    }
 
     document.querySelectorAll('[data-auto-submit-filter]').forEach((select) => {
         select.addEventListener('change', () => {
