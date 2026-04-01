@@ -58,6 +58,33 @@ window.UServeAdmin.register('requests', 'adminModuleRequestsConfig', (config) =>
         document.getElementById('viewId').textContent = reqId;
         document.getElementById('viewServiceTitle').textContent = serviceTitle;
         document.getElementById('viewPackage').textContent = packageLabel;
+        // Payment Proof logic
+        const paymentProofSection = document.getElementById('paymentProofSection');
+        const paymentProofLink = document.getElementById('paymentProofLink');
+        const paymentProofPreview = document.getElementById('paymentProofPreview');
+        if (paymentProofSection && paymentProofLink && paymentProofPreview) {
+            const paymentProofNone = document.getElementById('paymentProofNone');
+            const proofUrl = req.hsr_payment_proof_url || req.hsr_payment_proof || null;
+
+            if (proofUrl) {
+                paymentProofLink.href = proofUrl;
+                paymentProofLink.style.display = '';
+
+                if (proofUrl.toLowerCase().endsWith('.pdf')) {
+                    paymentProofPreview.innerHTML = `<a href="${proofUrl}" target="_blank" class="mt-2 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700">View PDF</a>`;
+                } else {
+                    paymentProofPreview.innerHTML = `<img src="${proofUrl}" alt="Payment Proof" class="max-w-full h-auto max-h-96 object-contain rounded-md shadow-sm hover:opacity-95 transition-opacity">`;
+                }
+                paymentProofPreview.style.display = '';
+                if (paymentProofNone) paymentProofNone.style.display = 'none';
+            } else {
+                paymentProofLink.href = '#';
+                paymentProofLink.style.display = 'none';
+                paymentProofPreview.style.display = 'none';
+                paymentProofPreview.innerHTML = '';
+                if (paymentProofNone) paymentProofNone.style.display = '';
+            }
+        }
         document.getElementById('viewPrice').textContent = parseFloat(offeredPrice || 0).toFixed(2);
 
         const statusSpan = document.getElementById('viewStatus');

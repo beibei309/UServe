@@ -2,7 +2,7 @@
 
 @section('content')
     <div class="px-4 sm:px-6 py-4">
-        
+
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
             <h1 class="text-3xl font-bold transition-colors duration-300" style="color: var(--text-primary);">Service Request Management</h1>
         </div>
@@ -301,6 +301,22 @@
                     </div>
                 </div>
 
+                {{-- Payment Proof --}}
+                <div id="paymentProofSection" class="rounded-xl overflow-hidden border transition-colors duration-300 mt-4" style="border-color: var(--border-color);">
+                    <div class="bg-gradient-to-r from-pink-500 to-red-600 px-4 py-3 flex items-center gap-2">
+                        <i class="fa-solid fa-file-invoice-dollar text-white text-sm"></i>
+                        <span class="text-white text-sm font-semibold uppercase tracking-wide">Payment Proof</span>
+                    </div>
+                    <div class="p-4 flex flex-col items-center transition-colors duration-300" style="background-color: var(--bg-secondary);">
+                        <a id="paymentProofLink" href="#" target="_blank" class="text-indigo-600 hover:text-indigo-800 text-sm font-medium flex items-center gap-1 transition mb-2" style="display:none;">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                            Open Original
+                        </a>
+                        <div id="paymentProofPreview" class="rounded-lg overflow-hidden border border-gray-100 bg-gray-50 flex justify-center p-4 w-full" style="display:none;"></div>
+                        <div id="paymentProofNone" class="text-sm font-medium mt-2 transition-colors duration-300" style="color: var(--text-muted);">No payment proof uploaded.</div>
+                    </div>
+                </div>
+
                 {{-- Dispute Section (shown only when disputed) --}}
                 <div id="viewDisputeSection" class="hidden rounded-xl overflow-hidden border border-red-300">
                     <div class="bg-gradient-to-r from-red-500 to-rose-600 px-4 py-3 flex items-center gap-2">
@@ -362,7 +378,7 @@
 
                 <form id="disciplineForm" method="POST" action="">
     @csrf
-    <input type="hidden" name="action_type" id="inputActionType"> 
+    <input type="hidden" name="action_type" id="inputActionType">
     <input type="hidden" name="target_user_id" id="inputTargetUserId">
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -404,12 +420,12 @@
         <label class="block text-xs font-bold text-gray-500 uppercase mb-1">
             Warning Message / Restriction Reason <span class="text-red-500">*</span>
         </label>
-        <textarea 
-            name="admin_note" 
+        <textarea
+            name="admin_note"
             id="adminNoteInput"  {{-- THIS WAS MISSING --}}
-            rows="2" 
-            class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-red-500 outline-none" 
-            placeholder="Write the warning message or suspension/blacklist reason..." 
+            rows="2"
+            class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-red-500 outline-none"
+            placeholder="Write the warning message or suspension/blacklist reason..."
             required></textarea>
         <p id="actionPreview" class="hidden text-[11px] mt-2 rounded-md px-2 py-1 border"></p>
     </div>

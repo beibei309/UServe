@@ -68,6 +68,22 @@ class AdminRequestController extends Controller
     ];
 
     $requests->getCollection()->transform(function (ServiceRequest $serviceRequest) use ($reportedByUsers, $statusStyles) {
+                // Payment Proof URL logic (mimic user-facing logic)
+                $paymentProofUrl = null;
+                $paymentProofIsPdf = false;
+                $proofPath = $serviceRequest->hsr_payment_proof;
+                if ($proofPath) {
+                    if (str_starts_with($proofPath, 'http://') || str_starts_with($proofPath, 'https://')) {
+                        $paymentProofUrl = $proofPath;
+                    } elseif (str_starts_with($proofPath, 'storage/')) {
+                        $paymentProofUrl = asset($proofPath);
+                    } else {
+                        $paymentProofUrl = asset('storage/'.$proofPath);
+                    }
+                    $paymentProofIsPdf = str_ends_with(strtolower($proofPath), '.pdf');
+                }
+                $serviceRequest->hsr_payment_proof_url = $paymentProofUrl;
+                $serviceRequest->hsr_payment_proof_is_pdf = $paymentProofIsPdf;
         $selectedPackage = $serviceRequest->hsr_selected_package;
         $serviceRequest->selected_package_label = is_array($selectedPackage)
             ? implode(', ', array_filter($selectedPackage))
