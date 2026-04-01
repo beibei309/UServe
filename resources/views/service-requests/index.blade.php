@@ -492,7 +492,7 @@
                                                                     action="{{ route('service-requests.cancel-dispute', $request->hsr_id) }}"
                                                                     method="POST" class="inline-flex">
                                                                     @csrf
-                                                                    <button type="button" data-cancel-dispute="{{ $request->hsr_id }}"
+                                                                    <button type="submit" data-cancel-dispute="{{ $request->hsr_id }}"
                                                                         class="inline-flex items-center justify-center gap-2 rounded-lg border border-red-200 bg-white px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50 transition-colors"
                                                                         title="Withdraw Report">
                                                                         Withdraw Report

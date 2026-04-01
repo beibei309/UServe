@@ -1,113 +1,116 @@
 (() => {
-    const config = document.getElementById('serviceRequestsIndexConfig');
-    if (!config) return;
-
-    const defaultStatusTab = config.dataset.defaultStatusTab || 'pending';
-    const reviewUrl = config.dataset.reviewUrl || '/reviews';
-    const reportUrlTemplate = config.dataset.reportUrlTemplate || '';
-    const paymentUrlTemplate = config.dataset.paymentUrlTemplate || '';
-    const successMessage = config.dataset.successMessage || '';
-    const errorMessage = config.dataset.errorMessage || '';
-
-    const paymentModal = document.getElementById('paymentModal');
-    const paymentProofForm = document.getElementById('paymentProofForm');
-    const paymentModalPrice = document.getElementById('paymentModalPrice');
-    const fileInput = document.getElementById('dropzone-file');
-    const fileNamePreview = document.getElementById('fileNamePreview');
-    const maxPaymentProofSizeBytes = 1024 * 1024;
-    const reviewModal = document.getElementById('reviewModal');
-    const reviewForm = document.getElementById('reviewForm');
-    const reviewServiceRequestId = document.getElementById('reviewServiceRequestId');
-    const ratingInput = document.getElementById('rating');
-    const requestSearch = document.getElementById('request-search');
-    const categoryFilter = document.getElementById('category-filter');
-
-    function showStatusTab(status) {
-        document.querySelectorAll('.sr-status-tab-content').forEach((content) => content.classList.add('hidden'));
-        document.querySelectorAll('.sr-status-tab-button').forEach((button) => {
-            button.classList.remove('text-indigo-600', 'border-b-2', 'border-indigo-600');
-            button.classList.add('text-gray-500', 'hover:text-custom-teal');
-        });
-
-        const targetContent = document.getElementById(`${status}-content`);
-        const targetTab = document.getElementById(`${status}-tab`);
-        if (targetContent) targetContent.classList.remove('hidden');
-        if (targetTab) {
-            targetTab.classList.remove('text-gray-500', 'hover:text-custom-teal');
-            targetTab.classList.add('text-indigo-600', 'border-b-2', 'border-indigo-600');
+    function init() {
+        if (typeof window.Swal === 'undefined') {
+            setTimeout(init, 50); // Poll until Vite bundle executes and assigns window.Swal
+            return;
         }
-    }
 
-    function resetStars() {
-        document.querySelectorAll('.star-button').forEach((button) => {
-            button.classList.remove('text-yellow-400');
-            button.classList.add('text-gray-300');
-        });
-    }
+        const config = document.getElementById('serviceRequestsIndexConfig');
+        if (!config) return;
 
-    function setRating(rating) {
-        ratingInput.value = rating;
-        document.querySelectorAll('.star-button').forEach((button, index) => {
-            const active = index < rating;
-            button.classList.toggle('text-yellow-400', active);
-            button.classList.toggle('text-gray-300', !active);
-        });
-    }
+        const defaultStatusTab = config.dataset.defaultStatusTab || 'pending';
+        const reviewUrl = config.dataset.reviewUrl || '/reviews';
+        const reportUrlTemplate = config.dataset.reportUrlTemplate || '';
+        const paymentUrlTemplate = config.dataset.paymentUrlTemplate || '';
+        const successMessage = config.dataset.successMessage || '';
+        const errorMessage = config.dataset.errorMessage || '';
 
-    function closePaymentModal() {
-        if (!paymentModal) return;
-        paymentModal.classList.add('hidden');
-        if (paymentProofForm) paymentProofForm.reset();
-        if (fileNamePreview) {
-            fileNamePreview.textContent = '';
-            fileNamePreview.classList.add('hidden');
+        const paymentModal = document.getElementById('paymentModal');
+        const paymentProofForm = document.getElementById('paymentProofForm');
+        const paymentModalPrice = document.getElementById('paymentModalPrice');
+        const fileInput = document.getElementById('dropzone-file');
+        const fileNamePreview = document.getElementById('fileNamePreview');
+        const maxPaymentProofSizeBytes = 1024 * 1024;
+        const reviewModal = document.getElementById('reviewModal');
+        const reviewForm = document.getElementById('reviewForm');
+        const reviewServiceRequestId = document.getElementById('reviewServiceRequestId');
+        const ratingInput = document.getElementById('rating');
+        const requestSearch = document.getElementById('request-search');
+        const categoryFilter = document.getElementById('category-filter');
+
+        function showMessage(title, text, icon = 'info', confirmButtonColor = '#4F46E5') {
+            return Swal.fire({ title, text, icon, confirmButtonColor, confirmButtonText: 'OK' });
         }
-    }
 
-    function closeReviewModal() {
-        if (!reviewModal) return;
-        reviewModal.classList.add('hidden');
-        if (reviewForm) reviewForm.reset();
-        resetStars();
-    }
+        function showConfirm(options) {
+            return Swal.fire(options);
+        }
 
-    function filterItems() {
-        if (!requestSearch || !categoryFilter) return;
-        const query = requestSearch.value.toLowerCase();
-        const selectedCategory = categoryFilter.value;
-        const activeContent = document.querySelector('.sr-status-tab-content:not(.hidden)');
-        if (!activeContent) return;
+        function showStatusTab(status) {
+            document.querySelectorAll('.sr-status-tab-content').forEach((content) => content.classList.add('hidden'));
+            document.querySelectorAll('.sr-status-tab-button').forEach((button) => {
+                button.classList.remove('text-indigo-600', 'border-b-2', 'border-indigo-600');
+                button.classList.add('text-gray-500', 'hover:text-custom-teal');
+            });
 
-        activeContent.querySelectorAll('.sr-request-item').forEach((item) => {
-            const text = item.textContent.toLowerCase();
-            const itemCategory = item.getAttribute('data-category');
-            const matchesSearch = text.includes(query);
-            const matchesCategory = selectedCategory === '' || selectedCategory === itemCategory;
-            item.style.display = matchesSearch && matchesCategory ? '' : 'none';
-        });
-    }
+            const targetContent = document.getElementById(`${status}-content`);
+            const targetTab = document.getElementById(`${status}-tab`);
+            if (targetContent) targetContent.classList.remove('hidden');
+            if (targetTab) {
+                targetTab.classList.remove('text-gray-500', 'hover:text-custom-teal');
+                targetTab.classList.add('text-indigo-600', 'border-b-2', 'border-indigo-600');
+            }
+        }
 
-    showStatusTab(defaultStatusTab);
-    filterItems();
+        function resetStars() {
+            document.querySelectorAll('.star-button').forEach((button) => {
+                button.classList.remove('text-yellow-400');
+                button.classList.add('text-gray-300');
+            });
+        }
 
-    if (successMessage) {
-        Swal.fire({
-            title: 'Success!',
-            text: successMessage,
-            icon: 'success',
-            confirmButtonColor: '#4F46E5',
-            confirmButtonText: 'OK',
-        });
-    }
+        function setRating(rating) {
+            ratingInput.value = rating;
+            document.querySelectorAll('.star-button').forEach((button, index) => {
+                const active = index < rating;
+                button.classList.toggle('text-yellow-400', active);
+                button.classList.toggle('text-gray-300', !active);
+            });
+        }
 
-    if (errorMessage) {
-        Swal.fire({
-            title: 'Error!',
-            text: errorMessage,
-            icon: 'error',
-            confirmButtonColor: '#d33',
-        });
-    }
+        function closePaymentModal() {
+            if (!paymentModal) return;
+            paymentModal.classList.add('hidden');
+            if (paymentProofForm) paymentProofForm.reset();
+            if (fileNamePreview) {
+                fileNamePreview.textContent = '';
+                fileNamePreview.classList.add('hidden');
+            }
+        }
+
+        function closeReviewModal() {
+            if (!reviewModal) return;
+            reviewModal.classList.add('hidden');
+            if (reviewForm) reviewForm.reset();
+            resetStars();
+        }
+
+        function filterItems() {
+            if (!requestSearch || !categoryFilter) return;
+            const query = requestSearch.value.toLowerCase();
+            const selectedCategory = categoryFilter.value;
+            const activeContent = document.querySelector('.sr-status-tab-content:not(.hidden)');
+            if (!activeContent) return;
+
+            activeContent.querySelectorAll('.sr-request-item').forEach((item) => {
+                const text = item.textContent.toLowerCase();
+                const itemCategory = item.getAttribute('data-category');
+                const matchesSearch = text.includes(query);
+                const matchesCategory = selectedCategory === '' || selectedCategory === itemCategory;
+                item.style.display = matchesSearch && matchesCategory ? '' : 'none';
+            });
+        }
+
+        showStatusTab(defaultStatusTab);
+        filterItems();
+
+        if (successMessage) {
+            showMessage('Success!', successMessage, 'success', '#4F46E5');
+        }
+
+        if (errorMessage) {
+            showMessage('Error!', errorMessage, 'error', '#d33');
+        }
 
     if (requestSearch) requestSearch.addEventListener('input', filterItems);
     if (categoryFilter) categoryFilter.addEventListener('change', filterItems);
@@ -120,12 +123,7 @@
                 fileInput.value = '';
                 fileNamePreview.textContent = '';
                 fileNamePreview.classList.add('hidden');
-                Swal.fire({
-                    title: 'File too large',
-                    text: 'Payment proof must be 1MB or smaller.',
-                    icon: 'error',
-                    confirmButtonColor: '#d33',
-                });
+                showMessage('File too large', 'Payment proof must be 1MB or smaller.', 'error', '#d33');
                 return;
             }
 
@@ -148,12 +146,7 @@
                     fileNamePreview.textContent = '';
                     fileNamePreview.classList.add('hidden');
                 }
-                Swal.fire({
-                    title: 'File too large',
-                    text: 'Payment proof must be 1MB or smaller.',
-                    icon: 'error',
-                    confirmButtonColor: '#d33',
-                });
+                showMessage('File too large', 'Payment proof must be 1MB or smaller.', 'error', '#d33');
             }
         });
     }
@@ -181,7 +174,7 @@
                 closeReviewModal();
                 Swal.fire('Thank You!', 'Your review has been submitted.', 'success').then(() => location.reload());
             } catch (error) {
-                Swal.fire('Error', error.message, 'error');
+                showMessage('Error', error.message, 'error', '#d33');
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Submit';
@@ -200,7 +193,7 @@
         const cancelTrigger = event.target.closest('[data-cancel-request]');
         if (cancelTrigger) {
             const requestId = cancelTrigger.dataset.cancelRequest;
-            Swal.fire({
+            showConfirm({
                 title: 'Cancel Request?',
                 text: 'Are you sure you want to cancel this request?',
                 icon: 'warning',
@@ -212,11 +205,13 @@
                 if (!result.isConfirmed) return;
                 const form = document.getElementById(`cancel-form-${requestId}`);
                 if (!form) return;
+                
                 Swal.fire({
                     title: 'Cancelling...',
                     allowOutsideClick: false,
                     didOpen: () => Swal.showLoading(),
                 });
+                
                 form.submit();
             });
             return;
@@ -225,6 +220,7 @@
         const reportTrigger = event.target.closest('[data-open-report]');
         if (reportTrigger) {
             const requestId = reportTrigger.dataset.openReport;
+
             Swal.fire({
                 title: 'Report Issue',
                 input: 'textarea',
@@ -264,8 +260,9 @@
 
         const cancelDisputeTrigger = event.target.closest('[data-cancel-dispute]');
         if (cancelDisputeTrigger) {
+            event.preventDefault();
             const requestId = cancelDisputeTrigger.dataset.cancelDispute;
-            Swal.fire({
+            showConfirm({
                 title: 'Withdraw report?',
                 text: 'This will withdraw the dispute and resume the request flow.',
                 icon: 'warning',
@@ -277,11 +274,13 @@
                 if (!result.isConfirmed) return;
                 const form = document.getElementById(`cancel-dispute-form-${requestId}`);
                 if (!form) return;
+                
                 Swal.fire({
                     title: 'Updating...',
                     allowOutsideClick: false,
                     didOpen: () => Swal.showLoading(),
                 });
+                
                 form.submit();
             });
             return;
@@ -325,4 +324,10 @@
     window.addEventListener('click', (event) => {
         if (event.target === paymentModal) closePaymentModal();
     });
+
+    } // end of init func
+
+    // Start polling to initialize once Swal is active from the Vite bundle
+    init();
+
 })();
