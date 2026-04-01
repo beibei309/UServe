@@ -31,14 +31,14 @@
         @endif
 
         {{-- PROFILE HEADER CARD --}}
-        <div class="rounded-xl shadow-xl border transition-all duration-300 mb-8" 
+        <div class="rounded-xl shadow-xl border transition-all duration-300 mb-8"
              style="background-color: var(--bg-secondary); border-color: var(--border-color);">
             <div class="p-6 sm:p-8">
                 <div class="flex flex-col lg:flex-row gap-8">
-                    
+
                     {{-- Profile Photo --}}
                     <div class="flex-shrink-0 text-center lg:text-left">
-                        <div class="w-32 h-32 lg:w-40 lg:h-40 rounded-full overflow-hidden border-4 shadow-lg mx-auto lg:mx-0 transition-transform hover:scale-105" 
+                        <div class="w-32 h-32 lg:w-40 lg:h-40 rounded-full overflow-hidden border-4 shadow-lg mx-auto lg:mx-0 transition-transform hover:scale-105"
                              style="border-color: var(--border-color);">
                             <img src="{{ $user->profile_image_url }}" class="w-full h-full object-cover" alt="{{ $user->hu_name }}" />
                         </div>
@@ -133,9 +133,9 @@
         </div>
 
         {{-- VERIFICATION DOCUMENTS SECTION --}}
-        <div class="rounded-xl shadow-xl border transition-all duration-300 mb-8" 
+        <div class="rounded-xl shadow-xl border transition-all duration-300 mb-8"
              style="background-color: var(--bg-secondary); border-color: var(--border-color);">
-            
+
             {{-- Header --}}
             <div class="bg-gradient-to-r from-indigo-600 to-purple-700 px-6 py-4 rounded-t-xl">
                 <div class="flex items-center gap-3">
@@ -151,7 +151,7 @@
 
             <div class="p-6 sm:p-8">
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    
+
                     {{-- Live Selfie Section --}}
                     <div class="flex flex-col">
                         <div class="flex items-center gap-3 mb-4">
@@ -162,7 +162,7 @@
                         </div>
 
                         @if ($user->hu_selfie_media_path)
-                            <div class="relative group rounded-xl overflow-hidden border shadow-lg transition-all duration-300 hover:shadow-xl" 
+                            <div class="relative group rounded-xl overflow-hidden border shadow-lg transition-all duration-300 hover:shadow-xl"
                                  style="background-color: var(--bg-primary); border-color: var(--border-color);">
                                 <img src="{{ route('admin.verifications.selfie', $user->hu_id) }}"
                                      class="w-full h-72 object-cover transition-transform duration-300 group-hover:scale-105"
@@ -201,7 +201,7 @@
                         </div>
 
                         @if ($user->hu_verification_document_path)
-                            <div class="border rounded-xl p-8 flex flex-col items-center justify-center h-72 transition-all duration-300 hover:shadow-lg" 
+                            <div class="border rounded-xl p-8 flex flex-col items-center justify-center h-72 transition-all duration-300 hover:shadow-lg"
                                  style="background-color: var(--bg-primary); border-color: var(--border-color);">
                                 <div class="w-20 h-20 bg-blue-100 rounded-2xl flex items-center justify-center mb-6 shadow-inner">
                                     <i class="fas fa-file-alt text-blue-600 text-3xl"></i>
@@ -313,9 +313,9 @@
 
 
         {{-- ACCOUNT INFORMATION SECTION --}}
-        <div class="rounded-xl shadow-xl border transition-all duration-300" 
+        <div class="rounded-xl shadow-xl border transition-all duration-300"
              style="background-color: var(--bg-secondary); border-color: var(--border-color);">
-            
+
             {{-- Header --}}
             <div class="bg-gradient-to-r from-emerald-600 to-teal-700 px-6 py-4 rounded-t-xl">
                 <div class="flex items-center gap-3">
@@ -331,8 +331,8 @@
 
             <div class="p-6 sm:p-8">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    
-                    <div class="p-6 rounded-xl border transition-all duration-300 hover:shadow-lg" 
+
+                    <div class="p-6 rounded-xl border transition-all duration-300 hover:shadow-lg"
                          style="background-color: var(--bg-primary); border-color: var(--border-color);">
                         <div class="flex items-center gap-3 mb-3">
                             <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -345,7 +345,7 @@
                         </div>
                     </div>
 
-                    <div class="p-6 rounded-xl border transition-all duration-300 hover:shadow-lg" 
+                    <div class="p-6 rounded-xl border transition-all duration-300 hover:shadow-lg"
                          style="background-color: var(--bg-primary); border-color: var(--border-color);">
                         <div class="flex items-center gap-3 mb-3">
                             <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
@@ -358,7 +358,7 @@
                         </div>
                     </div>
 
-                    <div class="p-6 rounded-xl border transition-all duration-300 hover:shadow-lg" 
+                    <div class="p-6 rounded-xl border transition-all duration-300 hover:shadow-lg"
                          style="background-color: var(--bg-primary); border-color: var(--border-color);">
                         <div class="flex items-center gap-3 mb-3">
                             <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">

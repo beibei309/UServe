@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="px-4 sm:px-6">
-    
+
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <h1 class="text-2xl sm:text-3xl font-bold transition-colors duration-300" style="color: var(--text-primary);">Student Status Management</h1>
         <a href="{{ route('admin.student_status.create') }}"
@@ -202,7 +202,7 @@
                     </div>
                     <span class="px-2.5 py-0.5 rounded-full text-xs font-bold {{ $student->status_badge_class }}">{{ $student->status_label }}</span>
                 </div>
-                
+
                 <div class="grid grid-cols-2 gap-2 text-sm mb-3">
                     <div>
                         <span class="font-medium transition-colors duration-300" style="color: var(--text-primary);">Semester:</span>
@@ -225,7 +225,7 @@
                         </span>
                     </div>
                 </div>
-                
+
                 <div class="flex flex-wrap gap-2 mt-1">
                     @if ($student->studentStatus)
                         <a href="{{ route('admin.student_status.edit', $student->studentStatus->hss_id) }}"
@@ -258,7 +258,7 @@
                 No students found.
             </div>
         @endforelse
-        
+
         <div class="mt-4">{{ $students->links() }}</div>
     </div>
 @endsection
