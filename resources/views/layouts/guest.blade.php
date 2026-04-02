@@ -98,7 +98,8 @@
     </style>
 </head>
 
-<body class="bg-gray-50 text-gray-900 antialiased" <!-- Navigation (same as welcome page) -->
+<body class="bg-gray-50 text-gray-900 antialiased">
+    <!-- Navigation (same as welcome page) -->
     @include('layouts.navbar')
 
     <main class="min-h-screen pt-8 md:pt-10 pb-16">

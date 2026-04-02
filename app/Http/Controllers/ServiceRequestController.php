@@ -155,7 +155,10 @@ class ServiceRequestController extends BaseController
         try {
             $user = Auth::user();
             $currentUserId = (int) ($user->hu_id ?? $user->id);
-            $isHelperView = ($user->hu_role ?? null) === 'helper';
+            $isSellerMode = session('view_mode', 'buyer') === 'seller';
+            $isHelperView = ($user->hu_role ?? null) === 'helper'
+                && $isSellerMode
+                && $user->canAccessSellerFeatures();
 
             $query = ServiceRequest::query()
                 ->with(['studentService.category', 'requester', 'provider'])

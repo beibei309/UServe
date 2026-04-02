@@ -471,7 +471,7 @@
 
                                                         {{-- View Details Link (beside Report icon) --}}
                                                         <a href="{{ route('service-requests.show', $request) }}"
-                                                            class="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-bold text-gray-600 hover:bg-gray-50 transition-colors hidden sm:inline-flex">
+                                                            class="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-bold text-gray-600 hover:bg-gray-50 transition-colors">
                                                             View Details
                                                         </a>
                                                             {{-- 2. REPORT ISSUE BUTTON (Icon Only) --}}
