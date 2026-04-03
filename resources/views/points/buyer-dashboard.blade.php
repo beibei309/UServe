@@ -152,17 +152,17 @@
                 @if($recentBuyerPoints->count() > 0)
                     <div class="space-y-3">
                         @foreach($recentBuyerPoints as $point)
-                            <div class="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
-                                <div class="flex items-center space-x-3">
+                            <div class="flex items-start justify-between gap-3 py-2 border-b border-gray-100 last:border-0">
+                                <div class="flex min-w-0 flex-1 items-start space-x-3">
                                     <div class="bg-green-100 p-1.5 rounded-full flex-shrink-0">
                                         <i class="fas fa-plus text-green-600 text-xs"></i>
                                     </div>
                                     <div class="min-w-0">
-                                        <p class="text-sm font-medium text-gray-900 truncate">{{ $point->hbp_description }}</p>
+                                        <p class="text-sm font-medium leading-snug text-gray-900 break-words">{{ $point->hbp_description }}</p>
                                         <p class="text-xs text-gray-500">{{ $point->created_at->format('M d, Y') }}</p>
                                     </div>
                                 </div>
-                                <span class="text-sm font-medium text-green-600">+{{ $point->hbp_points_earned }}</span>
+                                <span class="flex-shrink-0 text-sm font-medium text-green-600">+{{ $point->hbp_points_earned }}</span>
                             </div>
                         @endforeach
                     </div>

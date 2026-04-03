@@ -102,6 +102,7 @@
             const url = deleteUrlTemplate.replace('__ID__', serviceId);
             fetch(url, {
                 method: 'DELETE',
+                credentials: 'same-origin',
                 headers: {
                     'X-CSRF-TOKEN': csrfToken,
                     Accept: 'application/json',
@@ -109,9 +110,17 @@
                 },
             })
                 .then(async (res) => {
-                    const data = await res.json().catch(() => ({}));
+                    const contentType = res.headers.get('content-type') || '';
+                    const data = contentType.includes('application/json')
+                        ? await res.json().catch(() => ({}))
+                        : { message: null };
+
+                    if (res.redirected) {
+                        throw new Error('Session expired. Please refresh and sign in again.');
+                    }
+
                     if (!res.ok || !data.success) {
-                        throw new Error(data.message || 'Unable to delete service.');
+                        throw new Error(data.message || `Unable to delete service (HTTP ${res.status}).`);
                     }
                     return data;
                 })

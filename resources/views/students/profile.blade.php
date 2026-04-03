@@ -53,7 +53,7 @@
                                     </h1>
                                     <div class="flex items-center gap-2 text-gray-600 font-medium mb-3">
                                         <i class="fa-solid fa-graduation-cap text-indigo-500"></i>
-                                        {{ $user->hu_faculty ?? 'Faculty of Computing' }}
+                                        {{ $profileUi['faculty_short_display'] ?? ($user->hu_faculty ?? 'Faculty of Computing') }}
                                         <span class="text-gray-300 mx-1">•</span>
                                         <span class="text-sm text-gray-500">{{ $user->hu_course ?? 'Student' }}</span>
                                     </div>
@@ -114,7 +114,7 @@
                                                 <a href="{{ $profileWhatsappUrl }}" target="_blank"
                                                     class="inline-flex items-center justify-center px-6 py-3 bg-green-500 hover:bg-green-600 text-white font-bold rounded-xl transition shadow-lg shadow-green-500/30 transform hover:-translate-y-0.5">
                                                     <i class="fa-brands fa-whatsapp text-xl mr-2"></i>
-                                                    Chat on WhatsApp
+                                                    Chat
                                                 </a>
                                             @else
                                                 <button disabled

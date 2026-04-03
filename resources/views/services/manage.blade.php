@@ -287,8 +287,8 @@
     </style>
 
     <div id="servicesManageConfig"
-        data-edit-url-template="{{ url('/services/__ID__/edit') }}"
-        data-delete-url-template="{{ route('services.destroy', '__ID__') }}"></div>
+        data-edit-url-template="{{ route('services.edit', ['service' => '__ID__'], false) }}"
+        data-delete-url-template="{{ route('services.destroy', ['service' => '__ID__'], false) }}"></div>
     @push('scripts')
         <script src="{{ asset('js/nonadmin-services-manage.js') }}"></script>
     @endpush

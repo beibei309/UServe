@@ -315,17 +315,30 @@ class StudentServiceController extends Controller
 
         try {
             $service->delete();
+            return response()->json([
+                'success' => true,
+                'message' => 'Service deleted successfully.',
+            ], 200);
         } catch (\Throwable $exception) {
-            $service->hss_is_active = false;
-            $service->hss_status = 'unavailable';
-            $service->save();
-        }
+            try {
+                $service->hss_is_active = false;
+                $service->hss_status = 'unavailable';
+                $service->save();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Service deleted successfully.',
-            'service' => $service,
-        ], 200);
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Service archived successfully.',
+                ], 200);
+            } catch (\Throwable $fallbackException) {
+                report($fallbackException);
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unable to delete service right now. Please try again.',
+                    'error' => $fallbackException->getMessage(),
+                ], 500);
+            }
+        }
     }
 
     public function storefront(User $user): JsonResponse

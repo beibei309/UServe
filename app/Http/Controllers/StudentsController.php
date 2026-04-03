@@ -413,7 +413,8 @@ class StudentsController extends Controller
 
     return redirect()
         ->route('students.edit')
-        ->with('success', 'Profile updated successfully!');
+        ->with('success', 'Profile updated successfully!')
+        ->with('status', 'profile-updated');
 }
 
 private function facultyCanonicalMap(): array
@@ -456,6 +457,31 @@ private function normalizeFacultyName(?string $faculty): ?string
 
     $map = $this->facultyCanonicalMap();
     return $map[$value] ?? $value;
+}
+
+private function facultyShortLabel(?string $faculty): string
+{
+    $value = trim((string) $faculty);
+    if ($value === '') {
+        return 'Faculty of Computing';
+    }
+
+    $normalized = $this->normalizeFacultyName($value) ?? $value;
+    $shortMap = [
+        'Fakulti Komputeran dan Meta-Teknologi' => 'FKMT',
+        'Fakulti Bahasa dan Komunikasi' => 'FBK',
+        'Fakulti Pembangunan Manusia' => 'FPM',
+        'Fakulti Sains dan Matematik' => 'FSM',
+        'Fakulti Pengurusan dan Ekonomi' => 'FPE',
+        'Fakulti Seni, Komputeran dan Industri Kreatif' => 'FSKIK',
+        'Fakulti Seni, Kelestarian dan Industri Kreatif' => 'FSKIK',
+        'Fakulti Muzik dan Seni Persembahan' => 'FMSP',
+        'Fakulti Sains Sukan dan Kejurulatihan' => 'FSSKJ',
+        'Fakulti Teknikal dan Vokasional' => 'FTV',
+        'Fakulti Sains Kemanusiaan' => 'FSK',
+    ];
+
+    return $shortMap[$normalized] ?? $normalized;
 }
 
 public function deleteWorkExperienceFile()
@@ -536,6 +562,7 @@ public function deleteWorkExperienceFile()
             'average_rating_rounded' => (int) round($averageRating),
             'latest_report_reason_short' => $latestReportReason ? Str::limit($latestReportReason, 140) : null,
             'member_since_display' => optional($memberSinceSource)->format('M Y') ?? 'N/A',
+            'faculty_short_display' => $this->facultyShortLabel($user->hu_faculty ?? $user->faculty),
         ];
 
         return view('students.profile', [
