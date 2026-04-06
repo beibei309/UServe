@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\StudentStatus;
+use App\Support\UpsiStaffEmail;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
@@ -58,9 +59,8 @@ class RegisteredUserController extends Controller
                         $fail('Student must use @siswa.upsi.edu.my email');
                     }
                     if ($request->role === 'community' && $request->community_type === 'staff') {
-                        $pattern = '/^[a-zA-Z0-9._%+-]+@(upsi\.edu\.my|fsskj\.upsi\.edu\.my|fpm\.upsi\.edu\.my|fsmt\.upsi\.edu\.my|fskik\.upsi\.edu\.my|meta\.upsi\.edu\.my|fbk\.upsi\.edu\.my|fpe\.upsi\.edu\.my|fmsp\.upsi\.edu\.my|ftv\.upsi\.edu\.my|fsk\.upsi\.edu\.my|bendahari\.upsi\.edu\.my|ict\.upsi\.edu\.my)$/';
-                        if (!preg_match($pattern, $value)) {
-                            $fail('Staff must use a valid UPSI staff email (e.g., @upsi.edu.my or faculty subdomain).');
+                        if (!UpsiStaffEmail::isValid($value)) {
+                            $fail('Staff must use a valid UPSI staff email (' . UpsiStaffEmail::humanReadableDomains() . ').');
                         }
                     }
                 },

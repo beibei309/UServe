@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\User;
+use App\Support\UpsiStaffEmail;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -44,10 +45,14 @@ class ProfileUpdateRequest extends FormRequest
         // Staff email for community users
         if ($this->user()->isCommunity() && !$this->user()->isVerifiedStaff()) {
             $rules['staff_email'] = [
-                'nullable', 
-                'email', 
-                'ends_with:@upsi.edu.my',
-                Rule::unique(User::class, 'hu_staff_email')->ignore($this->user()->hu_id, 'hu_id')
+                'nullable',
+                'email',
+                Rule::unique(User::class, 'hu_staff_email')->ignore($this->user()->hu_id, 'hu_id'),
+                function ($attribute, $value, $fail) {
+                    if (filled($value) && !UpsiStaffEmail::isValid((string) $value)) {
+                        $fail('Staff email must use a valid UPSI domain (' . UpsiStaffEmail::humanReadableDomains() . ').');
+                    }
+                },
             ];
         }
 
@@ -62,7 +67,6 @@ class ProfileUpdateRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'staff_email.ends_with' => 'Staff email must be a valid UPSI email address (@upsi.edu.my)',
             'student_id.unique' => 'This student ID is already registered.',
             'bio.max' => 'Bio must not exceed 500 characters.',
         ];

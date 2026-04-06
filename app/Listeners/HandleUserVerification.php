@@ -2,9 +2,8 @@
 
 namespace App\Listeners;
 
+use App\Support\UpsiStaffEmail;
 use Illuminate\Auth\Events\Verified;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\InteractsWithQueue;
 
 class HandleUserVerification
 {
@@ -15,32 +14,51 @@ class HandleUserVerification
     {
         /** @var \App\Models\User $user */
         $user = $event->user;
+        $email = strtolower(trim((string) ($user->hu_email ?? '')));
 
-        // Auto-approve Students
-        if ($user->hu_role === 'student') {
-            if (str_ends_with($user->hu_email, '@siswa.upsi.edu.my')) {
-                $user->update([
-                    'hu_verification_status' => 'approved',
-                    'hu_public_verified_at' => now(),
-                ]);
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return;
+        }
+
+        $updates = [];
+
+        if ($user->hu_role === 'student' && str_ends_with($email, '@siswa.upsi.edu.my')) {
+            $updates['hu_verification_status'] = 'approved';
+            $updates['hu_public_verified_at'] = now();
+        }
+
+        if ($this->isUpsiStaffDomainEmail($email)) {
+            if (empty($user->hu_staff_email)) {
+                $updates['hu_staff_email'] = $email;
             }
+
+            $updates['hu_staff_verified_at'] = now();
+            $updates['hu_verification_status'] = 'approved';
+            $updates['hu_public_verified_at'] = now();
         }
-        
-        // Auto-approve Staff (Community)
-        // Check if the user has a staff role (community) and uses a valid UPSI email
-           if ($user->hu_role === 'community') {
-             $pattern = '/^[a-zA-Z0-9._%+-]+@(upsi\.edu\.my|fsskj\.upsi\.edu\.my|fpm\.upsi\.edu\.my|fsmt\.upsi\.edu\.my|fskik\.upsi\.edu\.my|meta\.upsi\.edu\.my|fbk\.upsi\.edu\.my|fpe\.upsi\.edu\.my|fmsp\.upsi\.edu\.my|ftv\.upsi\.edu\.my|fsk\.upsi\.edu\.my|bendahari\.upsi\.edu\.my|ict\.upsi\.edu\.my)$/';
-               $isStaffEmail = preg_match($pattern, $user->hu_email);
-             
-             if ($isStaffEmail) {
-                 $user->update([
-                     'hu_verification_status' => 'approved',
-                     // 'hu_staff_verified_at' => now(), // Optional, if we want to track staff specifically
-                     'hu_public_verified_at' => now(), 
-                 ]);
-             }
+
+        if (!empty($updates)) {
+            $user->forceFill($updates)->save();
         }
-        
-        // Community Public: Do NOTHING. They remain 'pending' until Doc Upload + Admin Approve.
+
+        $this->triggerPermissionSync($user);
+    }
+
+    private function isUpsiStaffDomainEmail(string $email): bool
+    {
+        return UpsiStaffEmail::isValid($email);
+    }
+
+    private function triggerPermissionSync(object $user): void
+    {
+        if (method_exists($user, 'syncPermissionsAfterVerification')) {
+            $user->syncPermissionsAfterVerification();
+            return;
+        }
+
+        if (method_exists($user, 'syncRolesAfterVerification')) {
+            $user->syncRolesAfterVerification();
+            return;
+        }
     }
 }
