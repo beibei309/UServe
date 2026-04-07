@@ -2,6 +2,14 @@
     const config = document.getElementById('servicesDetailsConfig');
     if (!config) return;
 
+    document.querySelectorAll('img[data-fallback-src]').forEach((img) => {
+        img.addEventListener('error', () => {
+            if (img.dataset.fallbackApplied === '1') return;
+            img.dataset.fallbackApplied = '1';
+            img.src = img.dataset.fallbackSrc;
+        });
+    });
+
     const parseJson = (value, fallback) => {
         try {
             return JSON.parse(value);

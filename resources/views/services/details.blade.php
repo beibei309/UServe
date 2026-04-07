@@ -152,22 +152,10 @@
                     class="group relative overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-md transition-all duration-300 hover:shadow-xl">
                     {{-- Image Container --}}
                     <div class="aspect-video h-[400px] w-full overflow-hidden bg-gray-100">
-                        @if ($detailsImageUrl)
-                            <img src="{{ $detailsImageUrl }}"
-                                alt="{{ $service->hss_title ?? 'Service Image' }}"
-                                class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                data-fallback-src="{{ $detailsImagePlaceholder }}">
-                        @else
-                            <div
-                                class="flex h-full w-full flex-col items-center justify-center bg-gray-50 text-gray-400">
-                                <svg class="mb-2 h-12 w-12 opacity-50" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
-                                <span class="text-xs font-medium uppercase tracking-wider">No Image Available</span>
-                            </div>
-                        @endif
+                        <img src="{{ $detailsImageUrl }}"
+                            alt="{{ $service->hss_title ?? 'Service Image' }}"
+                            class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            data-fallback-src="{{ $detailsImagePlaceholder }}">
 
                         {{-- Optional: Gradient Overlay (Makes text easier to read if you add titles over the image later) --}}
                     </div>
@@ -190,7 +178,8 @@
                             {{-- 1. WRAPPER FOR BLUR LOGIC --}}
                             <div class="relative">
                                 @if ($service->user->hu_profile_photo_path)
-                                    <img src="{{ asset( $service->user->hu_profile_photo_path) }}"
+                                    <img src="{{ $detailsProviderAvatarUrl }}"
+                                        data-fallback-src="{{ $detailsProviderAvatarFallback }}"
                                         class="w-24 h-24 md:w-28 md:h-28 rounded-full object-cover border-4 border-white shadow-lg transition-all duration-300 
                         {{-- BLUR IF GUEST --}}
                         @guest blur-md brightness-90 @endguest">
@@ -307,7 +296,9 @@
                     <div class="flex-shrink-0">
                         <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 font-bold text-sm uppercase overflow-hidden">
                             @if($review->reviewer->hu_profile_photo_path)
-                                <img src="{{ asset($review->reviewer->hu_profile_photo_path) }}" class="w-full h-full object-cover">
+                                <img src="{{ asset($review->reviewer->hu_profile_photo_path) }}"
+                                    data-fallback-src="https://ui-avatars.com/api/?name={{ urlencode((string) ($review->ui_reviewer_initial ?? 'U')) }}"
+                                    class="w-full h-full object-cover">
                             @else
                                 {{ $review->ui_reviewer_initial }}
                             @endif

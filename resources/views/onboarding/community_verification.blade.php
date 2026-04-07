@@ -85,7 +85,7 @@
 
                             <div>
                                 <input type="file" name="profile_photo" id="profile_photo_input" accept="image/*" required class="block w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 transition-all"/>
-                                <p class="mt-2 text-xs text-slate-400 text-center">Clear face photo. JPG/PNG, Max 4MB.</p>
+                                <p class="mt-2 text-xs text-slate-400 text-center">Clear face photo. JPG/PNG, Max 1MB.</p>
                             </div>
 
                             <button type="submit" class="w-full bg-slate-900 text-white py-3 rounded-xl font-medium hover:bg-slate-800 transition-all">Save Photo</button>

@@ -88,6 +88,28 @@
         window.location.href = editUrlTemplate.replace('__ID__', id);
     }
 
+    function fallbackSubmitDelete(url) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = url;
+        form.style.display = 'none';
+
+        const methodInput = document.createElement('input');
+        methodInput.type = 'hidden';
+        methodInput.name = '_method';
+        methodInput.value = 'DELETE';
+
+        const tokenInput = document.createElement('input');
+        tokenInput.type = 'hidden';
+        tokenInput.name = '_token';
+        tokenInput.value = csrfToken;
+
+        form.appendChild(methodInput);
+        form.appendChild(tokenInput);
+        document.body.appendChild(form);
+        form.submit();
+    }
+
     function deleteService(serviceId) {
         Swal.fire({
             title: 'Delete Service?',
@@ -100,20 +122,30 @@
         }).then((result) => {
             if (!result.isConfirmed) return;
             const url = deleteUrlTemplate.replace('__ID__', serviceId);
+            const payload = new URLSearchParams();
+            payload.append('_method', 'DELETE');
+            payload.append('_token', csrfToken);
+
             fetch(url, {
-                method: 'DELETE',
+                method: 'POST',
                 credentials: 'same-origin',
                 headers: {
-                    'X-CSRF-TOKEN': csrfToken,
+                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
                     Accept: 'application/json',
                     'X-Requested-With': 'XMLHttpRequest',
                 },
+                body: payload.toString(),
             })
                 .then(async (res) => {
                     const contentType = res.headers.get('content-type') || '';
                     const data = contentType.includes('application/json')
                         ? await res.json().catch(() => ({}))
                         : { message: null };
+
+                    if (res.status === 405) {
+                        fallbackSubmitDelete(url);
+                        return new Promise(() => {});
+                    }
 
                     if (res.redirected) {
                         throw new Error('Session expired. Please refresh and sign in again.');

@@ -88,6 +88,7 @@
                                     <img class="h-10 w-10 rounded-full border transition-colors duration-300"
                                         style="border-color: var(--border-color);"
                                         src="{{ $student->hu_profile_photo_path ? asset($student->hu_profile_photo_path) : 'https://ui-avatars.com/api/?name=' . urlencode($student->hu_name) }}"
+                                        onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name={{ urlencode((string) ($student->hu_name ?? 'U')) }}';"
                                         alt="Profile">
 
                                     <div>

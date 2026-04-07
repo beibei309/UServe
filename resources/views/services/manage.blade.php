@@ -74,7 +74,7 @@
                                 <div class="relative h-48 overflow-hidden bg-gray-100">
                                     <img src="{{ $service->ui_image_url }}"
                                         class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                                        data-fallback-src="https://via.placeholder.com/400x300?text=Service+Image">
+                                        data-fallback-src="{{ $service->ui_image_fallback }}">
 
                                     {{-- 🟢 UPDATE: Only show badge if NOT approved --}}
                                     @if (strtolower($service->hss_approval_status) !== 'approved')
@@ -290,6 +290,7 @@
         data-edit-url-template="{{ route('services.edit', ['service' => '__ID__'], false) }}"
         data-delete-url-template="{{ route('services.destroy', ['service' => '__ID__'], false) }}"></div>
     @push('scripts')
-        <script src="{{ asset('js/nonadmin-services-manage.js') }}"></script>
+        @php($manageJsVersion = @filemtime(public_path('js/nonadmin-services-manage.js')) ?: time())
+        <script src="{{ asset('js/nonadmin-services-manage.js') }}?v={{ $manageJsVersion }}"></script>
     @endpush
 @endsection

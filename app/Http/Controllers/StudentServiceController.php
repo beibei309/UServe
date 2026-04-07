@@ -90,9 +90,23 @@ class StudentServiceController extends Controller
             $service->ui_image_fallback = 'https://ui-avatars.com/api/?name='.urlencode($service->hss_title ?? 'Service');
             $service->ui_details_url = route('services.details', $service->hss_id);
 
-            $service->ui_seller_avatar_url = $service->user->hu_profile_photo_path
-                ? asset($service->user->hu_profile_photo_path)
-                : 'https://ui-avatars.com/api/?name='.urlencode($isAuthenticated ? $service->user->hu_name : substr((string) $service->user->hu_name, 0, 1)).'&background=random';
+            $sellerName = (string) ($service->user->hu_name ?? 'User');
+            $sellerAvatarFallback = 'https://ui-avatars.com/api/?name='.urlencode($sellerName);
+
+            $sellerPhotoPath = (string) ($service->user->hu_profile_photo_path ?? '');
+            if ($sellerPhotoPath !== '') {
+                if (Str::startsWith($sellerPhotoPath, ['http://', 'https://'])) {
+                    $service->ui_seller_avatar_url = $sellerPhotoPath;
+                } elseif (Str::startsWith($sellerPhotoPath, 'storage/')) {
+                    $service->ui_seller_avatar_url = asset($sellerPhotoPath);
+                } else {
+                    $service->ui_seller_avatar_url = asset('storage/'.ltrim($sellerPhotoPath, '/'));
+                }
+            } else {
+                $service->ui_seller_avatar_url = $sellerAvatarFallback;
+            }
+
+            $service->ui_seller_avatar_fallback = $sellerAvatarFallback;
             $service->ui_seller_display_name = $isAuthenticated
                 ? $service->user->hu_name
                 : Str::limit($service->user->hu_name, 1, '****');
@@ -684,7 +698,11 @@ class StudentServiceController extends Controller
         $services->transform(function (StudentService $service) {
             $status = strtolower((string) $service->hss_approval_status);
             $service->ui_is_suspended = $status === 'suspended';
-            $service->ui_image_url = $this->resolveServiceImageUrl($service->hss_image_path);
+            $service->ui_image_fallback = 'https://ui-avatars.com/api/?name='.urlencode($service->hss_title ?? 'Service');
+            $service->ui_image_url = $this->resolveServiceImageUrl(
+                $service->hss_image_path,
+                $service->ui_image_fallback
+            );
             $service->ui_badge_class = match ($status) {
                 'pending' => 'bg-amber-500 text-white',
                 'rejected' => 'bg-red-500 text-white',
@@ -866,11 +884,13 @@ class StudentServiceController extends Controller
         $detailsCurrentPackage = $service->hss_basic_price ? 'basic' : ($service->hss_standard_price ? 'standard' : 'premium');
         $detailsSessionDuration = (int) ($service->hss_session_duration ?? 60);
         $detailsImagePlaceholder = 'https://ui-avatars.com/api/?name='.urlencode($service->hss_title ?? 'Service');
-        $detailsImageUrl = ! empty($service->hss_image_path) ? $this->resolveServiceImageUrl($service->hss_image_path, $detailsImagePlaceholder) : '';
+        $detailsImageUrl = $this->resolveServiceImageUrl($service->hss_image_path, $detailsImagePlaceholder);
         $detailsWhatsappUrl = $this->buildServiceWhatsappUrl($service);
         $detailsHasPhone = ! empty($detailsWhatsappUrl);
         $providerName = $service->user->hu_name ?? 'User';
         $providerMaskedName = Str::substr($providerName, 0, 1).'****';
+        $detailsProviderAvatarFallback = 'https://ui-avatars.com/api/?name='.urlencode($providerName);
+        $detailsProviderAvatarUrl = $this->resolveServiceImageUrl($service->user->hu_profile_photo_path, $detailsProviderAvatarFallback);
         $isFavouritedByViewer = $isAuthenticatedViewer && (bool) ($service->is_favourited ?? false);
         $daysMap = [
             'mon' => 'Monday',
@@ -909,6 +929,8 @@ class StudentServiceController extends Controller
             'detailsSessionDuration' => $detailsSessionDuration,
             'detailsImageUrl' => $detailsImageUrl,
             'detailsImagePlaceholder' => $detailsImagePlaceholder,
+            'detailsProviderAvatarUrl' => $detailsProviderAvatarUrl,
+            'detailsProviderAvatarFallback' => $detailsProviderAvatarFallback,
             'detailsWhatsappUrl' => $detailsWhatsappUrl,
             'detailsHasPhone' => $detailsHasPhone,
             'detailsOperatingDays' => $detailsOperatingDays,

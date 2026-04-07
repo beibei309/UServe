@@ -125,6 +125,7 @@
                         <td class="py-4 px-6">
                             <div class="flex items-center gap-4">
                                 <img src="{{ $user->profile_image_url }}"
+                                    onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name={{ urlencode($user->hu_name ?? 'User') }}';"
                                     class="w-12 h-12 rounded-full object-cover border-2 transition-colors duration-300 shadow-md"
                                     style="border-color: var(--border-color);">
                                 <div>
@@ -258,6 +259,7 @@
                                                                 <div class="flex-shrink-0">
                                                                     <img class="h-10 w-10 rounded-full object-cover"
                                                                         src="{{ $review->reviewer_image_url }}"
+                                                                        onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name={{ urlencode($review->reviewer->hu_name ?? 'User') }}';"
                                                                         alt="">
                                                                 </div>
 

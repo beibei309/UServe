@@ -367,6 +367,7 @@
                                                 <div class="relative flex-shrink-0">
 
                                                     <img src="{{ $service->ui_seller_avatar_url }}"
+                                                        data-fallback-src="{{ $service->ui_seller_avatar_fallback }}"
                                                         class="w-12 h-12 rounded-2xl object-cover border-2 border-white shadow-md group-hover/user:ring-2 group-hover/user:ring-indigo-500 transition-all duration-300 @guest blur-sm @endguest">
 
                                                     @guest

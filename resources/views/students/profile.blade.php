@@ -1,7 +1,6 @@
 <x-app-layout>
-    <div class="min-h-screen bg-gray-50 py-12">
+    <div class="min-h-screen bg-gray-50 pt-4 pb-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <br><br>
             {{-- 1. PROFILE HEADER SECTION --}}
             <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden mb-10">
                 {{-- Banner --}}

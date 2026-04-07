@@ -140,7 +140,7 @@ class VerificationController extends Controller
    public function uploadPhoto(Request $request)
     {
         $request->validate([
-            'profile_photo' => 'required|image|max:4096'
+            'profile_photo' => 'required|image|max:1024'
         ]);
 
         $user = Auth::user();

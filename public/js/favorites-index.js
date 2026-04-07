@@ -5,6 +5,14 @@
     const toggleUrl = config.dataset.toggleUrl || '';
     const csrfToken = config.dataset.csrfToken || '';
 
+    document.querySelectorAll('img[data-fallback-src]').forEach((img) => {
+        img.addEventListener('error', () => {
+            if (img.dataset.fallbackApplied === '1') return;
+            img.dataset.fallbackApplied = '1';
+            img.src = img.dataset.fallbackSrc;
+        });
+    });
+
     const performRemove = (serviceId, btn) => {
         btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i>';
         btn.disabled = true;

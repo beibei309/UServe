@@ -100,6 +100,11 @@ public function index()
             'https://via.placeholder.com/800x600?text=No+Image'
         );
 
+        $service->ui_image_fallback = 'https://via.placeholder.com/800x600?text=No+Image';
+
+        $sellerName = (string) ($service->user->hu_name ?? 'User');
+        $sellerAvatarFallback = 'https://ui-avatars.com/api/?name=' . urlencode($sellerName);
+
         $sellerPhotoPath = (string) ($service->user->hu_profile_photo_path ?? '');
         if ($sellerPhotoPath !== '') {
             if (Str::startsWith($sellerPhotoPath, ['http://', 'https://'])) {
@@ -110,8 +115,10 @@ public function index()
                 $service->ui_seller_avatar_url = asset('storage/' . ltrim($sellerPhotoPath, '/'));
             }
         } else {
-            $service->ui_seller_avatar_url = 'https://ui-avatars.com/api/?name=' . urlencode((string) $service->user->hu_name);
+            $service->ui_seller_avatar_url = $sellerAvatarFallback;
         }
+
+        $service->ui_seller_avatar_fallback = $sellerAvatarFallback;
 
         return $service;
     });

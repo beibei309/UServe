@@ -14,6 +14,7 @@
     const locationMsg = document.getElementById('location_status_msg');
     const detectBtn = document.getElementById('detect_location_btn');
     const profileInput = document.getElementById('profile_photo_input');
+    const profileForm = document.getElementById('profile_form');
     const profilePreview = document.getElementById('profile-preview');
     const video = document.getElementById('camera_preview');
     const canvas = document.getElementById('snapshot_canvas');
@@ -27,6 +28,7 @@
     const faceGuide = document.getElementById('face_guide');
     const mainForm = document.getElementById('verificationForm');
     const verificationDocumentInput = mainForm?.querySelector('input[name="verification_document"]');
+    const maxProfilePhotoSizeBytes = 1024 * 1024;
     const maxDocumentSizeBytes = 1024 * 1024;
 
     let stream = null;
@@ -110,11 +112,38 @@
         profileInput.addEventListener('change', (e) => {
             const file = e.target.files?.[0];
             if (!file) return;
+
+            if (file.size > maxProfilePhotoSizeBytes) {
+                profileInput.value = '';
+                Swal.fire({
+                    title: 'File too large',
+                    text: 'Profile photo must be 1MB or smaller.',
+                    icon: 'error',
+                });
+                return;
+            }
+
             const reader = new FileReader();
             reader.onload = (ev) => {
                 profilePreview.src = ev.target?.result || profilePreview.src;
             };
             reader.readAsDataURL(file);
+        });
+    }
+
+    if (profileForm && profileInput) {
+        profileForm.addEventListener('submit', (e) => {
+            const file = profileInput.files?.[0];
+            if (!file) return;
+
+            if (file.size > maxProfilePhotoSizeBytes) {
+                e.preventDefault();
+                Swal.fire({
+                    title: 'File too large',
+                    text: 'Profile photo must be 1MB or smaller.',
+                    icon: 'error',
+                });
+            }
         });
     }
 

@@ -16,16 +16,29 @@ class AdminCommunityController extends Controller
 {
 private function resolveProfileImageUrl(?string $path): string
 {
-    if (!$path) {
-        return asset('uploads/profile/default.png');
+    if (! $path) {
+        return 'https://ui-avatars.com/api/?name=User';
     }
+
     if (Str::startsWith($path, ['http://', 'https://'])) {
         return $path;
     }
-    if (file_exists(public_path('storage/' . $path))) {
-        return asset('storage/' . $path);
+
+    if (Str::startsWith($path, 'storage/')) {
+        return asset($path);
     }
-    return asset($path);
+
+    $cleanPath = ltrim($path, '/');
+
+    if (file_exists(public_path('storage/' . $cleanPath))) {
+        return asset('storage/' . $cleanPath);
+    }
+
+    if (file_exists(public_path($cleanPath))) {
+        return asset($cleanPath);
+    }
+
+    return 'https://ui-avatars.com/api/?name=User';
 }
 
    public function index(Request $request)
