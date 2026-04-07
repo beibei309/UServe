@@ -2,6 +2,7 @@
 
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use function Pest\Laravel\actingAs;
 
 require_once __DIR__ . '/TestSeederHelper.php';
 
@@ -39,8 +40,7 @@ test('helpers cannot redeem buyer rewards using seller points', function () {
         'updated_at' => now(),
     ], 'hr_id');
 
-    $response = $this
-        ->actingAs($helper)
+    $response = actingAs($helper)
         ->from('/points/buyer-dashboard')
         ->post(route('points.rewards.redeem'), ['reward_id' => $rewardId]);
 
