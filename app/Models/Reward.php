@@ -70,8 +70,10 @@ class Reward extends Model
             return false;
         }
 
-        // Check if user has enough points
-        if ($user->getAccessibleTotalPoints() < $this->hr_points_cost) {
+        // Check if user has enough points.
+        // Rewards are redeemed from buyer points, so do not allow seller points
+        // to be used to redeem buyer rewards.
+        if ($user->getTotalBuyerPoints() < $this->hr_points_cost) {
             return false;
         }
 

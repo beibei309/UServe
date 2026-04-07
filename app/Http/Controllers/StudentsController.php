@@ -20,17 +20,38 @@ class StudentsController extends Controller
         abort(403);
     }
 
-    // Range handling (default last 30 days)
-    $range = $request->get('range', '30days'); // possible: 30days, 3months, yearly
+    // Range handling (default: monthly)
+    // Supported (UI): weekly, monthly, yearly
+    // Semantics:
+    // - weekly: current week (Mon-Sun)
+    // - monthly: current month (1st - last day)
+    // - yearly: current year (Jan - Dec)
+    // Backward-compatible aliases: 30days -> monthly, 3months -> yearly (legacy)
+    $range = (string) $request->get('range', 'monthly');
+    $range = strtolower(trim($range));
 
-    if ($range === '3months') {
-        $start = Carbon::now()->subMonths(3);
-        $interval = 'day'; // still show daily within range
+    if ($range === '30days') {
+        $range = 'monthly';
+    } elseif ($range === '3months') {
+        // No longer shown in UI; map to yearly to keep the dataset aggregation readable.
+        $range = 'yearly';
+    }
+
+    $now = Carbon::now();
+
+    if ($range === 'weekly') {
+        $start = $now->copy()->startOfWeek(Carbon::MONDAY);
+        $end = $now->copy()->endOfWeek(Carbon::SUNDAY);
+        $interval = 'day';
     } elseif ($range === 'yearly') {
-        $start = Carbon::now()->subYear();
-        $interval = 'month'; // for year show monthly aggregation (more practical)
+        // Always show Jan-Dec for the current year (12 months)
+        $start = $now->copy()->startOfYear();
+        $end = $now->copy()->endOfYear();
+        $interval = 'month';
     } else {
-        $start = Carbon::now()->subDays(29); // last 30 days inclusive
+        $range = 'monthly';
+        $start = $now->copy()->startOfMonth();
+        $end = $now->copy()->endOfMonth();
         $interval = 'day';
     }
 
@@ -39,18 +60,34 @@ class StudentsController extends Controller
     $period = [];
 
     if ($interval === 'day') {
-        $days = $start->diffInDays(Carbon::now());
-        for ($i = 0; $i <= $days; $i++) {
-            $d = $start->copy()->addDays($i);
-            $labels[] = $d->format('M j, Y'); // "Nov 15, 2025"
-            $period[] = $d->format('Y-m-d');
+        // Iterate calendar days inclusively to avoid off-by-one issues from time components
+        $cursor = $start->copy()->startOfDay();
+        $endDate = $end->copy()->startOfDay();
+
+        while ($cursor->lte($endDate)) {
+            if ($range === 'weekly') {
+                $labels[] = $cursor->format('D'); // Mon, Tue, ...
+            } else {
+                $labels[] = $cursor->format('j'); // 1..31
+            }
+            $period[] = $cursor->format('Y-m-d');
+            $cursor->addDay();
         }
     } else { // month
-        $months = $start->diffInMonths(Carbon::now());
-        for ($i = 0; $i <= $months; $i++) {
-            $m = $start->copy()->addMonths($i);
-            $labels[] = $m->format('M Y'); // "Nov 2025"
-            $period[] = $m->format('Y-m'); // use Y-m for grouping
+        if ($range === 'yearly') {
+            $year = (int) $now->format('Y');
+            for ($month = 1; $month <= 12; $month++) {
+                $m = Carbon::create($year, $month, 1);
+                $labels[] = $m->format('M'); // Jan, Feb, ...
+                $period[] = $m->format('Y-m');
+            }
+        } else {
+            $months = $start->diffInMonths($end);
+            for ($i = 0; $i <= $months; $i++) {
+                $m = $start->copy()->addMonths($i);
+                $labels[] = $m->format('M Y'); // "Nov 2025"
+                $period[] = $m->format('Y-m'); // use Y-m for grouping
+            }
         }
     }
 

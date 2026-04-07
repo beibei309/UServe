@@ -133,20 +133,29 @@
 
             <div class="lg:col-span-2">
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 h-full">
-                    <div class="flex items-center justify-between mb-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
                         <div>
                             <h2 class="text-lg font-bold text-slate-900">Performance Overview</h2>
                             <p class="text-sm text-gray-500">Track your earnings and order volume</p>
                         </div>
-                        <form method="GET">
-                            <select name="range" data-auto-submit
-                                class="bg-gray-50 border-0 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block p-2.5 font-medium">
-                                <option value="30days" {{ ($range ?? '30days') === '30days' ? 'selected' : '' }}>Last 30
-                                    Days</option>
-                                <option value="3months" {{ ($range ?? '') === '3months' ? 'selected' : '' }}>Last 3 Months
-                                </option>
-                                <option value="yearly" {{ ($range ?? '') === 'yearly' ? 'selected' : '' }}>Yearly</option>
-                            </select>
+                        <form method="GET" class="shrink-0">
+                            <div class="inline-flex items-center rounded-xl bg-gray-100 p-1 border border-gray-200">
+                                <button type="submit" name="range" value="weekly"
+                                    class="px-3 py-1.5 text-sm font-semibold rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 {{ ($range ?? 'monthly') === 'weekly' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900 hover:bg-white/60' }}"
+                                    aria-pressed="{{ ($range ?? 'monthly') === 'weekly' ? 'true' : 'false' }}">
+                                    Weekly
+                                </button>
+                                <button type="submit" name="range" value="monthly"
+                                    class="px-3 py-1.5 text-sm font-semibold rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 {{ ($range ?? 'monthly') === 'monthly' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900 hover:bg-white/60' }}"
+                                    aria-pressed="{{ ($range ?? 'monthly') === 'monthly' ? 'true' : 'false' }}">
+                                    Monthly
+                                </button>
+                                <button type="submit" name="range" value="yearly"
+                                    class="px-3 py-1.5 text-sm font-semibold rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 {{ ($range ?? 'monthly') === 'yearly' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900 hover:bg-white/60' }}"
+                                    aria-pressed="{{ ($range ?? 'monthly') === 'yearly' ? 'true' : 'false' }}">
+                                    Yearly
+                                </button>
+                            </div>
                         </form>
                     </div>
                     <div class="relative h-[300px] w-full">
@@ -295,6 +304,7 @@
         data-chart-cancelled='@json($cancelled ?? [])'
         data-chart-completed='@json($completedDaily ?? [])'
         data-chart-new-orders='@json($newOrders ?? [])'
+        data-range="{{ $range ?? 'monthly' }}"
         data-is-available="{{ $user->hu_is_available ? 'true' : 'false' }}"
         data-start-date="{{ $user->hu_unavailable_start_date ?? '' }}"
         data-end-date="{{ $user->hu_unavailable_end_date ?? '' }}"

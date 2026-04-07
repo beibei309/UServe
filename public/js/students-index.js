@@ -15,10 +15,18 @@
     const chartCancelled = parseJson(config.dataset.chartCancelled || '[]', []);
     const chartCompleted = parseJson(config.dataset.chartCompleted || '[]', []);
     const chartNewOrders = parseJson(config.dataset.chartNewOrders || '[]', []);
+    const selectedRange = (config.dataset.range || '').toLowerCase();
     const isAvailableInitial = config.dataset.isAvailable === 'true';
     const startDateInitial = config.dataset.startDate || '';
     const endDateInitial = config.dataset.endDate || '';
     const availabilityUpdateUrl = config.dataset.availabilityUpdateUrl || '';
+
+    const getMaxTicksLimit = () => {
+        if (selectedRange === 'weekly') return 7;
+        if (selectedRange === 'yearly') return 12;
+        // monthly (default): keep it scannable
+        return 10;
+    };
 
     function renderOverviewChart() {
         const canvas = document.getElementById('overviewChart');
@@ -133,6 +141,11 @@
                             display: false,
                         },
                         ticks: {
+                            autoSkip: true,
+                            maxTicksLimit: getMaxTicksLimit(),
+                            maxRotation: 0,
+                            minRotation: 0,
+                            padding: 10,
                             font: {
                                 family: "'Plus Jakarta Sans', sans-serif",
                             },
