@@ -593,6 +593,14 @@
                                     @endif>Redemptions</a>
                             </li>
                             <li>
+                                <a href="{{ route('admin.rewards.certificates') }}"
+                                    class="block px-4 py-2 text-sm rounded-lg transition-colors duration-300 submenu-hover
+                                    {{ request()->routeIs('admin.rewards.certificates') ? 'text-cyan-400 font-semibold' : '' }}"
+                                    @if(!request()->routeIs('admin.rewards.certificates'))
+                                    style="color: var(--text-secondary);"
+                                    @endif>Certificates</a>
+                            </li>
+                            <li>
                                 <a href="{{ route('admin.rewards.analytics') }}"
                                     class="block px-4 py-2 text-sm rounded-lg transition-colors duration-300 submenu-hover
                                     {{ request()->routeIs('admin.rewards.analytics') ? 'text-cyan-400 font-semibold' : '' }}"

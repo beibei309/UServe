@@ -3,8 +3,8 @@
 @section('title', 'Certificate - ' . $redemption->hcr_certificate_number)
 
 @section('content')
-<div class="min-h-screen bg-gray-50 py-8">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="min-h-screen bg-gray-50 py-8 certificate-print-wrapper">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 certificate-print-content">
         {{-- Header Section --}}
         <div class="text-center mb-8 no-print">
             <a href="{{ route('points.dashboard') }}" 
@@ -15,92 +15,76 @@
         </div>
 
         {{-- Certificate Display --}}
-        <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-            {{-- Certificate Header --}}
-            <div class="bg-gradient-to-r from-blue-600 to-purple-700 px-8 py-6 text-white text-center">
-                <h1 class="text-3xl font-bold mb-2">Certificate of Achievement</h1>
-                <p class="text-blue-100">UServe Seller Excellence Program</p>
+        <div class="certificate-container">
+            <div class="certificate-header">
+                <h1 class="certificate-title">Certificate of Achievement</h1>
+                <p class="certificate-subtitle">UServe Seller Excellence Program</p>
             </div>
 
-            {{-- Certificate Body --}}
-            <div class="p-12 text-center bg-white">
-                {{-- UPSI Logo --}}
-                <div class="mb-8">
-                    <img src="{{ asset('images/upsilogo.png') }}" alt="UPSI Logo" class="h-20 mx-auto">
-                </div>
+            <div class="certificate-body">
+                <img src="{{ asset('images/upsilogo.png') }}" alt="UPSI Logo" class="certificate-logo">
 
-                {{-- Certificate Content --}}
-                <div class="mb-8">
-                    <h2 class="text-xl text-gray-600 mb-6">This is to certify that</h2>
-                    <h3 class="text-4xl font-bold text-gray-900 mb-6 border-b-2 border-gray-300 pb-4 inline-block">
-                        {{ $redemption->user->hu_name }}
-                    </h3>
-                    <p class="text-lg text-gray-700 mb-6 max-w-2xl mx-auto leading-relaxed">
-                        has successfully completed <strong>3 sales</strong> in the UServe platform and demonstrated 
-                        excellence in providing quality services to the UPSI community.
-                    </p>
-                </div>
+                <p class="certificate-to">This is to certify that</p>
+                <h2 class="certificate-name">{{ $redemption->user->hu_name }}</h2>
 
-                {{-- Certificate Details --}}
-                <div class="border-t border-gray-200 pt-6 mb-8">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div>
-                            <p class="text-sm text-gray-600 mb-1">Certificate Number</p>
-                            <p class="font-bold text-gray-900">{{ $redemption->hcr_certificate_number }}</p>
+                <p class="certificate-description">
+                    has successfully completed <strong>3 sales</strong> in the UServe platform and demonstrated
+                    excellence in providing quality services to the UPSI community.
+                </p>
+
+                <div class="certificate-details">
+                    <div class="certificate-detail-grid">
+                        <div class="certificate-detail-item">
+                            <p class="certificate-detail-label">Certificate Number</p>
+                            <p class="certificate-detail-value">{{ $redemption->hcr_certificate_number }}</p>
                         </div>
-                        <div>
-                            <p class="text-sm text-gray-600 mb-1">Issue Date</p>
-                            <p class="font-bold text-gray-900">
+                        <div class="certificate-detail-item">
+                            <p class="certificate-detail-label">Issue Date</p>
+                            <p class="certificate-detail-value">
                                 {{ $redemption->hcr_issued_at ? $redemption->hcr_issued_at->format('F j, Y') : 'Pending' }}
                             </p>
                         </div>
-                        <div>
-                            <p class="text-sm text-gray-600 mb-1">Achieved Status</p>
-                            @if ($redemption->hcr_status === 'issued')
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-800 font-medium">
-                                    <i class="fas fa-check-circle mr-1"></i>
-                                    Issued
-                                </span>
-                            @else
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-yellow-100 text-yellow-800 font-medium">
-                                    <i class="fas fa-clock mr-1"></i>
-                                    {{ ucfirst($redemption->hcr_status) }}
-                                </span>
-                            @endif
+                        <div class="certificate-detail-item">
+                            <p class="certificate-detail-label">Status</p>
+                            <span class="certificate-status {{ $redemption->hcr_status }}">
+                                {{ ucfirst($redemption->hcr_status) }}
+                            </span>
                         </div>
-                        <div>
-                            <p class="text-sm text-gray-600 mb-1">User ID</p>
-                            <p class="font-bold text-gray-900">{{ $redemption->user->hu_student_id ?? $redemption->user->hu_id }}</p>
+                        <div class="certificate-detail-item">
+                            <p class="certificate-detail-label">User ID</p>
+                            <p class="certificate-detail-value">{{ $redemption->user->hu_student_id ?? $redemption->user->hu_id }}</p>
                         </div>
                     </div>
                 </div>
 
-                {{-- Signature Section --}}
                 @if ($redemption->hcr_status === 'issued')
-                    <div class="border-t border-gray-200 pt-8">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-lg mx-auto">
-                            <div class="text-center border-t-2 border-gray-400 pt-2">
-                                <p class="font-semibold text-gray-900">UServe Administrator</p>
-                                <p class="text-sm text-gray-600">Digital Certificate</p>
+                    <div class="certificate-signatures">
+                        <div class="certificate-signature-grid">
+                            <div class="certificate-signature">
+                                <p class="certificate-signature-name">UServe Administrator</p>
+                                <p class="certificate-signature-title">Digital Certificate</p>
                             </div>
-                            <div class="text-center border-t-2 border-gray-400 pt-2">
-                                <p class="font-semibold text-gray-900">UPSI Official</p>
-                                <p class="text-sm text-gray-600">Authorized Signatory</p>
+                            <div class="certificate-signature">
+                                <p class="certificate-signature-name">UPSI Official</p>
+                                <p class="certificate-signature-title">Authorized Signatory</p>
                             </div>
                         </div>
                     </div>
                 @endif
             </div>
 
-            {{-- Certificate Footer --}}
-            <div class="bg-gray-50 px-8 py-4 border-t border-gray-200">
-                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between text-sm text-gray-600">
-                    <div class="flex items-center">
-                        <i class="fas fa-shield-alt mr-2"></i>
+            <div class="certificate-footer">
+                <div class="certificate-footer-content">
+                    <div class="certificate-footer-item">
+                        <span class="certificate-footer-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </span>
                         <span>Verified by UServe Platform</span>
                     </div>
-                    <div class="flex items-center mt-2 sm:mt-0">
-                        <i class="fas fa-calendar mr-2"></i>
+                    <div class="certificate-footer-item">
+                        <span class="certificate-footer-icon">
+                            <i class="fas fa-calendar"></i>
+                        </span>
                         <span>Generated on {{ now()->format('F j, Y') }}</span>
                     </div>
                 </div>
@@ -152,29 +136,43 @@
 <link href="{{ asset('css/certificate.css') }}" rel="stylesheet">
 <style>
     @media print {
-        @page {
-            size: A4 portrait;
-            margin: 10mm;
-        }
-
         html, body {
-            width: 210mm;
-            min-height: 297mm;
+            background: #ffffff !important;
             margin: 0 !important;
             padding: 0 !important;
-            overflow: visible !important;
         }
 
-        .bg-gray-50 { background: white !important; }
-        .shadow-lg { box-shadow: none !important; }
-        .border { border: 1px solid #ddd !important; }
-        .bg-gradient-to-r { background: #4f46e5 !important; }
-        nav, footer, .print\\:hidden, .no-print { display: none !important; }
+        /* The helper layout renders navbar BEFORE <main>. Hide everything except <main>. */
+        body > .min-h-screen > :not(main) {
+            display: none !important;
+        }
 
-        .max-w-4xl,
-        .max-w-4xl > .bg-white.rounded-xl {
-            max-width: 100% !important;
-            width: 100% !important;
+        body > .min-h-screen,
+        body > .min-h-screen > main {
+            display: block !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        /* Print area should not force extra height/padding */
+        .certificate-print-wrapper {
+            background: #ffffff !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            min-height: auto !important;
+        }
+
+        .certificate-print-content {
+            max-width: none !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+
+        /* Only the certificate should print */
+        .no-print { display: none !important; }
+
+        .certificate-container {
+            break-inside: avoid-page !important;
             page-break-inside: avoid !important;
         }
     }

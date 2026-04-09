@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\CertificateRedemption;
 use App\Models\Reward;
 use App\Models\RewardRedemption;
 use App\Models\User;
@@ -246,6 +247,45 @@ class AdminRewardController extends Controller
             ->paginate(20);
         
         return view('admin.rewards.redemptions', compact('redemptions'));
+    }
+
+    /**
+     * Display list of all certificate redemptions
+     */
+    public function certificates(Request $request)
+    {
+        $query = CertificateRedemption::with('user');
+
+        // Filter by status
+        if ($request->filled('status')) {
+            $query->where('hcr_status', $request->status);
+        }
+
+        // Search by user name or certificate number
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('hcr_certificate_number', 'ILIKE', '%' . $search . '%')
+                  ->orWhereHas('user', function ($userQuery) use ($search) {
+                      $userQuery->where('hu_name', 'ILIKE', '%' . $search . '%');
+                  });
+            });
+        }
+
+        $certificates = $query->orderBy('created_at', 'desc')
+            ->paginate(20);
+
+        return view('admin.rewards.certificates', compact('certificates'));
+    }
+
+    /**
+     * Show a single certificate for admin view
+     */
+    public function showCertificate(CertificateRedemption $certificate)
+    {
+        return view('admin.rewards.certificate-show', [
+            'redemption' => $certificate,
+        ]);
     }
 
     /**

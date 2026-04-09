@@ -355,6 +355,10 @@ Route::middleware(['auth:admin', 'prevent-back-history'])->prefix('admin')->grou
         Route::get('/redemptions', [AdminRewardController::class, 'redemptions'])->name('redemptions');
         Route::patch('/redemptions/{redemption}/status', [AdminRewardController::class, 'updateRedemptionStatus'])->name('redemptions.update-status');
         
+        // Certificates management
+        Route::get('/certificates', [AdminRewardController::class, 'certificates'])->name('certificates');
+        Route::get('/certificates/{certificate}', [AdminRewardController::class, 'showCertificate'])->name('certificates.show');
+        
         // Analytics and exports
         Route::get('/analytics', [AdminRewardController::class, 'analytics'])->name('analytics');
         Route::get('/export-redemptions', [AdminRewardController::class, 'exportRedemptions'])->name('export-redemptions');

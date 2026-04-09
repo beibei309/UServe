@@ -15,6 +15,7 @@
         rel="stylesheet">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @stack('styles')
     <style>
         nav {
             background-color: #ffffff !important;

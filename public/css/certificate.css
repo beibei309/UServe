@@ -396,12 +396,31 @@
     
     .certificate-container {
         box-shadow: none !important;
-        margin: 0 !important;
-        max-width: 210mm !important;
-        min-height: 297mm !important;
-        page-break-inside: avoid !important;
-        page-break-after: auto !important;
+        margin: 0 auto !important;
+        max-width: 190mm !important;
+        width: 100% !important;
+        /* Don't force an unbreakable block; it can create blank pages if content slightly overflows */
+        page-break-inside: auto !important;
     }
+
+    /* Tighten vertical rhythm for print so everything fits on one page */
+    .certificate-header { padding: 1.25rem !important; }
+    .certificate-title { font-size: 2rem !important; margin-bottom: 0.25rem !important; }
+    .certificate-subtitle { font-size: 1rem !important; }
+
+    .certificate-body { padding: 2rem !important; }
+    .certificate-logo { height: 64px !important; margin-bottom: 1.25rem !important; }
+    .certificate-to { font-size: 1.05rem !important; margin-bottom: 1rem !important; }
+    .certificate-name { font-size: 2.25rem !important; margin: 1rem auto !important; padding-bottom: 0.75rem !important; }
+    .certificate-description { font-size: 1rem !important; margin-bottom: 1.25rem !important; }
+
+    .certificate-details { padding-top: 1.25rem !important; margin-top: 1.25rem !important; }
+    .certificate-detail-grid { gap: 1.25rem !important; margin-bottom: 1.25rem !important; }
+
+    .certificate-signatures { padding-top: 1.25rem !important; margin-top: 1.25rem !important; }
+    .certificate-signature-grid { gap: 2rem !important; }
+
+    .certificate-footer { padding: 0.9rem 1.25rem !important; }
     
     .certificate-actions,
     .no-print {
