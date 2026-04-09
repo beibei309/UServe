@@ -864,6 +864,6 @@
         data-reviews-store-url="{{ route('reviews.store') }}"
         data-reviews-reply-url-template="{{ url('/reviews/__ID__/reply') }}"></div>
     @push('scripts')
-        <script src="{{ asset('js/nonadmin-service-requests-helper.js') }}?v={{ filemtime(public_path('js/nonadmin-service-requests-helper.js')) }}"></script>
+        <script src="{{ asset('js/nonadmin-service-requests-helper.js') }}?v={{ $serviceRequestsHelperJsVersion }}"></script>
     @endpush
 @endsection

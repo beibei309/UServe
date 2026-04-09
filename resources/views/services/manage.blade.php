@@ -290,7 +290,6 @@
         data-edit-url-template="{{ route('services.edit', ['service' => '__ID__'], false) }}"
         data-delete-url-template="{{ route('services.destroy', ['service' => '__ID__'], false) }}"></div>
     @push('scripts')
-        @php($manageJsVersion = @filemtime(public_path('js/nonadmin-services-manage.js')) ?: time())
         <script src="{{ asset('js/nonadmin-services-manage.js') }}?v={{ $manageJsVersion }}"></script>
     @endpush
 @endsection

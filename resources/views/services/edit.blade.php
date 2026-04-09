@@ -596,7 +596,7 @@
                                             <input id="unavailableDates" name="unavailable_dates"
                                                 class="w-full pl-10 px-4 py-3 border border-slate-200 rounded-xl bg-white focus:ring-indigo-500"
                                                 placeholder="Select dates..."
-                                                value="{{ $service->hss_unavailable_dates ? implode(',', json_decode($service->hss_unavailable_dates, true)) : '' }}">
+                                                value="{{ $serviceEditUi['unavailable_dates_csv'] ?? '' }}">
                                             <i class="fa-regular fa-calendar absolute left-3.5 top-3.5 text-slate-400"></i>
                                         </div>
 

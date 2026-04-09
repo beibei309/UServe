@@ -889,6 +889,6 @@
         data-success-message="{{ session('success', '') }}"
         data-error-message="{{ $errors->any() ? 'Please check your input or file format.' : '' }}"></div>
     @push('scripts')
-        <script src="{{ asset('js/nonadmin-service-requests-index.js') }}?v={{ filemtime(public_path('js/nonadmin-service-requests-index.js')) }}"></script>
+        <script src="{{ asset('js/nonadmin-service-requests-index.js') }}?v={{ $serviceRequestsIndexJsVersion }}"></script>
     @endpush
 </x-app-layout>

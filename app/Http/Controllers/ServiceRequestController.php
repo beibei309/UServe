@@ -268,12 +268,14 @@ class ServiceRequestController extends BaseController
                     ->get();
 
                 $receivedRequests = $requests;
+                $serviceRequestsHelperJsVersion = @filemtime(public_path('js/nonadmin-service-requests-helper.js')) ?: time();
 
                 return view('service-requests.helper', compact(
                     'receivedRequests',
                     'categories',
                     'serviceTypes',
-                    'defaultStatusTab'
+                    'defaultStatusTab',
+                    'serviceRequestsHelperJsVersion'
                 ));
             }
 
@@ -283,11 +285,13 @@ class ServiceRequestController extends BaseController
                 ->filter()
                 ->unique()
                 ->values();
+            $serviceRequestsIndexJsVersion = @filemtime(public_path('js/nonadmin-service-requests-index.js')) ?: time();
 
             return view('service-requests.index', compact(
                 'sentRequests',
                 'uniqueCategories',
-                'defaultStatusTab'
+                'defaultStatusTab',
+                'serviceRequestsIndexJsVersion'
             ));
         } catch (\Exception $e) {
             Log::error('ServiceRequest index error: ' . $e->getMessage());

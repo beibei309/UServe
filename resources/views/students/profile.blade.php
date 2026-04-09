@@ -181,16 +181,16 @@
                         </div>
                     </div>
 
-                    @if ($user->skills ?? $user->hu_skills)
+                    @if (!empty($profileUi['skills_list']))
                         <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                             <h3 class="font-bold text-gray-900 mb-4 flex items-center gap-2">
                                 <i class="fa-solid fa-wand-magic-sparkles text-indigo-500"></i> Skills
                             </h3>
                             <div class="flex flex-wrap gap-2">
-                                @foreach (explode(',', $user->skills ?? $user->hu_skills) as $skill)
+                                @foreach ($profileUi['skills_list'] as $skill)
                                     <span
                                         class="px-3 py-1 rounded-lg text-sm font-medium bg-slate-100 text-slate-700 border border-slate-200">
-                                        {{ trim($skill) }}
+                                        {{ $skill }}
                                     </span>
                                 @endforeach
                             </div>

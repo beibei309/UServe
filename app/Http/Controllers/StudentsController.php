@@ -600,6 +600,7 @@ public function deleteWorkExperienceFile()
             'latest_report_reason_short' => $latestReportReason ? Str::limit($latestReportReason, 140) : null,
             'member_since_display' => optional($memberSinceSource)->format('M Y') ?? 'N/A',
             'faculty_short_display' => $this->facultyShortLabel($user->hu_faculty ?? $user->faculty),
+            'skills_list' => $this->parseSkillsListForDisplay($user->skills ?? $user->hu_skills),
         ];
 
         return view('students.profile', [
@@ -645,5 +646,15 @@ public function deleteWorkExperienceFile()
         }
 
         return "https://wa.me/{$cleanPhone}?text=Hi " . urlencode($user->hu_name) . ', I saw your profile on S2U.';
+    }
+
+    private function parseSkillsListForDisplay(?string $rawSkills): array
+    {
+        $value = trim((string) $rawSkills);
+        if ($value === '') {
+            return [];
+        }
+
+        return array_values(array_filter(array_map('trim', explode(',', $value)), static fn ($skill) => $skill !== ''));
     }
 }

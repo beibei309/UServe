@@ -90,6 +90,7 @@ class AdminStudentController extends Controller
     $student->graduation_date_display = optional($student->studentStatus)->hss_graduation_date
         ? Carbon::parse($student->studentStatus->hss_graduation_date)->format('d M Y')
         : null;
+        $student->skills_list = $this->parseSkillsListForDisplay($student->skills);
 
     return view('admin.students.view', compact('student'));
 }
@@ -292,6 +293,16 @@ private function normalizeFacultyName(?string $faculty): ?string
 
     $map = $this->facultyCanonicalMap();
     return $map[$value] ?? $value;
+}
+
+private function parseSkillsListForDisplay(?string $rawSkills): array
+{
+    $value = trim((string) $rawSkills);
+    if ($value === '') {
+        return [];
+    }
+
+    return array_values(array_filter(array_map('trim', explode(',', $value)), static fn ($skill) => $skill !== ''));
 }
 
 // Show helper verification selfie

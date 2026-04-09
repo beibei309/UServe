@@ -155,6 +155,9 @@ class StudentServiceController extends Controller
             }
         }
         $serviceImageUrl = $this->resolveServiceImageUrl($service->hss_image_path);
+        $serviceEditUi = [
+            'unavailable_dates_csv' => $this->formatUnavailableDatesForInput($service->hss_unavailable_dates),
+        ];
 
         $bookedSlots = \App\Models\ServiceRequest::where('hsr_student_service_id', $service->hss_id)
             ->whereIn('hsr_status', ['accepted', 'approved', 'in_progress'])
@@ -171,7 +174,7 @@ class StudentServiceController extends Controller
                 return $date.' '.$time;
             });
 
-        return view('services.edit', compact('service', 'categories', 'bookedSlots', 'scheduleData', 'serviceImageUrl'));
+        return view('services.edit', compact('service', 'categories', 'bookedSlots', 'scheduleData', 'serviceImageUrl', 'serviceEditUi'));
     }
 
     public function update(Request $request, StudentService $service): JsonResponse
@@ -672,6 +675,25 @@ class StudentServiceController extends Controller
         return strtr($text, $replacements);
     }
 
+    private function formatUnavailableDatesForInput($rawUnavailableDates): string
+    {
+        if (is_array($rawUnavailableDates)) {
+            return implode(',', $rawUnavailableDates);
+        }
+
+        $value = trim((string) $rawUnavailableDates);
+        if ($value === '') {
+            return '';
+        }
+
+        $decoded = json_decode($value, true);
+        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+            return implode(',', $decoded);
+        }
+
+        return $value;
+    }
+
     public function manage(Request $request)
     {
         $user = $request->user();
@@ -732,7 +754,9 @@ class StudentServiceController extends Controller
             ->unique('hc_id')
             ->filter();
 
-        return view('services.manage', compact('services', 'categories', 'servicesByStatus'));
+        $manageJsVersion = @filemtime(public_path('js/nonadmin-services-manage.js')) ?: time();
+
+        return view('services.manage', compact('services', 'categories', 'servicesByStatus', 'manageJsVersion'));
     }
 
     private function resolveServiceImageUrl(?string $path, ?string $fallback = null): string

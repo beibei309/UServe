@@ -367,7 +367,7 @@
                         </div>
                     @endif
 
-                    @if ($student->skills)
+                    @if (!empty($student->skills_list))
                         <div class="mb-8 p-6 rounded-xl border transition-all duration-300" style="background-color: var(--bg-primary); border-color: var(--border-color);">
                             <div class="flex items-center gap-3 mb-4">
                                 <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
@@ -378,8 +378,8 @@
                                 </h3>
                             </div>
                             <div class="flex flex-wrap gap-2">
-                                @foreach (explode(',', $student->skills) as $skill)
-                                    <span class="px-3 py-1 bg-purple-50 text-purple-700 rounded-lg text-sm font-medium border border-purple-200">{{ trim($skill) }}</span>
+                                @foreach ($student->skills_list as $skill)
+                                    <span class="px-3 py-1 bg-purple-50 text-purple-700 rounded-lg text-sm font-medium border border-purple-200">{{ $skill }}</span>
                                 @endforeach
                             </div>
                         </div>
