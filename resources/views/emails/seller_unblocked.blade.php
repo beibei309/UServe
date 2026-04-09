@@ -19,7 +19,7 @@
 
         <div class="content">
             <p>Dear {{ $user->hu_name }},</p>
-            <p>Your seller access on S2U has been restored by the admin after moderation review.</p>
+            <p>Your seller access on UPSI2u has been restored by the admin after moderation review.</p>
 
             <div class="notice-box">
                 You can now continue providing services on the platform.
@@ -29,7 +29,7 @@
         </div>
 
         <div class="footer">
-            <p>&copy; {{ date('Y') }} UPSI Connect. All rights reserved.</p>
+            <p>&copy; {{ date('Y') }} UPSI2u. All rights reserved.</p>
         </div>
     </div>
 </body>

@@ -1,6 +1,6 @@
-# UServe
+# UPSI2u
 
-UServe is a Laravel 12 application with a strict prefixed PostgreSQL schema contract.
+UPSI2u is a Laravel 12 application with a strict prefixed PostgreSQL schema contract.
 
 ## Schema Contract
 

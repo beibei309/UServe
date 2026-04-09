@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>U-Serve | Upsi Service Circle</title>
+    <title>UPSI2u | UPSI Service Circle</title>
     <link rel="icon" type="image/png" href="/images/logo.png">
 
     <!-- Fonts -->
@@ -189,10 +189,10 @@
                         <h1 class="text-4xl md:text-5xl font-black text-slate-900 mb-6 leading-tight">
                             Empowering the <span
                                 class="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">UPSI
-                                Community</span> through U-Serve
+                                Community</span> through UPSI2u
                         </h1>
                         <p class="text-lg text-slate-600 leading-relaxed mb-8">
-                            U-Serve (UPSI Service Circle) is more than just a marketplace. It is a dedicated ecosystem
+                            UPSI2u (UPSI Service Circle) is more than just a marketplace. It is a dedicated ecosystem
                             designed specifically for UPSI students to bridge the gap between talent and needs. Whether
                             you're looking for expert tutoring, creative design, or technical coding help, your peers
                             are here to deliver.
@@ -211,7 +211,7 @@
                             @else
                                 <a href="{{ route('register') }}"
                                     class="px-8 py-4 bg-blue-600 text-white rounded-2xl font-bold hover:bg-blue-700 transition-all duration-300 shadow-xl shadow-blue-200">
-                                    Join U-Serve Today!
+                                    Join UPSI2u Today!
                                 </a>
                             @endauth
                         </div>
@@ -314,7 +314,7 @@
                             <div class="relative group">
                                 <p
                                     class="text-lg text-slate-600 leading-relaxed italic border-l-4 border-blue-500 pl-6 md:border-none md:pl-0">
-                                    "U-Serve was developed in 2025 out of a simple need: a trusted, friendly, and more effective
+                                    "UPSI2u was developed in 2025 out of a simple need: a trusted, friendly, and more effective
                                     way for UPSI students to help one another."
                                 </p>
                             </div>
@@ -335,7 +335,7 @@
                                 </div>
 
                                 <p>
-                                    Today, U-Serve stands as a leader in student-led services at UPSI, continuously growing
+                                    Today, UPSI2u stands as a leader in student-led services at UPSI, continuously growing
                                     as more students turn to us for verified, peer-to-peer excellence.
                                 </p>
                             </div>
@@ -476,7 +476,7 @@
 
     <div class="max-w-4xl mx-auto px-6 relative z-10">
         <h2 class="text-4xl md:text-6xl font-black text-white mb-8 tracking-tight leading-tight">
-            Over <span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">{{ number_format($totalUsers ?? 1250) }}+</span> Students Have Used U-Serve
+            Over <span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">{{ number_format($totalUsers ?? 1250) }}+</span> Students Have Used UPSI2u
         </h2>
         <p class="text-slate-400 text-lg md:text-xl mb-12 max-w-2xl mx-auto">
             Find a better way to learn and earn. Join the UPSI student movement transforming the campus economy.

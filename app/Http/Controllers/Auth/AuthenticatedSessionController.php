@@ -41,7 +41,7 @@ class AuthenticatedSessionController extends Controller
             $request->session()->regenerateToken();
 
             throw ValidationException::withMessages([
-                'email' => "{$statusMessage} due to the reason: \"{$reason}\". Please contact admin@upsiconnect.com for assistance regarding your account."
+                'email' => "{$statusMessage} due to the reason: \"{$reason}\". Please contact admin@upsi2u.upsi.edu.my for assistance regarding your account."
             ]);
         }
 

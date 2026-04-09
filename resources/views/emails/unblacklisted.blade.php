@@ -19,14 +19,14 @@
         </div>
         <div class="content">
             <p>Dear {{ $user->hu_name }},</p>
-            <p>Your account restriction has been lifted. You can now access S2U again.</p>
+            <p>Your account restriction has been lifted. You can now access UPSI2u again.</p>
             <div class="notice-box">
                 Your account is back to active status.
             </div>
             <a class="button" href="{{ config('app.url') . '/login' }}">Login Now</a>
         </div>
         <div class="footer">
-            <p>&copy; {{ date('Y') }} UPSI Connect. All rights reserved.</p>
+            <p>&copy; {{ date('Y') }} UPSI2u. All rights reserved.</p>
         </div>
     </div>
 </body>

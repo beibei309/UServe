@@ -18,13 +18,13 @@
         </div>
         <div class="content">
             <p>Dear {{ $user->hu_name }},</p>
-            <p>Great news. Your account on S2U has been reactivated.</p>
+            <p>Great news. Your account on UPSI2u has been reactivated.</p>
             <div class="notice-box">
                 You can now log in and continue using platform features.
             </div>
         </div>
         <div class="footer">
-            <p>&copy; {{ date('Y') }} UPSI Connect. All rights reserved.</p>
+            <p>&copy; {{ date('Y') }} UPSI2u. All rights reserved.</p>
         </div>
     </div>
 </body>

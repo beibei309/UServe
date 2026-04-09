@@ -38,7 +38,7 @@ class VerifyEmailRelativeNotification extends VerifyEmail
 
         // Use the branded Blade template
         return (new MailMessage)
-            ->subject('Verify Your Email – U-Serve')
+            ->subject('Verify Your Email – UPSI2u')
             ->view('emails.verify-email', [
                 'url'  => $verificationUrl,
                 'name' => $notifiable->hu_name ?? 'User',

@@ -8,7 +8,7 @@
             <div class="col-span-1 lg:col-span-1">
                 <div class="flex items-center gap-2 mb-6">
                     <span class="text-3xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">
-                       Home2U 
+                       UPSI2u 
                     </span>
                 </div>
                 <p class="text-slate-400 text-sm leading-relaxed mb-8 max-w-xs">
@@ -73,7 +73,7 @@
 
         <div class="pt-8 border-t border-slate-900 flex flex-col md:flex-row justify-between items-center gap-6">
             <div class="text-slate-500 text-xs tracking-wide">
-                &copy; {{ date('Y') }} <span class="text-slate-300 font-semibold">Home2U | UPSI Service Circle</span>. All rights reserved.
+                &copy; {{ date('Y') }} <span class="text-slate-300 font-semibold">UPSI2u | UPSI Service Circle</span>. All rights reserved.
             </div>
             
             <div class="flex items-center gap-6">

@@ -627,7 +627,7 @@ class IntegrationSnapshotSeeder extends Seeder
         }
 
         $faqs = [
-            ['category' => 'General & Accounts', 'question' => 'Who can use U-Serve?', 'answer' => 'U-Serve can be used by students and community users in the Muallim area.', 'is_active' => true, 'display_order' => 1],
+            ['category' => 'General & Accounts', 'question' => 'Who can use UPSI2u?', 'answer' => 'UPSI2u can be used by students and community users in the Muallim area.', 'is_active' => true, 'display_order' => 1],
             ['category' => 'Safety & Support', 'question' => 'Why was my service banned?', 'answer' => 'Services can be banned for policy violations, repeated reports, or unsafe activity.', 'is_active' => true, 'display_order' => 1],
         ];
 

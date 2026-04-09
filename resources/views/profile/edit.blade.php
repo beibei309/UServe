@@ -101,7 +101,7 @@
                         {{-- Quick Help Box --}}
                         <div class="mt-4 p-5 bg-slate-50 rounded-[1.5rem] border border-slate-100">
                             <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Need Help?</p>
-                            <p class="text-xs text-slate-500 leading-relaxed">Contact U-Serve support if you're having trouble changing your credentials.</p>
+                            <p class="text-xs text-slate-500 leading-relaxed">Contact UPSI2u support if you're having trouble changing your credentials.</p>
                         </div>
                     </div>
                 </aside>

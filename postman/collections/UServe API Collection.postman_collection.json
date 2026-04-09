@@ -1,8 +1,8 @@
 {
   "info": {
     "_postman_id": "24ebfd1d-d2a5-47a8-ac64-cb7a7bbbd26b",
-    "name": "UServe API Collection",
-    "description": "Complete API collection for UServe services marketplace",
+    "name": "UPSI2u API Collection",
+    "description": "Complete API collection for UPSI2u services marketplace",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [

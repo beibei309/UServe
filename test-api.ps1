@@ -1,7 +1,7 @@
 # API Testing Script
 # Save as test-api.ps1 and run with: .\test-api.ps1
 
-Write-Host "🚀 UServe API Testing Script" -ForegroundColor Magenta
+Write-Host "🚀 UPSI2u API Testing Script" -ForegroundColor Magenta
 Write-Host "================================" -ForegroundColor Magenta
 
 $baseUrl = "http://localhost:8000/api/v1"

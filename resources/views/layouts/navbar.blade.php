@@ -60,7 +60,7 @@
 
             <a href="{{ $isLoggedIn ? route('dashboard') : route('home') }}" class="flex-shrink-0 flex items-center cursor-pointer gap-2">
 
-                <img src="{{ asset('images/logo-svg.png') }}" alt="U-Serve Logo" class="h-20 w-auto object-contain">
+                <img src="{{ asset('images/logo-svg.png') }}" alt="UPSI2u Logo" class="h-20 w-auto object-contain">
 
                 @if ($viewMode === 'seller')
                     <span

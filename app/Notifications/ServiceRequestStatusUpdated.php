@@ -149,7 +149,7 @@ class ServiceRequestStatusUpdated extends Notification
             
             ->line($instruction)
             ->action('View Request & Chat', route('service-requests.show', $this->serviceRequest->hsr_id))
-            ->line('Thank you for using S2U - UPSI Connect.')
-            ->salutation('Regards, The S2U Team');
+            ->line('Thank you for using UPSI2u.')
+            ->salutation('Regards, The UPSI2u Team');
     }
 }

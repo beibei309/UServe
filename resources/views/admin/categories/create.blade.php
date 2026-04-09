@@ -38,7 +38,7 @@
                 </div>
                 <div>
                     <h1 class="text-white font-bold text-2xl">Create New Category</h1>
-                    <p class="text-purple-100 text-sm">Add a new service category to the UServe platform</p>
+                    <p class="text-purple-100 text-sm">Add a new service category to the UPSI2u platform</p>
                 </div>
             </div>
         </div>
@@ -79,7 +79,7 @@
                                    class="w-full px-4 py-3 rounded-xl border transition-all duration-300 focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                                    style="background-color: var(--bg-primary); border-color: var(--border-color); color: var(--text-primary);"
                                    placeholder="Enter new category name" required>
-                            <p class="text-xs mt-2 transition-colors duration-300" style="color: var(--text-muted);">Enter a new UServe service category name</p>
+                            <p class="text-xs mt-2 transition-colors duration-300" style="color: var(--text-muted);">Enter a new UPSI2u service category name</p>
                         </div>
 
                         {{-- Slug --}}

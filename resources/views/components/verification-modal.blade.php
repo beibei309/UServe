@@ -40,7 +40,7 @@
 
                 <p class="text-xs text-slate-500 mt-6">
                     If you believe this is a mistake, please contact support at
-                    <a href="mailto:support@U-Serve.upsi.edu.my" class="text-indigo-600 hover:underline font-semibold">support@U-Serve.upsi.edu.my</a>.
+                    <a href="mailto:support@upsi2u.upsi.edu.my" class="text-indigo-600 hover:underline font-semibold">support@upsi2u.upsi.edu.my</a>.
                 </p>
             </div>
         </div>

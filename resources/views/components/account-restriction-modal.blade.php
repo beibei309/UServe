@@ -32,7 +32,7 @@
                 </form>
                 <div class="text-xs text-slate-500 mt-4">
                     If you believe this is a mistake, please contact our support team at 
-                    <a href="mailto:support@uservemalaysia.com" class="text-indigo-600 hover:underline">support@uservemalaysia.com</a>
+                    <a href="mailto:support@upsi2u.upsi.edu.my" class="text-indigo-600 hover:underline">support@upsi2u.upsi.edu.my</a>
                 </div>
             </div>
         </div>

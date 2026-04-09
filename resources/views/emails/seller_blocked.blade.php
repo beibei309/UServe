@@ -18,7 +18,7 @@
         </div>
         <div class="content">
             <p>Dear {{ $user->hu_name }},</p>
-            <p>Your seller access on S2U has been blocked after moderation review.</p>
+            <p>Your seller access on UPSI2u has been blocked after moderation review.</p>
             <div class="notice-box">
                 <strong>Reason:</strong><br>
                 {{ $reason }}
@@ -26,7 +26,7 @@
             <p>You can still use buyer features. Contact support if you believe this action is incorrect.</p>
         </div>
         <div class="footer">
-            <p>&copy; {{ date('Y') }} UPSI Connect. All rights reserved.</p>
+            <p>&copy; {{ date('Y') }} UPSI2u. All rights reserved.</p>
         </div>
     </div>
 </body>

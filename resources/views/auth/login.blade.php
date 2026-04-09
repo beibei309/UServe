@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>U-Serve | Upsi Service Circle</title>
+    <title>UPSI2u | UPSI Service Circle</title>
     <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
 
     {{-- SCRIPTS & STYLES --}}
@@ -58,7 +58,7 @@
 
             <div class="text-center mb-8">
                 <h2 class="text-2xl font-bold text-gray-900 tracking-tight">Welcome back</h2>
-                <p class="mt-2 text-sm text-gray-500">Sign in to your U-Serve account.</p>
+                <p class="mt-2 text-sm text-gray-500">Sign in to your UPSI2u account.</p>
             </div>
 
             <x-auth-session-status class="mb-4" :status="session('status')" />
@@ -119,7 +119,7 @@
                         <div class="w-full border-t border-gray-200"></div>
                     </div>
                     <div class="relative flex justify-center text-sm">
-                        <span class="px-3 bg-white text-gray-500 font-medium">New to U-Serve?</span>
+                        <span class="px-3 bg-white text-gray-500 font-medium">New to UPSI2u?</span>
                     </div>
                 </div>
 

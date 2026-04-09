@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>U-Serve | Upsi Service Circle</title>
+    <title>UPSI2u | UPSI Service Circle</title>
     <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -180,7 +180,7 @@
                     <h2 class="text-blue-600 font-bold tracking-widest uppercase text-xs mb-3">Advantages</h2>
                     <h3 class="text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight mb-6">
                         Why choose <span
-                            class="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">U-Serve</span>
+                            class="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">UPSI2u</span>
                     </h3>
                     <p class="text-lg text-slate-600 leading-relaxed">
                         We create a safe, reliable environment for students to connect, earn, and collaborate within the
@@ -387,7 +387,7 @@
                 </h2>
 
                 <p class="text-slate-400 text-lg md:text-xl mb-12 max-w-2xl mx-auto leading-relaxed">
-                    Join hundreds of UPSI students who are already connecting, learning, and earning on U-Serve today.
+                    Join hundreds of UPSI students who are already connecting, learning, and earning on UPSI2u today.
                 </p>
 
                 <div class="flex flex-col sm:flex-row justify-center items-center gap-4">

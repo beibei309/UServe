@@ -25,7 +25,7 @@
             <p>Please review platform guidelines and resubmit after updates.</p>
         </div>
         <div class="footer">
-            <p>&copy; {{ date('Y') }} UPSI Connect. All rights reserved.</p>
+            <p>&copy; {{ date('Y') }} UPSI2u. All rights reserved.</p>
         </div>
     </div>
 </body>

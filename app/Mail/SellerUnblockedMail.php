@@ -20,7 +20,7 @@ class SellerUnblockedMail extends Mailable
 
     public function build()
     {
-        return $this->subject('S2U: Seller Access Restored')
+        return $this->subject('UPSI2u: Seller Access Restored')
             ->view('emails.seller_unblocked');
     }
 }

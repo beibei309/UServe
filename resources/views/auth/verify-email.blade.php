@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Verify Email - U-Serve</title>
+    <title>Verify Email - UPSI2u</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -59,7 +59,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
                 <div class="flex-shrink-0 flex items-center">
-                    <h1 class="text-3xl font-extrabold tracking-tight text-indigo-600">U-Serve</h1>
+                    <h1 class="text-3xl font-extrabold tracking-tight text-indigo-600">UPSI2u</h1>
                 </div>
             </div>
         </div>
@@ -181,7 +181,7 @@
 
             <!-- Footer Note -->
             <p class="mt-6 text-center text-xs text-slate-400">
-                Need help? Contact us at <a href="mailto:support@upsiconnect.com" class="text-indigo-600 hover:text-indigo-700 font-medium">support@upsiconnect.com</a>
+                Need help? Contact us at <a href="mailto:support@upsi2u.upsi.edu.my" class="text-indigo-600 hover:text-indigo-700 font-medium">support@upsi2u.upsi.edu.my</a>
             </p>
         </div>
     </div>

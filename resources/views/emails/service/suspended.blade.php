@@ -25,7 +25,7 @@
             <p>During suspension, this service is not visible to users. Please contact admin if you want to appeal.</p>
         </div>
         <div class="footer">
-            <p>&copy; {{ date('Y') }} UPSI Connect. All rights reserved.</p>
+            <p>&copy; {{ date('Y') }} UPSI2u. All rights reserved.</p>
         </div>
     </div>
 </body>

@@ -18,7 +18,7 @@
         <div class="certificate-container">
             <div class="certificate-header">
                 <h1 class="certificate-title">Certificate of Achievement</h1>
-                <p class="certificate-subtitle">UServe Seller Excellence Program</p>
+                <p class="certificate-subtitle">UPSI2u Seller Excellence Program</p>
             </div>
 
             <div class="certificate-body">
@@ -28,7 +28,7 @@
                 <h2 class="certificate-name">{{ $redemption->user->hu_name }}</h2>
 
                 <p class="certificate-description">
-                    has successfully completed <strong>3 sales</strong> in the UServe platform and demonstrated
+                    has successfully completed <strong>3 sales</strong> in the UPSI2u platform and demonstrated
                     excellence in providing quality services to the UPSI community.
                 </p>
 
@@ -61,7 +61,7 @@
                     <div class="certificate-signatures">
                         <div class="certificate-signature-grid">
                             <div class="certificate-signature">
-                                <p class="certificate-signature-name">UServe Administrator</p>
+                                <p class="certificate-signature-name">UPSI2u Administrator</p>
                                 <p class="certificate-signature-title">Digital Certificate</p>
                             </div>
                             <div class="certificate-signature">
@@ -79,7 +79,7 @@
                         <span class="certificate-footer-icon">
                             <i class="fas fa-shield-alt"></i>
                         </span>
-                        <span>Verified by UServe Platform</span>
+                        <span>Verified by UPSI2u Platform</span>
                     </div>
                     <div class="certificate-footer-item">
                         <span class="certificate-footer-icon">
@@ -121,7 +121,7 @@
             </h3>
             <div class="text-sm text-blue-800">
                 <ul class="space-y-2">
-                    <li>• This certificate acknowledges your dedication to providing quality services on the UServe platform.</li>
+                    <li>• This certificate acknowledges your dedication to providing quality services on the UPSI2u platform.</li>
                     <li>• Certificates are issued after successfully completing 3 verified sales transactions.</li>
                     <li>• This digital certificate is officially recognized by UPSI and can be used for portfolio purposes.</li>
                     <li>• You can continue earning more certificates as you complete additional sales milestones.</li>

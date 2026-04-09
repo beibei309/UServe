@@ -4,7 +4,7 @@
         <div class="mb-6">
             <a href="/" class="flex items-center gap-2">
                 <div class="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">S</div>
-                <span class="text-2xl font-bold text-gray-900 tracking-tight">S2U</span>
+                <span class="text-2xl font-bold text-gray-900 tracking-tight">UPSI2u</span>
             </a>
         </div>
 

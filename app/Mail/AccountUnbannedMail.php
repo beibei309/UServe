@@ -29,7 +29,7 @@ class AccountUnbannedMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'S2U: Account Reactivated', // Updated subject here
+            subject: 'UPSI2u: Account Reactivated', // Updated subject here
         );
     }
 

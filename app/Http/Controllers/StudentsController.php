@@ -645,7 +645,7 @@ public function deleteWorkExperienceFile()
             return null;
         }
 
-        return "https://wa.me/{$cleanPhone}?text=Hi " . urlencode($user->hu_name) . ', I saw your profile on S2U.';
+        return "https://wa.me/{$cleanPhone}?text=Hi " . urlencode($user->hu_name) . ', I saw your profile on UPSI2u.';
     }
 
     private function parseSkillsListForDisplay(?string $rawSkills): array

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verify Your Email – U-Serve</title>
+    <title>Verify Your Email – UPSI2u</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { background-color: #f1f5f9; font-family: 'Segoe UI', Arial, sans-serif; color: #1e293b; }
@@ -29,13 +29,13 @@
     <div class="wrapper">
         <div class="card">
             <div class="header">
-                <h1>Home2U</h1>
+                <h1>UPSI2u</h1>
                 <p>UPSI Service Circle</p>
             </div>
             <div class="body">
                 <p class="greeting">Hi {{ $name }},</p>
                 <p class="message">
-                    Thank you for registering on <strong>U-Serve</strong>, the official UPSI student service platform.
+                    Thank you for registering on <strong>UPSI2u</strong>, the official UPSI student service platform.
                     To activate your account and start exploring services, please verify your email address by clicking the button below.
                 </p>
 
@@ -52,9 +52,9 @@
             <div class="footer">
                 <p>
                     If you did not create an account, you can safely ignore this email.<br>
-                    Need help? Contact us at <a href="mailto:noreply@d09103.schtg.com">support@u-serve.upsi.edu.my</a>
+                    Need help? Contact us at <a href="mailto:support@upsi2u.upsi.edu.my">support@upsi2u.upsi.edu.my</a>
                 </p>
-                <p style="margin-top: 12px;">© {{ date('Y') }} U-Serve · Home2U · UPSI Muallim</p>
+                <p style="margin-top: 12px;">© {{ date('Y') }} UPSI2u. All rights reserved.</p>
             </div>
         </div>
     </div>

@@ -1,4 +1,4 @@
-# UServe API Documentation
+# UPSI2u API Documentation
 
 ## Base URL
 ```

@@ -18,7 +18,7 @@
         </div>
         <div class="content">
             <p>Dear {{ $user->hu_name }},</p>
-            <p>Your account on S2U has been permanently blacklisted.</p>
+            <p>Your account on UPSI2u has been permanently blacklisted.</p>
             <div class="notice-box">
                 <strong>Reason:</strong><br>
                 {{ $reason }}
@@ -26,7 +26,7 @@
             <p>If you believe this action is incorrect, please contact support.</p>
         </div>
         <div class="footer">
-            <p>&copy; {{ date('Y') }} UPSI Connect. All rights reserved.</p>
+            <p>&copy; {{ date('Y') }} UPSI2u. All rights reserved.</p>
         </div>
     </div>
 </body>

@@ -22,7 +22,7 @@ class SellerBlockedMail extends Mailable
 
     public function build()
     {
-        return $this->subject('S2U: Seller Access Blocked')
+        return $this->subject('UPSI2u: Seller Access Blocked')
             ->view('emails.seller_blocked');
     }
 }

@@ -20,7 +20,7 @@
                 <nav class="flex justify-center mb-6">
                     <span
                         class="px-3 py-1 text-xs font-bold tracking-widest uppercase bg-indigo-50 text-indigo-600 rounded-full border border-indigo-100">
-                        U-Serve Help Center
+                        UPSI2u Help Center
                     </span>
                 </nav>
                 <h1 class="text-4xl md:text-5xl font-black text-slate-900 tracking-tight mb-6">
@@ -110,11 +110,11 @@
                             help you with anything you need.</p>
 
                         <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                            <a href="mailto:support@U-Serve.upsi.edu.my"
+                            <a href="mailto:support@upsi2u.upsi.edu.my"
                                 class="inline-flex items-center justify-center px-8 py-4 bg-slate-900 text-white font-bold rounded-2xl hover:bg-indigo-600 transition-all shadow-lg hover:shadow-indigo-200 active:scale-95">
                                 Send an Email
                             </a>
-                            <a href="mailto:support@U-Serve.upsi.edu.my?subject=U-Serve%20Support%20Request"
+                            <a href="mailto:support@upsi2u.upsi.edu.my?subject=UPSI2u%20Support%20Request"
                                 class="inline-flex items-center justify-center px-8 py-4 bg-white text-slate-700 font-bold rounded-2xl border border-slate-200 hover:border-indigo-600 hover:text-indigo-600 transition-all">
                                 Contact
                             </a>

@@ -24,7 +24,7 @@ class AccountBannedMail extends Mailable
 }
 
 public function build() {
-    return $this->subject('S2U: Account Suspended')
+    return $this->subject('UPSI2u: Account Suspended')
                 ->view('emails.account_banned');
 }
 

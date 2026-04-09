@@ -1,6 +1,6 @@
-# UServe API Client Examples
+# UPSI2u API Client Examples
 
-This file contains example code for consuming the UServe API in different programming languages.
+This file contains example code for consuming the UPSI2u API in different programming languages.
 
 ## JavaScript/Node.js Example
 
@@ -111,7 +111,7 @@ async function getCategories() {
 import requests
 from typing import Optional, Dict, Any
 
-class UServeAPI:
+class UPSI2uAPI:
     def __init__(self, base_url: str):
         self.base_url = base_url.rstrip('/')
         self.session = requests.Session()
@@ -172,7 +172,7 @@ class UServeAPI:
         return data['data']
 
 # Usage example
-api = UServeAPI('https://your-domain.com')
+api = UPSI2uAPI('https://your-domain.com')
 
 # Find services
 services = api.find_services(search='math', category_id=1, sort='rating')
@@ -323,7 +323,7 @@ export const useServiceDetails = (serviceId) => {
 ```php
 <?php
 
-class UServeApiClient
+class UPSI2uApiClient
 {
     private $baseUrl;
     private $httpClient;
@@ -388,7 +388,7 @@ class UServeApiClient
 }
 
 // Usage
-$api = new UServeApiClient('https://your-domain.com');
+$api = new UPSI2uApiClient('https://your-domain.com');
 
 // Find services
 $result = $api->findServices(['search' => 'math', 'category_id' => 1]);

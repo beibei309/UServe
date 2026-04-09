@@ -16,14 +16,14 @@ class FaqSeeder extends Seeder
         Faq::insert([
             [
                 'hfq_category' => 'General & Accounts',
-                'hfq_question' => 'Who can use S2U?',
-                'hfq_answer' => 'S2U is designed for the UPSI ecosystem. It can be used by UPSI students (as service providers or buyers), UPSI staff, and the surrounding local community members who need ad-hoc services.',
+                'hfq_question' => 'Who can use UPSI2u?',
+                'hfq_answer' => 'UPSI2u is designed for the UPSI ecosystem. It can be used by UPSI students (as service providers or buyers), UPSI staff, and the surrounding local community members who need ad-hoc services.',
                 'hfq_display_order' => 1,
             ],
             [
                 'hfq_category' => 'General & Accounts',
-                'hfq_question' => 'Is S2U free to use?',
-                'hfq_answer' => 'Yes. S2U is completely free to join and browse. There are no hidden platform fees or commissions charged by S2U. You pay the student directly for the service agreed upon.',
+                'hfq_question' => 'Is UPSI2u free to use?',
+                'hfq_answer' => 'Yes. UPSI2u is completely free to join and browse. There are no hidden platform fees or commissions charged by UPSI2u. You pay the student directly for the service agreed upon.',
                 'hfq_display_order' => 2,
             ],
             [
