@@ -22,6 +22,7 @@
                                 @if ($user->hu_profile_photo_path)
                                     <img src="{{ asset( $user->hu_profile_photo_path) }}"
                                         alt="{{ $user->hu_name }}"
+                                        onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name={{ urlencode((string) ($user->hu_name ?? 'U')) }}';"
                                         class="w-full h-full object-cover transition transform group-hover:scale-105">
                                 @else
                                     <div
@@ -263,6 +264,7 @@
     @if ($service->ui_image_url)
         <img src="{{ $service->ui_image_url }}" 
             alt="{{ $service->hss_title }}"
+            onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name={{ urlencode((string) ($service->hss_title ?? 'Service')) }}';"
             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
     @else
         <div class="w-full h-full flex items-center justify-center bg-slate-50 text-slate-300">
@@ -377,6 +379,7 @@
         {{-- Display Image --}}
         <img src="{{ asset($review->reviewer->hu_profile_photo_path) }}" 
              alt="{{ $review->reviewer->hu_name }}"
+             onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name={{ urlencode((string) ($review->reviewer->hu_name ?? 'A')) }}';"
              class="w-11 h-11 rounded-full object-cover border border-indigo-100 shadow-sm">
     @else
         {{-- Fallback to Initials --}}

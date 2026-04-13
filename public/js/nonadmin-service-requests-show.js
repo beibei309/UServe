@@ -138,6 +138,13 @@
             img.dataset.fallbackApplied = '1';
             img.src = fallback;
         });
+
+        if (img.complete && img.naturalWidth === 0) {
+            const fallback = img.dataset.fallbackSrc;
+            if (!fallback || img.dataset.fallbackApplied === '1') return;
+            img.dataset.fallbackApplied = '1';
+            img.src = fallback;
+        }
     });
 
     document.addEventListener('click', (event) => {

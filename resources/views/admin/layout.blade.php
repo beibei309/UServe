@@ -365,8 +365,7 @@
                             <li>
                                 <a href="{{ route('admin.faqs.index') }}"
                                     class="block px-4 py-2 text-sm rounded-lg transition-colors duration-300 submenu-hover {{ request()->routeIs('admin.faqs.*') ? 'text-cyan-400 font-semibold' : '' }}"
-                                    style="color: var(--text-secondary);">Help
-                                    page</a>
+                                    style="color: var(--text-secondary);">FAQs</a>
                             </li>
                             <li>
                                 <a href="{{ route('admin.legal-pages.index') }}"

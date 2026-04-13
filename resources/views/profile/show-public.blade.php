@@ -21,6 +21,7 @@
                     <div class="absolute -top-16 left-8">
                         @if ($user->hu_profile_photo_path)
                             <img src="{{ asset($user->hu_profile_photo_path) }}"
+                                onerror="if (this.dataset.fallbackApplied === '1') return; this.dataset.fallbackApplied = '1'; this.src='https://ui-avatars.com/api/?name={{ urlencode($user->hu_name) }}';"
                                 class="w-32 h-32 rounded-full border-4 border-white shadow-md object-cover bg-white">
                         @else
                             <div
@@ -125,6 +126,7 @@
                                         {{-- Check if reviewer exists AND has a photo --}}
                                         @if ($review->reviewer && $review->reviewer->hu_profile_photo_path)
                                             <img src="{{ asset($review->reviewer->hu_profile_photo_path) }}"
+                                                onerror="if (this.dataset.fallbackApplied === '1') return; this.dataset.fallbackApplied = '1'; this.src='https://ui-avatars.com/api/?name={{ urlencode($review->reviewer->hu_name ?? 'Anonymous') }}';"
                                                 class="w-10 h-10 rounded-full object-cover border border-slate-200"
                                                 alt="{{ $review->reviewer->hu_name }}">
                                         @else

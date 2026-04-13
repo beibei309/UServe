@@ -16,9 +16,20 @@
         const serviceId = service.hss_id ?? service.id;
         const getField = (prefixed, fallback) => service[prefixed] ?? service[fallback] ?? null;
         const imageUrl = service.ui_image_url || 'https://via.placeholder.com/400x300?text=Service+Image';
+        const imageFallback = service.ui_image_fallback || 'https://via.placeholder.com/400x300?text=Service+Image';
 
         document.getElementById('modalTitle').textContent = getField('hss_title', 'title') || 'Untitled Service';
-        document.getElementById('modalImage').src = imageUrl;
+        const modalImage = document.getElementById('modalImage');
+        if (modalImage) {
+            modalImage.dataset.fallbackSrc = imageFallback;
+            modalImage.dataset.fallbackApplied = '0';
+            modalImage.onerror = () => {
+                if (modalImage.dataset.fallbackApplied === '1') return;
+                modalImage.dataset.fallbackApplied = '1';
+                modalImage.src = modalImage.dataset.fallbackSrc || 'https://via.placeholder.com/400x300?text=Service+Image';
+            };
+            modalImage.src = imageUrl;
+        }
 
         const categoryEl = document.getElementById('modalCategory');
         if (service.category) {
@@ -196,6 +207,11 @@
             img.dataset.fallbackApplied = '1';
             img.src = img.dataset.fallbackSrc;
         });
+
+        if (img.complete && img.naturalWidth === 0 && img.dataset.fallbackApplied !== '1') {
+            img.dataset.fallbackApplied = '1';
+            img.src = img.dataset.fallbackSrc;
+        }
     });
 
     document.addEventListener('click', (event) => {

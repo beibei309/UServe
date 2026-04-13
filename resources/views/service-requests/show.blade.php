@@ -207,7 +207,7 @@
 
                                             <div class="w-20 h-20 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0 grayscale">
                                                 @if ($serviceImageUrl)
-                                                    <img src="{{ $serviceImageUrl }}" data-fallback-src="{{ $serviceImageFallback }}" class="w-full h-full object-cover">
+                                                    <img src="{{ $serviceImageUrl }}" data-fallback-src="{{ $serviceImageFallback }}" onerror="if (this.dataset.fallbackApplied === '1') return; this.dataset.fallbackApplied = '1'; this.src='{{ $serviceImageFallback }}';" class="w-full h-full object-cover">
                                                 @else
                                                     <div class="w-full h-full flex items-center justify-center text-gray-400">
                                                         <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd" /></svg>
@@ -227,7 +227,7 @@
                                         <a href="{{ route('services.details', $service->hss_id) }}" class="block bg-white rounded-xl border border-gray-200 p-5 flex gap-4 items-start hover:shadow-md transition-all hover:border-indigo-300 group">
                                             <div class="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
                                                 @if ($serviceImageUrl)
-                                                    <img src="{{ $serviceImageUrl }}" data-fallback-src="{{ $serviceImageFallback }}" class="w-full h-full object-cover">
+                                                    <img src="{{ $serviceImageUrl }}" data-fallback-src="{{ $serviceImageFallback }}" onerror="if (this.dataset.fallbackApplied === '1') return; this.dataset.fallbackApplied = '1'; this.src='{{ $serviceImageFallback }}';" class="w-full h-full object-cover">
                                                 @else
                                                     <div class="w-full h-full flex items-center justify-center text-gray-300">
                                                         <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd" /></svg>
@@ -273,7 +273,7 @@
                                                 </div>
                                             @else
                                                 <a href="{{ $paymentProofUrl }}" target="_blank" class="block">
-                                                    <img src="{{ $paymentProofUrl }}" alt="Payment Proof" class="max-w-full h-auto max-h-96 object-contain rounded-md shadow-sm hover:opacity-95 transition-opacity">
+                                                    <img src="{{ $paymentProofUrl }}" data-fallback-src="{{ $serviceImageFallback }}" onerror="if (this.dataset.fallbackApplied === '1') return; this.dataset.fallbackApplied = '1'; this.src='{{ $serviceImageFallback }}';" alt="Payment Proof" class="max-w-full h-auto max-h-96 object-contain rounded-md shadow-sm hover:opacity-95 transition-opacity">
                                                 </a>
                                             @endif
                                         </div>
@@ -294,7 +294,7 @@
                                     @if($providerRestricted)
                                         <div class="flex items-center gap-3 p-2 -ml-2 rounded-lg bg-gray-50 border border-gray-100 opacity-75 cursor-not-allowed">
                                             <div class="relative">
-                                                <img src="{{ $serviceRequest->provider->hu_profile_photo_path ? asset($serviceRequest->provider->hu_profile_photo_path) : 'https://ui-avatars.com/api/?name=' . urlencode($serviceRequest->provider->hu_name) }}" class="w-10 h-10 rounded-full border border-gray-200 grayscale">
+                                                <img src="{{ $serviceRequest->provider->hu_profile_photo_path ? asset($serviceRequest->provider->hu_profile_photo_path) : 'https://ui-avatars.com/api/?name=' . urlencode($serviceRequest->provider->hu_name) }}" onerror="if (this.dataset.fallbackApplied === '1') return; this.dataset.fallbackApplied = '1'; this.src='https://ui-avatars.com/api/?name={{ urlencode($serviceRequest->provider->hu_name) }}';" class="w-10 h-10 rounded-full border border-gray-200 grayscale">
                                             </div>
                                             <div>
                                                 <p class="text-sm font-bold text-gray-500 line-through">{{ $serviceRequest->provider->hu_name }}</p>
@@ -306,7 +306,7 @@
                                         </div>
                                     @else
                                         <a href="{{ route('students.profile', $serviceRequest->provider->hu_id) }}" class="flex items-center gap-3 p-2 -ml-2 rounded-lg hover:bg-gray-50 transition-colors group">
-                                            <img src="{{ $serviceRequest->provider->hu_profile_photo_path ? asset($serviceRequest->provider->hu_profile_photo_path) : 'https://ui-avatars.com/api/?name=' . urlencode($serviceRequest->provider->hu_name) }}" class="w-10 h-10 rounded-full border border-gray-200 group-hover:border-indigo-200">
+                                            <img src="{{ $serviceRequest->provider->hu_profile_photo_path ? asset($serviceRequest->provider->hu_profile_photo_path) : 'https://ui-avatars.com/api/?name=' . urlencode($serviceRequest->provider->hu_name) }}" onerror="if (this.dataset.fallbackApplied === '1') return; this.dataset.fallbackApplied = '1'; this.src='https://ui-avatars.com/api/?name={{ urlencode($serviceRequest->provider->hu_name) }}';" class="w-10 h-10 rounded-full border border-gray-200 group-hover:border-indigo-200">
                                             <div>
                                                 <p class="text-sm font-bold text-gray-900 group-hover:text-indigo-600 transition-colors">{{ $serviceRequest->provider->hu_name }} <span class="text-gray-300 text-[10px] ml-1">↗</span></p>
                                                 <div class="flex items-center text-xs text-yellow-500">
@@ -324,7 +324,7 @@
                                     @if($buyerRestricted)
                                         <div class="flex items-center gap-3 p-2 -ml-2 rounded-lg bg-gray-50 border border-gray-100 opacity-75 cursor-not-allowed">
                                             <div class="relative">
-                                                <img src="{{ $serviceRequest->requester->hu_profile_photo_path ? asset($serviceRequest->requester->hu_profile_photo_path) : 'https://ui-avatars.com/api/?name=' . urlencode($serviceRequest->requester->hu_name) }}" class="w-10 h-10 rounded-full border border-gray-200 grayscale">
+                                                <img src="{{ $serviceRequest->requester->hu_profile_photo_path ? asset($serviceRequest->requester->hu_profile_photo_path) : 'https://ui-avatars.com/api/?name=' . urlencode($serviceRequest->requester->hu_name) }}" onerror="if (this.dataset.fallbackApplied === '1') return; this.dataset.fallbackApplied = '1'; this.src='https://ui-avatars.com/api/?name={{ urlencode($serviceRequest->requester->hu_name) }}';" class="w-10 h-10 rounded-full border border-gray-200 grayscale">
                                             </div>
                                             <div>
                                                 <p class="text-sm font-bold text-gray-500 line-through">{{ $serviceRequest->requester->hu_name }}</p>
@@ -336,7 +336,7 @@
                                         </div>
                                     @else
                                         <a href="{{ route('profile.public', $serviceRequest->requester->hu_id) }}" class="flex items-center gap-3 p-2 -ml-2 rounded-lg hover:bg-gray-50 transition-colors group">
-                                            <img src="{{ $serviceRequest->requester->hu_profile_photo_path ? asset($serviceRequest->requester->hu_profile_photo_path) : 'https://ui-avatars.com/api/?name=' . urlencode($serviceRequest->requester->hu_name) }}" class="w-10 h-10 rounded-full border border-gray-200 group-hover:border-blue-200">
+                                            <img src="{{ $serviceRequest->requester->hu_profile_photo_path ? asset($serviceRequest->requester->hu_profile_photo_path) : 'https://ui-avatars.com/api/?name=' . urlencode($serviceRequest->requester->hu_name) }}" onerror="if (this.dataset.fallbackApplied === '1') return; this.dataset.fallbackApplied = '1'; this.src='https://ui-avatars.com/api/?name={{ urlencode($serviceRequest->requester->hu_name) }}';" class="w-10 h-10 rounded-full border border-gray-200 group-hover:border-blue-200">
                                             <div>
                                                 <p class="text-sm font-bold text-gray-900 group-hover:text-blue-600 transition-colors">{{ $serviceRequest->requester->hu_name }} <span class="text-gray-300 text-[10px] ml-1">↗</span></p>
                                                 <div class="flex items-center text-xs text-yellow-500">
