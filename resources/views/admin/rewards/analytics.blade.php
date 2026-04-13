@@ -65,7 +65,7 @@
                                 </div>
                                 <div>
                                     <div class="font-medium transition-colors duration-300" style="color: var(--text-primary);">{{ $redeemer->user->hu_name ?? 'Unknown User' }}</div>
-                                    <div class="text-sm transition-colors duration-300" style="color: var(--text-secondary);">{{ $redeemer->user->email ?? 'No email' }}</div>
+                                    <div class="text-sm transition-colors duration-300" style="color: var(--text-secondary);">{{ $redeemer->user->hu_email ?? $redeemer->user->email ?? 'No email' }}</div>
                                 </div>
                             </div>
                             <div class="text-right">

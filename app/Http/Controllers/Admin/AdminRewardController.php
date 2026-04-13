@@ -393,7 +393,7 @@ class AdminRewardController extends Controller
                 fputcsv($file, [
                     $redemption->hrr_id,
                     $redemption->user->hu_name ?? 'Unknown',
-                    $redemption->user->email ?? 'Unknown',
+                    $redemption->user->hu_email ?? $redemption->user->email ?? 'Unknown',
                     $redemption->reward->hr_title ?? 'Deleted Reward',
                     $redemption->reward->hr_type ?? 'Unknown',
                     $redemption->hrr_points_used,
