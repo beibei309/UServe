@@ -83,7 +83,7 @@
                                     {{ $redemption->user->hu_name ?? 'Unknown User' }}
                                 </div>
                                 <div class="text-sm transition-colors duration-300" style="color: var(--text-secondary);">
-                                    {{ $redemption->user->email ?? 'No email' }}
+                                    {{ $redemption->user->hu_email ?? $redemption->user->email ?? 'No email' }}
                                 </div>
                                 <div class="text-sm font-medium text-blue-600 mt-1">
                                     {{ $redemption->reward->hr_title ?? 'Deleted Reward' }}
