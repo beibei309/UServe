@@ -301,9 +301,8 @@ class StudentsController extends Controller
         $user->hu_role = 'helper'; // or $user->status = 'helper', depending on your DB column
         $user->save();
 
-        return redirect()->route('students.create')
-                        ->with('status', 'Profile updated successfully!')
-                        ->with('ready_to_help', true);
+        return redirect()->route('services.create')
+                ->with('success', 'Profile updated successfully. Continue by creating your first service.');
     }
 
     public function edit()
