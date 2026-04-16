@@ -1,4 +1,8 @@
 <x-guest-layout>
+    @php
+        $supportEmail = \App\Models\PageContent::get('settings.support_email', 'support@upsi2u.upsi.edu.my');
+        $supportHours = \App\Models\PageContent::get('settings.support_hours', 'Mon-Fri, 8AM-5PM');
+    @endphp
     <div x-data="{
         selected: null,
         search: '',
@@ -106,15 +110,15 @@
                             </svg>
                         </div>
                         <h3 class="text-2xl font-black text-slate-900 mb-3">Still need a hand?</h3>
-                        <p class="text-slate-500 mb-8 max-w-sm mx-auto">Our support team is online from 8AM - 5PM to
+                        <p class="text-slate-500 mb-8 max-w-sm mx-auto">Our support team is online {{ $supportHours }} to
                             help you with anything you need.</p>
 
                         <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                            <a href="mailto:support@upsi2u.upsi.edu.my"
+                            <a href="mailto:{{ $supportEmail }}"
                                 class="inline-flex items-center justify-center px-8 py-4 bg-slate-900 text-white font-bold rounded-2xl hover:bg-indigo-600 transition-all shadow-lg hover:shadow-indigo-200 active:scale-95">
                                 Send an Email
                             </a>
-                            <a href="mailto:support@upsi2u.upsi.edu.my?subject=UPSI2u%20Support%20Request"
+                            <a href="mailto:{{ $supportEmail }}?subject=UPSI2u%20Support%20Request"
                                 class="inline-flex items-center justify-center px-8 py-4 bg-white text-slate-700 font-bold rounded-2xl border border-slate-200 hover:border-indigo-600 hover:text-indigo-600 transition-all">
                                 Contact
                             </a>

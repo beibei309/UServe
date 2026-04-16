@@ -1,4 +1,9 @@
 <footer class="bg-slate-950 text-white pt-24 pb-12 border-t border-slate-900 relative overflow-hidden">
+    @php
+        $facebookUrl = \App\Models\PageContent::get('settings.facebook_url', 'https://www.facebook.com/UPSIMalaysia/');
+        $instagramUrl = \App\Models\PageContent::get('settings.instagram_url', 'https://www.instagram.com/upsi_malaysia');
+        $tiktokUrl = \App\Models\PageContent::get('settings.tiktok_url', 'https://www.tiktok.com/@upsi_malaysia');
+    @endphp
     <div class="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-blue-500/50 to-transparent"></div>
     
     <div class="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
@@ -16,13 +21,13 @@
                 </p>
                 
                 <div class="flex space-x-3">
-                    <a href="https://www.facebook.com/UPSIMalaysia/" target="_blank" rel="noopener noreferrer" title="Facebook" aria-label="Facebook" class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white hover:bg-blue-600 hover:border-blue-500 transition-all duration-300">
+                    <a href="{{ $facebookUrl }}" target="_blank" rel="noopener noreferrer" title="Facebook" aria-label="Facebook" class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white hover:bg-blue-600 hover:border-blue-500 transition-all duration-300">
                         <i class="fa-brands fa-facebook"></i>
                     </a>
-                    <a href="https://www.instagram.com/upsi_malaysia" target="_blank" rel="noopener noreferrer" title="Instagram" aria-label="Instagram" class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white hover:bg-gradient-to-tr from-yellow-500 via-red-500 to-purple-500 hover:border-transparent transition-all duration-300">
+                    <a href="{{ $instagramUrl }}" target="_blank" rel="noopener noreferrer" title="Instagram" aria-label="Instagram" class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white hover:bg-gradient-to-tr from-yellow-500 via-red-500 to-purple-500 hover:border-transparent transition-all duration-300">
                         <i class="fa-brands fa-instagram"></i>
                     </a>
-                    <a href="https://www.tiktok.com/@upsi_malaysia" target="_blank" rel="noopener noreferrer" title="TikTok" aria-label="TikTok" class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-900 hover:border-slate-600 transition-all duration-300">
+                    <a href="{{ $tiktokUrl }}" target="_blank" rel="noopener noreferrer" title="TikTok" aria-label="TikTok" class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-900 hover:border-slate-600 transition-all duration-300">
                         <i class="fa-brands fa-tiktok"></i>
                     </a>
                 </div>

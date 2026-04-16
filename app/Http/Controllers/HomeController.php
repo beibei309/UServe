@@ -201,29 +201,35 @@ public function about()
 
     public function terms()
     {
-        $legalPage = LegalPage::where('hlp_slug', 'terms')->where('hlp_is_active', true)->first();
+        $legalPage = LegalPage::where('hlp_slug', 'terms')->first();
+        $isPublished = (bool) ($legalPage?->hlp_is_active ?? true);
 
         if (! $legalPage) {
             $legalPage = new LegalPage([
                 'hlp_title' => 'Terms of Service',
                 'hlp_content' => '1. Introduction' . "\n" . 'This page is currently being prepared.',
+                'hlp_is_active' => true,
             ]);
+            $isPublished = true;
         }
 
-        return view('legal.terms', compact('legalPage'));
+        return view('legal.terms', compact('legalPage', 'isPublished'));
     }
 
     public function privacy()
     {
-        $legalPage = LegalPage::where('hlp_slug', 'privacy')->where('hlp_is_active', true)->first();
+        $legalPage = LegalPage::where('hlp_slug', 'privacy')->first();
+        $isPublished = (bool) ($legalPage?->hlp_is_active ?? true);
 
         if (! $legalPage) {
             $legalPage = new LegalPage([
                 'hlp_title' => 'Privacy Policy',
                 'hlp_content' => '1. Policy Overview' . "\n" . 'This page is currently being prepared.',
+                'hlp_is_active' => true,
             ]);
+            $isPublished = true;
         }
 
-        return view('legal.privacy', compact('legalPage'));
+        return view('legal.privacy', compact('legalPage', 'isPublished'));
     }
 }

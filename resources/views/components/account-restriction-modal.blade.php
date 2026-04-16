@@ -1,5 +1,8 @@
 @auth
     @if($accountRestrictionData['isRestricted'])
+        @php
+            $supportEmail = \App\Models\PageContent::get('settings.support_email', 'support@upsi2u.upsi.edu.my');
+        @endphp
         <div class="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/80 backdrop-blur-sm p-4">
             <div class="bg-white border border-slate-200 rounded-2xl shadow-2xl max-w-md w-full p-8 text-center relative overflow-hidden">
                 <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-red-500 to-rose-600"></div>
@@ -32,7 +35,7 @@
                 </form>
                 <div class="text-xs text-slate-500 mt-4">
                     If you believe this is a mistake, please contact our support team at 
-                    <a href="mailto:support@upsi2u.upsi.edu.my" class="text-indigo-600 hover:underline">support@upsi2u.upsi.edu.my</a>
+                    <a href="mailto:{{ $supportEmail }}" class="text-indigo-600 hover:underline">{{ $supportEmail }}</a>
                 </div>
             </div>
         </div>

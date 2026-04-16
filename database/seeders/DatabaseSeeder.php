@@ -33,6 +33,7 @@ class DatabaseSeeder extends Seeder
             $this->call([
                 AboutSeeder::class,
                 FaqSeeder::class,
+                PageContentSeeder::class,
             ]);
 
             $categories = $this->seedCategories();
@@ -65,6 +66,7 @@ class DatabaseSeeder extends Seeder
             'h2u_service_requests',
             'h2u_student_services',
             'h2u_categories',
+            'h2u_page_contents',
             'h2u_users',
         ];
 

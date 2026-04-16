@@ -54,6 +54,9 @@
 </head>
 
 <body class="antialiased">
+    @php
+        $supportEmail = \App\Models\PageContent::get('settings.support_email', 'support@upsi2u.upsi.edu.my');
+    @endphp
     <!-- Header with Logo -->
     <nav class="bg-white shadow-sm border-b border-gray-100">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -181,7 +184,7 @@
 
             <!-- Footer Note -->
             <p class="mt-6 text-center text-xs text-slate-400">
-                Need help? Contact us at <a href="mailto:support@upsi2u.upsi.edu.my" class="text-indigo-600 hover:text-indigo-700 font-medium">support@upsi2u.upsi.edu.my</a>
+                Need help? Contact us at <a href="mailto:{{ $supportEmail }}" class="text-indigo-600 hover:text-indigo-700 font-medium">{{ $supportEmail }}</a>
             </p>
         </div>
     </div>

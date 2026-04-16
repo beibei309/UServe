@@ -58,6 +58,22 @@
 </head>
 
 <body class="antialiased text-slate-800">
+    @php
+        $dashboardHeroImage = \App\Models\PageContent::get('dashboard.hero_image', 'images/bgupsi.jpg');
+    @endphp
+        @php
+            $dashboardHeroBadgeTemplate = \App\Models\PageContent::get('dashboard.hero_badge', 'Welcome back, {name}!');
+            $dashboardHeroBadge = str_replace('{name}', $dashboardUi['welcome_name'], (string) $dashboardHeroBadgeTemplate);
+            $dashboardHeroTitleLine1 = \App\Models\PageContent::get('dashboard.hero_title_line_1', 'Find the perfect');
+            $dashboardHeroTitleHighlight = \App\Models\PageContent::get('dashboard.hero_title_highlight', 'student seller');
+            $dashboardHeroTitleLine2 = \App\Models\PageContent::get('dashboard.hero_title_line_2', 'for your needs.');
+            $dashboardHeroSubtitle = \App\Models\PageContent::get('dashboard.hero_subtitle', 'Discover talented UPSI students offering professional services. From design to daily tasks, get it done by your community.');
+            $dashboardSearchPlaceholder = \App\Models\PageContent::get('dashboard.search_placeholder', 'What service are you looking for today?');
+            $dashboardPopularLabel = \App\Models\PageContent::get('dashboard.popular_label', 'Popular:');
+            $dashboardCategoriesTitle = \App\Models\PageContent::get('dashboard.categories_title', 'Explore Categories');
+            $dashboardRecommendedTitle = \App\Models\PageContent::get('dashboard.recommended_title', 'Services you might like');
+            $dashboardRecommendedSubtitle = \App\Models\PageContent::get('dashboard.recommended_subtitle', 'Recommended based on popular demand.');
+        @endphp
         {{-- Navigation bar --}}
         @include('layouts.navbar')
 
@@ -65,7 +81,7 @@
 
             {{-- 1. BACKGROUND IMAGE START --}}
             <div class="absolute inset-0"> {{-- Removed -z-10 --}}
-                <img src="{{ asset('images/bgupsi.jpg') }}" alt="Background" class="w-full h-full object-cover">
+                <img src="{{ asset($dashboardHeroImage) }}" alt="Background" class="w-full h-full object-cover">
 
                 {{-- Keep the overlay here --}}
                 <div class="absolute inset-0 bg-gray-900/80"></div>
@@ -86,16 +102,15 @@
             <div class="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center z-10">
                 <span
                     class="inline-block py-1 px-3 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-sm font-semibold mb-6">
-                    Welcome back, {{ $dashboardUi['welcome_name'] }}!
+                    {{ $dashboardHeroBadge }}
                 </span>
 
                 <h1 class="text-4xl md:text-5xl font-extrabold text-white tracking-tight mb-6 leading-tight">
-                    Find the perfect <span class="text-indigo-400">student seller</span><br>for your needs.
+                    {{ $dashboardHeroTitleLine1 }} <span class="text-indigo-400">{{ $dashboardHeroTitleHighlight }}</span><br>{{ $dashboardHeroTitleLine2 }}
                 </h1>
 
                 <p class="text-lg text-slate-300 mb-10 max-w-2xl mx-auto"> {{-- Changed text-slate-400 to text-slate-300 for better contrast on bg --}}
-                    Discover talented UPSI students offering professional services. From design to daily tasks, get it
-                    done by your community.
+                    {{ $dashboardHeroSubtitle }}
                 </p>
 
                 <div class="w-full max-w-3xl mx-auto mb-8">
@@ -111,7 +126,7 @@
                             id="dashboard-search-input"
                             value="{{ $dashboardUi['search_query'] }}"
                             class="block w-full pl-14 pr-4 py-5 bg-white/95 backdrop-blur-sm rounded-2xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-indigo-500/30 shadow-xl text-lg font-medium transition-all"
-                            placeholder="What service are you looking for today?">
+                            placeholder="{{ $dashboardSearchPlaceholder }}">
                         <button type="submit"
                             class="absolute right-3 top-3 bottom-3 bg-indigo-600 hover:bg-indigo-700 text-white px-6 rounded-xl font-semibold transition-colors shadow-lg">
                             Search
@@ -120,7 +135,7 @@
                 </div>
 
                 <div class="flex flex-wrap justify-center gap-3 text-sm">
-                    <span class="text-slate-400 mr-2 py-1.5">Popular:</span>
+                    <span class="text-slate-400 mr-2 py-1.5">{{ $dashboardPopularLabel }}</span>
                     @foreach($dashboardUi['popular_searches'] as $popularSearch)
                     <a href="{{ route('services.index', ['q' => $popularSearch['query']]) }}"
                         class="px-4 py-1.5 rounded-full bg-slate-800/60 border border-slate-700 text-slate-300 hover:bg-indigo-600 hover:text-white hover:border-indigo-500 transition-all cursor-pointer backdrop-blur-sm">{{ $popularSearch['label'] }}</a>
@@ -133,7 +148,7 @@
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex justify-between items-end mb-8">
                     <div>
-                        <h2 class="text-2xl font-bold text-slate-900">Explore Categories</h2>
+                        <h2 class="text-2xl font-bold text-slate-900">{{ $dashboardCategoriesTitle }}</h2>
                     </div>
                     <div class="flex gap-2">
                         <button id="dashboardCategoriesScrollLeft"
@@ -182,8 +197,8 @@
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex flex-col md:flex-row justify-between items-end mb-10 gap-4">
                     <div>
-                        <h2 class="text-3xl font-bold text-slate-900">Services you might like</h2>
-                        <p class="text-slate-500 mt-2">Recommended based on popular demand.</p>
+                        <h2 class="text-3xl font-bold text-slate-900">{{ $dashboardRecommendedTitle }}</h2>
+                        <p class="text-slate-500 mt-2">{{ $dashboardRecommendedSubtitle }}</p>
                     </div>
                     <a href="{{ route('services.index') }}"
                         class="text-indigo-600 font-semibold hover:text-indigo-700 flex items-center gap-1 group">

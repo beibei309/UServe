@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\AdminFeedbackController;
 use App\Http\Controllers\Admin\AdminRequestController;
 use App\Http\Controllers\Admin\AdminRewardController;
 use App\Http\Controllers\Admin\AdminLegalPagesController;
+use App\Http\Controllers\Admin\AdminPageContentController;
 use App\Http\Controllers\Admin\AdminServicesController;
 use App\Http\Controllers\Admin\AdminStudentController;
 use App\Http\Controllers\Admin\AdminStudentStatusController;
@@ -310,6 +311,19 @@ Route::middleware(['auth:admin', 'prevent-back-history'])->prefix('admin')->grou
     // LEGAL PAGE MANAGEMENT
     Route::get('/legal-pages', [AdminLegalPagesController::class, 'index'])->name('admin.legal-pages.index');
     Route::put('/legal-pages/{legalPage}', [AdminLegalPagesController::class, 'update'])->name('admin.legal-pages.update');
+
+    // PAGE CONTENT MANAGEMENT
+    Route::prefix('page-content')->name('admin.page-content.')->group(function () {
+        Route::get('/', [AdminPageContentController::class, 'index'])->name('index');
+        Route::get('/{page}/edit', [AdminPageContentController::class, 'edit'])->name('edit');
+        Route::put('/{page}', [AdminPageContentController::class, 'update'])->name('update');
+        Route::post('/media/{slug}', [AdminPageContentController::class, 'uploadMedia'])
+            ->where('slug', '[A-Za-z0-9._-]+')
+            ->name('upload-media');
+        Route::post('/reset/{slug}', [AdminPageContentController::class, 'resetBlock'])
+            ->where('slug', '[A-Za-z0-9._-]+')
+            ->name('reset');
+    });
 
     // ========================================
     // COMMUNITY USER MANAGEMENT

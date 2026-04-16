@@ -52,7 +52,7 @@
             <div class="footer">
                 <p>
                     If you did not create an account, you can safely ignore this email.<br>
-                    Need help? Contact us at <a href="mailto:support@upsi2u.upsi.edu.my">support@upsi2u.upsi.edu.my</a>
+                    Need help? Contact us at <a href="mailto:{{ \App\Models\PageContent::get('settings.support_email', 'support@upsi2u.upsi.edu.my') }}">{{ \App\Models\PageContent::get('settings.support_email', 'support@upsi2u.upsi.edu.my') }}</a>
                 </p>
                 <p style="margin-top: 12px;">© {{ date('Y') }} UPSI2u. All rights reserved.</p>
             </div>

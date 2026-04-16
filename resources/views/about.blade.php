@@ -164,6 +164,20 @@
 </head>
 
 <body class="antialiased bg-white text-slate-800">
+    @php
+        $aboutHeroBadge = \App\Models\PageContent::get('about.hero_badge', 'Our Mission');
+        $aboutHeroTitle = \App\Models\PageContent::get('about.hero_title', 'Empowering the UPSI Community through UPSI2u');
+        $aboutHeroDescription = \App\Models\PageContent::get('about.hero_description', 'UPSI2u (UPSI Service Circle) is more than just a marketplace. It is a dedicated ecosystem designed specifically for UPSI students to bridge the gap between talent and needs. Whether you\'re looking for expert tutoring, creative design, or technical coding help, your peers are here to deliver.');
+        $aboutStoryTitle = \App\Models\PageContent::get('about.story_title', 'Built by Students, For the Community.');
+        $aboutStoryQuote = \App\Models\PageContent::get('about.story_quote', '"UPSI2u was developed in 2025 out of a simple need: a trusted, friendly, and more effective way for UPSI students to help one another."');
+        $aboutStoryBody1 = \App\Models\PageContent::get('about.story_body_1', 'Founded by a group of students who experienced the frustration of searching for reliable academic help and creative services. Tired of unreliable providers and cluttered listings, they decided to build the solution the UPSI community deserved.');
+        $aboutStoryHighlight = \App\Models\PageContent::get('about.story_highlight', 'What started as a small project has now become a movement, transforming how we connect and support each other\'s financial and academic growth.');
+        $aboutStoryBody2 = \App\Models\PageContent::get('about.story_body_2', 'Today, UPSI2u stands as a leader in student-led services at UPSI, continuously growing as more students turn to us for verified, peer-to-peer excellence.');
+        $aboutCtaTitle = \App\Models\PageContent::get('about.cta_title', 'Ready to be part of the movement?');
+        $aboutCtaSubtitle = \App\Models\PageContent::get('about.cta_subtitle', 'Join UPSI2u and grow together with your campus community.');
+        $aboutHeroImage = \App\Models\PageContent::get('about.hero_image', 'images/about.jpg');
+        $aboutStoryImage = \App\Models\PageContent::get('about.story_image', 'images/about2.jpg');
+    @endphp
     <div x-data="{
         activeTab: 'seekers'
     }" class="min-h-screen">
@@ -184,18 +198,12 @@
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center mb-20">
 
                     <div class="order-2 lg:order-1">
-                        <span class="text-blue-600 font-bold tracking-widest uppercase text-xs mb-4 block">Our
-                            Mission</span>
+                        <span class="text-blue-600 font-bold tracking-widest uppercase text-xs mb-4 block">{{ $aboutHeroBadge }}</span>
                         <h1 class="text-4xl md:text-5xl font-black text-slate-900 mb-6 leading-tight">
-                            Empowering the <span
-                                class="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">UPSI
-                                Community</span> through UPSI2u
+                            {{ $aboutHeroTitle }}
                         </h1>
                         <p class="text-lg text-slate-600 leading-relaxed mb-8">
-                            UPSI2u (UPSI Service Circle) is more than just a marketplace. It is a dedicated ecosystem
-                            designed specifically for UPSI students to bridge the gap between talent and needs. Whether
-                            you're looking for expert tutoring, creative design, or technical coding help, your peers
-                            are here to deliver.
+                            {{ $aboutHeroDescription }}
                         </p>
 
                         <div class="flex flex-wrap gap-4">
@@ -222,7 +230,7 @@
                             class="relative z-10 rounded-3xl overflow-hidden shadow-2xl transform lg:rotate-3 hover:rotate-0 transition-transform duration-500 border-8 border-white">
                             <div
                                 class="aspect-video bg-gradient-to-br from-slate-200 to-slate-300 flex items-center justify-center group">
-                                <img src="{{ asset('images/about.jpg') }}" alt="Students Collaborating"
+                                <img src="{{ asset($aboutHeroImage) }}" alt="Students Collaborating"
                                     class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity">
                                 <div class="absolute inset-0 flex items-center justify-center">
                                     <span
@@ -300,10 +308,7 @@
                         </div>
 
                         <h2 class="text-4xl md:text-5xl font-black text-slate-900 mb-8 leading-tight">
-                            Built by Students, <br>
-                            <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
-                                For the Community.
-                            </span>
+                            {{ $aboutStoryTitle }}
                         </h2>
 
                         <div class="space-y-8 relative">
@@ -314,37 +319,27 @@
                             <div class="relative group">
                                 <p
                                     class="text-lg text-slate-600 leading-relaxed italic border-l-4 border-blue-500 pl-6 md:border-none md:pl-0">
-                                    "UPSI2u was developed in 2025 out of a simple need: a trusted, friendly, and more effective
-                                    way for UPSI students to help one another."
+                                    {{ $aboutStoryQuote }}
                                 </p>
                             </div>
 
                             <div class="text-slate-600 leading-relaxed space-y-6">
-                                <p>
-                                    Founded by a group of students who experienced the frustration of searching for
-                                    reliable academic help and creative services. Tired of
-                                    <span class="font-semibold text-slate-900">unreliable providers and cluttered
-                                        listings</span>, they decided to build the solution the UPSI community deserved.
-                                </p>
+                                <p>{{ $aboutStoryBody1 }}</p>
 
                                 <div class="bg-slate-50 p-6 rounded-2xl border-l-4 border-purple-500 shadow-sm">
                                     <p class="text-slate-700 font-medium">
-                                        What started as a small project has now become a movement, transforming how we
-                                        connect and support each other's financial and academic growth.
+                                        {{ $aboutStoryHighlight }}
                                     </p>
                                 </div>
 
-                                <p>
-                                    Today, UPSI2u stands as a leader in student-led services at UPSI, continuously growing
-                                    as more students turn to us for verified, peer-to-peer excellence.
-                                </p>
+                                <p>{{ $aboutStoryBody2 }}</p>
                             </div>
                         </div>
                     </div>
 
                     <div class="relative mt-12 lg:mt-0">
                         <div class="relative z-20">
-                            <img src="{{ !empty($imagePath) ? asset('images/' . $imagePath) : asset('images/about2.jpg') }}"
+                            <img src="{{ asset($aboutStoryImage) }}"
                                 alt="Students Collaborating"
                                 class="w-full h-[500px] object-cover rounded-[2rem] shadow-2xl border-8 border-white">
 
@@ -476,10 +471,10 @@
 
     <div class="max-w-4xl mx-auto px-6 relative z-10">
         <h2 class="text-4xl md:text-6xl font-black text-white mb-8 tracking-tight leading-tight">
-            Over <span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">{{ number_format($totalUsers ?? 1250) }}+</span> Students Have Used UPSI2u
+            {{ $aboutCtaTitle }}
         </h2>
         <p class="text-slate-400 text-lg md:text-xl mb-12 max-w-2xl mx-auto">
-            Find a better way to learn and earn. Join the UPSI student movement transforming the campus economy.
+            {{ $aboutCtaSubtitle }}
         </p>
         
         <div class="flex flex-col sm:flex-row justify-center items-center gap-4">

@@ -53,6 +53,34 @@
 </head>
 
 <body class="antialiased text-slate-800">
+    @php
+        $heroVideo = \App\Models\PageContent::get('welcome.hero_video', 'videos/herobanner.mp4');
+        $heroTitleLegacy = \App\Models\PageContent::get('welcome.hero_title', "UPSI Student to Community\nWe've Got You.");
+        $heroTitleLegacyLines = preg_split('/\r\n|\r|\n/', (string) $heroTitleLegacy, 2);
+
+        $heroTitlePrimary = trim((string) \App\Models\PageContent::get('welcome.hero_title_line_1', trim($heroTitleLegacyLines[0] ?? 'UPSI Student to Community')));
+        $heroTitleAccent = trim((string) \App\Models\PageContent::get('welcome.hero_title_highlight', trim($heroTitleLegacyLines[1] ?? "We've Got You.")));
+        $heroTitleAccentColor = trim((string) \App\Models\PageContent::get('welcome.hero_title_highlight_color', '#818cf8'));
+        $heroTitleLine2 = trim((string) \App\Models\PageContent::get('welcome.hero_title_line_2', ''));
+
+        if (!preg_match('/^#[0-9A-Fa-f]{3}(?:[0-9A-Fa-f]{3})?$/', $heroTitleAccentColor)) {
+            $heroTitleAccentColor = '#818cf8';
+        }
+        $heroSubtitle = \App\Models\PageContent::get('welcome.hero_subtitle', 'Connect with talented students for services ranging from academic help to creative tasks. Secure, reliable, and community-driven.');
+        $featuresBadge = \App\Models\PageContent::get('welcome.features_badge', 'Advantages');
+        $featuresTitle = \App\Models\PageContent::get('welcome.features_title', 'Why choose UPSI2u');
+        $featuresSubtitle = \App\Models\PageContent::get('welcome.features_subtitle', 'We create a safe, reliable environment for students to connect, earn, and collaborate within the UPSI ecosystem.');
+        $feature1Title = \App\Models\PageContent::get('welcome.feature_1_title', 'Verified Students');
+        $feature1Desc = \App\Models\PageContent::get('welcome.feature_1_desc', 'Safety first. Every service provider is a verified UPSI student.');
+        $feature2Title = \App\Models\PageContent::get('welcome.feature_2_title', 'Transparent Pricing');
+        $feature2Desc = \App\Models\PageContent::get('welcome.feature_2_desc', 'What you see is what you pay. No hidden fees or commissions.');
+        $feature3Title = \App\Models\PageContent::get('welcome.feature_3_title', 'Community Growth');
+        $feature3Desc = \App\Models\PageContent::get('welcome.feature_3_desc', 'Directly empower your peers to develop skills and gain independence.');
+        $ctaBadge = \App\Models\PageContent::get('welcome.cta_badge', 'Become part of the community');
+        $ctaTitle = \App\Models\PageContent::get('welcome.cta_title', 'Ready to get started?');
+        $ctaSubtitle = \App\Models\PageContent::get('welcome.cta_subtitle', 'Join hundreds of UPSI students who are already connecting, learning, and earning on UPSI2u today.');
+        $ctaFootnote = \App\Models\PageContent::get('welcome.cta_footnote', 'Exclusively for UPSI Students and local Tg.Malim');
+    @endphp
     <div x-data="{
         mobileMenuOpen: false,
         activeTab: 'seekers'
@@ -63,20 +91,24 @@
 
         <section class="relative min-h-[72vh] md:min-h-[78vh] flex items-center justify-start overflow-hidden">
             <video autoplay muted loop playsinline class="absolute inset-0 w-full h-full object-cover z-0">
-                <source src="{{ asset('videos/herobanner.mp4') }}" type="video/mp4">
+                <source src="{{ asset($heroVideo) }}" type="video/mp4">
             </video>
 
             <div class="absolute inset-0 z-10 hero-overlay"></div>
 
             <div class="relative z-20 w-full max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 pt-8 md:pt-12 pb-8">
                 <div class="max-w-3xl animate-fade-in-up">
-                    <h1 class="text-5xl md:text-6xl font-bold text-white leading-tight mb-6">
-                        UPSI Student to Community<br>
-                        <span class="text-indigo-500">We've Got You.</span>
+                    <h1 class="text-5xl md:text-6xl font-bold leading-tight mb-6">
+                        <span class="block text-white">{{ $heroTitlePrimary }}</span>
+                        @if (!empty($heroTitleAccent))
+                            <span class="block" style="color: {{ $heroTitleAccentColor }};">{{ $heroTitleAccent }}</span>
+                        @endif
+                        @if (!empty($heroTitleLine2))
+                            <span class="block text-white">{{ $heroTitleLine2 }}</span>
+                        @endif
                     </h1>
                     <p class="text-lg text-gray-200 mb-8 max-w-2xl font-light">
-                        Connect with talented students for services ranging from academic help to creative tasks.
-                        Secure, reliable, and community-driven.
+                        {{ $heroSubtitle }}
                     </p>
 
                     <div class="bg-white p-2 rounded-2xl shadow-2xl max-w-2xl mb-4 flex items-center">
@@ -177,14 +209,12 @@
 
             <div class="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
                 <div class="text-center max-w-2xl mx-auto mb-20">
-                    <h2 class="text-blue-600 font-bold tracking-widest uppercase text-xs mb-3">Advantages</h2>
+                    <h2 class="text-blue-600 font-bold tracking-widest uppercase text-xs mb-3">{{ $featuresBadge }}</h2>
                     <h3 class="text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight mb-6">
-                        Why choose <span
-                            class="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">UPSI2u</span>
+                        {{ $featuresTitle }}
                     </h3>
                     <p class="text-lg text-slate-600 leading-relaxed">
-                        We create a safe, reliable environment for students to connect, earn, and collaborate within the
-                        UPSI ecosystem.
+                        {{ $featuresSubtitle }}
                     </p>
                 </div>
 
@@ -199,9 +229,8 @@
                                 </path>
                             </svg>
                         </div>
-                        <h4 class="text-xl font-bold text-slate-900 mb-4">Verified Students</h4>
-                        <p class="text-slate-600 leading-relaxed">Safety first. Every service provider is a verified
-                            UPSI student.</p>
+                        <h4 class="text-xl font-bold text-slate-900 mb-4">{{ $feature1Title }}</h4>
+                        <p class="text-slate-600 leading-relaxed">{{ $feature1Desc }}</p>
                     </div>
 
                     <div
@@ -214,9 +243,8 @@
                                 </path>
                             </svg>
                         </div>
-                        <h4 class="text-xl font-bold text-slate-900 mb-4">Transparent Pricing</h4>
-                        <p class="text-slate-600 leading-relaxed">What you see is what you pay. No hidden fees or
-                            commissions.</p>
+                        <h4 class="text-xl font-bold text-slate-900 mb-4">{{ $feature2Title }}</h4>
+                        <p class="text-slate-600 leading-relaxed">{{ $feature2Desc }}</p>
                     </div>
 
                     <div
@@ -229,9 +257,8 @@
                                 </path>
                             </svg>
                         </div>
-                        <h4 class="text-xl font-bold text-slate-900 mb-4">Community Growth</h4>
-                        <p class="text-slate-600 leading-relaxed">Directly empower your peers to develop skills and
-                            gain independence.</p>
+                        <h4 class="text-xl font-bold text-slate-900 mb-4">{{ $feature3Title }}</h4>
+                        <p class="text-slate-600 leading-relaxed">{{ $feature3Desc }}</p>
                     </div>
                 </div>
             </div>
@@ -378,16 +405,15 @@
 
             <div class="max-w-4xl mx-auto px-6 relative z-10 text-center">
                 <span class="text-blue-400 font-bold tracking-[0.2em] uppercase text-xs mb-4 block">
-                    Become part of the community
+                    {{ $ctaBadge }}
                 </span>
 
                 <h2 class="text-4xl md:text-5xl lg:text-6xl font-black text-white mb-8 tracking-tight">
-                    Ready to get <span
-                        class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">started?</span>
+                    {{ $ctaTitle }}
                 </h2>
 
                 <p class="text-slate-400 text-lg md:text-xl mb-12 max-w-2xl mx-auto leading-relaxed">
-                    Join hundreds of UPSI students who are already connecting, learning, and earning on UPSI2u today.
+                    {{ $ctaSubtitle }}
                 </p>
 
                 <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
@@ -416,7 +442,7 @@
                             d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
                             clip-rule="evenodd"></path>
                     </svg>
-                    Exclusively for UPSI Students and local Tg.Malim
+                    {{ $ctaFootnote }}
                 </div>
             </div>
         </section>

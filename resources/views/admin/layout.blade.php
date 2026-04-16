@@ -338,8 +338,8 @@
                     <li>
                         <button type="button" data-submenu-toggle data-menu-id="pageMenu" data-arrow-id="pageArrow"
                             class="w-full flex items-center justify-between px-4 py-3 rounded-lg transition-colors duration-300 nav-hover
-                                {{ request()->routeIs('admin.pages.*') || request()->routeIs('admin.faqs.*') || request()->routeIs('admin.legal-pages.*') ? 'text-white font-semibold' : '' }}"
-                            @if(request()->routeIs('admin.pages.*') || request()->routeIs('admin.faqs.*') || request()->routeIs('admin.legal-pages.*'))
+                                {{ request()->routeIs('admin.pages.*') || request()->routeIs('admin.faqs.*') || request()->routeIs('admin.legal-pages.*') || request()->routeIs('admin.page-content.*') ? 'text-white font-semibold' : '' }}"
+                            @if(request()->routeIs('admin.pages.*') || request()->routeIs('admin.faqs.*') || request()->routeIs('admin.legal-pages.*') || request()->routeIs('admin.page-content.*'))
                             style="background-color: var(--hover-bg);"
                             @else
                             style="color: var(--text-secondary);"
@@ -353,7 +353,7 @@
                                 <span>Page Management</span>
                             </div>
                             <svg id="pageArrow"
-                                class="w-4 h-4 transition-transform {{ request()->routeIs('admin.pages.*') || request()->routeIs('admin.faqs.*') || request()->routeIs('admin.legal-pages.*') ? 'rotate-90' : '' }}"
+                                class="w-4 h-4 transition-transform {{ request()->routeIs('admin.pages.*') || request()->routeIs('admin.faqs.*') || request()->routeIs('admin.legal-pages.*') || request()->routeIs('admin.page-content.*') ? 'rotate-90' : '' }}"
                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7">
                                 </path>
@@ -361,11 +361,21 @@
                         </button>
 
                         <ul id="pageMenu"
-                            class="pl-11 mt-1 space-y-1 {{ request()->routeIs('admin.pages.*') || request()->routeIs('admin.faqs.*') || request()->routeIs('admin.legal-pages.*') ? '' : 'hidden' }}">
+                            class="pl-11 mt-1 space-y-1 {{ request()->routeIs('admin.pages.*') || request()->routeIs('admin.faqs.*') || request()->routeIs('admin.legal-pages.*') || request()->routeIs('admin.page-content.*') ? '' : 'hidden' }}">
                             <li>
                                 <a href="{{ route('admin.faqs.index') }}"
                                     class="block px-4 py-2 text-sm rounded-lg transition-colors duration-300 submenu-hover {{ request()->routeIs('admin.faqs.*') ? 'text-cyan-400 font-semibold' : '' }}"
                                     style="color: var(--text-secondary);">FAQs</a>
+                            </li>
+                            <li>
+                                <a href="{{ route('admin.page-content.index') }}"
+                                    class="block px-4 py-2 text-sm rounded-lg transition-colors duration-300 submenu-hover {{ request()->routeIs('admin.page-content.index') || (request()->routeIs('admin.page-content.edit') && request()->route('page') !== 'settings') ? 'text-cyan-400 font-semibold' : '' }}"
+                                    style="color: var(--text-secondary);">Page Content</a>
+                            </li>
+                            <li>
+                                <a href="{{ route('admin.page-content.edit', 'settings') }}"
+                                    class="block px-4 py-2 text-sm rounded-lg transition-colors duration-300 submenu-hover {{ request()->routeIs('admin.page-content.edit') && request()->route('page') === 'settings' ? 'text-cyan-400 font-semibold' : '' }}"
+                                    style="color: var(--text-secondary);">Site Settings</a>
                             </li>
                             <li>
                                 <a href="{{ route('admin.legal-pages.index') }}"

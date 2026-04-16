@@ -12,6 +12,11 @@
             </div>
 
             <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-6 md:p-8">
+                @if (isset($isPublished) && !$isPublished)
+                    <div class="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                        This page is currently unpublished. You are viewing the latest draft content.
+                    </div>
+                @endif
 
             <style>
                 .legal-content h1, .legal-content h2, .legal-content h3 { color: #0f172a; font-weight: 700; }
