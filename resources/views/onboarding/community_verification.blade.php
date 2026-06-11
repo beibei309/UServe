@@ -20,8 +20,8 @@
                     <div class="w-16 h-16 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center mx-auto mb-4">
                         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     </div>
-                    <h2 class="text-xl font-bold text-yellow-800 mb-2">Verification Under Review</h2>
-                    <p class="text-yellow-700 max-w-lg mx-auto">We have received your details. Our admin team is reviewing your profile photo, selfie, and documents. You will be notified via email once approved.</p>
+                    <h2 class="text-xl font-bold text-yellow-800 mb-2">Verification Document Saved</h2>
+                    <p class="text-yellow-700 max-w-lg mx-auto">We have received your details. Your document is stored as a backup record and may be checked by the admin team later.</p>
                     <div class="mt-4">
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf

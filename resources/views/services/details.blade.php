@@ -677,7 +677,7 @@
                         <div class="grid grid-cols-2 gap-3">
                             {{-- Share --}}
                             <button type="button" data-share-trigger
-                                data-url="{{ route('student-services.show', $service->hss_id) }}"
+                                data-url="{{ route('services.details', $service->hss_id) }}"
                                 class="flex items-center justify-center gap-2 py-2.5 rounded-xl border border-gray-200 text-gray-600 text-sm font-bold hover:bg-gray-50 hover:border-gray-300 transition-all">
                                 <i class="fa-solid fa-arrow-up-right-from-square"></i> Share
                             </button>

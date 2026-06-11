@@ -52,15 +52,10 @@
                         <div class="flex items-center gap-3">
                             @auth
                                 @if($canContactProvider)
-                                    <a href="{{ route('chat.request', ['user' => $provider->hu_id]) }}"
-                                       class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium text-white {{ $provider->hu_is_available ? 'bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500' : 'bg-gray-400 cursor-not-allowed' }} focus:outline-none focus:ring-2 transition-colors"
-                                       {{ !$provider->hu_is_available ? 'aria-disabled=true' : '' }}>
-                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-3.582 8-8 8a8.959 8.959 0 01-4.906-1.436L3 21l2.436-5.094A8.959 8.959 0 013 12c0-4.418 3.582-8 8-8s8 3.582 8 8z"></path>
-                                        </svg>
-                                        {{ $provider->hu_is_available ? 'Send Message' : 'Currently Unavailable' }}
+                                    <a href="{{ route('services.details', $service->hss_id) }}"
+                                       class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors">
+                                        View booking page
                                     </a>
-                                    <x-favorite-button :user-id="$provider->hu_id" :is-favorited="$isProviderFavorited ?? false" />
                                 @endif
                             @else
                                 <a href="{{ route('login') }}" class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors">Login to Contact</a>

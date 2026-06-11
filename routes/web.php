@@ -84,7 +84,6 @@ Route::get('/services', [StudentServiceController::class, 'index'])->name('servi
 Route::get('/services/manage', [StudentServiceController::class, 'manage'])->middleware(['auth'])->name('services.manage');
 Route::get('/services/create', [StudentServiceController::class, 'create'])->middleware(['auth'])->name('services.create');
 Route::post('/services/create', [StudentServiceController::class, 'store'])->middleware(['auth'])->name('services.store');
-Route::post('/student-services', [StudentServiceController::class, 'store']);
 
 Route::delete('/services/manage/{service}', [StudentServiceController::class, 'destroy'])
     ->middleware(['auth'])
@@ -95,8 +94,6 @@ Route::put('/services/manage/{service}', [StudentServiceController::class, 'upda
 Route::get('/services/{service}/edit', [StudentServiceController::class, 'edit'])
     ->middleware(['auth'])
     ->name('services.edit');
-
-Route::get('/student-services/{service}', [StudentServiceController::class, 'show'])->name('student-services.show');
 
 Route::get('/services/apply', [HomeController::class, 'serviceApply'])->middleware(['auth'])->name('services.apply');
 

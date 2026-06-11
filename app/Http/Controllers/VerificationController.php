@@ -111,13 +111,11 @@ class VerificationController extends Controller
             $statusColor = 'green';
         }
     } else {
-        // --- NO RECORD FOUND SCENARIO ---
-        // For development/testing, you might want to allow this.
-        // Change $isEligible to true if you want to allow users without status records.
-        $isEligible = true; 
-        $statusMessage = 'Active (No Record)'; 
-        $statusColor = 'green';
-        $reason = 'No specific status record found, assuming active.';
+        // Student status is required before a student can become a helper.
+        $isEligible = false;
+        $statusMessage = 'Status Not Found';
+        $statusColor = 'red';
+        $reason = 'Your UPSI student status record was not found. Please contact admin to verify your student status before registering as a helper.';
     }
 
     // 5. Pass variables to the view
@@ -452,7 +450,7 @@ class VerificationController extends Controller
                     $user->hu_verification_status = 'approved';
                     $user->save();
 
-                    return redirect()->back()->with('success', 'Verification Successfully!');
+                    return redirect()->back()->with('success', 'Verification document saved successfully. Your account is approved and the document is kept for admin record checks.');
                 } catch (\Throwable $e) {
                     \Illuminate\Support\Facades\Log::error('Community doc upload failed', [
                         'user_id' => $user->hu_id,
