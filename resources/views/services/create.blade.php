@@ -30,35 +30,35 @@
     .toggle-label { width: 100%; height: 100%; background-color: #cbd5e1; border-radius: 9999px; transition: background-color 0.3s; }
 </style>
 
-<div class="py-12 bg-gray-50 min-h-screen">
+<div class="py-6 md:py-12 bg-gray-50 min-h-screen">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {{-- Header --}}
-        <div class="flex items-center justify-between mb-8">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 md:mb-8">
             <div>
-                <h1 class="text-3xl font-bold text-gray-900">Create New Service</h1>
+                <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Create New Service</h1>
                 <p class="text-gray-600 mt-1">Fill in the details below to list your service.</p>
             </div>
-            <a href="{{ route('services.manage') }}" class="text-gray-600 hover:text-gray-900 font-medium flex items-center">
+            <a href="{{ route('services.manage') }}" class="text-gray-600 hover:text-gray-900 font-medium inline-flex items-center">
                 <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                 Back to Manage
             </a>
         </div>
 
         {{-- Wizard Tabs --}}
-        <div class="mb-8 max-w-5xl mx-auto">
-            <div class="border-b border-gray-200">
-                <nav class="-mb-px flex space-x-8" aria-label="Tabs">
-                    <button class="step-link step-active w-1/4 py-4 px-1 border-b-2 font-medium text-sm flex items-center justify-center transition-colors" data-target="overview">
+        <div class="mb-6 md:mb-8 max-w-5xl mx-auto">
+            <div class="border-b border-gray-200 overflow-x-auto">
+                <nav class="-mb-px flex min-w-max space-x-5 sm:space-x-8" aria-label="Tabs">
+                    <button class="step-link step-active min-w-28 sm:w-1/4 py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm flex items-center justify-center transition-colors" data-target="overview">
                         <span class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs mr-2 font-bold ring-1 ring-indigo-600">1</span> Overview
                     </button>
-                    <button class="step-link step-inactive w-1/4 py-4 px-1 border-b-2 font-medium text-sm flex items-center justify-center transition-colors pointer-events-none" data-target="pricing">
+                    <button class="step-link step-inactive min-w-28 sm:w-1/4 py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm flex items-center justify-center transition-colors pointer-events-none" data-target="pricing">
                         <span class="w-6 h-6 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center text-xs mr-2 font-bold">2</span> Pricing
                     </button>
-                    <button class="step-link step-inactive w-1/4 py-4 px-1 border-b-2 font-medium text-sm flex items-center justify-center transition-colors pointer-events-none" data-target="description">
+                    <button class="step-link step-inactive min-w-28 sm:w-1/4 py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm flex items-center justify-center transition-colors pointer-events-none" data-target="description">
                         <span class="w-6 h-6 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center text-xs mr-2 font-bold">3</span> Description
                     </button>
-                    <button class="step-link step-inactive w-1/4 py-4 px-1 border-b-2 font-medium text-sm flex items-center justify-center transition-colors pointer-events-none" data-target="availability">
+                    <button class="step-link step-inactive min-w-28 sm:w-1/4 py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm flex items-center justify-center transition-colors pointer-events-none" data-target="availability">
                         <span class="w-6 h-6 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center text-xs mr-2 font-bold">4</span> Availability
                     </button>
                 </nav>
@@ -70,7 +70,7 @@
             @csrf
             
             {{-- STEP 1: OVERVIEW --}}
-            <div id="overview" class="tab-section p-8">
+            <div id="overview" class="tab-section p-5 sm:p-8">
                 <div class="mb-6">
                     <h2 class="text-xl font-bold text-gray-900">Service Basics</h2>
                     <p class="text-gray-500 text-sm">Let's start with the fundamental details.</p>
@@ -108,7 +108,7 @@
             </div>
 
             {{-- STEP 2: PRICING --}}
-            <div id="pricing" class="tab-section hidden p-8">
+            <div id="pricing" class="tab-section hidden p-5 sm:p-8">
                 <div class="mb-6">
                     <h2 class="text-xl font-bold text-gray-900">Packages & Pricing</h2>
                     <p class="text-gray-500 text-sm">Define your costs and what students get per package.</p>
@@ -116,7 +116,7 @@
                 </div>
 
                 {{-- Basic Package (Required) --}}
-                <div class="border border-gray-200 rounded-xl p-6 mb-6 bg-gray-50 relative">
+                <div class="border border-gray-200 rounded-xl p-4 sm:p-6 mb-6 bg-gray-50 relative">
                     <span class="absolute top-0 right-0 px-3 py-1 bg-gray-200 text-gray-600 text-xs font-bold rounded-bl-xl rounded-tr-xl">REQUIRED</span>
                     <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center"><span class="w-3 h-3 bg-gray-800 rounded-full mr-2"></span> Basic Package</h3>
                     <input type="hidden" name="packages[0][package_type]" value="basic">
@@ -156,7 +156,7 @@
                 {{-- Extra Packages --}}
                 <div id="extraPackages" class="hidden space-y-6">
                     {{-- Standard --}}
-                    <div class="border border-blue-200 rounded-xl p-6 bg-blue-50/50">
+                    <div class="border border-blue-200 rounded-xl p-4 sm:p-6 bg-blue-50/50">
                         <h3 class="text-lg font-bold text-blue-800 mb-4 flex items-center"><span class="w-3 h-3 bg-blue-600 rounded-full mr-2"></span> Standard Package</h3>
                         <input type="hidden" name="packages[1][package_type]" value="standard">
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
@@ -168,7 +168,7 @@
                         <input type="hidden" name="packages[1][description]" id="input-standard">
                     </div>
                     {{-- Premium --}}
-                    <div class="border border-purple-200 rounded-xl p-6 bg-purple-50/50">
+                    <div class="border border-purple-200 rounded-xl p-4 sm:p-6 bg-purple-50/50">
                         <h3 class="text-lg font-bold text-purple-800 mb-4 flex items-center"><span class="w-3 h-3 bg-purple-600 rounded-full mr-2"></span> Premium Package</h3>
                         <input type="hidden" name="packages[2][package_type]" value="premium">
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
@@ -190,7 +190,7 @@
             </div>
 
             {{-- STEP 3: DESCRIPTION --}}
-            <div id="description" class="tab-section hidden p-8">
+            <div id="description" class="tab-section hidden p-5 sm:p-8">
                 <div class="mb-6">
                     <h2 class="text-xl font-bold text-gray-900">Detailed Description</h2>
                     <p class="text-gray-500 text-sm">Tell students why they should choose your service.</p>
@@ -211,12 +211,12 @@
             </div>
 
             {{-- STEP 4: AVAILABILITY --}}
-            <div id="availability" class="tab-section hidden p-8">
+            <div id="availability" class="tab-section hidden p-5 sm:p-8">
                 {{-- Alpine Component --}}
                 <div x-data="scheduleHandler()">
                     
                     {{-- Booking Type Toggle --}}
-                    <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-5 mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-4 sm:p-5 mb-6 sm:mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div>
                             <h3 class="font-bold text-indigo-900">How is this service booked?</h3>
                             <p class="text-sm text-indigo-700 mt-1">
@@ -224,7 +224,7 @@
                                 <span x-show="!isSessionBased"><strong>Task Based:</strong> One-off requests (e.g. Laundry).</span>
                             </p>
                         </div>
-                        <div class="flex items-center bg-white rounded-lg p-1 border border-indigo-200 shadow-sm">
+                        <div class="grid grid-cols-2 sm:flex sm:items-center bg-white rounded-lg p-1 border border-indigo-200 shadow-sm">
                             <button type="button" @click="isSessionBased = true" :class="isSessionBased ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-500 hover:bg-gray-50'" class="px-4 py-2 rounded-md text-sm font-bold transition-all">Time Slots</button>
                             <button type="button" @click="isSessionBased = false" :class="!isSessionBased ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-500 hover:bg-gray-50'" class="px-4 py-2 rounded-md text-sm font-bold transition-all">One-off Task</button>
                         </div>
@@ -234,7 +234,7 @@
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
                         <div class="lg:col-span-2 space-y-6">
                             {{-- Session Duration --}}
-                            <div x-show="isSessionBased" x-transition class="bg-white rounded-3xl shadow-sm border border-slate-100 p-8">
+                            <div x-show="isSessionBased" x-transition class="bg-white rounded-2xl sm:rounded-3xl shadow-sm border border-slate-100 p-5 sm:p-8">
                                 <h2 class="font-bold text-slate-800 text-lg">Session Duration</h2>
                                 <p class="text-sm text-slate-500 mb-6">How long is one slot?</p>
                                 <select name="session_duration" :disabled="!isSessionBased" class="w-full max-w-xs rounded-xl border-slate-200 shadow-sm focus:border-indigo-500 py-3 px-4 font-bold text-slate-700 bg-slate-50">
@@ -249,13 +249,13 @@
 
                             {{-- Weekly Schedule --}}
                             <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
-                                <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                                <div class="p-4 sm:p-6 border-b border-slate-100 flex flex-wrap gap-3 justify-between items-center bg-slate-50/50">
                                     <h2 class="font-bold text-slate-800">Weekly Availability</h2>
                                     <button type="button" @click="showBulk = !showBulk" class="text-sm text-indigo-600 font-bold hover:text-indigo-700 bg-indigo-50 px-4 py-2 rounded-lg">Bulk Edit</button>
                                 </div>
                                 
                                 {{-- Bulk Edit --}}
-                                <div x-show="showBulk" x-transition class="bg-indigo-50/80 p-4 border-b border-indigo-100 flex items-center gap-4">
+                                <div x-show="showBulk" x-transition class="bg-indigo-50/80 p-4 border-b border-indigo-100 flex flex-wrap items-center gap-3 sm:gap-4">
                                     <span class="text-xs font-bold text-indigo-800 uppercase">Set all to:</span>
                                     <input type="time" x-model="bulkStart" class="border-none rounded p-1 text-xs font-bold">
                                     <span>?</span>
@@ -265,16 +265,16 @@
 
                                 <div class="divide-y divide-slate-100">
                                     <template x-for="day in days" :key="day.key">
-                                        <div class="flex items-center justify-between p-5 hover:bg-slate-50 transition-colors group">
-                                            <div class="flex items-center gap-5 w-48">
+                                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 sm:p-5 hover:bg-slate-50 transition-colors group">
+                                            <div class="flex items-center gap-4 sm:gap-5 sm:w-48">
                                                 <div class="relative inline-block w-12 h-7">
                                                     <input type="checkbox" :name="`operating_hours[${day.key}][enabled]`" :id="`toggle-${day.key}`" x-model="schedule[day.key].enabled" value="1" class="toggle-checkbox absolute block w-7 h-7 rounded-full bg-white border-4 appearance-none cursor-pointer border-slate-200 checked:right-0 checked:border-indigo-600"/>
                                                     <label :for="`toggle-${day.key}`" class="toggle-label block overflow-hidden h-7 rounded-full bg-slate-200 cursor-pointer"></label>
                                                 </div>
                                                 <label :for="`toggle-${day.key}`" class="text-sm font-bold text-slate-700" x-text="day.name"></label>
                                             </div>
-                                            <div class="flex-1 flex justify-end">
-                                                <div x-show="schedule[day.key].enabled" class="flex items-center gap-3 bg-white border border-slate-200 rounded-lg px-3 py-1.5">
+                                            <div class="flex-1 flex sm:justify-end">
+                                                <div x-show="schedule[day.key].enabled" class="flex flex-wrap items-center gap-2 sm:gap-3 bg-white border border-slate-200 rounded-lg px-3 py-1.5">
                                                     <input type="time" :name="`operating_hours[${day.key}][start]`" x-model="schedule[day.key].start" class="border-none p-0 text-sm font-bold text-slate-700 focus:ring-0">
                                                     <span class="text-slate-300 text-xs">to</span>
                                                     <input type="time" :name="`operating_hours[${day.key}][end]`" x-model="schedule[day.key].end" class="border-none p-0 text-sm font-bold text-slate-700 focus:ring-0">
@@ -289,7 +289,7 @@
 
                         {{-- Block Dates --}}
                         <div class="lg:col-span-1 space-y-6">
-                            <div class="bg-white rounded-3xl shadow-sm border border-slate-100 p-6 sticky top-24">
+                            <div class="bg-white rounded-2xl sm:rounded-3xl shadow-sm border border-slate-100 p-5 sm:p-6 lg:sticky lg:top-24">
                                 <h2 class="font-bold text-slate-800 mb-2">Block Dates</h2>
                                 <p class="text-xs text-slate-500 mb-6">Select specific dates when unavailable.</p>
                                 <input type="text" id="unavailableDates" name="unavailable_dates" class="w-full pl-10 rounded-xl border-slate-200 focus:ring-indigo-500 text-sm py-3 font-medium shadow-sm" placeholder="Select dates...">
@@ -303,11 +303,11 @@
                     </div>
                 </div>
 
-                <div class="bg-gray-50 rounded-xl p-8 text-center border border-gray-100 mt-8">
+                <div class="bg-gray-50 rounded-xl p-5 sm:p-8 text-center border border-gray-100 mt-8">
                     <h3 class="text-lg font-bold text-gray-900">Ready to Launch?</h3>
-                    <div class="flex justify-center gap-4 mt-6">
+                    <div class="flex flex-col sm:flex-row sm:justify-center gap-3 sm:gap-4 mt-6">
                         <button type="button" data-next-step="availability|description" class="px-5 py-3 text-gray-600 hover:bg-gray-100 rounded-lg font-medium">Review Details</button>
-                        <button type="button" data-submit-form class="px-8 py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 shadow-lg">Publish Service Now</button>
+                        <button type="button" data-submit-form class="px-6 sm:px-8 py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 shadow-lg">Publish Service Now</button>
                     </div>
                 </div>
             </div>

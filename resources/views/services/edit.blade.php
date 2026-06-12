@@ -566,7 +566,7 @@
                             <div class="lg:col-span-1 space-y-6">
                                 {{-- Kita tambah x-data di sini untuk kawal UI bila toggle ditekan --}}
                                 {{-- Pastikan tukar $service->is_active mengikut nama column DB anda (contoh: is_unavailable atau active status) --}}
-                                <div class="bg-white rounded-3xl shadow-sm border border-slate-100 p-6 sticky top-24">
+                                <div class="bg-white rounded-2xl sm:rounded-3xl shadow-sm border border-slate-100 p-5 sm:p-6 lg:sticky lg:top-24">
 
                                     {{-- 1. TOGGLE UNAVAILABLE (BARU) --}}
                                     <div class="flex items-center justify-between mb-6 pb-6 border-b border-slate-100">
@@ -624,14 +624,14 @@
                     </div>
 
                     {{-- Save Buttons --}}
-                    <div class="bg-gray-50 rounded-xl p-8 text-center border border-gray-100 mt-8">
+                    <div class="bg-gray-50 rounded-xl p-5 sm:p-8 text-center border border-gray-100 mt-8">
                         <h3 class="text-lg font-bold text-gray-900">Update Service?</h3>
-                        <div class="flex justify-center gap-4 mt-4">
+                        <div class="flex flex-col sm:flex-row sm:justify-center gap-3 sm:gap-4 mt-4">
                             <button type="button" data-next-step="availability|description"
                                 class="px-5 py-3 text-gray-600 hover:bg-gray-100 rounded-lg font-medium transition">Review
                                 Details</button>
                             <button type="button" data-submit-form
-                                class="px-8 py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition shadow-lg flex items-center">Save
+                                class="px-6 sm:px-8 py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition shadow-lg flex items-center justify-center">Save
                                 Changes</button>
                         </div>
                     </div>

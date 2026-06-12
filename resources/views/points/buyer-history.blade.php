@@ -3,10 +3,10 @@
 @section('title', 'Buyer Points History')
 
 @section('content')
-<div class="min-h-screen bg-gray-50 py-8">
+<div class="min-h-screen bg-gray-50 py-5 sm:py-8">
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         {{-- Header Section --}}
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 mb-8">
+        <div class="upsi-card p-4 sm:p-5 mb-5 sm:mb-8">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 <div class="flex items-center space-x-3 sm:space-x-4">
                     <div class="bg-gradient-to-br from-purple-500 to-pink-500 p-2 sm:p-3 rounded-xl flex-shrink-0">
@@ -19,7 +19,7 @@
                 </div>
                 <div class="mt-4 sm:mt-0">
                     <a href="{{ route('points.buyer.dashboard') }}" 
-                       class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors w-full sm:w-auto justify-center">
+                       class="upsi-secondary-action w-full sm:w-auto">
                         <i class="fas fa-arrow-left mr-2"></i>
                         Back to Dashboard
                     </a>
@@ -28,9 +28,9 @@
         </div>
 
         {{-- Summary Cards --}}
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-8">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5 sm:mb-8">
             {{-- Total Points Card --}}
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6">
+            <div class="upsi-card p-4 sm:p-5">
                 <div class="flex items-center">
                     <div class="bg-purple-100 p-2 sm:p-3 rounded-xl flex-shrink-0">
                         <i class="fas fa-coins text-purple-600 text-lg sm:text-xl"></i>
@@ -43,7 +43,7 @@
             </div>
 
             {{-- Total Earned Card --}}
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6">
+            <div class="upsi-card p-4 sm:p-5">
                 <div class="flex items-center">
                     <div class="bg-green-100 p-2 sm:p-3 rounded-xl flex-shrink-0">
                         <i class="fas fa-plus text-green-600 text-lg sm:text-xl"></i>
@@ -58,7 +58,7 @@
             </div>
 
             {{-- Total Spent Card --}}
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6">
+            <div class="upsi-card p-4 sm:p-5">
                 <div class="flex items-center">
                     <div class="bg-red-100 p-2 sm:p-3 rounded-xl flex-shrink-0">
                         <i class="fas fa-minus text-red-600 text-lg sm:text-xl"></i>
@@ -74,8 +74,8 @@
         </div>
 
         {{-- Transaction History --}}
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-            <div class="p-4 sm:p-6 border-b border-gray-200">
+        <div class="upsi-card overflow-hidden">
+            <div class="p-4 sm:p-5 border-b border-gray-200">
                 <h3 class="text-lg sm:text-xl font-semibold text-gray-900">Transaction History</h3>
                 <p class="text-gray-600 mt-1 text-sm">Showing {{ $buyerPointsHistory->count() }} of {{ $buyerPointsHistory->total() }} transactions</p>
             </div>
@@ -83,7 +83,7 @@
             @if($buyerPointsHistory->count() > 0)
                 <div class="divide-y divide-gray-200">
                     @foreach($buyerPointsHistory as $point)
-                        <div class="p-4 sm:p-6 hover:bg-gray-50 transition-colors">
+                        <div class="p-4 sm:p-5 hover:bg-gray-50 transition-colors">
                             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
                                 <div class="flex items-start space-x-3 sm:space-x-4">
                                     <div class="flex-shrink-0 mt-1">
@@ -123,7 +123,7 @@
                                     </div>
                                 </div>
                                 
-                                <div class="text-right">
+                                <div class="text-left sm:text-right">
                                     <span class="text-lg font-bold 
                                         @if($point->hbp_points_earned > 0) text-green-600
                                         @else text-red-600
@@ -142,7 +142,7 @@
                 </div>
 
                 {{-- Pagination --}}
-                <div class="p-4 sm:p-6 border-t border-gray-200">
+                <div class="p-4 sm:p-5 border-t border-gray-200">
                     {{ $buyerPointsHistory->links() }}
                 </div>
             @else

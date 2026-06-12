@@ -95,7 +95,9 @@ Route::get('/services/{service}/edit', [StudentServiceController::class, 'edit']
     ->middleware(['auth'])
     ->name('services.edit');
 
-Route::get('/services/apply', [HomeController::class, 'serviceApply'])->middleware(['auth'])->name('services.apply');
+Route::redirect('/services/apply', '/services')
+    ->middleware(['auth'])
+    ->name('services.apply');
 
 Route::post('/service-request', [ServiceRequestController::class, 'store'])->middleware(['auth'])->name('service-request.store');
 

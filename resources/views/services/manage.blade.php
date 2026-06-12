@@ -4,18 +4,18 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <div class="py-12 bg-gray-50 min-h-screen">
+    <div class="py-6 md:py-12 bg-gray-50 min-h-screen">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
             {{-- Header Section --}}
-            <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
+            <div class="flex flex-col md:flex-row md:items-end justify-between mb-6 md:mb-8 gap-4">
                 <div>
-                    <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Service Portfolio</h1>
+                    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">Service Portfolio</h1>
                     <p class="text-gray-500 mt-2">Manage your listings and check approval status.</p>
                 </div>
 
                 <a href="{{ route('services.create') }}"
-                    class="inline-flex items-center justify-center px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    class="w-full sm:w-auto inline-flex items-center justify-center px-5 sm:px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
@@ -25,11 +25,11 @@
             </div>
 
             {{-- Tabs --}}
-            <div class="mb-8 border-b border-gray-200">
-                <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+            <div class="mb-6 md:mb-8 border-b border-gray-200 overflow-x-auto">
+                <nav class="-mb-px flex min-w-max space-x-5 sm:space-x-8" aria-label="Tabs">
                     @foreach (['all' => 'All Services', 'pending' => 'Pending Approval', 'approved' => 'Live / Approved', 'rejected' => 'Rejected'] as $key => $label)
                         <button data-tab="{{ $key }}"
-                            class="tab-btn whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-all duration-200 {{ $key === 'all' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
+                            class="tab-btn whitespace-nowrap py-3 sm:py-4 px-1 border-b-2 font-medium text-sm transition-all duration-200 {{ $key === 'all' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
                             {{ $label }}
                         </button>
                     @endforeach
@@ -40,7 +40,7 @@
             <div id="tab-contents">
                 @foreach (['all', 'pending', 'approved', 'rejected'] as $status)
                     <div id="{{ $status }}-tab-content"
-                        class="tab-content grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 {{ $status !== 'all' ? 'hidden' : '' }}">
+                        class="tab-content grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 {{ $status !== 'all' ? 'hidden' : '' }}">
                         @foreach ($servicesByStatus[$status] as $service)
                             <div class="group relative rounded-2xl shadow-sm transition-all duration-300 border border-gray-100 flex flex-col overflow-hidden
                                  {{ $service->ui_is_suspended ? 'opacity-80 pointer-events-none' : 'bg-white hover:shadow-lg' }}"
@@ -88,7 +88,7 @@
                                 </div>
 
                                 {{-- Card Body --}}
-                                <div class="p-5 flex-1 flex flex-col">
+                                <div class="p-4 sm:p-5 flex-1 flex flex-col">
                                     {{-- Category --}}
                                     <div class="flex justify-between items-start mb-2">
                                         @if ($service->category)
@@ -112,7 +112,7 @@
                                     </h3>
 
                                     {{-- 🟢 UPDATE: Booking Status as Solid Bubble --}}
-                                    <div class="flex items-center justify-between mb-4 pb-4 border-b border-gray-100">
+                                    <div class="flex flex-wrap items-center justify-between gap-2 mb-4 pb-4 border-b border-gray-100">
                                         <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Service
                                             Status</span>
 
@@ -147,7 +147,7 @@
                                     </div>
 
                                     {{-- Action Buttons --}}
-                                    <div class="mt-auto grid grid-cols-2 gap-3">
+                                    <div class="mt-auto grid grid-cols-1 min-[380px]:grid-cols-2 gap-3">
                                         <button type="button" data-edit-service="{{ $service->hss_id }}"
                                             class="flex items-center justify-center px-4 py-2.5 bg-gray-50 text-gray-700 text-sm font-semibold rounded-xl hover:bg-gray-100 hover:text-gray-900 transition-all border border-gray-200">
                                             Edit / Status
@@ -219,7 +219,7 @@
                     </div>
 
                     {{-- Modal Content --}}
-                    <div class="px-8 py-8 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                    <div class="px-5 sm:px-8 py-6 sm:py-8 max-h-[60vh] overflow-y-auto custom-scrollbar">
                         <div class="mb-8">
                             <h4 class="text-sm font-bold text-indigo-900 uppercase tracking-wide mb-3 flex items-center">
                                 <i class="fa-solid fa-align-left mr-2 text-indigo-500"></i> Description

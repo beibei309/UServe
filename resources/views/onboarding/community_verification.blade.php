@@ -1,11 +1,11 @@
 <x-guest-layout>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
-    <div class="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-5xl rounded-3xl shadow-2xl border border-slate-100 p-6 sm:p-8 md:p-10">
+    <div class="min-h-screen bg-slate-50 flex items-center justify-center p-3 sm:p-4">
+        <div class="upsi-card w-full max-w-5xl p-4 sm:p-8 md:p-10">
             
-            <div class="text-center mb-10">
-                <h1 class="text-3xl font-bold text-slate-900 tracking-tight">Community Verification</h1>
+            <div class="text-center mb-6 sm:mb-10">
+                <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">Community Verification</h1>
                 <p class="mt-2 text-slate-500">Complete these steps to verify your identity and ensure community safety.</p>
             </div>
 
@@ -40,9 +40,9 @@
             <div class="space-y-8 max-w-3xl mx-auto">
 
                 <div id="step1" class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden {{ $communityVerificationUi['step1_card_class'] }}">
-                    <div class="p-6 sm:p-8">
-                        <div class="flex items-center gap-4 mb-6">
-                            <div class="w-10 h-10 rounded-full {{ $communityVerificationUi['step1_badge_class'] }} flex items-center justify-center font-bold">
+                    <div class="p-4 sm:p-8">
+                        <div class="flex items-center gap-3 sm:gap-4 mb-6">
+                            <div class="w-10 h-10 rounded-full {{ $communityVerificationUi['step1_badge_class'] }} flex items-center justify-center font-bold shrink-0">
                                 {{ $communityVerificationUi['step1_badge_text'] }}
                             </div>
                             <div>
@@ -69,9 +69,9 @@
                 </div>
 
                 <div id="step2" class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden {{ $communityVerificationUi['step2_card_class'] }}">
-                    <div class="p-6 sm:p-8">
-                        <div class="flex items-center gap-4 mb-6">
-                            <div class="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold">2</div>
+                    <div class="p-4 sm:p-8">
+                        <div class="flex items-center gap-3 sm:gap-4 mb-6">
+                            <div class="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold shrink-0">2</div>
                             <h2 class="text-xl font-bold text-slate-900">Upload Profile Photo</h2>
                         </div>
 
@@ -94,9 +94,9 @@
                 </div>
 
                 <div id="step3" class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden {{ $communityVerificationUi['step3_card_class'] }}">
-                    <div class="p-6 sm:p-8">
-                        <div class="flex items-center gap-4 mb-6">
-                            <div class="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold">3</div>
+                    <div class="p-4 sm:p-8">
+                        <div class="flex items-center gap-3 sm:gap-4 mb-6">
+                            <div class="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold shrink-0">3</div>
                             <h2 class="text-xl font-bold text-slate-900">Live Selfie Check</h2>
                         </div>
                         
@@ -121,7 +121,7 @@
                                 <div id="face_guide" class="absolute inset-0 border-4 border-white/30 rounded-[50%] w-48 h-64 m-auto hidden pointer-events-none"></div>
                             </div>
 
-                            <div class="mt-4 flex justify-center gap-3">
+                            <div class="mt-4 flex flex-wrap justify-center gap-3">
                                 <button id="start_camera" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-full font-medium text-sm transition-all shadow-lg">Start Camera</button>
                                 <button id="take_snapshot" class="hidden bg-white text-slate-900 px-6 py-2 rounded-full font-bold text-sm hover:bg-slate-100 transition-all">Capture Photo</button>
                                 <button id="retake_snapshot" class="hidden bg-slate-700 text-white px-6 py-2 rounded-full font-medium text-sm hover:bg-slate-600 transition-all">Retake</button>
@@ -133,9 +133,9 @@
                 </div>
 
                 <div id="step4" class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden {{ $communityVerificationUi['step4_card_class'] }}">
-                    <div class="p-6 sm:p-8">
-                        <div class="flex items-center gap-4 mb-6">
-                            <div class="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold">4</div>
+                    <div class="p-4 sm:p-8">
+                        <div class="flex items-center gap-3 sm:gap-4 mb-6">
+                            <div class="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold shrink-0">4</div>
                             <h2 class="text-xl font-bold text-slate-900">Upload Proof Document</h2>
                         </div>
 

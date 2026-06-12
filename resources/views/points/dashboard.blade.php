@@ -3,10 +3,10 @@
 @section('title', 'Seller Points Dashboard')
 
 @section('content')
-<div class="min-h-screen bg-gray-50 py-8">
+<div class="min-h-screen bg-gray-50 py-5 sm:py-8">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {{-- Header Section --}}
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 mb-8">
+        <div class="upsi-card p-4 sm:p-5 mb-5 sm:mb-8">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 <div class="flex items-center space-x-3 sm:space-x-4">
                     <div class="bg-gradient-to-br from-yellow-400 to-orange-500 p-2 sm:p-3 rounded-xl flex-shrink-0">
@@ -17,14 +17,14 @@
                         <p class="text-gray-600 mt-1 text-sm sm:text-base">Track your points and redeem certificates</p>
                     </div>
                 </div>
-                <div class="mt-4 sm:mt-0 flex space-x-2">
+                <div class="mt-4 sm:mt-0 flex flex-col sm:flex-row gap-2">
                     <a href="{{ route('points.history') }}"
-                       class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors w-full sm:w-auto justify-center">
+                       class="upsi-secondary-action w-full sm:w-auto">
                         <i class="fas fa-history mr-2"></i>
                         View History
                     </a>
                     <a href="{{ route('points.leaderboard') }}"
-                       class="inline-flex items-center px-4 py-2 border border-orange-300 rounded-lg text-sm font-medium text-orange-700 bg-orange-50 hover:bg-orange-100 transition-colors w-full sm:w-auto justify-center">
+                       class="inline-flex items-center justify-center rounded-xl border border-orange-200 bg-orange-50 px-4 py-2.5 text-sm font-bold text-orange-700 transition-colors hover:bg-orange-100 w-full sm:w-auto">
                         <i class="fas fa-trophy mr-2"></i>
                         Leaderboard
                     </a>
@@ -33,9 +33,9 @@
         </div>
 
         {{-- Points Overview Cards --}}
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-5 sm:mb-8">
             {{-- Total Points Card --}}
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6">
+            <div class="upsi-card p-4 sm:p-5">
                 <div class="flex items-center">
                     <div class="bg-blue-100 p-2 sm:p-3 rounded-xl flex-shrink-0">
                         <i class="fas fa-star text-blue-600 text-lg sm:text-xl"></i>
@@ -48,7 +48,7 @@
             </div>
 
             {{-- Points Needed Card --}}
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6">
+            <div class="upsi-card p-4 sm:p-5">
                 <div class="flex items-center">
                     <div class="bg-orange-100 p-2 sm:p-3 rounded-xl flex-shrink-0">
                         <i class="fas fa-bullseye text-orange-600 text-lg sm:text-xl"></i>
@@ -61,7 +61,7 @@
             </div>
 
             {{-- Certificates Card --}}
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 sm:col-span-2 lg:col-span-1">
+            <div class="upsi-card p-4 sm:p-5 sm:col-span-2 lg:col-span-1">
                 <div class="flex items-center">
                     <div class="bg-green-100 p-2 sm:p-3 rounded-xl flex-shrink-0">
                         <i class="fas fa-certificate text-green-600 text-lg sm:text-xl"></i>
@@ -75,7 +75,7 @@
         </div>
 
         {{-- Progress Bar --}}
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 mb-8">
+        <div class="upsi-card p-4 sm:p-5 mb-5 sm:mb-8">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 space-y-2 sm:space-y-0">
                 <h3 class="text-lg sm:text-xl font-semibold text-gray-900">Progress to Certificate Achievement</h3>
                 <span class="text-sm sm:text-base text-gray-600 font-medium">{{ $totalPoints }}/1 points</span>
@@ -126,17 +126,17 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-8">
             {{-- Recent Points Section --}}
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100">
-                <div class="px-6 py-4 border-b border-gray-100">
+            <div class="upsi-card overflow-hidden">
+                <div class="px-4 sm:px-5 py-4 border-b border-gray-100">
                     <h3 class="text-lg font-semibold text-gray-900">Recent Points Earned</h3>
                 </div>
-                <div class="p-6">
+                <div class="p-4 sm:p-5">
                     @if ($recentPoints->count() > 0)
                         <div class="space-y-4">
                             @foreach ($recentPoints as $point)
-                                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                <div class="flex items-center justify-between gap-3 p-3 sm:p-4 bg-gray-50 rounded-xl">
                                     <div class="flex items-center space-x-3">
                                         <div class="bg-green-100 p-2 rounded-full">
                                             <i class="fas fa-plus text-green-600"></i>
@@ -176,15 +176,15 @@
             </div>
 
             {{-- Certificates Section --}}
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100">
-                <div class="px-6 py-4 border-b border-gray-100">
+            <div class="upsi-card overflow-hidden">
+                <div class="px-4 sm:px-5 py-4 border-b border-gray-100">
                     <h3 class="text-lg font-semibold text-gray-900">My Certificates</h3>
                 </div>
-                <div class="p-6">
+                <div class="p-4 sm:p-5">
                     @if ($certificates->count() > 0)
                         <div class="space-y-4">
                             @foreach ($certificates as $certificate)
-                                <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                                <div class="flex items-center justify-between gap-3 p-3 sm:p-4 border border-gray-200 rounded-xl">
                                     <div class="flex items-center space-x-3">
                                         <div class="p-2 rounded-full {{ $certificate->hcr_status === 'issued' ? 'bg-green-100' : 'bg-yellow-100' }}">
                                             <i class="fas fa-certificate {{ $certificate->hcr_status === 'issued' ? 'text-green-600' : 'text-yellow-600' }}"></i>
@@ -231,9 +231,9 @@
         </div>
 
         {{-- How It Works Section --}}
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 mt-8 p-6">
+        <div class="upsi-card mt-5 sm:mt-8 p-4 sm:p-6">
             <h3 class="text-lg font-semibold text-gray-900 mb-4">How Points Work</h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
                 <div class="text-center">
                     <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                         <i class="fas fa-handshake text-blue-600 text-xl"></i>

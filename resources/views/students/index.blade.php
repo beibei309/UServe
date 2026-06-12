@@ -11,29 +11,29 @@
         }
     </style>
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" x-data="studentsIndexAvailability()">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8" x-data="studentsIndexAvailability()">
 
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-            <div>
-                <h1 class="text-3xl font-bold text-slate-900 tracking-tight">Dashboard</h1>
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 md:mb-8">
+            <div class="min-w-0">
+                <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">Dashboard</h1>
                 <p class="text-slate-500 mt-1">Welcome back, {{ $user->hu_name }}! Here's what's happening today.</p>
             </div>
 
-            <div class="bg-white p-2 pr-4 rounded-full shadow-sm border border-gray-200 flex items-center gap-3">
-                <div class="h-10 w-10 rounded-full flex items-center justify-center transition-colors duration-300"
+            <div class="w-full md:w-auto bg-white p-2 sm:pr-4 rounded-2xl md:rounded-full shadow-sm border border-gray-200 flex flex-wrap sm:flex-nowrap items-center gap-3">
+                <div class="h-10 w-10 rounded-full flex items-center justify-center transition-colors duration-300 shrink-0"
                     :class="isAvailable ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'">
                     <i class="fa-solid fa-power-off text-lg"></i>
                 </div>
-                <div class="flex flex-col">
+                <div class="flex flex-col min-w-0 flex-1">
                     <span class="text-xs font-bold uppercase tracking-wider text-gray-400">Status</span>
                     <span class="text-sm font-bold" :class="isAvailable ? 'text-green-600' : 'text-red-600'"
                         x-text="isAvailable ? 'Accepting Orders' : 'Currently Unavailable'">
                     </span>
                 </div>
-                <div class="h-8 w-px bg-gray-200 mx-2"></div>
+                <div class="hidden sm:block h-8 w-px bg-gray-200 mx-2"></div>
                 {{-- Quick toggle: switches immediately without opening modal --}}
                 <button @click="quickToggle()"
-                    class="text-sm font-semibold px-3 py-1.5 rounded-full transition-all"
+                    class="text-sm font-semibold px-3 py-1.5 rounded-full transition-all shrink-0"
                     :class="isAvailable
                         ? 'bg-red-50 text-red-600 hover:bg-red-100 border border-red-200'
                         : 'bg-green-50 text-green-600 hover:bg-green-100 border border-green-200'"
@@ -41,14 +41,14 @@
                     x-text="isSaving ? 'Saving...' : (isAvailable ? 'Go Offline' : 'Go Online')">
                 </button>
                 <button @click="openModal()"
-                    class="text-sm font-semibold text-indigo-600 hover:text-indigo-800 hover:underline">
+                    class="text-sm font-semibold text-indigo-600 hover:text-indigo-800 hover:underline shrink-0">
                     <i class="fa-solid fa-sliders text-xs mr-1"></i>Settings
                 </button>
             </div>
         </div>
 
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8">
             <a href="{{ route('service-requests.index') }}#pending"
                 class="block bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between group hover:border-blue-100 hover:shadow-md hover:-translate-y-1 transition-all duration-300 cursor-pointer">
                 <div>

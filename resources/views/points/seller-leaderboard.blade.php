@@ -3,10 +3,10 @@
 @section('title', 'Seller Leaderboard')
 
 @section('content')
-<div class="min-h-screen bg-gray-50 py-8">
+<div class="min-h-screen bg-gray-50 py-5 sm:py-8">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {{-- Header Section --}}
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 mb-8">
+        <div class="upsi-card p-4 sm:p-5 mb-5 sm:mb-8">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 <div class="flex items-center space-x-3 sm:space-x-4">
                     <div class="bg-orange-500 p-2 sm:p-3 rounded-xl flex-shrink-0">
@@ -19,7 +19,7 @@
                 </div>
                 <div class="mt-4 sm:mt-0 flex space-x-2">
                     <a href="{{ route('points.leaderboard') }}"
-                       class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+                       class="upsi-secondary-action">
                         <i class="fas fa-arrow-left mr-2"></i>
                         Back
                     </a>
@@ -29,7 +29,7 @@
 
         {{-- Your Rank Card --}}
         @if($userRank)
-        <div class="bg-orange-500 text-white rounded-xl p-4 sm:p-6 mb-8">
+        <div class="bg-orange-500 text-white rounded-2xl p-4 sm:p-5 mb-5 sm:mb-8 shadow-sm">
             <div class="flex items-center justify-between">
                 <div>
                     <h2 class="text-lg font-bold">Your Rank</h2>
@@ -46,7 +46,7 @@
         @endif
 
         {{-- Leaderboard --}}
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="upsi-card overflow-hidden">
             <div class="px-4 sm:px-6 py-4 border-b border-gray-100">
                 <h2 class="text-lg font-bold text-gray-900">Top Sellers</h2>
                 <p class="text-sm text-gray-600">Students who have earned points by providing services</p>
@@ -54,31 +54,31 @@
 
             @if($sellerLeaderboard->count() > 0)
                 @if($sellerLeaderboard->count() >= 3)
-                    <div class="bg-gradient-to-b from-indigo-500 to-blue-600 p-5 text-white">
-                        <div class="grid grid-cols-3 gap-4 items-end text-center">
+                    <div class="bg-gradient-to-b from-indigo-500 to-blue-600 p-4 sm:p-5 text-white">
+                        <div class="grid grid-cols-3 gap-3 sm:gap-4 items-end text-center">
                             <div>
                                 <img src="{{ $sellerLeaderboard->get(1)?->hu_profile_photo_path ? asset($sellerLeaderboard->get(1)?->hu_profile_photo_path) : ('https://ui-avatars.com/api/?name=' . urlencode($sellerLeaderboard->get(1)?->hu_name ?? 'User')) }}"
                                      alt="{{ $sellerLeaderboard->get(1)?->hu_name }}"
-                                     class="w-14 h-14 rounded-full mx-auto mb-2 border-2 border-white/70 object-cover shadow" />
+                                     class="w-12 h-12 sm:w-14 sm:h-14 rounded-full mx-auto mb-2 border-2 border-white/70 object-cover shadow" />
                                 <p class="text-sm font-semibold truncate">{{ $sellerLeaderboard->get(1)?->hu_name }}</p>
                                 <p class="text-xs text-indigo-100">2nd • {{ $sellerLeaderboard->get(1)?->seller_points_sum_hsp_points_earned ?? 0 }} pts</p>
-                                <div class="mt-2 h-16 rounded-t-lg bg-cyan-300/90 border border-white/25 border-b-0 flex items-center justify-center text-2xl font-bold">2</div>
+                                <div class="mt-2 h-12 sm:h-16 rounded-t-lg bg-cyan-300/90 border border-white/25 border-b-0 flex items-center justify-center text-xl sm:text-2xl font-bold">2</div>
                             </div>
                             <div>
                                 <img src="{{ $sellerLeaderboard->get(0)?->hu_profile_photo_path ? asset($sellerLeaderboard->get(0)?->hu_profile_photo_path) : ('https://ui-avatars.com/api/?name=' . urlencode($sellerLeaderboard->get(0)?->hu_name ?? 'User')) }}"
                                      alt="{{ $sellerLeaderboard->get(0)?->hu_name }}"
-                                     class="w-16 h-16 rounded-full mx-auto mb-2 border-2 border-white object-cover shadow" />
+                                     class="w-14 h-14 sm:w-16 sm:h-16 rounded-full mx-auto mb-2 border-2 border-white object-cover shadow" />
                                 <p class="text-base font-semibold truncate">{{ $sellerLeaderboard->get(0)?->hu_name }}</p>
                                 <p class="text-xs text-indigo-100">1st • {{ $sellerLeaderboard->get(0)?->seller_points_sum_hsp_points_earned ?? 0 }} pts</p>
-                                <div class="mt-2 h-24 rounded-t-lg bg-amber-300/90 border border-white/25 border-b-0 flex items-center justify-center text-3xl font-bold">1</div>
+                                <div class="mt-2 h-16 sm:h-24 rounded-t-lg bg-amber-300/90 border border-white/25 border-b-0 flex items-center justify-center text-2xl sm:text-3xl font-bold">1</div>
                             </div>
                             <div>
                                 <img src="{{ $sellerLeaderboard->get(2)?->hu_profile_photo_path ? asset($sellerLeaderboard->get(2)?->hu_profile_photo_path) : ('https://ui-avatars.com/api/?name=' . urlencode($sellerLeaderboard->get(2)?->hu_name ?? 'User')) }}"
                                      alt="{{ $sellerLeaderboard->get(2)?->hu_name }}"
-                                     class="w-14 h-14 rounded-full mx-auto mb-2 border-2 border-white/70 object-cover shadow" />
+                                     class="w-12 h-12 sm:w-14 sm:h-14 rounded-full mx-auto mb-2 border-2 border-white/70 object-cover shadow" />
                                 <p class="text-sm font-semibold truncate">{{ $sellerLeaderboard->get(2)?->hu_name }}</p>
                                 <p class="text-xs text-indigo-100">3rd • {{ $sellerLeaderboard->get(2)?->seller_points_sum_hsp_points_earned ?? 0 }} pts</p>
-                                <div class="mt-2 h-12 rounded-t-lg bg-sky-200/90 border border-white/25 border-b-0 flex items-center justify-center text-2xl font-bold">3</div>
+                                <div class="mt-2 h-10 sm:h-12 rounded-t-lg bg-sky-200/90 border border-white/25 border-b-0 flex items-center justify-center text-xl sm:text-2xl font-bold">3</div>
                             </div>
                         </div>
                         <div class="h-3 rounded-b-lg bg-white/25 border border-white/20 border-t-0"></div>
@@ -105,7 +105,7 @@
                     @endforeach
                 </div>
             @else
-                <div class="text-center py-12">
+                <div class="text-center py-10 sm:py-12">
                     <i class="fas fa-users text-gray-400 text-4xl mb-4"></i>
                     <h3 class="text-lg font-semibold text-gray-900 mb-2">No Sellers Yet</h3>
                     <p class="text-gray-600">Be the first to earn points by providing services!</p>
@@ -114,7 +114,7 @@
         </div>
 
         {{-- How to Earn Points --}}
-        <div class="mt-8 bg-orange-50 border border-orange-200 rounded-xl p-4 sm:p-6">
+        <div class="mt-5 sm:mt-8 bg-orange-50 border border-orange-200 rounded-2xl p-4 sm:p-5">
             <div class="flex items-start space-x-3">
                 <div class="bg-orange-500 p-2 rounded-lg flex-shrink-0">
                     <i class="fas fa-lightbulb text-white"></i>

@@ -1,4 +1,4 @@
-<footer class="bg-slate-950 text-white pt-24 pb-12 border-t border-slate-900 relative overflow-hidden">
+<footer class="bg-slate-950 text-white pt-12 sm:pt-16 lg:pt-24 pb-8 sm:pb-12 border-t border-slate-900 relative overflow-hidden">
     @php
         $facebookUrl = \App\Models\PageContent::get('settings.facebook_url', 'https://www.facebook.com/UPSIMalaysia/');
         $instagramUrl = \App\Models\PageContent::get('settings.instagram_url', 'https://www.instagram.com/upsi_malaysia');
@@ -6,17 +6,17 @@
     @endphp
     <div class="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-blue-500/50 to-transparent"></div>
     
-    <div class="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 mb-16">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12 mb-10 lg:mb-16">
             
-            <div class="col-span-1 lg:col-span-1">
-                <div class="flex items-center gap-2 mb-6">
-                    <span class="text-3xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">
+            <div class="col-span-1 sm:col-span-2 lg:col-span-1">
+                <div class="flex items-center gap-2 mb-4 sm:mb-6">
+                    <span class="text-2xl sm:text-3xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">
                        UPSI2u 
                     </span>
                 </div>
-                <p class="text-slate-400 text-sm leading-relaxed mb-8 max-w-xs">
+                <p class="text-slate-400 text-sm leading-relaxed mb-5 sm:mb-8 max-w-md lg:max-w-xs">
                     The leading peer-to-peer service platform for the UPSI community. We empower student talents and facilitate trusted connections.
                 </p>
                 
@@ -34,30 +34,30 @@
             </div>
 
             <div>
-                <h4 class="text-xs font-bold uppercase tracking-[0.2em] text-blue-500 mb-8">Platform</h4>
-                <ul class="space-y-4">
+                <h4 class="text-xs font-bold uppercase tracking-[0.16em] sm:tracking-[0.2em] text-blue-500 mb-4 sm:mb-8">Platform</h4>
+                <ul class="space-y-2.5 sm:space-y-4">
                     <li>
-                        <a href="{{ route('services.index') }}" class="group text-slate-400 hover:text-white transition-colors text-sm flex items-center">
+                        <a href="{{ route('services.index') }}" class="group text-slate-400 hover:text-white transition-colors text-sm flex items-center min-h-8">
                             <span class="w-0 group-hover:w-2 h-px bg-blue-500 mr-0 group-hover:mr-2 transition-all"></span>
                             Find Services
                         </a>
                     </li>
                     @auth
                                                <li>
-                            <a href="{{ route('profile.edit') }}" class="group text-slate-400 hover:text-white transition-colors text-sm flex items-center">
+                            <a href="{{ route('profile.edit') }}" class="group text-slate-400 hover:text-white transition-colors text-sm flex items-center min-h-8">
                                 <span class="w-0 group-hover:w-2 h-px bg-blue-500 mr-0 group-hover:mr-2 transition-all"></span>
                                 My Account
                             </a>
                         </li>
                     @else
                         <li>
-                            <a href="{{ route('register') }}" class="group text-slate-400 hover:text-white transition-colors text-sm flex items-center">
+                            <a href="{{ route('register') }}" class="group text-slate-400 hover:text-white transition-colors text-sm flex items-center min-h-8">
                                 <span class="w-0 group-hover:w-2 h-px bg-blue-500 mr-0 group-hover:mr-2 transition-all"></span>
                                 Become a Seller
                             </a>
                         </li>
                         <li>
-                            <a href="{{ route('login') }}" class="group text-slate-400 hover:text-white transition-colors text-sm flex items-center">
+                            <a href="{{ route('login') }}" class="group text-slate-400 hover:text-white transition-colors text-sm flex items-center min-h-8">
                                 <span class="w-0 group-hover:w-2 h-px bg-blue-500 mr-0 group-hover:mr-2 transition-all"></span>
                                 Log In
                             </a>
@@ -67,11 +67,11 @@
             </div>
 
             <div>
-                <h4 class="text-xs font-bold uppercase tracking-[0.2em] text-purple-500 mb-8">Support & Help</h4>
-                <ul class="space-y-4">
-                    <li><a href="{{ route('help') }}" class="text-slate-400 hover:text-white transition-colors text-sm">Help Center</a></li>
-                    <li><a href="{{ route('privacy') }}" class="text-slate-400 hover:text-white transition-colors text-sm">Privacy Policy</a></li>
-                    <li><a href="{{ route('terms') }}" class="text-slate-400 hover:text-white transition-colors text-sm">Terms of Service</a></li>
+                <h4 class="text-xs font-bold uppercase tracking-[0.16em] sm:tracking-[0.2em] text-purple-500 mb-4 sm:mb-8">Support & Help</h4>
+                <ul class="space-y-2.5 sm:space-y-4">
+                    <li><a href="{{ route('help') }}" class="text-slate-400 hover:text-white transition-colors text-sm inline-flex items-center min-h-8">Help Center</a></li>
+                    <li><a href="{{ route('privacy') }}" class="text-slate-400 hover:text-white transition-colors text-sm inline-flex items-center min-h-8">Privacy Policy</a></li>
+                    <li><a href="{{ route('terms') }}" class="text-slate-400 hover:text-white transition-colors text-sm inline-flex items-center min-h-8">Terms of Service</a></li>
                 </ul>
             </div>
         </div>

@@ -63,10 +63,10 @@
         {{-- Navigation bar --}}
         @include('layouts.navbar')
 
-        <div class="bg-white border-b border-gray-200 pt-8 md:pt-12 pb-8 md:pb-10">
-            <div class="max-w-7xl mx-auto px-6">
-                <nav class="flex mb-6" aria-label="Breadcrumb">
-                    <ol class="inline-flex items-center space-x-1 md:space-x-3 text-sm text-gray-500">
+        <div class="bg-white border-b border-gray-200 pt-6 md:pt-12 pb-6 md:pb-10">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6">
+                <nav class="flex mb-5 md:mb-6 overflow-x-auto" aria-label="Breadcrumb">
+                    <ol class="inline-flex items-center space-x-1 md:space-x-3 text-xs sm:text-sm text-gray-500 whitespace-nowrap">
                         <li class="inline-flex items-center">
                             <a href="{{ route('dashboard') }}"
                                 class="inline-flex items-center hover:text-indigo-600 transition-colors">
@@ -84,40 +84,40 @@
 
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
-                        <h1 class="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight mb-2">Find Student
+                        <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 tracking-tight mb-2">Find Student
                             Services</h1>
-                        <p class="text-slate-500 text-lg">Browse services offered by UPSI students. Fast, reliable, and
+                        <p class="text-slate-500 text-base sm:text-lg leading-relaxed">Browse services offered by UPSI students. Fast, reliable, and
                             affordable.</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8 md:py-10">
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 ">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-6 md:py-10">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-8">
 
                 {{-- ======================= --}}
                 {{--       SIDEBAR           --}}
                 {{-- ======================= --}}
-                <aside class="lg:col-span-3 space-y-6">
+                <aside class="lg:col-span-3 space-y-6 min-w-0">
                     <div
-                        class="bg-white rounded-[2rem] shadow-sm border border-slate-100 p-5 md:p-6 lg:sticky lg:top-24 transition-all duration-300">
+                        class="bg-white rounded-2xl lg:rounded-[2rem] shadow-sm border border-slate-100 p-4 md:p-6 lg:sticky lg:top-24 transition-all duration-300">
 
-                        <div class="flex items-center justify-between mb-6 px-2">
-                            <h3 class="font-black text-slate-900 uppercase tracking-tighter text-sm">Explore Categories
+                        <div class="flex items-center justify-between mb-3 lg:mb-6 px-1 lg:px-2">
+                            <h3 class="font-black text-slate-900 uppercase tracking-tight text-xs lg:text-sm">Explore Categories
                             </h3>
                             <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
                         </div>
 
-                        <div class="space-y-2">
+                        <div class="flex gap-2 overflow-x-auto pb-1 lg:pb-0 lg:block lg:space-y-2">
                             {{-- All Categories Link --}}
                             <a href="{{ route('services.index') }}"
-                                class="group flex items-center justify-between px-4 py-3.5 rounded-2xl text-sm font-bold transition-all duration-300
+                                class="group shrink-0 min-w-max flex items-center justify-between gap-3 px-3 lg:px-4 py-2.5 lg:py-3.5 rounded-2xl text-xs lg:text-sm font-bold transition-all duration-300
                 {{ !$category_id ? 'bg-slate-200 text-slate-700 shadow-xl shadow-slate-200' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900' }}">
 
                                 <div class="flex items-center gap-3">
                                     <span
-                                        class="w-9 h-9 flex items-center justify-center rounded-xl transition-all duration-300
+                                        class="w-8 h-8 lg:w-9 lg:h-9 flex items-center justify-center rounded-xl transition-all duration-300
             {{ !$category_id ? 'bg-white text-indigo-600 shadow-sm' : 'bg-slate-100 text-slate-400 group-hover:bg-white group-hover:shadow-sm' }}">
                                         <i class="fas fa-th-large text-sm"></i>
                                     </span>
@@ -128,20 +128,20 @@
                                 @endif
                             </a>
 
-                            <div class="py-2 px-4">
+                            <div class="hidden lg:block py-2 px-4">
                                 <div class="h-px bg-slate-100 w-full"></div>
                             </div>
 
                             {{-- Dynamic Categories --}}
                             @foreach ($categories as $cat)
                                 <a href="?category_id={{ $cat->hc_id }}"
-                                    class="group flex items-center justify-between px-4 py-3 rounded-2xl text-sm font-bold transition-all duration-300
+                                    class="group shrink-0 min-w-max flex items-center justify-between gap-3 px-3 lg:px-4 py-2.5 lg:py-3 rounded-2xl text-xs lg:text-sm font-bold transition-all duration-300
                     {{ $category_id == $cat->hc_id ? 'bg-white shadow-lg shadow-slate-100 ring-1 ring-slate-100' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900' }}">
 
                                     <div class="flex items-center gap-3">
                                         {{-- Modern Icon Container --}}
                                         <span
-                                            class="w-9 h-9 flex items-center justify-center rounded-xl transition-all duration-300 border shadow-sm"
+                                            class="w-8 h-8 lg:w-9 lg:h-9 flex items-center justify-center rounded-xl transition-all duration-300 border shadow-sm"
                                             style="
                                 background-color: {{ $category_id == $cat->hc_id ? $cat->hc_color : $cat->hc_color . '10' }}; 
                                 border-color: {{ $cat->hc_color . '30' }};
@@ -169,7 +169,7 @@
 
                         @guest
                             <div
-                                class="mt-8 p-5 bg-gradient-to-br from-indigo-600 to-purple-700 rounded-3xl text-white relative overflow-hidden group">
+                                class="hidden lg:block mt-8 p-5 bg-gradient-to-br from-indigo-600 to-purple-700 rounded-3xl text-white relative overflow-hidden group">
                                 <div
                                     class="absolute -right-4 -bottom-4 w-24 h-24 bg-white/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700">
                                 </div>
@@ -188,12 +188,12 @@
                 {{-- ======================= --}}
                 {{--      MAIN CONTENT       --}}
                 {{-- ======================= --}}
-                <main class="lg:col-span-9">
+                <main class="lg:col-span-9 min-w-0">
 
                     {{-- Top Filters --}}
-                    <div class="lg:sticky lg:top-24 z-30 mb-8 md:mb-10 px-0 sm:px-0">
+                    <div class="lg:sticky lg:top-24 z-30 mb-5 md:mb-10 px-0 sm:px-0">
                         <div
-                            class="bg-white/80 backdrop-blur-md border border-slate-200 shadow-xl shadow-slate-200/50 rounded-[2rem] p-2 transition-all duration-300">
+                            class="upsi-soft-panel backdrop-blur-md p-2 transition-all duration-300">
 
                             <form method="GET" action="{{ route('services.index') }}"
                                 class="flex flex-col lg:flex-row gap-2">
@@ -209,13 +209,13 @@
                                     </div>
                                     <input type="text" name="q" value="{{ request('q') }}"
                                         placeholder="Search services (Cleaning, Tutoring...)"
-                                        class="block w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-[1.5rem] text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:ring-indigo-500 transition-all text-sm font-medium">
+                                        class="block w-full pl-12 pr-4 py-3.5 lg:py-4 bg-slate-50 border-none rounded-xl lg:rounded-[1.5rem] text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:ring-indigo-500 transition-all text-sm font-medium">
                                 </div>
 
-                                <div class="flex flex-wrap md:flex-nowrap gap-2">
-                                    <div class="relative flex-1 md:w-52 group">
+                                <div class="grid grid-cols-2 md:flex md:flex-nowrap gap-2">
+                                    <div class="relative min-w-0 md:w-52 group">
                                         <select name="sort" data-auto-submit
-                                            class="block w-full pl-4 pr-10 py-4 bg-slate-50 border-none rounded-[1.5rem] text-slate-700 focus:bg-white focus:ring-2 focus:ring-indigo-500 text-sm cursor-pointer appearance-none font-bold transition-all">
+                                            class="block w-full pl-3 lg:pl-4 pr-8 lg:pr-10 py-3.5 lg:py-4 bg-slate-50 border-none rounded-xl lg:rounded-[1.5rem] text-slate-700 focus:bg-white focus:ring-2 focus:ring-indigo-500 text-xs sm:text-sm cursor-pointer appearance-none font-bold transition-all">
                                             <option value="recommended" {{ $sort == 'recommended' ? 'selected' : '' }}>⭐Recommended</option>
                                             <option value="newest" {{ $sort == 'newest' ? 'selected' : '' }}>Newest
                                                 First</option>
@@ -236,9 +236,9 @@
                                         </div>
                                     </div>
 
-                                    <div class="relative flex-1 md:w-44 group">
+                                    <div class="relative min-w-0 md:w-44 group">
                                         <select name="available_only" data-auto-submit
-                                            class="block w-full pl-4 pr-10 py-4 bg-slate-50 border-none rounded-[1.5rem] text-slate-700 focus:bg-white focus:ring-2 focus:ring-indigo-500 text-sm cursor-pointer appearance-none font-bold transition-all">
+                                            class="block w-full pl-3 lg:pl-4 pr-8 lg:pr-10 py-3.5 lg:py-4 bg-slate-50 border-none rounded-xl lg:rounded-[1.5rem] text-slate-700 focus:bg-white focus:ring-2 focus:ring-indigo-500 text-xs sm:text-sm cursor-pointer appearance-none font-bold transition-all">
                                             <option value="">🔘 All Status</option>
                                             <option value="1"
                                                 {{ request('available_only') == '1' ? 'selected' : '' }}>🟢 Available
@@ -258,7 +258,7 @@
                                     </div>
 
                                     <button type="submit"
-                                        class="w-full md:w-14 h-14 bg-indigo-500 hover:bg-indigo-600 text-white rounded-[1.2rem] transition-all duration-300 shadow-lg shadow-slate-900/20 active:scale-90 flex items-center justify-center group"
+                                        class="col-span-2 md:col-span-1 w-full md:w-14 h-12 md:h-14 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl lg:rounded-[1.2rem] transition-all duration-300 shadow-lg shadow-slate-900/20 active:scale-90 flex items-center justify-center gap-2 group"
                                         title="Search">
 
                                         <svg class="w-6 h-6 transform group-hover:scale-110 transition-transform duration-300"
@@ -268,22 +268,22 @@
                                             </path>
                                         </svg>
 
-                                        <span class="sr-only">Search</span>
+                                        <span class="md:sr-only text-sm font-bold">Search</span>
                                     </button>
                                 </div>
                             </form>
                         </div>
                     </div>
 
-                    <div class="space-y-8">
+                    <div class="space-y-5 md:space-y-8">
                         @foreach ($services as $service)
                             <div
-                                class="group bg-white rounded-[2rem] border border-slate-100 p-2 sm:p-3 shadow-sm hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-500 relative overflow-hidden">
+                                class="group upsi-card upsi-card-hover p-2 relative overflow-hidden">
 
-                                <div class="flex flex-col md:flex-row gap-6">
+                                <div class="flex flex-col md:flex-row gap-4 md:gap-6">
                                     {{-- IMAGE SECTION --}}
                                     <div
-                                        class="w-full md:w-64 aspect-square flex-shrink-0 relative rounded-[1.5rem] overflow-hidden bg-slate-50">
+                                        class="w-full md:w-56 lg:w-60 aspect-[16/10] md:aspect-[4/3] flex-shrink-0 relative rounded-xl overflow-hidden bg-slate-50">
                                    <img src="{{ $service->ui_image_url }}"
     alt="{{ $service->hss_title }}"
      class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
@@ -291,9 +291,9 @@
 
                                         {{-- Category Badge --}}
                                         @if ($service->category)
-                                            <div class="absolute top-4 left-4">
+                                            <div class="absolute top-3 left-3">
                                                 <span
-                                                    class="backdrop-blur-md bg-white/80 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-sm"
+                                                    class="backdrop-blur-md bg-white/85 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wide shadow-sm"
                                                     style="color: {{ $service->category->hc_color }}">
                                                     {{ $service->category->hc_name }}
                                                 </span>
@@ -310,9 +310,9 @@
                                     </div>
 
                                     {{-- CONTENT SECTION --}}
-                                    <div class="flex-1 px-4 py-4 md:py-6 flex flex-col">
+                                    <div class="flex-1 px-3 sm:px-4 py-3 md:py-4 flex flex-col min-w-0">
                                         <div class="flex items-start justify-between mb-3 gap-3">
-                                            <div class="flex items-center gap-3">
+                                            <div class="flex flex-wrap items-center gap-2 sm:gap-3 min-w-0">
                                                 <span
                                                     class="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">
                                                     <i class="far fa-clock text-indigo-500"></i>
@@ -328,7 +328,7 @@
                                             <div class="flex items-center gap-2 shrink-0">
                                                 <button type="button" data-share-trigger
                                                     data-url="{{ $service->ui_details_url }}"
-                                                    class="w-10 h-10 flex items-center justify-center rounded-2xl bg-slate-50 text-slate-400 hover:bg-indigo-600 hover:text-white transition-all duration-300 shadow-sm"
+                                                    class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-50 text-slate-400 hover:bg-indigo-600 hover:text-white transition-all duration-300 shadow-sm"
                                                     title="Share Service">
                                                     <i class="fas fa-share-alt"></i>
                                                 </button>
@@ -336,13 +336,13 @@
                                         </div>
 
                                         <h2
-                                            class="text-2xl font-black text-slate-900 mb-3 leading-tight group-hover:text-indigo-600 transition-colors duration-300">
+                                            class="text-lg sm:text-xl font-black text-slate-900 mb-2 leading-tight group-hover:text-indigo-600 transition-colors duration-300">
                                             <a href="{{ route('services.details', $service->hss_id) }}">
                                                 {{ $service->hss_title }}
                                             </a>
                                         </h2>
 
-                                        <div class="flex items-center gap-2 mb-4">
+                                        <div class="flex flex-wrap items-center gap-2 mb-3">
                                             <div class="flex text-yellow-400 text-xs">
                                                 @for ($i = 1; $i <= 5; $i++)
                                                     <i
@@ -356,14 +356,14 @@
                                                 reviews)</span>
                                         </div>
 
-                                        <div class="text-slate-500 text-sm line-clamp-2 leading-relaxed mb-6 flex-1">
+                                        <div class="text-slate-500 text-sm line-clamp-2 leading-relaxed mb-4 flex-1">
                                             {!! strip_tags($service->hss_description) !!}
                                         </div>
 
-                                        <div class="flex items-center justify-between border-t border-slate-50 pt-6">
+                                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-t border-slate-100 pt-4">
                                             {{-- Seller Info --}}
                                             <a href="{{ $service->ui_profile_url }}"
-                                                class="flex items-center gap-3 group/user overflow-hidden max-w-[200px]">
+                                                class="flex items-center gap-3 group/user overflow-hidden max-w-full sm:max-w-[220px]">
                                                 <div class="relative flex-shrink-0">
 
                                                     <img src="{{ $service->ui_seller_avatar_url }}"
@@ -397,7 +397,7 @@
                                                 </div>
                                             </a>
 
-                                            <div class="flex items-center gap-6">
+                                            <div class="flex items-center justify-between sm:justify-end gap-4 sm:gap-6">
                                                 @if ($service->hss_basic_price)
                                                     <div class="text-right hidden sm:block">
                                                         <p
@@ -411,7 +411,7 @@
                                                 @endif
 
                                                 <a href="{{ route('services.details', $service->hss_id) }}"
-                                                    class="bg-white text-slate-700 border border-slate-200 hover:bg-indigo-600 hover:text-white hover:border-indigo-600 px-7 py-3 rounded-2xl text-sm font-bold transition-all duration-300 shadow-sm hover:shadow-indigo-200 hover:-translate-y-1 flex items-center justify-center">
+                                                    class="upsi-secondary-action px-5">
                                                     View Details
                                                 </a>
                                             </div>

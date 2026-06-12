@@ -8,16 +8,16 @@
         </h2>
     </x-slot>
 
-    <div class="py-6">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+    <div class="py-4 sm:py-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
             <div id="received-content" class="sr-tab-content">
-                <div class="overflow-hidden rounded-2xl border border-gray-100 bg-gradient-to-b from-white to-slate-50/50 shadow-sm">
-                    <div class="p-6 text-gray-800">
-                         <h3 class="font-medium mb-4 700" style="font-size: 25px;">My Services Orders ({{ $receivedRequests->count() }} total)</h3>
+                <div class="upsi-card overflow-hidden">
+                    <div class="p-4 sm:p-5 text-gray-800">
+                         <h3 class="font-semibold mb-4 text-xl sm:text-2xl">My Services Orders ({{ $receivedRequests->count() }} total)</h3>
 
-                        <form method="GET" action="{{ url()->current() }}" class="mb-6">
-                            <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                        <form method="GET" action="{{ url()->current() }}" class="mb-5">
+                            <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
 
                                 {{-- 1. Search Bar (Takes up 4 columns) --}}
                                 <div class="md:col-span-4">
@@ -28,14 +28,14 @@
                                         </div>
                                         <input type="text" name="search" id="request-search"
                                             value="{{ request('search') }}" placeholder="Search requests..."
-                                            class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-custom-teal focus:border-custom-teal text-sm">
+                                            class="w-full border border-gray-200 rounded-xl pl-10 pr-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm">
                                     </div>
                                 </div>
 
                                 {{-- 2. Filter by Category (Takes up 3 columns) --}}
                                 <div class="md:col-span-3">
                                     <select name="category" data-auto-submit-filter
-                                        class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-custom-teal focus:border-custom-teal text-sm text-gray-700 bg-white">
+                                        class="w-full border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm text-gray-700 bg-white">
                                         <option value="">-- All Categories --</option>
                                         @foreach ($categories as $category)
                                             <option value="{{ $category->hc_id }}"
@@ -49,7 +49,7 @@
                                 {{-- 3. Filter by Service Type (Takes up 3 columns) --}}
                                 <div class="md:col-span-3">
                                     <select name="service_type" data-auto-submit-filter
-                                        class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-custom-teal focus:border-custom-teal text-sm text-gray-700 bg-white">
+                                        class="w-full border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm text-gray-700 bg-white">
                                         <option value="">-- All My Services --</option>
                                         {{-- Assuming you pass a variable $serviceTypes from controller --}}
                                         @foreach ($serviceTypes as $type)
@@ -64,7 +64,7 @@
                                 {{-- 4. Filter by Status (Replaces Sort) (Takes up 2 columns) --}}
                                 <div class="md:col-span-2">
                                     <select name="status" data-auto-submit-filter
-                                        class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-custom-teal focus:border-custom-teal text-sm text-gray-700 bg-white">
+                                        class="w-full border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm text-gray-700 bg-white">
                                         <option value="">-- Status --</option>
                                         <option value="waiting_payment"
                                             {{ request('status') == 'waiting_payment' ? 'selected' : '' }}>Waiting Payment
@@ -92,8 +92,8 @@
                             </div>
                         </form>
 
-                        <div class="mb-6">
-                            <div class="flex space-x-4 border-b border-gray-200">
+                        <div class="mb-5 overflow-x-auto">
+                            <div class="flex min-w-max space-x-4 border-b border-gray-200">
                                 <button type="button" data-status-tab="pending" id="pending-tab"
                                     class="sr-status-tab-button py-2 px-4 text-sm font-medium {{ $defaultStatusTab === 'pending' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-500 hover:text-custom-teal' }} focus:outline-none">
                                     Pending
@@ -111,7 +111,7 @@
 
                        <div id="pending-content" class="sr-status-tab-content {{ $defaultStatusTab === 'pending' ? '' : 'hidden' }}">
     @if ($receivedRequests->where('hsr_status', 'pending')->isEmpty())
-        <div class="flex flex-col items-center justify-center py-16 text-center bg-white rounded-xl border border-dashed border-gray-300">
+        <div class="flex flex-col items-center justify-center py-12 text-center bg-white rounded-xl border border-dashed border-gray-300">
             <div class="rounded-full bg-indigo-50 p-4 mb-4">
                 <svg class="w-10 h-10 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
@@ -121,16 +121,16 @@
             <p class="mt-2 text-sm text-gray-500">Good job! You've processed all your incoming requests.</p>
         </div>
     @else
-        <div class="space-y-6">
+        <div class="space-y-4">
             @foreach ($receivedRequests->where('hsr_status', 'pending') as $request)
                 <div class="sr-request-item group relative overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:shadow-md hover:border-indigo-300"
                     data-category="{{ optional(optional($request->studentService)->category)->hc_name ?? 'Other' }}">
                     
                     <div class="absolute top-0 left-0 right-0 h-1 bg-indigo-500"></div>
 
-                    <div class="p-5 sm:p-6">
+                    <div class="p-4 sm:p-5">
                         
-                        <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mb-6">
+                        <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mb-5">
                             <div class="flex-1">
                                 <div class="flex items-center gap-3 mb-2">
                                     <span class="inline-flex items-center rounded-full bg-indigo-100 px-2.5 py-0.5 text-xs font-bold text-indigo-700">
@@ -170,7 +170,7 @@
 
                         <div class="h-px w-full bg-gray-100 my-4"></div>
 
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-5">
                             
                             <div class="flex items-start gap-3">
                                 <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 border border-indigo-100">

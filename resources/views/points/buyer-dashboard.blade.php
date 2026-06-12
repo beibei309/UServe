@@ -3,10 +3,10 @@
 @section('title', 'Buyer Rewards Dashboard')
 
 @section('content')
-<div class="min-h-screen bg-gray-50 py-8">
+<div class="min-h-screen bg-gray-50 py-6 sm:py-8">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {{-- Header Section --}}
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 mb-8">
+        <div class="upsi-card p-4 sm:p-5 mb-6">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 <div class="flex items-center space-x-3 sm:space-x-4">
                     <div class="bg-gradient-to-br from-purple-500 to-pink-500 p-2 sm:p-3 rounded-xl flex-shrink-0">
@@ -33,9 +33,9 @@
         </div>
 
         {{-- Points Overview Cards --}}
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 mb-6">
             {{-- Total Buyer Points Card --}}
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6">
+            <div class="upsi-card p-4 sm:p-5">
                 <div class="flex items-center">
                     <div class="bg-purple-100 p-2 sm:p-3 rounded-xl flex-shrink-0">
                         <i class="fas fa-coins text-purple-600 text-lg sm:text-xl"></i>
@@ -48,7 +48,7 @@
             </div>
 
             {{-- Points Earned Card --}}
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6">
+            <div class="upsi-card p-4 sm:p-5">
                 <div class="flex items-center">
                     <div class="bg-green-100 p-2 sm:p-3 rounded-xl flex-shrink-0">
                         <i class="fas fa-chart-line text-green-600 text-lg sm:text-xl"></i>
@@ -61,7 +61,7 @@
             </div>
 
             {{-- Rewards Redeemed Card --}}
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 sm:col-span-2 lg:col-span-1">
+            <div class="upsi-card p-4 sm:p-5 sm:col-span-2 lg:col-span-1">
                 <div class="flex items-center">
                     <div class="bg-pink-100 p-2 sm:p-3 rounded-xl flex-shrink-0">
                         <i class="fas fa-trophy text-pink-600 text-lg sm:text-xl"></i>
@@ -75,14 +75,14 @@
         </div>
 
         {{-- Available Rewards Section --}}
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 mb-8">
+        <div class="upsi-card p-4 sm:p-5 mb-6">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 space-y-2 sm:space-y-0">
                 <h3 class="text-lg sm:text-xl font-semibold text-gray-900">Available Rewards</h3>
                 <p class="text-sm text-gray-600">Choose your rewards with {{ $buyerPoints }} points</p>
             </div>
 
             @if($availableRewards->count() > 0)
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
                     @foreach($availableRewards as $reward)
                         <div class="{{ $reward->ui_card_classes }}">
                             
@@ -145,9 +145,9 @@
         </div>
 
         {{-- Recent Points & Redemptions Section --}}
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6">
             {{-- Recent Points Earned --}}
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6">
+            <div class="upsi-card p-4 sm:p-5">
                 <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-4">Recent Points Earned</h3>
                 @if($recentBuyerPoints->count() > 0)
                     <div class="space-y-3">
@@ -172,7 +172,7 @@
             </div>
 
             {{-- Recent Redemptions --}}
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6">
+            <div class="upsi-card p-4 sm:p-5">
                 <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-4">My Reward Redemptions</h3>
                 @if($rewardRedemptions->count() > 0)
                     <div class="space-y-3">

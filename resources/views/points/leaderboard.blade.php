@@ -3,10 +3,10 @@
 @section('title', 'Points Leaderboard')
 
 @section('content')
-<div class="min-h-screen bg-gray-50 py-8">
+<div class="min-h-screen bg-gray-50 py-5 sm:py-8">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {{-- Header Section --}}
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 mb-8">
+        <div class="upsi-card p-4 sm:p-5 mb-5 sm:mb-8">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 <div class="flex items-center space-x-3 sm:space-x-4">
                     <div class="bg-gradient-to-br from-amber-400 to-orange-500 p-2 sm:p-3 rounded-xl flex-shrink-0">
@@ -17,9 +17,9 @@
                         <p class="text-gray-600 mt-1 text-sm sm:text-base">Shared rankings across Seller and Buyer tracks.</p>
                     </div>
                 </div>
-                <div class="mt-4 sm:mt-0 flex space-x-2">
+                <div class="mt-4 sm:mt-0 flex">
                     <a href="{{ auth()->user()?->canAccessSellerFeatures() ? route('points.dashboard') : route('points.buyer.dashboard') }}"
-                       class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+                       class="upsi-secondary-action w-full sm:w-auto">
                         <i class="fas fa-arrow-left mr-2"></i>
                         Back to Dashboard
                     </a>
@@ -27,8 +27,8 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 lg:col-span-2">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-5 sm:mb-8">
+            <div class="upsi-card p-4 sm:p-5 lg:col-span-2">
                 <h3 class="text-lg font-bold text-gray-900 mb-3">How ranking works</h3>
                 <ul class="space-y-2 text-sm text-gray-600">
                     <li>Seller leaderboard ranks helpers by seller points earned from completed services.</li>
@@ -36,7 +36,7 @@
                     <li>Both tracks are visible to all users for transparency.</li>
                 </ul>
             </div>
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6">
+            <div class="upsi-card p-4 sm:p-5">
                 <h3 class="text-lg font-bold text-gray-900 mb-3">Your standing</h3>
                 <div class="space-y-3 text-sm">
                     @if($canViewSellerStanding)
@@ -53,9 +53,9 @@
             </div>
         </div>
 
-        <div class="mb-8 bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6">
+        <div class="mb-5 sm:mb-8 upsi-card p-4 sm:p-5">
             <h3 class="text-lg font-bold text-gray-900 mb-4">Quick Stats</h3>
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
                 <div class="text-center">
                     <div class="bg-orange-100 p-3 rounded-lg mx-auto w-fit mb-2">
                         <i class="fas fa-user-tie text-orange-600"></i>
@@ -90,9 +90,9 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6">
             {{-- Seller Leaderboard --}}
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6">
+            <div class="upsi-card p-4 sm:p-5">
                 <div class="flex items-center justify-between mb-6">
                     <div class="flex items-center space-x-3">
                         <div class="bg-gradient-to-br from-yellow-400 to-orange-500 p-2 rounded-lg">
@@ -111,7 +111,7 @@
 
                 @if($sellerLeaderboard && $sellerLeaderboard->count() > 0)
                     @if($sellerLeaderboard->count() >= 3)
-                        <div class="rounded-2xl bg-gradient-to-b from-indigo-500 to-blue-600 p-5 mb-4 shadow-sm">
+                        <div class="rounded-2xl bg-gradient-to-b from-indigo-500 to-blue-600 p-4 sm:p-5 mb-4 shadow-sm">
                             <div class="grid grid-cols-3 gap-3 items-end text-center text-white">
                                 <div>
                                     <img src="{{ $sellerLeaderboard->get(1)?->hu_profile_photo_path ? asset($sellerLeaderboard->get(1)?->hu_profile_photo_path) : ('https://ui-avatars.com/api/?name=' . urlencode($sellerLeaderboard->get(1)?->hu_name ?? 'User')) }}"
@@ -177,7 +177,7 @@
             </div>
 
             {{-- Buyer Leaderboard --}}
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6">
+            <div class="upsi-card p-4 sm:p-5">
                 <div class="flex items-center justify-between mb-6">
                     <div class="flex items-center space-x-3">
                         <div class="bg-gradient-to-br from-purple-500 to-pink-500 p-2 rounded-lg">
@@ -196,7 +196,7 @@
 
                 @if($buyerLeaderboard->count() > 0)
                     @if($buyerLeaderboard->count() >= 3)
-                        <div class="rounded-2xl bg-gradient-to-b from-indigo-500 to-blue-600 p-5 mb-4 shadow-sm">
+                        <div class="rounded-2xl bg-gradient-to-b from-indigo-500 to-blue-600 p-4 sm:p-5 mb-4 shadow-sm">
                             <div class="grid grid-cols-3 gap-3 items-end text-center text-white">
                                 <div>
                                     <img src="{{ $buyerLeaderboard->get(1)?->hu_profile_photo_path ? asset($buyerLeaderboard->get(1)?->hu_profile_photo_path) : ('https://ui-avatars.com/api/?name=' . urlencode($buyerLeaderboard->get(1)?->hu_name ?? 'User')) }}"

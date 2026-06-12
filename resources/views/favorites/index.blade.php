@@ -12,9 +12,9 @@
         <main class="max-w-7xl mx-auto">
 
             {{-- Header Section --}}
-            <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-5 mb-7">
                 <div>
-                    <h1 class="text-3xl font-bold text-gray-900 tracking-tight">My Saved Services</h1>
+                    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">My Saved Services</h1>
                     <p class="mt-1 text-sm text-gray-500">Access and view your list of favourite services.</p>
                 </div>
                 <a href="{{ route('services.index') }}"
@@ -24,13 +24,13 @@
             </div>
 
             @if ($favourites->count() > 0)
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
                     @foreach ($favourites as $service)
                         {{-- START NEW CARD DESIGN --}}
-                        <div class="service-card group bg-white rounded-2xl border border-gray-200 hover:border-indigo-100 hover:shadow-xl transition-all duration-300 flex flex-col overflow-hidden relative">
+                        <div class="service-card group upsi-card upsi-card-hover flex flex-col overflow-hidden relative">
 
                             {{-- Image Section --}}
-                            <div class="relative h-56 bg-gray-200 overflow-hidden block">
+                            <div class="relative h-44 sm:h-48 bg-gray-200 overflow-hidden block">
                                 <a href="{{ route('services.details', $service->hss_id) }}">
                                     <img src="{{ $service->ui_image_url }}"
                                         data-fallback-src="{{ $service->ui_image_fallback }}"
@@ -39,7 +39,7 @@
 
                                 {{-- Category Badge --}}
                                 @if ($service->category)
-                                    <span class="absolute top-4 left-4 bg-white/95 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold shadow-sm"
+                                    <span class="absolute top-3 left-3 upsi-chip bg-white/95 backdrop-blur-sm shadow-sm"
                                         style="color: {{ $service->category->hc_color }}">
                                         {{ $service->category->hc_name }}
                                     </span>
@@ -47,14 +47,14 @@
 
                                 {{-- REMOVE BUTTON (Integrated into new design) --}}
                                 <button data-favorite-remove data-service-id="{{ $service->hss_id }}"
-                                    class="absolute top-4 right-4 bg-white/95 text-red-500 w-8 h-8 rounded-full flex items-center justify-center shadow-md hover:bg-red-500 hover:text-white transition-all transform active:scale-90"
+                                    class="absolute top-3 right-3 bg-white/95 text-red-500 w-8 h-8 rounded-full flex items-center justify-center shadow-md hover:bg-red-500 hover:text-white transition-all transform active:scale-90"
                                     title="Remove from favorites">
                                     <i class="fa-solid fa-heart"></i>
                                 </button>
                             </div>
 
                             {{-- Content Section --}}
-                            <div class="p-5 flex flex-col flex-1">
+                            <div class="p-4 flex flex-col flex-1">
                                 {{-- User Info & Rating Row --}}
                                 <div class="flex items-center gap-3 mb-3">
                                     <img src="{{ $service->ui_seller_avatar_url }}"
@@ -85,7 +85,7 @@
 
                                 {{-- Title --}}
                                 <a href="{{ route('services.details', $service->hss_id) }}" class="block mb-2">
-                                    <h3 class="text-lg font-bold text-gray-900 group-hover:text-indigo-600 transition-colors line-clamp-2 leading-tight">
+                                    <h3 class="text-base sm:text-lg font-bold text-gray-900 group-hover:text-indigo-600 transition-colors line-clamp-2 leading-tight">
                                         {{ $service->hss_title }}
                                     </h3>
                                 </a>
@@ -104,7 +104,7 @@
                                         </div>
                                     </div>
                                     <a href="{{ route('services.details', $service->hss_id) }}"
-                                        class="px-4 py-2 bg-slate-900 hover:bg-indigo-600 text-white text-sm font-semibold rounded-lg transition-colors shadow-md">
+                                        class="upsi-primary-action px-3 py-2">
                                         View Details
                                     </a>
                                 </div>
@@ -119,14 +119,14 @@
                 </div>
             @else
                 {{-- Empty State --}}
-                <div class="text-center py-24 bg-white rounded-[3rem] border border-dashed border-slate-200">
+                <div class="text-center py-16 sm:py-20 bg-white rounded-2xl border border-dashed border-slate-200">
                     <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-300">
                         <i class="fa-regular fa-heart text-4xl"></i>
                     </div>
                     <h3 class="text-2xl font-bold text-slate-900">Your wishlist is empty</h3>
                     <p class="text-slate-500 mt-2 mb-8">Save services you're interested in to see them here.</p>
                     <a href="{{ route('services.index') }}"
-                        class="px-8 py-3 bg-indigo-600 text-white font-bold rounded-2xl hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-100">
+                        class="upsi-primary-action">
                         Explore Services
                     </a>
                 </div>

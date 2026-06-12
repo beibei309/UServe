@@ -186,30 +186,23 @@
         @include('layouts.navbar')
 
         <!-- Hero Section -->
-        <section class="py-24 bg-white relative overflow-hidden">
-            <div
-                class="absolute top-0 right-0 -translate-y-1/2 translate-x-1/4 w-96 h-96 bg-blue-50 rounded-full blur-3xl opacity-50">
-            </div>
-            <div
-                class="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/4 w-96 h-96 bg-purple-50 rounded-full blur-3xl opacity-50">
-            </div>
-
+        <section class="upsi-section bg-white relative overflow-hidden">
             <div class="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center mb-20">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-14 items-center mb-10 sm:mb-14">
 
                     <div class="order-2 lg:order-1">
                         <span class="text-blue-600 font-bold tracking-widest uppercase text-xs mb-4 block">{{ $aboutHeroBadge }}</span>
-                        <h1 class="text-4xl md:text-5xl font-black text-slate-900 mb-6 leading-tight">
+                        <h1 class="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 mb-5 leading-tight">
                             {{ $aboutHeroTitle }}
                         </h1>
-                        <p class="text-lg text-slate-600 leading-relaxed mb-8">
+                        <p class="text-base sm:text-lg text-slate-600 leading-relaxed mb-6">
                             {{ $aboutHeroDescription }}
                         </p>
 
                         <div class="flex flex-wrap gap-4">
                             @auth
                                 <a href="{{ route('services.index') }}"
-                                    class="px-8 py-4 bg-slate-900 text-white rounded-2xl font-bold hover:bg-blue-600 transition-all duration-300 shadow-xl shadow-slate-200 flex items-center gap-2">
+                                    class="upsi-primary-action gap-2">
                                     Find Your Next Service
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -218,7 +211,7 @@
                                 </a>
                             @else
                                 <a href="{{ route('register') }}"
-                                    class="px-8 py-4 bg-blue-600 text-white rounded-2xl font-bold hover:bg-blue-700 transition-all duration-300 shadow-xl shadow-blue-200">
+                                    class="upsi-primary-action">
                                     Join UPSI2u Today!
                                 </a>
                             @endauth
@@ -227,31 +220,28 @@
 
                     <div class="order-1 lg:order-2 relative">
                         <div
-                            class="relative z-10 rounded-3xl overflow-hidden shadow-2xl transform lg:rotate-3 hover:rotate-0 transition-transform duration-500 border-8 border-white">
+                            class="relative z-10 rounded-2xl overflow-hidden shadow-lg border border-slate-200">
                             <div
                                 class="aspect-video bg-gradient-to-br from-slate-200 to-slate-300 flex items-center justify-center group">
                                 <img src="{{ asset($aboutHeroImage) }}" alt="Students Collaborating"
                                     class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity">
-                                <div class="absolute inset-0 flex items-center justify-center">
+                                <div class="absolute inset-0 flex items-center justify-center p-4">
                                     <span
-                                        class="bg-white/90 backdrop-blur px-4 py-2 rounded-full text-slate-900 font-bold text-sm shadow-lg">UPSI
+                                        class="bg-white/90 backdrop-blur px-3 py-2 rounded-full text-slate-900 font-bold text-xs sm:text-sm shadow-sm">UPSI
                                         Talent in Action</span>
                                 </div>
                             </div>
                         </div>
-                        <div class="absolute -bottom-6 -left-6 w-32 h-32 bg-purple-100 rounded-2xl -z-10 rotate-12">
-                        </div>
-                        <div class="absolute -top-6 -right-6 w-32 h-32 bg-blue-100 rounded-2xl -z-10 -rotate-12"></div>
                     </div>
                 </div>
 
-                <div class="bg-slate-50 rounded-[2.5rem] p-8 md:p-12 border border-slate-100 shadow-inner">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
+                <div class="upsi-card bg-slate-50 p-5 sm:p-8">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-10 text-center">
 
                         <div class="relative group">
                             <div class="flex flex-col items-center">
                                 <span
-                                    class="text-4xl md:text-5xl font-black text-slate-900 mb-2 group-hover:text-blue-600 transition-colors">{{ number_format($totalUsers ?? 0) }}+</span>
+                                    class="text-3xl md:text-4xl font-black text-slate-900 mb-2 group-hover:text-blue-600 transition-colors">{{ number_format($totalUsers ?? 0) }}+</span>
                                 <div
                                     class="w-12 h-1 bg-blue-500 rounded-full mb-4 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300">
                                 </div>
@@ -260,10 +250,10 @@
                             </div>
                         </div>
 
-                        <div class="relative group border-y md:border-y-0 md:border-x border-slate-200 py-8 md:py-0">
+                        <div class="relative group border-y md:border-y-0 md:border-x border-slate-200 py-6 md:py-0">
                             <div class="flex flex-col items-center">
                                 <span
-                                    class="text-4xl md:text-5xl font-black text-slate-900 mb-2 group-hover:text-purple-600 transition-colors">{{ number_format($totalServices ?? 0) }}</span>
+                                    class="text-3xl md:text-4xl font-black text-slate-900 mb-2 group-hover:text-purple-600 transition-colors">{{ number_format($totalServices ?? 0) }}</span>
                                 <div
                                     class="w-12 h-1 bg-purple-500 rounded-full mb-4 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300">
                                 </div>
@@ -275,7 +265,7 @@
                         <div class="relative group">
                             <div class="flex flex-col items-center">
                                 <span
-                                    class="text-4xl md:text-5xl font-black text-slate-900 mb-2 group-hover:text-emerald-500 transition-colors">{{ number_format($totalSellers ?? 0) }}</span>
+                                    class="text-3xl md:text-4xl font-black text-slate-900 mb-2 group-hover:text-emerald-500 transition-colors">{{ number_format($totalSellers ?? 0) }}</span>
                                 <div
                                     class="w-12 h-1 bg-emerald-500 rounded-full mb-4 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300">
                                 </div>
@@ -292,14 +282,9 @@
 
 
         <!-- Story Section with Image -->
-        <section class="py-24 bg-white relative overflow-hidden">
-            <div class="absolute top-0 left-0 w-full h-full opacity-40 pointer-events-none">
-                <div class="absolute top-1/4 -left-20 w-72 h-72 bg-blue-100 rounded-full blur-[100px]"></div>
-                <div class="absolute bottom-1/4 -right-20 w-72 h-72 bg-purple-100 rounded-full blur-[100px]"></div>
-            </div>
-
+        <section class="upsi-section bg-white relative overflow-hidden">
             <div class="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-14 items-start">
 
                     <div class="relative">
                         <div
@@ -307,26 +292,26 @@
                             Our Origin
                         </div>
 
-                        <h2 class="text-4xl md:text-5xl font-black text-slate-900 mb-8 leading-tight">
+                        <h2 class="text-3xl md:text-4xl font-black text-slate-900 mb-6 leading-tight">
                             {{ $aboutStoryTitle }}
                         </h2>
 
-                        <div class="space-y-8 relative">
+                        <div class="space-y-6 relative">
                             <div
                                 class="absolute left-0 top-2 w-px h-[90%] bg-gradient-to-b from-blue-200 via-purple-200 to-transparent ml-[-20px] hidden md:block">
                             </div>
 
                             <div class="relative group">
                                 <p
-                                    class="text-lg text-slate-600 leading-relaxed italic border-l-4 border-blue-500 pl-6 md:border-none md:pl-0">
+                                    class="text-base sm:text-lg text-slate-600 leading-relaxed italic border-l-4 border-blue-500 pl-5 md:border-none md:pl-0">
                                     {{ $aboutStoryQuote }}
                                 </p>
                             </div>
 
-                            <div class="text-slate-600 leading-relaxed space-y-6">
+                            <div class="text-slate-600 leading-relaxed space-y-5">
                                 <p>{{ $aboutStoryBody1 }}</p>
 
-                                <div class="bg-slate-50 p-6 rounded-2xl border-l-4 border-purple-500 shadow-sm">
+                                <div class="bg-slate-50 p-5 rounded-2xl border-l-4 border-purple-500">
                                     <p class="text-slate-700 font-medium">
                                         {{ $aboutStoryHighlight }}
                                     </p>
@@ -341,10 +326,10 @@
                         <div class="relative z-20">
                             <img src="{{ asset($aboutStoryImage) }}"
                                 alt="Students Collaborating"
-                                class="w-full h-[500px] object-cover rounded-[2rem] shadow-2xl border-8 border-white">
+                                class="w-full h-72 sm:h-96 lg:h-[460px] object-cover rounded-2xl shadow-lg border border-slate-200">
 
                             <div
-                                class="absolute -bottom-6 -left-6 md:-left-12 bg-white p-6 rounded-3xl shadow-xl z-30 flex items-center gap-4 border border-slate-100">
+                                class="absolute bottom-4 left-4 bg-white/95 p-4 rounded-2xl shadow-lg z-30 flex items-center gap-3 border border-slate-100">
                                 <div
                                     class="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white font-bold text-xl">
                                     25
@@ -358,32 +343,6 @@
                             </div>
                         </div>
 
-                        <div class="absolute top-12 -right-6 w-full h-full bg-slate-100 rounded-[2rem] -z-10 rotate-3">
-                        </div>
-                        <div class="absolute -top-6 -right-6 text-slate-200">
-                            <svg width="100" height="100" fill="currentColor" viewBox="0 0 100 100">
-                                <circle cx="2" cy="2" r="2" />
-                                <circle cx="22" cy="2" r="2" />
-                                <circle cx="42" cy="2" r="2" />
-                                <circle cx="62" cy="2" r="2" />
-                                <circle cx="82" cy="2" r="2" />
-                                <circle cx="2" cy="22" r="2" />
-                                <circle cx="22" cy="22" r="2" />
-                                <circle cx="42" cy="22" r="2" />
-                                <circle cx="62" cy="22" r="2" />
-                                <circle cx="82" cy="22" r="2" />
-                                <circle cx="2" cy="42" r="2" />
-                                <circle cx="22" cy="42" r="2" />
-                                <circle cx="42" cy="42" r="2" />
-                                <circle cx="62" cy="42" r="2" />
-                                <circle cx="82" cy="42" r="2" />
-                                <circle cx="2" cy="62" r="2" />
-                                <circle cx="22" cy="62" r="2" />
-                                <circle cx="42" cy="62" r="2" />
-                                <circle cx="62" cy="62" r="2" />
-                                <circle cx="82" cy="62" r="2" />
-                            </svg>
-                        </div>
                     </div>
 
                 </div>
@@ -391,23 +350,21 @@
         </section>
 
         <!-- Step-by-Step Guide -->
-    <section class="py-24 bg-slate-50 relative overflow-hidden">
-    <div class="absolute top-0 right-0 w-96 h-96 bg-blue-100/50 rounded-full blur-[100px] -mr-48 -mt-48"></div>
-    
+    <section class="upsi-section bg-slate-50 relative overflow-hidden">
     <div class="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
-        <div class="text-center max-w-2xl mx-auto mb-16">
+        <div class="text-center max-w-2xl mx-auto mb-8 sm:mb-12">
             <h2 class="text-blue-600 font-bold tracking-widest uppercase text-xs mb-3">Process</h2>
-            <h3 class="text-4xl font-extrabold text-slate-900 mb-6">Simple Steps to Get Started</h3>
+            <h3 class="text-3xl sm:text-4xl font-extrabold text-slate-900 mb-5">Simple Steps to Get Started</h3>
             
-            <div class="inline-flex p-1.5 bg-white border border-slate-200 rounded-2xl shadow-sm">
+            <div class="inline-flex w-full sm:w-auto p-1.5 bg-white border border-slate-200 rounded-2xl shadow-sm">
                 <button @click="activeTab = 'seekers'" 
                     :class="activeTab === 'seekers' ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-600 hover:bg-slate-50'"
-                    class="px-6 py-2.5 rounded-xl font-bold transition-all duration-300 text-sm">
+                    class="flex-1 sm:flex-none px-4 sm:px-6 py-2.5 rounded-xl font-bold transition-all duration-300 text-sm">
                     For Buyers
                 </button>
                 <button @click="activeTab = 'providers'" 
                     :class="activeTab === 'providers' ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-600 hover:bg-slate-50'"
-                    class="px-6 py-2.5 rounded-xl font-bold transition-all duration-300 text-sm">
+                    class="flex-1 sm:flex-none px-4 sm:px-6 py-2.5 rounded-xl font-bold transition-all duration-300 text-sm">
                     For Sellers
                 </button>
             </div>
@@ -417,19 +374,19 @@
             <div class="relative">
                 <div class="hidden md:block absolute top-10 left-0 w-full h-0.5 border-t-2 border-dashed border-slate-300 z-0"></div>
                 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-12 relative z-10">
-                    <div class="group flex flex-col items-center text-center">
-                        <div class="w-20 h-20 bg-white text-blue-600 rounded-3xl flex items-center justify-center text-3xl font-black mb-8 shadow-xl shadow-blue-100 group-hover:scale-110 group-hover:-rotate-3 transition-all duration-300 border-2 border-blue-50">1</div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 relative z-10">
+                    <div class="upsi-card p-5 sm:p-6 flex flex-col items-center text-center">
+                        <div class="w-14 h-14 bg-white text-blue-600 rounded-2xl flex items-center justify-center text-2xl font-black mb-5 shadow-sm border-2 border-blue-50">1</div>
                         <h4 class="text-xl font-bold text-slate-900 mb-3">Search & Browse</h4>
                         <p class="text-slate-600 leading-relaxed max-w-xs">Use smart filters to find tutoring, design, or coding help from your peers.</p>
                     </div>
-                    <div class="group flex flex-col items-center text-center">
-                        <div class="w-20 h-20 bg-white text-purple-600 rounded-3xl flex items-center justify-center text-3xl font-black mb-8 shadow-xl shadow-purple-100 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 border-2 border-purple-50">2</div>
+                    <div class="upsi-card p-5 sm:p-6 flex flex-col items-center text-center">
+                        <div class="w-14 h-14 bg-white text-purple-600 rounded-2xl flex items-center justify-center text-2xl font-black mb-5 shadow-sm border-2 border-purple-50">2</div>
                         <h4 class="text-xl font-bold text-slate-900 mb-3">Book & Chat</h4>
                         <p class="text-slate-600 leading-relaxed max-w-xs">Book your requested date, Wait for approval, discuss needs, pricing or other details directly with student sellers through Whatsapp.</p>
                     </div>
-                    <div class="group flex flex-col items-center text-center">
-                        <div class="w-20 h-20 bg-white text-emerald-500 rounded-3xl flex items-center justify-center text-3xl font-black mb-8 shadow-xl shadow-emerald-100 group-hover:scale-110 group-hover:-rotate-3 transition-all duration-300 border-2 border-emerald-50">3</div>
+                    <div class="upsi-card p-5 sm:p-6 flex flex-col items-center text-center">
+                        <div class="w-14 h-14 bg-white text-emerald-500 rounded-2xl flex items-center justify-center text-2xl font-black mb-5 shadow-sm border-2 border-emerald-50">3</div>
                         <h4 class="text-xl font-bold text-slate-900 mb-3">Leave a Review</h4>
                         <p class="text-slate-600 leading-relaxed max-w-xs">Leave a review to help build a trustworthy community.</p>
                     </div>
@@ -440,19 +397,19 @@
         <div x-show="activeTab === 'providers'" x-transition:enter="transition ease-out duration-500 transform" x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0" style="display: none;">
             <div class="relative">
                 <div class="hidden md:block absolute top-10 left-0 w-full h-0.5 border-t-2 border-dashed border-orange-200 z-0"></div>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-12 relative z-10">
-                    <div class="group flex flex-col items-center text-center">
-                        <div class="w-20 h-20 bg-white text-orange-500 rounded-3xl flex items-center justify-center text-3xl font-black mb-8 shadow-xl shadow-orange-100 group-hover:scale-110 transition-all border-2 border-orange-50">1</div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 relative z-10">
+                    <div class="upsi-card p-5 sm:p-6 flex flex-col items-center text-center">
+                        <div class="w-14 h-14 bg-white text-orange-500 rounded-2xl flex items-center justify-center text-2xl font-black mb-5 shadow-sm border-2 border-orange-50">1</div>
                         <h4 class="text-xl font-bold text-slate-900 mb-3">Create Profile</h4>
                         <p class="text-slate-600 leading-relaxed max-w-xs">Showcase your skills, portfolio, and set your own availability status.</p>
                     </div>
-                    <div class="group flex flex-col items-center text-center">
-                        <div class="w-20 h-20 bg-white text-pink-500 rounded-3xl flex items-center justify-center text-3xl font-black mb-8 shadow-xl shadow-pink-100 group-hover:scale-110 transition-all border-2 border-pink-50">2</div>
+                    <div class="upsi-card p-5 sm:p-6 flex flex-col items-center text-center">
+                        <div class="w-14 h-14 bg-white text-pink-500 rounded-2xl flex items-center justify-center text-2xl font-black mb-5 shadow-sm border-2 border-pink-50">2</div>
                         <h4 class="text-xl font-bold text-slate-900 mb-3">Receive Requests</h4>
                         <p class="text-slate-600 leading-relaxed max-w-xs">Get instant notifications when students are interested in your services.</p>
                     </div>
-                    <div class="group flex flex-col items-center text-center">
-                        <div class="w-20 h-20 bg-white text-teal-500 rounded-3xl flex items-center justify-center text-3xl font-black mb-8 shadow-xl shadow-teal-100 group-hover:scale-110 transition-all border-2 border-teal-50">3</div>
+                    <div class="upsi-card p-5 sm:p-6 flex flex-col items-center text-center">
+                        <div class="w-14 h-14 bg-white text-teal-500 rounded-2xl flex items-center justify-center text-2xl font-black mb-5 shadow-sm border-2 border-teal-50">3</div>
                         <h4 class="text-xl font-bold text-slate-900 mb-3">Earn & Grow</h4>
                         <p class="text-slate-600 leading-relaxed max-w-xs">Build your reputation, earn money, and help your fellow students and community succeed.</p>
                     </div>
@@ -464,28 +421,24 @@
     
 </section>
 
-<section class="py-24 bg-slate-950 relative overflow-hidden text-center">
-    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full opacity-30 pointer-events-none">
-        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-600 rounded-full blur-[120px]"></div>
-    </div>
-
+<section class="py-12 sm:py-16 bg-slate-950 relative overflow-hidden text-center">
     <div class="max-w-4xl mx-auto px-6 relative z-10">
-        <h2 class="text-4xl md:text-6xl font-black text-white mb-8 tracking-tight leading-tight">
+        <h2 class="text-3xl md:text-5xl font-black text-white mb-5 tracking-tight leading-tight">
             {{ $aboutCtaTitle }}
         </h2>
-        <p class="text-slate-400 text-lg md:text-xl mb-12 max-w-2xl mx-auto">
+        <p class="text-slate-400 text-base md:text-lg mb-8 max-w-2xl mx-auto">
             {{ $aboutCtaSubtitle }}
         </p>
         
         <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
             <a href="{{ route('services.index') }}" 
-               class="group px-10 py-4 bg-white text-slate-950 rounded-2xl font-bold hover:scale-105 transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.2)] flex items-center gap-2">
+               class="group w-full sm:w-auto px-6 py-3 bg-white text-slate-950 rounded-xl font-bold hover:bg-indigo-50 transition-all duration-300 flex items-center justify-center gap-2">
                 <span>Find Your Service!</span>
                 <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
             </a>
             
             @guest
-            <a href="{{ route('login') }}" class="px-10 py-4 text-white border border-slate-700 rounded-2xl font-bold hover:bg-slate-900 transition-all">
+            <a href="{{ route('login') }}" class="w-full sm:w-auto px-6 py-3 text-white border border-slate-700 rounded-xl font-bold hover:bg-slate-900 transition-all">
                 Log In
             </a>
             @endguest

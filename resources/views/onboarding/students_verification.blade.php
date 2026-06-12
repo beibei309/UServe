@@ -1,5 +1,5 @@
 <x-guest-layout>
-    <div class="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+    <div class="min-h-screen bg-slate-50 flex items-center justify-center p-3 sm:p-4">
         @if(session('info'))
             <div class="fixed top-5 left-1/2 -translate-x-1/2 z-50 max-w-xl w-[95%] p-4 bg-amber-50 border-l-4 border-amber-500 rounded-lg shadow">
                 <p class="text-sm font-medium text-amber-800 text-center">{{ session('info') }}</p>
@@ -7,9 +7,9 @@
         @endif
         
         @if($isEligible)
-            <div class="bg-white w-full max-w-5xl rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row min-h-[650px]">
+            <div class="upsi-card w-full max-w-5xl overflow-hidden flex flex-col md:flex-row md:min-h-[650px]">
                 
-                <div class="w-full md:w-1/3 bg-indigo-600 p-8 text-white flex flex-col justify-between relative overflow-hidden">
+                <div class="w-full md:w-1/3 bg-indigo-600 p-5 sm:p-8 text-white flex flex-col justify-between relative overflow-hidden">
                     <div class="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
                         <svg class="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0 100 C 20 0 50 0 100 100 Z" fill="white" /></svg>
                     </div>
@@ -19,22 +19,22 @@
                             <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
                             <span class="text-xs font-bold uppercase tracking-wider">Status: {{ $statusMessage }}</span>
                         </div>
-                        <h2 class="text-3xl font-bold tracking-tight">Seller Verification</h2>
+                        <h2 class="text-2xl sm:text-3xl font-bold tracking-tight">Seller Verification</h2>
                         <p class="text-indigo-100 mt-2 text-sm">Complete these steps to activate your seller account.</p>
                     </div>
 
-                    <div class="relative z-10 space-y-8 my-8">
+                    <div class="relative z-10 grid grid-cols-3 md:block md:space-y-8 gap-3 md:gap-0 my-5 md:my-8">
                         <div class="step-indicator flex items-center gap-4 opacity-100 transition-opacity duration-300" id="ind-1">
-                            <div class="w-10 h-10 rounded-full border-2 border-white flex items-center justify-center font-bold bg-white text-indigo-600 shadow-lg">1</div>
-                            <div><h4 class="font-bold text-lg">Location</h4><p class="text-xs text-indigo-200">Verify Muallim District</p></div>
+                            <div class="w-8 h-8 md:w-10 md:h-10 rounded-full border-2 border-white flex items-center justify-center font-bold bg-white text-indigo-600 shadow-lg shrink-0">1</div>
+                            <div class="hidden md:block"><h4 class="font-bold text-lg">Location</h4><p class="text-xs text-indigo-200">Verify Muallim District</p></div>
                         </div>
                         <div class="step-indicator flex items-center gap-4 opacity-50 transition-opacity duration-300" id="ind-2">
-                            <div class="w-10 h-10 rounded-full border-2 border-indigo-400 flex items-center justify-center font-bold text-indigo-100">2</div>
-                            <div><h4 class="font-bold text-lg">Profile Photo</h4><p class="text-xs text-indigo-200">Professional Look</p></div>
+                            <div class="w-8 h-8 md:w-10 md:h-10 rounded-full border-2 border-indigo-400 flex items-center justify-center font-bold text-indigo-100 shrink-0">2</div>
+                            <div class="hidden md:block"><h4 class="font-bold text-lg">Profile Photo</h4><p class="text-xs text-indigo-200">Professional Look</p></div>
                         </div>
                         <div class="step-indicator flex items-center gap-4 opacity-50 transition-opacity duration-300" id="ind-3">
-                            <div class="w-10 h-10 rounded-full border-2 border-indigo-400 flex items-center justify-center font-bold text-indigo-100">3</div>
-                            <div><h4 class="font-bold text-lg">Live Identity</h4><p class="text-xs text-indigo-200">Selfie Check</p></div>
+                            <div class="w-8 h-8 md:w-10 md:h-10 rounded-full border-2 border-indigo-400 flex items-center justify-center font-bold text-indigo-100 shrink-0">3</div>
+                            <div class="hidden md:block"><h4 class="font-bold text-lg">Live Identity</h4><p class="text-xs text-indigo-200">Selfie Check</p></div>
                         </div>
                     </div>
 
@@ -44,7 +44,7 @@
                     </div>
                 </div>
 
-                <div class="w-full md:w-2/3 bg-white p-8 md:p-12 relative flex flex-col justify-center">
+                <div class="w-full md:w-2/3 bg-white p-5 sm:p-8 md:p-12 relative flex flex-col justify-center">
                     
                     <a href="{{ route('dashboard') }}" class="absolute top-6 right-6 text-slate-400 hover:text-slate-600 transition-colors z-20">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -52,7 +52,7 @@
 
                     <div id="panel-1" class="step-panel w-full animate-fadeIn">
                         <div class="mb-8">
-                            <h3 class="text-2xl font-bold text-slate-800">Where are you located?</h3>
+                            <h3 class="text-xl sm:text-2xl font-bold text-slate-800">Where are you located?</h3>
                             <p class="text-slate-500 mt-2">Sellers must be located within Muallim District.</p>
                         </div>
                         <div class="space-y-6 max-w-md mx-auto w-full">
@@ -66,7 +66,7 @@
 
                     <div id="panel-2" class="step-panel hidden w-full animate-fadeIn">
                         <div class="mb-8 text-center">
-                            <h3 class="text-2xl font-bold text-slate-800">Upload Profile Photo</h3>
+                            <h3 class="text-xl sm:text-2xl font-bold text-slate-800">Upload Profile Photo</h3>
                             <p class="text-slate-500 mt-2">Make a good first impression.</p>
                         </div>
                         <form id="upload_photo_form" enctype="multipart/form-data" class="max-w-md mx-auto w-full space-y-8">
@@ -89,7 +89,7 @@
 
                     <div id="panel-3" class="step-panel hidden w-full animate-fadeIn">
                         <div class="mb-6 text-center">
-                            <h3 class="text-2xl font-bold text-slate-800">Live Identity Check</h3>
+                            <h3 class="text-xl sm:text-2xl font-bold text-slate-800">Live Identity Check</h3>
                             <p class="text-slate-500 text-sm mt-1">Please take a live selfie.</p>
                         </div>
                         <div class="relative bg-black rounded-2xl overflow-hidden shadow-2xl mx-auto w-full max-w-[320px] aspect-[3/4] mb-6 border-4 border-slate-900">
@@ -116,7 +116,7 @@
                         <div class="w-24 h-24 rounded-full bg-green-100 flex items-center justify-center text-green-600 mb-6 shadow-xl animate-bounce-short">
                             <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
                         </div>
-                        <h2 class="text-3xl font-extrabold text-slate-900 mb-2">You are now registered as a Student Seller!</h2>
+                        <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mb-2">You are now registered as a Student Seller!</h2>
                         <p class="text-slate-500 mb-8">Please complete your profile details.</p>
                         <a href="{{ route('students.create') }}" class="bg-slate-900 text-white px-8 py-3 rounded-xl font-bold shadow-lg">Create Profile</a>
                     </div>
@@ -124,7 +124,7 @@
             </div>
 
         @else
-            <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl p-10 text-center relative overflow-hidden border border-slate-100">
+            <div class="upsi-card w-full max-w-lg p-6 sm:p-10 text-center relative overflow-hidden">
                 
                 <div class="w-20 h-20 rounded-full {{ $statusColor == 'red' ? 'bg-red-100 text-red-600' : 'bg-orange-100 text-orange-600' }} mx-auto flex items-center justify-center mb-6 shadow-sm">
                     @if($statusColor == 'red')

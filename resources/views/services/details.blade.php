@@ -76,10 +76,10 @@
 
     @include('layouts.navbar')
 
-    <div class="bg-white border-b border-gray-200 pt-8 md:pt-10 pb-6">
-        <div class="max-w-7xl mx-auto px-6">
-            <nav class="flex" aria-label="Breadcrumb">
-                <ol class="inline-flex items-center space-x-1 md:space-x-3 text-sm text-gray-500">
+    <div class="bg-white border-b border-gray-200 pt-6 md:pt-10 pb-5 md:pb-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6">
+            <nav class="flex overflow-x-auto" aria-label="Breadcrumb">
+                <ol class="inline-flex items-center space-x-1 md:space-x-3 text-xs sm:text-sm text-gray-500 whitespace-nowrap">
                     <li class="inline-flex items-center"><a href="{{ route('dashboard') }}"
                             class="hover:text-indigo-600"><i class="fa-solid fa-house mr-2"></i> Home</a></li>
                     <li><i class="fa-solid fa-chevron-right text-gray-400 mx-2 text-xs"></i><a
@@ -91,14 +91,14 @@
         </div>
     </div>
 
-    <main class="max-w-7xl mx-auto px-6 py-10">
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6 md:py-10">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10">
 
             {{-- LEFT COLUMN (Service Details) --}}
             <div class="lg:col-span-8 space-y-8">
                 <div>
     {{-- TITLE --}}
-    <h1 class="text-3xl md:text-4xl font-bold text-slate-900 leading-tight">
+    <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 leading-tight">
         {{ $service->hss_title }}
     </h1>
 
@@ -119,7 +119,7 @@
     @endif
 
     {{-- META INFO --}}
-    <div class="flex flex-wrap items-center gap-4 text-sm mt-4">
+    <div class="flex flex-wrap items-center gap-2 sm:gap-4 text-sm mt-4">
         <span class="font-semibold text-slate-900">
             {{ $detailsUi['provider_display_name'] }}
         </span> |
@@ -149,9 +149,9 @@
 
 
                 <div
-                    class="group relative overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-md transition-all duration-300 hover:shadow-xl">
+                    class="group upsi-card upsi-card-hover relative overflow-hidden">
                     {{-- Image Container --}}
-                    <div class="aspect-video h-[400px] w-full overflow-hidden bg-gray-100">
+                    <div class="aspect-video max-h-[320px] w-full overflow-hidden bg-gray-100">
                         <img src="{{ $detailsImageUrl }}"
                             alt="{{ $service->hss_title ?? 'Service Image' }}"
                             class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
@@ -162,15 +162,15 @@
                 </div>
 
 
-                <section class="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100">
+                <section class="upsi-card p-5 md:p-6">
                     <h2 class="text-xl font-bold text-slate-900 mb-4 border-b border-gray-100 pb-2">Description</h2>
                     <div class="prose prose-slate max-w-none text-gray-600 rich-text">{!! $service->hss_description !!}</div>
                 </section>
 
                 {{-- Helper Profile Section --}}
                 <section
-                    class="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100 relative overflow-hidden">
-                    <div class="flex flex-col md:flex-row gap-8 items-start">
+                    class="upsi-card p-5 md:p-6 relative overflow-hidden">
+                    <div class="flex flex-col md:flex-row gap-6 items-start">
 
                         {{-- Left: Profile Image & Badge --}}
                         <div class="relative mx-auto md:mx-0 flex-shrink-0 group">
@@ -180,12 +180,12 @@
                                 @if ($service->user->hu_profile_photo_path)
                                     <img src="{{ $detailsProviderAvatarUrl }}"
                                         data-fallback-src="{{ $detailsProviderAvatarFallback }}"
-                                        class="w-24 h-24 md:w-28 md:h-28 rounded-full object-cover border-4 border-white shadow-lg transition-all duration-300 
+                                        class="w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 border-white shadow-md transition-all duration-300
                         {{-- BLUR IF GUEST --}}
                         @guest blur-md brightness-90 @endguest">
                                 @else
                                     <div
-                                        class="w-24 h-24 md:w-28 md:h-28 rounded-full bg-indigo-600 flex items-center justify-center text-3xl md:text-4xl text-white font-bold border-4 border-white shadow-lg 
+                                        class="w-20 h-20 md:w-24 md:h-24 rounded-full bg-indigo-600 flex items-center justify-center text-2xl md:text-3xl text-white font-bold border-4 border-white shadow-md
                         {{-- BLUR IF GUEST --}}
                         @guest blur-md brightness-90 @endguest">
                                         {{ $detailsUi['provider_initial_upper'] }}
@@ -231,7 +231,7 @@
                             </div>
 
                             {{-- Bio Box --}}
-                            <div class="bg-slate-50 rounded-xl p-4 border border-slate-100 text-left relative">
+                                <div class="bg-slate-50 rounded-xl p-4 border border-slate-100 text-left relative">
                                 <i
                                     class="fa-solid fa-quote-left text-slate-200 text-2xl absolute top-3 left-3 -z-0"></i>
                                 <p class="text-gray-600 italic text-sm relative z-10 pl-6">
@@ -267,7 +267,7 @@
 
                 {{-- Reviews Section --}}
                {{-- Reviews Section --}}
-<section class="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100">
+<section class="upsi-card p-5 md:p-6">
     <div class="flex items-center justify-between mb-6">
         <h2 class="text-xl font-bold text-slate-900">
             {{-- OPTIONAL: You might want to filter the count in the controller to be accurate --}}
@@ -377,7 +377,7 @@
 
             {{-- RIGHT COLUMN (Booking System) --}}
             <div class="lg:col-span-4">
-                <div class="sticky top-24 space-y-6" x-data="bookingSystem()" x-init="init()">
+                <div class="lg:sticky lg:top-24 space-y-6" x-data="bookingSystem()" x-init="init()">
 
                     {{-- 1. CALENDAR MODAL (Hidden by default) --}}
                     <template x-teleport="body">
@@ -402,7 +402,7 @@
 
                     {{-- 2. MAIN BOOKING CARD --}}
                     <div
-                        class="bg-white rounded-2xl shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] border border-gray-100 overflow-hidden relative">
+                        class="upsi-card overflow-hidden relative">
 
                         <div class="grid grid-cols-3 border-b border-gray-200 bg-gray-50">
                             @if ($service->hss_basic_price)
@@ -410,7 +410,7 @@
                                     :class="currentPackage === 'basic' ?
                                         'border-b-2 border-teal-600 text-teal-600 font-bold bg-white' :
                                         'text-gray-500 hover:text-gray-700'"
-                                    class="py-4 text-sm transition-all border-b-2 border-transparent">
+                                    class="py-3 sm:py-4 text-xs sm:text-sm transition-all border-b-2 border-transparent">
                                     Basic
                                 </button>
                             @endif
@@ -419,7 +419,7 @@
                                     :class="currentPackage === 'standard' ?
                                         'border-b-2 border-yellow-500 text-yellow-600 font-bold bg-white' :
                                         'text-gray-500 hover:text-gray-700'"
-                                    class="py-4 text-sm transition-all border-b-2 border-transparent">
+                                    class="py-3 sm:py-4 text-xs sm:text-sm transition-all border-b-2 border-transparent">
                                     Standard
                                 </button>
                             @endif
@@ -428,21 +428,21 @@
                                     :class="currentPackage === 'premium' ?
                                         'border-b-2 border-red-600 text-red-600 font-bold bg-white' :
                                         'text-gray-500 hover:text-gray-700'"
-                                    class="py-4 text-sm transition-all border-b-2 border-transparent">
+                                    class="py-3 sm:py-4 text-xs sm:text-sm transition-all border-b-2 border-transparent">
                                     Premium
                                 </button>
                             @endif
                         </div>
 
-                        <div class="p-6">
+                        <div class="p-4 sm:p-5">
                             {{-- Price & Simple Info Display --}}
-                            <div class="flex flex-col items-end mb-6 text-right">
+                            <div class="flex flex-col items-end mb-5 text-right">
                                 <span class="font-bold text-gray-400 text-xs uppercase tracking-wider mb-1">
                                     <span x-text="isSessionBased ? 'From' : 'Task Price'"></span>
                                 </span>
 
                                 {{-- Price --}}
-                                <span class="text-4xl font-extrabold" :class="priceColorClass"
+                                <span class="text-3xl sm:text-4xl font-extrabold" :class="priceColorClass"
                                     x-text="'RM' + calculateTotal()"></span>
 
                                 {{-- ?? UPDATED: Simple Data Display (No labels) --}}
@@ -461,20 +461,20 @@
                             </div>
 
                             {{-- Description Box --}}
-                            <div class="bg-slate-50 rounded-xl p-4 mb-6 border border-slate-100 text-sm" x-transition>
+                            <div class="bg-slate-50 rounded-xl p-4 mb-5 border border-slate-100 text-sm" x-transition>
                                 <div class="text-slate-700 prose prose-sm max-w-none rich-text"
                                     x-html="packages[currentPackage].description || 'No description provided.'"></div>
                             </div>
 
                             {{-- Duration (Session Based Only) --}}
                             {{-- Duration --}}
-                            <div class="mb-6" x-show="isSessionBased">
+                            <div class="mb-5" x-show="isSessionBased">
                                 <div class="flex justify-between items-center mb-2">
                                     <label class="text-xs font-bold text-gray-700 uppercase">Duration</label>
                                     <span class="text-xs font-medium text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded"
                                         x-text="formatDuration(selectedDuration * sessionDuration)"></span>
                                 </div>
-                                <div class="grid grid-cols-5 gap-2">
+                                <div class="grid grid-cols-3 min-[380px]:grid-cols-5 gap-2">
                                     <template x-for="h in [1, 2, 3, 4, 5]" :key="h">
                                         <button @click="selectDuration(h)" type="button"
                                             class="py-2.5 rounded-xl border text-sm font-bold transition-all"
@@ -488,10 +488,10 @@
                                 <p class="mt-2 text-[11px] text-indigo-600" x-show="packageDurationHint" x-text="packageDurationHint"></p>
                             </div>
 
-                            <div class="w-full h-px bg-gray-100 mb-6"></div>
+                            <div class="w-full h-px bg-gray-100 mb-5"></div>
 
                             {{-- Date Scroller --}}
-                            <div class="mb-6">
+                            <div class="mb-5">
                                 <div class="flex justify-between items-center mb-3">
                                     <label class="text-xs font-bold text-gray-700 uppercase">Select Date</label>
                                     <button @click="openCalendar()"
@@ -545,7 +545,7 @@
                             </div>
 
                             {{-- Time Slots --}}
-                            <div x-show="selectedDate && isSessionBased" x-transition class="mb-6">
+                            <div x-show="selectedDate && isSessionBased" x-transition class="mb-5">
                                 <label class="block text-xs font-bold text-gray-500 uppercase mb-3">Start Time</label>
                                 <div class="flex flex-wrap gap-2" x-show="timeSlots.length > 0">
                                     <template x-for="slot in timeSlots" :key="slot.time">

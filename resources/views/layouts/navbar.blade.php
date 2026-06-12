@@ -9,8 +9,8 @@
 </style>
 
 {{-- TOP UTILITY BAR --}}
-<div class="w-full bg-white border-b border-slate-100 font-sans sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto h-16 md:h-20 flex items-center justify-between px-6 relative">
+<div class="w-full bg-white border-b border-slate-100 font-sans">
+    <div class="max-w-7xl mx-auto h-12 md:h-20 flex items-center justify-between px-3 sm:px-4 md:px-6 relative">
 
         <div class="hidden md:flex items-center gap-4 text-slate-400 text-[11px] font-bold uppercase tracking-widest">
             <span class="flex items-center gap-2">
@@ -22,28 +22,28 @@
         {{-- CENTER LOGO: Dengan Kesan Hover --}}
         <div class="absolute left-1/2 transform -translate-x-1/2 z-20">
             <a href="https://www.upsi.edu.my/" class="block transition-transform duration-300 hover:scale-105 active:scale-95">
-                <img src="{{ asset('images/upsilogo.png') }}" class="h-12 md:h-16 w-auto object-contain"
+                <img src="{{ asset('images/upsilogo.png') }}" class="h-9 sm:h-10 md:h-16 w-auto object-contain"
                     alt="UPSI Logo">
             </a>
         </div>
 
         {{-- SOCIAL ICONS RIGHT: Gaya Card-based --}}
-        <div class="ml-auto flex items-center gap-2.5">
+        <div class="ml-auto flex items-center gap-1.5 sm:gap-2.5">
 
             <a href="https://www.facebook.com/UPSIMalaysia/" target="_blank"
-                class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-50 text-slate-400 hover:bg-[#1877F2] hover:text-white hover:shadow-lg hover:shadow-blue-200 transition-all duration-300"
+                class="hidden min-[380px]:flex w-8 h-8 md:w-9 md:h-9 items-center justify-center rounded-xl bg-slate-50 text-slate-400 hover:bg-[#1877F2] hover:text-white hover:shadow-lg hover:shadow-blue-200 transition-all duration-300"
                 title="Facebook">
                 <i class="fa-brands fa-facebook-f text-sm"></i>
             </a>
 
             <a href="https://www.instagram.com/upsi_malaysia" target="_blank"
-                class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-50 text-slate-400 hover:bg-gradient-to-tr hover:from-[#f9ce34] hover:via-[#ee2a7b] hover:to-[#6228d7] hover:text-white hover:shadow-lg hover:shadow-pink-200 transition-all duration-300"
+                class="w-8 h-8 md:w-9 md:h-9 flex items-center justify-center rounded-xl bg-slate-50 text-slate-400 hover:bg-gradient-to-tr hover:from-[#f9ce34] hover:via-[#ee2a7b] hover:to-[#6228d7] hover:text-white hover:shadow-lg hover:shadow-pink-200 transition-all duration-300"
                 title="Instagram">
                 <i class="fa-brands fa-instagram text-sm"></i>
             </a>
             
             <a href="https://www.tiktok.com/@upsi_malaysia" target="_blank"
-                class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-50 text-slate-400 hover:bg-slate-900 hover:text-white hover:shadow-lg hover:shadow-slate-300 transition-all duration-300"
+                class="w-8 h-8 md:w-9 md:h-9 flex items-center justify-center rounded-xl bg-slate-50 text-slate-400 hover:bg-slate-900 hover:text-white hover:shadow-lg hover:shadow-slate-300 transition-all duration-300"
                 title="TikTok">
                 <i class="fa-brands fa-tiktok text-sm"></i>
             </a>
@@ -56,11 +56,11 @@
 <nav x-data="{ mobileMenuOpen: false, userOpen: false }" class="bg-white shadow-sm sticky top-0 w-full z-50 border-b border-gray-100">
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center h-16 md:h-20">
+        <div class="flex justify-between items-center h-14 md:h-20">
 
-            <a href="{{ $isLoggedIn ? route('dashboard') : route('home') }}" class="flex-shrink-0 flex items-center cursor-pointer gap-2">
+            <a href="{{ $isLoggedIn ? route('dashboard') : route('home') }}" class="flex-shrink-0 flex items-center cursor-pointer gap-2 min-w-0">
 
-                <img src="{{ asset('images/logo-svg.png') }}" alt="UPSI2u Logo" class="h-20 w-auto object-contain">
+                <img src="{{ asset('images/logo-svg.png') }}" alt="UPSI2u Logo" class="h-12 md:h-20 w-auto object-contain">
 
                 @if ($viewMode === 'seller')
                     <span
@@ -245,7 +245,7 @@
 
             <div class="-mr-2 flex md:hidden">
                 <button @click="mobileMenuOpen = !mobileMenuOpen" type="button"
-                    class="bg-white inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    class="bg-white inline-flex items-center justify-center p-2 rounded-xl text-gray-500 hover:text-indigo-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                     <span class="sr-only">Open main menu</span>
                     <svg :class="{ 'hidden': mobileMenuOpen, 'block': !mobileMenuOpen }" class="block h-6 w-6"
                         xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -263,43 +263,43 @@
     </div>
 
     <div x-show="mobileMenuOpen"
-        class="md:hidden absolute top-16 inset-x-0 z-50 bg-white border-b border-gray-200 shadow-lg" id="mobile-menu"
+        class="md:hidden absolute top-14 inset-x-0 z-50 bg-white border-b border-gray-200 shadow-lg max-h-[calc(100vh-3.5rem)] overflow-y-auto" id="mobile-menu"
         style="display: none;">
-        <div class="pt-2 pb-3 space-y-1 px-4">
+        <div class="py-2 space-y-0.5 px-3">
             @if ($viewMode === 'seller')
                 {{-- MOBILE SELLER LINKS --}}
                 <a href="{{ route('students.index') }}"
-                    class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50">Dashboard</a>
+                    class="block px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:text-indigo-600 hover:bg-gray-50">Dashboard</a>
                 <a href="{{ route('services.manage') }}"
-                    class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50">My
+                    class="block px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:text-indigo-600 hover:bg-gray-50">My
                     Services</a>
                 <a href="{{ route('service-requests.index') }}"
-                    class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50">Incoming
+                    class="block px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:text-indigo-600 hover:bg-gray-50">Incoming
                     Orders</a>
                 <a href="{{ route('points.dashboard') }}"
-                    class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50">
+                    class="block px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:text-indigo-600 hover:bg-gray-50">
                     Points
                 </a>
             @else
                 {{-- MOBILE BUYER LINKS --}}
                 <a href="{{ $isLoggedIn ? route('dashboard') : route('home') }}"
-                    class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50">Home</a>
+                    class="block px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:text-indigo-600 hover:bg-gray-50">Home</a>
                 <a href="{{ route('services.index') }}"
-                    class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50">Find
+                    class="block px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:text-indigo-600 hover:bg-gray-50">Find
                     Services</a>
                 <a href="{{ route('about') }}"
-                    class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50">About
+                    class="block px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:text-indigo-600 hover:bg-gray-50">About
                     Us</a>
                 <a href="{{ route('help') }}"
-                    class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50">Help</a>
+                    class="block px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:text-indigo-600 hover:bg-gray-50">Help</a>
             @endif
         </div>
 
         @auth
-            <div class="pt-4 pb-4 border-t border-gray-200">
-                <div class="flex items-center px-5">
+            <div class="py-3 border-t border-gray-200">
+                <div class="flex items-center px-4 min-w-0">
                     <div class="flex-shrink-0 relative">
-                        <img class="h-10 w-10 rounded-full border border-gray-200"
+                        <img class="h-9 w-9 rounded-full border border-gray-200 object-cover"
                             src="{{ $user->hu_profile_photo_path ? asset($user->hu_profile_photo_path) : 'https://ui-avatars.com/api/?name=' . urlencode($user->hu_name) }}"
                             alt="">
                         @if ($user->hu_verification_status === 'approved')
@@ -314,34 +314,34 @@
                             </span>
                         @endif
                     </div>
-                    <div class="ml-3">
-                        <div class="text-base font-medium text-gray-800">{{ $user->hu_name }}</div>
-                        <div class="text-sm font-medium text-gray-500">{{ $user->hu_email }}</div>
+                    <div class="ml-3 min-w-0">
+                        <div class="text-sm font-semibold text-gray-800 truncate">{{ $user->hu_name }}</div>
+                        <div class="text-xs font-medium text-gray-500 truncate">{{ $user->hu_email }}</div>
                     </div>
                 </div>
-                <div class="mt-3 px-2 space-y-1">
+                <div class="mt-2 px-3 space-y-0.5">
                     <a href="{{ route('profile.edit') }}"
-                        class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50">Your
+                        class="block px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:text-indigo-600 hover:bg-gray-50">Your
                         Profile</a>
                     {{-- <a href="{{ route('chat.index') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50">Messages</a> --}}
 
                     @if ($viewMode === 'buyer')
                         <a href="{{ route('favorites.index') }}"
-                            class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50">Favorites</a>
+                            class="block px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:text-indigo-600 hover:bg-gray-50">Favorites</a>
                         <a href="{{ route('service-requests.index') }}"
-                            class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50">Orders</a>
+                            class="block px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:text-indigo-600 hover:bg-gray-50">Orders</a>
                     @endif
 
                     @if ($user->hu_role === 'student')
                         <a href="{{ route('onboarding.students') }}"
-                            class="block px-3 py-2 rounded-md text-base font-medium text-indigo-600 hover:bg-indigo-50">Become
+                            class="block px-3 py-2.5 rounded-xl text-sm font-semibold text-indigo-600 hover:bg-indigo-50">Become
                             a Seller</a>
                     @elseif ($isHelper && !$user->hu_is_blocked)
                         {{-- MOBILE SWITCH BUTTON --}}
                         <form action="{{ route('switch.mode') }}" method="POST">
                             @csrf
                             <button type="submit"
-                                class="w-full text-left block px-3 py-2 rounded-md text-base font-medium {{ $viewMode === 'seller' ? 'text-indigo-600 hover:bg-indigo-50' : 'text-green-600 hover:bg-green-50' }}">
+                                class="w-full text-left block px-3 py-2.5 rounded-xl text-sm font-semibold {{ $viewMode === 'seller' ? 'text-indigo-600 hover:bg-indigo-50' : 'text-green-600 hover:bg-green-50' }}">
                                 {{ $viewMode === 'seller' ? 'Switch to Buying' : 'Switch to Selling' }}
                             </button>
                         </form>
@@ -350,18 +350,18 @@
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit"
-                            class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-red-600 hover:bg-red-50 hover:text-red-700">Sign
+                            class="block w-full text-left px-3 py-2.5 rounded-xl text-sm font-semibold text-red-600 hover:bg-red-50 hover:text-red-700">Sign
                             out</button>
                     </form>
                 </div>
             </div>
         @else
-            <div class="pt-4 pb-4 border-t border-gray-200">
+            <div class="py-3 border-t border-gray-200">
                 <div class="flex items-center justify-around px-5">
-                    <a href="{{ route('login') }}" class="text-base font-medium text-gray-600 hover:text-indigo-600">Log
+                    <a href="{{ route('login') }}" class="text-sm font-semibold text-gray-600 hover:text-indigo-600">Log
                         in</a>
                     <a href="{{ route('register') }}"
-                        class="inline-flex items-center px-4 py-2 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">Sign
+                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-semibold rounded-xl text-white bg-indigo-600 hover:bg-indigo-700">Sign
                         up</a>
                 </div>
             </div>

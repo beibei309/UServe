@@ -54,7 +54,7 @@
 
         {{-- LOGIN CARD --}}
         <div
-            class="w-full sm:max-w-md px-8 py-10 bg-white/95 backdrop-blur-sm shadow-2xl rounded-2xl border border-gray-200/50">
+            class="w-full sm:max-w-md px-6 sm:px-8 py-8 sm:py-10 bg-white/95 backdrop-blur-sm shadow-lg rounded-2xl border border-gray-200/50">
 
             <div class="text-center mb-8">
                 <h2 class="text-2xl font-bold text-gray-900 tracking-tight">Welcome back</h2>

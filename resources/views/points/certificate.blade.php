@@ -3,12 +3,12 @@
 @section('title', 'Certificate - ' . $redemption->hcr_certificate_number)
 
 @section('content')
-<div class="min-h-screen bg-gray-50 py-8 certificate-print-wrapper">
+<div class="min-h-screen bg-gray-50 py-5 sm:py-8 certificate-print-wrapper">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 certificate-print-content">
         {{-- Header Section --}}
         <div class="text-center mb-8 no-print">
             <a href="{{ route('points.dashboard') }}" 
-               class="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium mb-4">
+               class="inline-flex items-center text-blue-600 hover:text-blue-700 font-bold mb-4">
                 <i class="fas fa-arrow-left mr-2"></i>
                 Back to Points Dashboard
             </a>
@@ -95,17 +95,17 @@
         <div class="flex flex-col sm:flex-row gap-4 mt-8 no-print">
             @if ($redemption->hcr_status === 'issued')
                 <button type="button" data-certificate-print
-                        class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center justify-center">
+                        class="upsi-primary-action flex-1">
                     <i class="fas fa-print mr-2"></i>
                     Print Certificate
                 </button>
                 <button type="button" data-certificate-download
-                        class="flex-1 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center justify-center">
+                        class="flex-1 inline-flex items-center justify-center rounded-xl bg-green-600 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition-colors hover:bg-green-700">
                     <i class="fas fa-download mr-2"></i>
                     Download PDF
                 </button>
             @else
-                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
+                <div class="bg-yellow-50 border border-yellow-200 rounded-2xl p-5 sm:p-6 text-center">
                     <i class="fas fa-clock text-yellow-600 text-2xl mb-2"></i>
                     <h3 class="font-semibold text-yellow-800 mb-2">Certificate Pending</h3>
                     <p class="text-yellow-700 text-sm">Your certificate is being processed and will be available soon.</p>
@@ -114,7 +114,7 @@
         </div>
 
         {{-- Additional Information --}}
-        <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mt-8 no-print">
+        <div class="bg-blue-50 border border-blue-200 rounded-2xl p-5 sm:p-6 mt-5 sm:mt-8 no-print">
             <h3 class="font-semibold text-blue-900 mb-3 flex items-center">
                 <i class="fas fa-info-circle mr-2"></i>
                 Certificate Information

@@ -5,16 +5,16 @@
         </h2>
     </x-slot>
 
-    <div class="py-6">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+    <div class="py-4 sm:py-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div id="sent-content" class="sr-tab-content">
-                <div class="overflow-hidden rounded-2xl border border-gray-100 bg-gradient-to-b from-white to-slate-50/50 shadow-sm">
-                    <div class="p-6 text-gray-800">
-                        <h3 class="font-medium mb-4 700" style="font-size: 25px;">My Orders ({{ $sentRequests->count() }}
+                <div class="upsi-card overflow-hidden">
+                    <div class="p-4 sm:p-5 text-gray-800">
+                        <h3 class="font-semibold mb-4 text-xl sm:text-2xl">My Orders ({{ $sentRequests->count() }}
                             total)</h3>
 
                         {{-- SEARCH & FILTER SECTION --}}
-                        <div class="mb-6 flex flex-col md:flex-row gap-4">
+                        <div class="mb-5 flex flex-col md:flex-row gap-3">
                             {{-- Search Bar --}}
                             <div class="relative flex-1">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -25,7 +25,7 @@
                                     </svg>
                                 </div>
                                 <input type="text" id="request-search"
-                                    class="block w-full pl-10 pr-3 py-2.5 border border-gray-200 rounded-xl leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm shadow-sm transition"
+                                    class="block w-full pl-10 pr-3 py-2.5 border border-gray-200 rounded-xl leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition"
                                     placeholder="Search by title, seller, etc...">
                             </div>
 
@@ -41,7 +41,7 @@
                                     </div>
 
                                     <select id="category-filter"
-                                        class="block w-full pl-10 pr-10 py-2.5 border border-gray-200 rounded-xl leading-5 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm shadow-sm appearance-none cursor-pointer">
+                                        class="block w-full pl-10 pr-10 py-2.5 border border-gray-200 rounded-xl leading-5 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm appearance-none cursor-pointer">
                                         <option value="">All Categories</option>
                                         @foreach ($uniqueCategories as $category)
                                             <option value="{{ $category }}">{{ $category }}</option>
@@ -60,8 +60,8 @@
                             </div>
                         </div>
 
-                        <div class="mb-6">
-                            <div class="flex space-x-4 border-b border-gray-200">
+                        <div class="mb-6 overflow-x-auto">
+                            <div class="flex min-w-max space-x-4 border-b border-gray-200">
                                 <button data-status-tab="pending" id="pending-tab"
                                     class="sr-status-tab-button py-2 px-4 text-sm font-medium {{ $defaultStatusTab === 'pending' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-500 hover:text-custom-teal' }} focus:outline-none">
                                     Pending
@@ -84,7 +84,7 @@
                             class="sr-status-tab-content {{ $defaultStatusTab === 'pending' ? '' : 'hidden' }}">
                             @if ($sentRequests->where('hsr_status', 'pending')->isEmpty())
                                 <div
-                                    class="flex flex-col items-center justify-center py-16 text-center bg-white rounded-xl border border-dashed border-gray-300">
+                                    class="flex flex-col items-center justify-center py-12 text-center bg-white rounded-xl border border-dashed border-gray-300">
                                     <div class="rounded-full bg-gray-50 p-4 mb-4">
                                         <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24">
@@ -103,7 +103,7 @@
                                     </div>
                                 </div>
                             @else
-                                <div class="space-y-6">
+                                <div class="space-y-4">
                                     @foreach ($sentRequests->where('hsr_status', 'pending') as $request)
                                         <div
                                             class="sr-request-item group relative overflow-hidden rounded-2xl border {{ $request->ui_is_seller_restricted ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-white hover:border-yellow-300' }} shadow-sm transition-all duration-300 hover:shadow-md"
@@ -113,9 +113,9 @@
                                                 class="absolute top-0 left-0 right-0 h-1 {{ $request->ui_is_seller_restricted ? 'bg-red-500' : 'bg-gradient-to-r from-yellow-400 to-orange-300' }}">
                                             </div>
 
-                                            <div class="p-5 sm:p-6">
+                                            <div class="p-4 sm:p-5">
                                                 <div
-                                                    class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mb-6">
+                                                    class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mb-5">
                                                     <div class="flex-1">
                                                         <div class="flex items-center gap-3 mb-2">
                                                             @if ($request->ui_is_seller_restricted)
@@ -177,7 +177,7 @@
                                                 @if (!$request->ui_is_seller_restricted)
                                                     <div class="h-px w-full bg-gray-100 my-4"></div>
 
-                                                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+                                                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-5">
 
                                                         <div class="flex items-start gap-3">
                                                             <div

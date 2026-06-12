@@ -1,11 +1,11 @@
 @extends('layouts.helper')
 
 @section('content')
-    <div class="py-12 bg-gray-50">
+    <div class="py-5 sm:py-8 bg-gray-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-            <div class="mb-8">
-                <h1 class="text-3xl font-bold text-gray-900">Edit Profile</h1>
+            <div class="mb-5 sm:mb-8">
+                <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Edit Profile</h1>
                 <p class="mt-1 text-sm text-gray-600">Update your public information and managing your account settings.</p>
             </div>
 
@@ -13,13 +13,13 @@
                 @csrf
                 @method('PATCH')
 
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 lg:gap-8">
 
                     {{-- Left Column: Main Inputs --}}
-                    <div class="lg:col-span-2 space-y-8">
+                    <div class="lg:col-span-2 space-y-5 sm:space-y-8">
 
                         {{-- Basic Information --}}
-                        <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                        <div class="upsi-card p-4 sm:p-6">
                             <h2 class="text-xl font-semibold text-gray-900 mb-6">Basic Information</h2>
 
                             <div class="space-y-6">
@@ -75,7 +75,7 @@
                         </div>
 
                         {{-- About You --}}
-                        <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                        <div class="upsi-card p-4 sm:p-6">
                             <h2 class="text-xl font-semibold text-gray-900 mb-4">About You</h2>
                             <div>
                                 <label for="bio" class="block text-sm font-medium text-gray-700">Bio /
@@ -94,7 +94,7 @@
                         </div>
 
                         {{-- Skills --}}
-                        <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                        <div class="upsi-card p-4 sm:p-6">
                             <h2 class="text-xl font-semibold text-gray-900 mb-4">Skills</h2>
                             <div>
                                 <label for="skills" class="block text-sm font-medium text-gray-700">Skills (Comma
@@ -111,7 +111,7 @@
                         </div>
 
                         {{-- Work Experience --}}
-                        <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                        <div class="upsi-card p-4 sm:p-6">
                             <h2 class="text-xl font-semibold text-gray-900 mb-4">Work Experience</h2>
 
                             <div class="space-y-6">
@@ -192,20 +192,20 @@
                     </div>
 
                         {{-- Right Column: Actions --}}
-                    <div class="lg:col-span-1 space-y-8">
+                    <div class="lg:col-span-1 space-y-5 sm:space-y-8">
 
                         {{-- [REMOVED] Profile Photo Card was here --}}
 
                         {{-- Action Buttons --}}
-                        <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm sticky top-28 z-10">
+                        <div class="upsi-card p-4 sm:p-6 lg:sticky lg:top-28 z-10">
                             <div class="flex flex-col gap-3">
                                 <button type="submit"
-                                    class="w-full flex justify-center py-2 px-4 border border-custom-teal rounded-lg shadow-sm text-sm font-medium text-white bg-custom-teal hover:bg-white hover:text-custom-teal focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-custom-teal transition-colors">
+                                    class="upsi-primary-action w-full">
                                     Save Changes
                                 </button>
 
                                 <a href="{{ route('students.index', $user->hu_id) }}"
-                                    class="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none transition-colors">
+                                    class="upsi-secondary-action w-full">
                                     Cancel
                                 </a>
                             </div>

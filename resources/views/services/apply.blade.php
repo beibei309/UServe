@@ -1,15 +1,15 @@
 <x-app-layout>
-    <div class="py-8">
+    <div class="py-5 sm:py-8">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Header + Tabs -->
-            <div class="mb-8">
-                <div class="flex items-center justify-between">
+            <div class="mb-5 sm:mb-8">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div>
-                        <h1 class="text-3xl font-bold text-gray-900">Apply for Services</h1>
-                        <p class="text-gray-600 mt-2">Request help from talented UPSI students</p>
+                        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Apply for Services</h1>
+                        <p class="text-sm sm:text-base text-gray-600 mt-2">Request help from talented UPSI students</p>
                     </div>
                     <a href="{{ route('search.index') }}" 
-                       class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-3 rounded-lg font-medium transition-colors flex items-center space-x-2">
+                       class="upsi-secondary-action gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                         </svg>
@@ -17,7 +17,7 @@
                     </a>
                 </div>
                 <div class="mt-6 border-b border-gray-200">
-                    <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+                    <nav class="-mb-px flex gap-5 overflow-x-auto" aria-label="Tabs">
                         <a href="{{ route('services.apply') }}" class="whitespace-nowrap py-4 px-1 border-b-2 text-sm font-medium border-indigo-600 text-indigo-600">Apply for Services</a>
                         @if($showAddServiceTab)
                             <a href="{{ route('services.create') }}" class="whitespace-nowrap py-4 px-1 border-b-2 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">Add New Service</a>
@@ -28,7 +28,7 @@
 
             <!-- Verification Notice -->
             @if(!$canApplyServices)
-                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-8">
+                <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-5 sm:mb-8">
                     <div class="flex">
                         <div class="flex-shrink-0">
                             <svg class="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
@@ -51,7 +51,7 @@
             @endif
 
             <!-- Service Application Form -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+            <div class="upsi-card p-4 sm:p-6 md:p-8">
                 <form id="applyServiceForm" class="space-y-6">
                     @csrf
                     
@@ -174,13 +174,13 @@
                     </div>
 
                     <!-- Form Actions -->
-                    <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
+                    <div class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-3 sm:gap-4 pt-6 border-t border-gray-200">
                         <a href="{{ route('dashboard') }}" 
-                           class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition-colors">
+                           class="upsi-secondary-action">
                             Cancel
                         </a>
                         <button type="submit" 
-                                class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors flex items-center space-x-2"
+                                class="upsi-primary-action gap-2"
                                 {{ !$canApplyServices ? 'disabled' : '' }}>
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
@@ -192,9 +192,9 @@
             </div>
 
             <!-- How It Works Section -->
-            <div class="mt-12 bg-gray-50 rounded-xl p-8">
-                <h2 class="text-2xl font-bold text-gray-900 mb-6">How It Works</h2>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="mt-8 sm:mt-12 bg-gray-50 rounded-2xl p-5 sm:p-8 border border-gray-100">
+                <h2 class="text-xl sm:text-2xl font-bold text-gray-900 mb-5">How It Works</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
                     <div class="text-center">
                         <div class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mx-auto mb-4">
                             <span class="text-xl font-bold text-indigo-600">1</span>

@@ -77,7 +77,7 @@
         {{-- Navigation bar --}}
         @include('layouts.navbar')
 
-        <section class="relative pt-10 md:pt-14 pb-20 overflow-hidden">
+        <section class="relative pt-8 md:pt-14 pb-14 md:pb-20 overflow-hidden">
 
             {{-- 1. BACKGROUND IMAGE START --}}
             <div class="absolute inset-0"> {{-- Removed -z-10 --}}
@@ -89,33 +89,33 @@
             {{-- BACKGROUND IMAGE END --}}
 
             {{-- 2. EXISTING ANIMATED BLOBS --}}
-            <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none">
+            <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none overflow-hidden">
                 <div
-                    class="absolute top-20 left-20 w-72 h-72 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob">
+                    class="absolute top-20 left-10 md:left-20 w-48 h-48 md:w-72 md:h-72 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob">
                 </div>
                 <div
-                    class="absolute top-20 right-20 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000">
+                    class="absolute top-20 right-10 md:right-20 w-48 h-48 md:w-72 md:h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000">
                 </div>
             </div>
 
             {{-- 3. CONTENT --}}
             <div class="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center z-10">
                 <span
-                    class="inline-block py-1 px-3 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-sm font-semibold mb-6">
+                    class="inline-block max-w-full py-1 px-3 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs sm:text-sm font-semibold mb-5 md:mb-6 truncate">
                     {{ $dashboardHeroBadge }}
                 </span>
 
-                <h1 class="text-4xl md:text-5xl font-extrabold text-white tracking-tight mb-6 leading-tight">
+                <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-tight mb-4 md:mb-6 leading-tight">
                     {{ $dashboardHeroTitleLine1 }} <span class="text-indigo-400">{{ $dashboardHeroTitleHighlight }}</span><br>{{ $dashboardHeroTitleLine2 }}
                 </h1>
 
-                <p class="text-lg text-slate-300 mb-10 max-w-2xl mx-auto"> {{-- Changed text-slate-400 to text-slate-300 for better contrast on bg --}}
+                <p class="text-base sm:text-lg text-slate-300 mb-7 md:mb-10 max-w-2xl mx-auto leading-relaxed"> {{-- Changed text-slate-400 to text-slate-300 for better contrast on bg --}}
                     {{ $dashboardHeroSubtitle }}
                 </p>
 
-                <div class="w-full max-w-3xl mx-auto mb-8">
-                    <form action="{{ route('services.index') }}" method="GET" class="relative group">
-                        <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                <div class="w-full max-w-3xl mx-auto mb-7 md:mb-8">
+                    <form action="{{ route('services.index') }}" method="GET" class="flex flex-col sm:block gap-3 sm:relative group rounded-2xl bg-white/95 p-2 sm:p-0 shadow-xl">
+                        <div class="absolute inset-y-0 left-0 pl-5 hidden sm:flex items-center pointer-events-none">
                             <svg class="h-6 w-6 text-slate-400 group-focus-within:text-indigo-500 transition-colors"
                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -125,30 +125,30 @@
                         <input type="text" name="q"
                             id="dashboard-search-input"
                             value="{{ $dashboardUi['search_query'] }}"
-                            class="block w-full pl-14 pr-4 py-5 bg-white/95 backdrop-blur-sm rounded-2xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-indigo-500/30 shadow-xl text-lg font-medium transition-all"
+                            class="block w-full px-4 sm:pl-14 sm:pr-32 py-4 sm:py-5 bg-white backdrop-blur-sm rounded-xl sm:rounded-2xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-indigo-500/30 text-base sm:text-lg font-medium transition-all"
                             placeholder="{{ $dashboardSearchPlaceholder }}">
                         <button type="submit"
-                            class="absolute right-3 top-3 bottom-3 bg-indigo-600 hover:bg-indigo-700 text-white px-6 rounded-xl font-semibold transition-colors shadow-lg">
+                            class="sm:absolute sm:right-3 sm:top-3 sm:bottom-3 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 sm:py-0 rounded-xl font-semibold transition-colors shadow-lg">
                             Search
                         </button>
                     </form>
                 </div>
 
-                <div class="flex flex-wrap justify-center gap-3 text-sm">
-                    <span class="text-slate-400 mr-2 py-1.5">{{ $dashboardPopularLabel }}</span>
+                <div class="flex flex-wrap justify-center gap-2 sm:gap-3 text-xs sm:text-sm">
+                    <span class="w-full sm:w-auto text-slate-400 sm:mr-2 py-1.5">{{ $dashboardPopularLabel }}</span>
                     @foreach($dashboardUi['popular_searches'] as $popularSearch)
                     <a href="{{ route('services.index', ['q' => $popularSearch['query']]) }}"
-                        class="px-4 py-1.5 rounded-full bg-slate-800/60 border border-slate-700 text-slate-300 hover:bg-indigo-600 hover:text-white hover:border-indigo-500 transition-all cursor-pointer backdrop-blur-sm">{{ $popularSearch['label'] }}</a>
+                        class="px-3 sm:px-4 py-1.5 rounded-full bg-slate-800/60 border border-slate-700 text-slate-300 hover:bg-indigo-600 hover:text-white hover:border-indigo-500 transition-all cursor-pointer backdrop-blur-sm">{{ $popularSearch['label'] }}</a>
                     @endforeach
                 </div>
             </div>
         </section>
 
-        <section class="py-12  border-b border-gray-100">
+        <section class="upsi-section border-b border-gray-100">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex justify-between items-end mb-8">
+                <div class="flex justify-between items-end mb-6">
                     <div>
-                        <h2 class="text-2xl font-bold text-slate-900">{{ $dashboardCategoriesTitle }}</h2>
+                        <h2 class="text-xl sm:text-2xl font-bold text-slate-900">{{ $dashboardCategoriesTitle }}</h2>
                     </div>
                     <div class="flex gap-2">
                         <button id="dashboardCategoriesScrollLeft"
@@ -166,23 +166,23 @@
                     </div>
                 </div>
 
-                <div id="dashboardCategoriesScrollContainer" class="flex gap-5 overflow-x-auto pb-3 hide-scroll snap-x snap-mandatory">
+                <div id="dashboardCategoriesScrollContainer" class="flex gap-4 overflow-x-auto pb-3 hide-scroll snap-x snap-mandatory">
                     @foreach ($categories as $category)
                         <a href="{{ route('services.index', ['category_id' => $category->hc_id]) }}"
-                            class="group shrink-0 snap-start w-64 p-6 rounded-2xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-center flex flex-col items-center justify-center"
+                            class="group shrink-0 snap-start w-44 sm:w-52 p-4 rounded-2xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 text-center flex flex-col items-center justify-center"
                             style="background-color: {{ $category->hc_color }};">
 
                             <div
-                                class="w-14 h-14 mb-4 rounded-full flex items-center justify-center bg-white shadow-sm transition-transform group-hover:scale-110">
+                                class="w-11 h-11 mb-3 rounded-full flex items-center justify-center bg-white shadow-sm transition-transform group-hover:scale-105">
 
 
-                                <i class="{{ $category->hc_icon ?? 'fa-solid fa-folder' }} text-2xl"
+                                <i class="{{ $category->hc_icon ?? 'fa-solid fa-folder' }} text-xl"
                                     style="color: {{ $category->hc_color }};">
                                 </i>
 
                             </div>
 
-                            <span class="block text-base font-bold text-white transition-colors group-hover:opacity-90">
+                            <span class="block text-sm font-bold text-white transition-colors group-hover:opacity-90">
                                 {{ $category->hc_name }}
                             </span>
                         </a>
@@ -193,11 +193,11 @@
 
 
 
-        <section class="py-16 bg-slate-50">
+        <section class="upsi-section bg-slate-50">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex flex-col md:flex-row justify-between items-end mb-10 gap-4">
+                <div class="flex flex-col md:flex-row justify-between items-end mb-7 gap-4">
                     <div>
-                        <h2 class="text-3xl font-bold text-slate-900">{{ $dashboardRecommendedTitle }}</h2>
+                        <h2 class="text-2xl sm:text-3xl font-bold text-slate-900">{{ $dashboardRecommendedTitle }}</h2>
                         <p class="text-slate-500 mt-2">{{ $dashboardRecommendedSubtitle }}</p>
                     </div>
                     <a href="{{ route('services.index') }}"
@@ -206,24 +206,24 @@
                     </a>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-6">
                     @foreach ($serviceCards as $serviceCard)
                         <div
-                            class="group bg-white rounded-2xl border border-slate-200 hover:border-indigo-100 hover:shadow-xl transition-all duration-300 flex flex-col overflow-hidden relative">
+                            class="group upsi-card upsi-card-hover flex flex-col overflow-hidden relative">
 
-                           <a href="{{ $serviceCard['details_url'] }}" class="relative h-56 bg-slate-200 overflow-hidden block">
+                           <a href="{{ $serviceCard['details_url'] }}" class="relative h-44 sm:h-48 bg-slate-200 overflow-hidden block">
     <img src="{{ $serviceCard['image_url'] }}" 
          class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
          alt="{{ $serviceCard['title'] ?? 'Service' }}">
 
     @if ($serviceCard['category_name'])
-        <span class="absolute top-4 left-4 bg-white/95 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold shadow-sm"
+        <span class="absolute top-3 left-3 upsi-chip bg-white/95 backdrop-blur-sm shadow-sm"
                             style="color: {{ $serviceCard['category_color'] }}">
                         {{ $serviceCard['category_name'] }}
         </span>
     @endif
 </a>
-                            <div class="p-5 flex flex-col flex-1">
+                            <div class="p-4 flex flex-col flex-1">
                                 <div class="flex items-center gap-3 mb-3">
                                     <img src="{{ $serviceCard['seller_avatar_url'] }}"
                                         class="w-8 h-8 rounded-full object-cover border border-slate-100">
@@ -256,7 +256,7 @@
 
                                 <a href="{{ $serviceCard['details_url'] }}" class="block mb-2">
                                     <h3
-                                        class="text-lg font-bold text-slate-900 group-hover:text-indigo-600 transition-colors line-clamp-2 leading-tight">
+                                        class="text-base sm:text-lg font-bold text-slate-900 group-hover:text-indigo-600 transition-colors line-clamp-2 leading-tight">
                                         {{ $serviceCard['title'] }}
                                     </h3>
                                 </a>
@@ -271,7 +271,7 @@
                                             RM{{ $serviceCard['price_display'] }}</div>
                                     </div>
                                     <a href="{{ $serviceCard['details_url'] }}"
-                                        class="px-4 py-2 bg-slate-900 hover:bg-indigo-600 text-white text-sm font-semibold rounded-lg transition-colors shadow-md">
+                                        class="upsi-primary-action px-3 py-2">
                                         View Details
                                     </a>
                                 </div>
@@ -284,9 +284,9 @@
 
 
         {{-- 🎨 REDESIGNED TOP STUDENTS SECTION (COLORFUL BUTTON) --}}
-        <section class="py-16 bg-white overflow-hidden">
+        <section class="upsi-section bg-white overflow-hidden">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="mb-10">
+                <div class="mb-7">
                     <div class="flex items-center justify-between gap-3 mb-2">
                         <div class="flex items-center gap-3">
                             <span class="relative flex h-3 w-3">
@@ -294,7 +294,7 @@
                                     class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                                 <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
                             </span>
-                            <h2 class="text-2xl font-bold text-slate-900">Sellers Available Now</h2>
+                            <h2 class="text-xl sm:text-2xl font-bold text-slate-900">Sellers Available Now</h2>
                         </div>
                         <div class="flex gap-2">
                             <button id="dashboardHelpersScrollLeft"
@@ -314,11 +314,11 @@
                     <p class="text-slate-500">Available right now to take your requests.</p>
                 </div>
 
-                <div id="dashboardHelpersScrollContainer" class="flex gap-6 overflow-x-auto pb-8 hide-scroll snap-x snap-mandatory">
+                <div id="dashboardHelpersScrollContainer" class="flex gap-4 overflow-x-auto pb-6 hide-scroll snap-x snap-mandatory">
                     @foreach ($availableHelpers as $student)
-                        <div class="snap-center shrink-0 w-64 group relative">
+                        <div class="snap-center shrink-0 w-56 sm:w-60 group relative">
                             <div
-                                class="bg-white rounded-2xl border border-slate-200 p-6 text-center hover:border-indigo-200 hover:shadow-xl transition-all duration-300 relative z-10 h-full flex flex-col items-center">
+                                class="upsi-card upsi-card-hover p-5 text-center relative z-10 h-full flex flex-col items-center">
 
                                 <div class="relative mb-4">
                                     <div
@@ -351,7 +351,7 @@
 
                                 {{-- Key Change: COLORFUL BUTTON --}}
                                 <a href="{{ $student['profile_url'] }}"
-                                    class="w-full py-2.5 rounded-xl bg-indigo-600 border border-indigo-600 text-white font-semibold text-sm hover:bg-indigo-700 hover:border-indigo-700 transition-all mt-auto shadow-md hover:shadow-lg">
+                                    class="w-full upsi-primary-action mt-auto">
                                     View Profile
                                 </a>
                             </div>
