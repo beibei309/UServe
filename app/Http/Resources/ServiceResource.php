@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Services\ServiceImageUrlResolver;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Str;
@@ -102,16 +103,10 @@ class ServiceResource extends JsonResource
      */
     private function resolveImageUrl(?string $path): ?string
     {
-        if (!$path) return null;
-
-        if (Str::startsWith($path, ['http://', 'https://'])) {
-            return $path;
+        if (! $path) {
+            return null;
         }
 
-        if (Str::startsWith($path, 'storage/')) {
-            return asset($path);
-        }
-
-        return asset('storage/' . ltrim($path, '/'));
+        return app(ServiceImageUrlResolver::class)->resolveGeneralImageUrl($path);
     }
 }

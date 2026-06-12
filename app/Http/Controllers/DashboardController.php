@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Category;
 use App\Models\StudentService;
+use App\Services\ServiceImageUrlResolver;
 use Illuminate\Http\JsonResponse; // Added for return type
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -11,6 +12,9 @@ use Illuminate\Support\Str;
 
 class DashboardController extends Controller
 {
+    public function __construct(private ServiceImageUrlResolver $serviceImageUrlResolver)
+    {
+    }
 
 public function index(Request $request)
 {
@@ -199,16 +203,8 @@ public function index(Request $request)
     private function resolveDashboardServiceImageUrl(?string $path, ?string $title): string
     {
         $fallback = 'https://ui-avatars.com/api/?name=' . urlencode($title ?? 'Service');
-        if (!$path) {
-            return $fallback;
-        }
-        if (Str::startsWith($path, ['http://', 'https://'])) {
-            return $path;
-        }
-        if (Str::startsWith($path, 'storage/')) {
-            return asset($path);
-        }
-        return asset('storage/' . ltrim($path, '/'));
+
+        return $this->serviceImageUrlResolver->resolveGeneralImageUrl($path, $fallback);
     }
 
     private function resolveUserAvatarUrl(?string $path, ?string $name): string
