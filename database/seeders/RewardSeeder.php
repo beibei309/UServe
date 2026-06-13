@@ -101,7 +101,10 @@ class RewardSeeder extends Seeder
         ];
 
         foreach ($rewards as $rewardData) {
-            Reward::create($rewardData);
+            Reward::updateOrCreate(
+                ['hr_code_prefix' => $rewardData['hr_code_prefix']],
+                $rewardData
+            );
         }
     }
 }

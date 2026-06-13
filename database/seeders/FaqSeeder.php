@@ -13,7 +13,7 @@ class FaqSeeder extends Seeder
      */
    public function run()
     {
-        Faq::insert([
+        $faqs = [
             [
                 'hfq_category' => 'General & Accounts',
                 'hfq_question' => 'Who can use UPSI2u?',
@@ -56,6 +56,13 @@ class FaqSeeder extends Seeder
                 'hfq_answer' => 'If you encounter issues with a user or technical problems, please contact our support team immediately via the email below or use the "Report" function on the users profile.',
                 'hfq_display_order' => 2,
             ],
-        ]);
+        ];
+
+        foreach ($faqs as $faq) {
+            Faq::updateOrCreate(
+                ['hfq_question' => $faq['hfq_question']],
+                $faq + ['hfq_is_active' => true]
+            );
+        }
     }
 }

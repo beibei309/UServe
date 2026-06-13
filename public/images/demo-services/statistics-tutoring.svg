@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" role="img" aria-labelledby="title desc">
+  <title id="title">Statistics tutoring service</title>
+  <desc id="desc">Notebook, calculator, graph paper, and formula notes for tutoring.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ecfeff"/>
+      <stop offset="1" stop-color="#eff6ff"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="800" fill="url(#bg)"/>
+  <rect x="140" y="120" width="920" height="560" rx="34" fill="#ffffff" stroke="#bae6fd" stroke-width="6"/>
+  <rect x="210" y="185" width="430" height="430" rx="24" fill="#f8fafc" stroke="#cbd5e1" stroke-width="4"/>
+  <path d="M250 270h340M250 350h340M250 430h340M250 510h340" stroke="#cbd5e1" stroke-width="5"/>
+  <path d="M290 535c60-160 110-220 170-150 44 52 80 24 118-110" fill="none" stroke="#2563eb" stroke-width="14" stroke-linecap="round"/>
+  <rect x="710" y="190" width="250" height="320" rx="28" fill="#0f172a"/>
+  <rect x="750" y="230" width="170" height="54" rx="12" fill="#dbeafe"/>
+  <circle cx="765" cy="340" r="24" fill="#38bdf8"/>
+  <circle cx="835" cy="340" r="24" fill="#38bdf8"/>
+  <circle cx="905" cy="340" r="24" fill="#38bdf8"/>
+  <circle cx="765" cy="415" r="24" fill="#fbbf24"/>
+  <circle cx="835" cy="415" r="24" fill="#fbbf24"/>
+  <circle cx="905" cy="415" r="24" fill="#fbbf24"/>
+  <rect x="700" y="560" width="280" height="44" rx="22" fill="#2563eb"/>
+  <rect x="250" y="215" width="180" height="30" rx="15" fill="#0f172a"/>
+</svg>

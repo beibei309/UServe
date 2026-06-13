@@ -32,6 +32,45 @@ Run these before release:
 4. `php artisan config:cache`
 5. `php artisan event:list`
 
+## Deployment Commands
+
+### Local (normal development)
+```bash
+composer install
+npm install
+php artisan optimize:clear
+php artisan migrate --force
+php artisan db:seed --class=PageContentSeeder --force
+npm run dev
+```
+
+### Local (production-like test on localhost)
+```bash
+composer install
+npm install
+npm run build
+php artisan migrate --force
+php artisan db:seed --class=PageContentSeeder --force
+php artisan optimize:clear
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+```
+
+### Admin server / production
+```bash
+composer install --no-dev --optimize-autoloader
+npm ci
+npm run build
+php artisan migrate --force
+php artisan db:seed --class=PageContentSeeder --force
+php artisan optimize:clear
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+php artisan queue:restart
+```
+
 ## CI
 
 GitHub Actions workflow is available at:
