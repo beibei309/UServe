@@ -13,8 +13,6 @@ The project follows prefixed physical tables and columns as source of truth.
 - Review columns: `hr_*`
 - Notification columns: `hn_*`
 
-See full contract in [docs/schema-contract.md](docs/schema-contract.md).
-
 ## Current Refactor Status
 
 - Prefixed schema remap completed for models/controllers/views.
@@ -89,5 +87,4 @@ It runs:
 
 ## Merge and Gate Policy
 
-- Branch protection and required checks: [docs/release/branch-protection-and-gates.md](docs/release/branch-protection-and-gates.md)
 - Install local pre-push hooks: `powershell -ExecutionPolicy Bypass -File ./scripts/install_git_hooks.ps1`
