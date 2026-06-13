@@ -372,10 +372,8 @@ class ServiceRequestController extends BaseController
             $proofPath = $serviceRequest->hsr_payment_proof;
             if (Str::startsWith($proofPath, ['http://', 'https://'])) {
                 $paymentProofUrl = $proofPath;
-            } elseif (Str::startsWith($proofPath, 'storage/')) {
-                $paymentProofUrl = asset($proofPath);
             } else {
-                $paymentProofUrl = asset('storage/'.$proofPath);
+                $paymentProofUrl = route('service-requests.payment-proof', $serviceRequest);
             }
             $paymentProofIsPdf = Str::endsWith(strtolower($proofPath), '.pdf');
         }
@@ -467,13 +465,12 @@ class ServiceRequestController extends BaseController
             $paymentProofPath = (string) ($request->hsr_payment_proof ?? '');
             $request->ui_has_payment_proof = $paymentProofPath !== '';
             $request->ui_payment_proof_url = null;
+            $request->ui_payment_proof_extension = strtolower(pathinfo(parse_url($paymentProofPath, PHP_URL_PATH) ?: $paymentProofPath, PATHINFO_EXTENSION));
             if ($request->ui_has_payment_proof) {
                 if (Str::startsWith($paymentProofPath, ['http://', 'https://'])) {
                     $request->ui_payment_proof_url = $paymentProofPath;
-                } elseif (Str::startsWith($paymentProofPath, 'storage/')) {
-                    $request->ui_payment_proof_url = asset($paymentProofPath);
                 } else {
-                    $request->ui_payment_proof_url = asset('storage/' . ltrim($paymentProofPath, '/'));
+                    $request->ui_payment_proof_url = route('service-requests.payment-proof', $request);
                 }
             }
 
@@ -611,8 +608,7 @@ class ServiceRequestController extends BaseController
     {
         $user = Auth::user();
 
-        // Only the provider can accept
-        if ($serviceRequest->hsr_requester_id != $user->hu_id && $serviceRequest->hsr_provider_id != $user->hu_id) {
+        if ((int) $serviceRequest->hsr_provider_id !== (int) $user->hu_id) {
             abort(403, 'You are not authorized to accept this request.');
         }
 
@@ -622,8 +618,7 @@ class ServiceRequestController extends BaseController
 
         $serviceRequest->accept();
 
-        // Notify Requester
-        $serviceRequest->requester->notify(new ServiceRequestStatusUpdated($serviceRequest, 'accepted'));
+        $this->notifyRequesterOfStatus($serviceRequest, 'accepted');
 
         return back()->with('success', 'Service request accepted successfully!');
     }
@@ -635,8 +630,7 @@ class ServiceRequestController extends BaseController
     {
         $user = Auth::user();
 
-        // Authorization check
-        if ($serviceRequest->hsr_requester_id != $user->hu_id && $serviceRequest->hsr_provider_id != $user->hu_id) {
+        if ((int) $serviceRequest->hsr_provider_id !== (int) $user->hu_id) {
             abort(403, 'You are not authorized to reject this request.');
         }
 
@@ -659,7 +653,7 @@ class ServiceRequestController extends BaseController
             'hsr_rejection_reason' => $request->rejection_reason,
         ]);
 
-        $serviceRequest->requester->notify(new ServiceRequestStatusUpdated($serviceRequest, 'rejected'));
+        $this->notifyRequesterOfStatus($serviceRequest, 'rejected');
 
         return back()->with('success', 'Service request rejected.');
     }
@@ -668,8 +662,7 @@ class ServiceRequestController extends BaseController
     {
         $user = Auth::user();
 
-        // Only the provider can mark as in progress
-        if ($serviceRequest->hsr_requester_id != $user->hu_id && $serviceRequest->hsr_provider_id != $user->hu_id) {
+        if ((int) $serviceRequest->hsr_provider_id !== (int) $user->hu_id) {
             abort(403, 'You are not authorized to update this request.');
         }
 
@@ -682,7 +675,7 @@ class ServiceRequestController extends BaseController
             'hsr_started_at' => now(),
         ]);
 
-        $serviceRequest->requester->notify(new ServiceRequestStatusUpdated($serviceRequest, 'in_progress'));
+        $this->notifyRequesterOfStatus($serviceRequest, 'in_progress');
 
         return back()->with('success', 'Service marked as in progress!');
     }
@@ -691,8 +684,7 @@ class ServiceRequestController extends BaseController
     {
         $user = Auth::user();
 
-        // Only the provider can mark as in progress
-        if ($serviceRequest->hsr_requester_id != $user->hu_id && $serviceRequest->hsr_provider_id != $user->hu_id) {
+        if ((int) $serviceRequest->hsr_provider_id !== (int) $user->hu_id) {
             abort(403, 'You are not authorized to update this request.');
         }
 
@@ -705,7 +697,7 @@ class ServiceRequestController extends BaseController
             'hsr_finished_at' => now(),
         ]);
 
-        $serviceRequest->requester->notify(new ServiceRequestStatusUpdated($serviceRequest, 'waiting_payment'));
+        $this->notifyRequesterOfStatus($serviceRequest, 'waiting_payment');
 
         return back()->with('success', 'Service marked as finished!');
     }
@@ -715,7 +707,7 @@ class ServiceRequestController extends BaseController
     {
         // 1. Authorization
         $user = Auth::user();
-        if ($serviceRequest->hsr_requester_id != $user->hu_id && $serviceRequest->hsr_provider_id != $user->hu_id) {
+        if ((int) $serviceRequest->hsr_requester_id !== (int) $user->hu_id) {
             abort(403);
         }
 
@@ -736,7 +728,7 @@ class ServiceRequestController extends BaseController
                 $random = bin2hex(random_bytes(6));
                 $filename = 'payment_'.$serviceRequest->hsr_id.'_'.now()->format('YmdHis').'_'.$random.'.'.$extension;
 
-                $disk = Storage::disk('public');
+                $disk = Storage::disk('local');
                 $directory = 'payment_proofs';
                 $path = $directory.'/'.$filename;
 
@@ -789,7 +781,7 @@ class ServiceRequestController extends BaseController
     {
         // 1. Authorization
         $user = Auth::user();
-        if ($serviceRequest->hsr_requester_id != $user->hu_id && $serviceRequest->hsr_provider_id != $user->hu_id) {
+        if ((int) $serviceRequest->hsr_provider_id !== (int) $user->hu_id) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -808,8 +800,7 @@ class ServiceRequestController extends BaseController
             PointsController::awardPointsForCompletedService($serviceRequest); // Seller points
             PointsController::awardBuyerPointsForCompletedService($serviceRequest); // Buyer points
 
-            // Notify Buyer
-            $serviceRequest->requester->notify(new ServiceRequestStatusUpdated($serviceRequest, 'completed'));
+            $this->notifyRequesterOfStatus($serviceRequest, 'completed');
 
             return back()->with('success', 'Payment confirmed and Order marked as Completed! Both parties earned 1 point each.');
         } else {
@@ -932,9 +923,72 @@ class ServiceRequestController extends BaseController
     public function markAsPaid($id)
     {
         $request = ServiceRequest::findOrFail($id);
+
+        if ((int) $request->hsr_provider_id !== (int) Auth::id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $request->update(['hsr_payment_status' => 'paid']);
 
         return back()->with('success', 'Payment status updated.');
+    }
+
+    private function notifyRequesterOfStatus(ServiceRequest $serviceRequest, string $status): void
+    {
+        try {
+            $serviceRequest->requester?->notify(new ServiceRequestStatusUpdated($serviceRequest, $status));
+        } catch (\Throwable $e) {
+            Log::warning('Service request status notification failed', [
+                'service_request_id' => $serviceRequest->hsr_id,
+                'status' => $status,
+                'requester_id' => $serviceRequest->hsr_requester_id,
+                'message' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    public function showPaymentProof(ServiceRequest $serviceRequest)
+    {
+        if (
+            (int) $serviceRequest->hsr_requester_id !== (int) Auth::id()
+            && (int) $serviceRequest->hsr_provider_id !== (int) Auth::id()
+        ) {
+            abort(403, 'You are not authorized to view this payment proof.');
+        }
+
+        return $this->paymentProofResponse($serviceRequest);
+    }
+
+    private function paymentProofResponse(ServiceRequest $serviceRequest)
+    {
+        $proofPath = ltrim((string) $serviceRequest->hsr_payment_proof, '/');
+
+        if ($proofPath === '') {
+            abort(404, 'Payment proof not found.');
+        }
+
+        if (Storage::disk('local')->exists($proofPath)) {
+            return response()->file(Storage::disk('local')->path($proofPath), $this->privateFileHeaders());
+        }
+
+        $publicPath = Str::startsWith($proofPath, 'storage/')
+            ? Str::after($proofPath, 'storage/')
+            : $proofPath;
+
+        if (Storage::disk('public')->exists($publicPath)) {
+            return response()->file(Storage::disk('public')->path($publicPath), $this->privateFileHeaders());
+        }
+
+        abort(404, 'Payment proof not found.');
+    }
+
+    private function privateFileHeaders(): array
+    {
+        return [
+            'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
+            'Pragma' => 'no-cache',
+            'Expires' => '0',
+        ];
     }
 
     public function cancel(ServiceRequest $serviceRequest)

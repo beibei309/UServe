@@ -65,12 +65,14 @@ window.UServeAdmin.register('requests', 'adminModuleRequestsConfig', (config) =>
         if (paymentProofSection && paymentProofLink && paymentProofPreview) {
             const paymentProofNone = document.getElementById('paymentProofNone');
             const proofUrl = req.hsr_payment_proof_url || req.hsr_payment_proof || null;
+            const proofExtension = String(req.hsr_payment_proof_extension || '').toLowerCase();
+            const proofIsPdf = Boolean(req.hsr_payment_proof_is_pdf) || proofExtension === 'pdf';
 
             if (proofUrl) {
                 paymentProofLink.href = proofUrl;
                 paymentProofLink.style.display = '';
 
-                if (proofUrl.toLowerCase().endsWith('.pdf')) {
+                if (proofIsPdf) {
                     paymentProofPreview.innerHTML = `<a href="${proofUrl}" target="_blank" class="mt-2 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700">View PDF</a>`;
                 } else {
                     paymentProofPreview.innerHTML = `<img src="${proofUrl}" alt="Payment Proof" class="max-w-full h-auto max-h-96 object-contain rounded-md shadow-sm hover:opacity-95 transition-opacity">`;

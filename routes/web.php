@@ -113,6 +113,7 @@ Route::middleware(['auth'])->group(function () {
     // finished work
     Route::post('/service-requests/{serviceRequest}/mark-work-finished', [ServiceRequestController::class, 'markWorkFinished'])->name('service-requests.mark-work-finished');
     Route::post('/service-requests/{serviceRequest}/buyer-confirm-payment', [ServiceRequestController::class, 'buyerConfirmPayment'])->name('service-requests.buyer-confirm-payment');
+    Route::get('/service-requests/{serviceRequest}/payment-proof', [ServiceRequestController::class, 'showPaymentProof'])->name('service-requests.payment-proof');
     Route::post('/service-requests/{serviceRequest}/finalize', [App\Http\Controllers\ServiceRequestController::class, 'finalizeOrder'])->name('service-requests.finalize');
     Route::post('/service-requests/{id}/mark-paid', [ServiceRequestController::class, 'markAsPaid'])->name('service-requests.mark-paid');
     Route::post('/service-requests/{serviceRequest}/report', [ServiceRequestController::class, 'report'])->name('service-requests.report');
@@ -260,6 +261,7 @@ Route::middleware(['auth:admin', 'prevent-back-history'])->prefix('admin')->grou
     Route::get('/requests', [AdminRequestController::class, 'index'])->name('admin.requests.index');
     Route::delete('/requests/{serviceRequest}', [AdminRequestController::class, 'destroy'])->name('admin.requests.destroy');
     Route::get('/requests/export', [AdminRequestController::class, 'export'])->name('admin.requests.export');
+    Route::get('/requests/{serviceRequest}/payment-proof', [AdminRequestController::class, 'showPaymentProof'])->name('admin.requests.payment-proof');
     Route::post('/requests/{id}/resolve', [AdminRequestController::class, 'resolveDispute'])->name('admin.requests.resolve');
 
     // ========================================

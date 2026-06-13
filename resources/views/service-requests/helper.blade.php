@@ -355,7 +355,7 @@
 
                                             {{-- Button: Normal Width --}}
                                             @if ($request->ui_has_payment_proof)
-                                                <button type="button" data-open-proof="{{ $request->hsr_id }}" data-proof-url="{{ $request->ui_payment_proof_url }}"
+                                                <button type="button" data-open-proof="{{ $request->hsr_id }}" data-proof-url="{{ $request->ui_payment_proof_url }}" data-proof-extension="{{ $request->ui_payment_proof_extension }}"
                                                     class="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-blue-700 transition-all">
                                                     Check Proof
                                                 </button>

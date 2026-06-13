@@ -52,7 +52,7 @@
         if (proofPdf) proofPdf.src = '';
     }
 
-    function openProofModal(fileUrl, requestId) {
+    function openProofModal(fileUrl, requestId, fileExtension = '') {
         if (!proofModal || !finalizeOrderForm) return;
         finalizeOrderForm.action = finalizeUrlTemplate.replace('__ID__', requestId);
 
@@ -69,13 +69,15 @@
             return;
         }
 
-        let extension = '';
+        let extension = String(fileExtension || '').toLowerCase();
         try {
-            const cleanPath = new URL(fileUrl, window.location.origin).pathname;
-            const parts = cleanPath.split('.');
-            extension = parts.length > 1 ? parts.pop().toLowerCase() : '';
+            if (!extension) {
+                const cleanPath = new URL(fileUrl, window.location.origin).pathname;
+                const parts = cleanPath.split('.');
+                extension = parts.length > 1 ? parts.pop().toLowerCase() : '';
+            }
         } catch (error) {
-            extension = (fileUrl.split('?')[0].split('.').pop() || '').toLowerCase();
+            if (!extension) extension = (fileUrl.split('?')[0].split('.').pop() || '').toLowerCase();
         }
 
         const imageTypes = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'];
@@ -432,7 +434,7 @@
 
         const openProof = event.target.closest('[data-open-proof]');
         if (openProof) {
-            openProofModal(openProof.dataset.proofUrl, openProof.dataset.openProof);
+            openProofModal(openProof.dataset.proofUrl, openProof.dataset.openProof, openProof.dataset.proofExtension);
             return;
         }
 

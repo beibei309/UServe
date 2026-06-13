@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\AccountBannedMail;
 use App\Mail\AccountWarnedMail;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class AdminRequestController extends Controller
 {
@@ -92,15 +94,14 @@ class AdminRequestController extends Controller
                 if ($proofPath) {
                     if (str_starts_with($proofPath, 'http://') || str_starts_with($proofPath, 'https://')) {
                         $paymentProofUrl = $proofPath;
-                    } elseif (str_starts_with($proofPath, 'storage/')) {
-                        $paymentProofUrl = asset($proofPath);
                     } else {
-                        $paymentProofUrl = asset('storage/'.$proofPath);
+                        $paymentProofUrl = route('admin.requests.payment-proof', $serviceRequest);
                     }
                     $paymentProofIsPdf = str_ends_with(strtolower($proofPath), '.pdf');
                 }
                 $serviceRequest->hsr_payment_proof_url = $paymentProofUrl;
                 $serviceRequest->hsr_payment_proof_is_pdf = $paymentProofIsPdf;
+                $serviceRequest->hsr_payment_proof_extension = strtolower(pathinfo(parse_url((string) $proofPath, PHP_URL_PATH) ?: (string) $proofPath, PATHINFO_EXTENSION));
         $selectedPackage = $serviceRequest->hsr_selected_package;
         $serviceRequest->selected_package_label = is_array($selectedPackage)
             ? implode(', ', array_filter($selectedPackage))
@@ -256,6 +257,38 @@ public function resolveDispute(Request $request, $id)
 
     return redirect()->route('admin.requests.index')->with('success', $message);
 }
+
+    public function showPaymentProof(ServiceRequest $serviceRequest)
+    {
+        $proofPath = ltrim((string) $serviceRequest->hsr_payment_proof, '/');
+
+        if ($proofPath === '') {
+            abort(404, 'Payment proof not found.');
+        }
+
+        if (Storage::disk('local')->exists($proofPath)) {
+            return response()->file(Storage::disk('local')->path($proofPath), $this->privateFileHeaders());
+        }
+
+        $publicPath = Str::startsWith($proofPath, 'storage/')
+            ? Str::after($proofPath, 'storage/')
+            : $proofPath;
+
+        if (Storage::disk('public')->exists($publicPath)) {
+            return response()->file(Storage::disk('public')->path($publicPath), $this->privateFileHeaders());
+        }
+
+        abort(404, 'Payment proof not found.');
+    }
+
+    private function privateFileHeaders(): array
+    {
+        return [
+            'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
+            'Pragma' => 'no-cache',
+            'Expires' => '0',
+        ];
+    }
     
     public function destroy($id)
     {
