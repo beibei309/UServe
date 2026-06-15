@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
+use RuntimeException;
 
 class DatabaseSeeder extends Seeder
 {
@@ -24,6 +25,8 @@ class DatabaseSeeder extends Seeder
 
     public function run(): void
     {
+        $this->guardAgainstProductionReset();
+
         DB::transaction(function () {
             $this->resetTables();
 
@@ -53,6 +56,22 @@ class DatabaseSeeder extends Seeder
 
             $this->call(AdminSeeder::class);
         });
+    }
+
+    private function guardAgainstProductionReset(): void
+    {
+        if (! app()->isProduction()) {
+            return;
+        }
+
+        if ((bool) env('ALLOW_DESTRUCTIVE_DATABASE_SEEDING', false)) {
+            return;
+        }
+
+        throw new RuntimeException(
+            'DatabaseSeeder truncates application tables and is blocked in production. '.
+            'Use LaunchSeeder for production setup, or set ALLOW_DESTRUCTIVE_DATABASE_SEEDING=true only for an intentional reset.'
+        );
     }
 
     private function resetTables(): void

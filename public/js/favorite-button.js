@@ -10,21 +10,25 @@
     };
 
     const toggleFavorite = async (btn) => {
-        const userId = Number(btn.dataset.userId || 0);
-        if (!userId) return;
-        const icon = document.getElementById(`favorite-icon-${userId}`);
-        const text = document.getElementById(`favorite-text-${userId}`);
+        const serviceId = Number(btn.dataset.serviceId || 0);
+        const favoriteId = serviceId || Number(btn.dataset.userId || 0);
+        if (!serviceId) {
+            showNotification('Favorite action is unavailable for this item.', 'error');
+            return;
+        }
+        const icon = document.getElementById(`favorite-icon-${favoriteId}`);
+        const text = document.getElementById(`favorite-text-${favoriteId}`);
 
         btn.disabled = true;
         try {
-            const response = await fetch('/favorites/toggle', {
+            const response = await fetch('/favorites/services/toggle', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
                     Accept: 'application/json',
                 },
-                body: JSON.stringify({ user_id: userId }),
+                body: JSON.stringify({ service_id: serviceId }),
             });
             const data = await response.json();
             if (!data.success) {
