@@ -9,14 +9,7 @@
     <title>UPSI2u | UPSI Service Circle</title>
     <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
 
-    {{-- SCRIPTS & STYLES --}}
-    {{-- Ensure you have Tailwind running. If using Vite: --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-
-    {{-- OR if you are not using Vite yet, uncomment this CDN for testing: --}}
-    {{-- <script src="https://cdn.tailwindcss.com"></script> --}}
-
-    {{-- SWEETALERT CDN --}}
 </head>
 
 <body class="font-sans antialiased text-gray-900">
