@@ -21,7 +21,7 @@ class SyncUpsiStudentStatusCommand extends Command
     {
         $apply = (bool) $this->option('apply');
         $limit = max(0, (int) $this->option('limit'));
-        $connectionName = (string) ($this->option('connection') ?: config('upsi.connection', 'pgsql'));
+        $connectionName = (string) ($this->option('connection') ?: config('upsi.connection', config('database.default', 'pgsql')));
         $sourceView = (string) config('upsi.student_view', 'home2u.h2u_student');
 
         if (! $this->isSourceConnectionConfigured($connectionName)) {

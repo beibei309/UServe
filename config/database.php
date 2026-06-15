@@ -109,7 +109,7 @@ return [
         'upsi_pgsql' => [
             'driver' => 'pgsql',
             'url' => env('UPSI_DB_URL'),
-            'host' => env('UPSI_DB_HOST', env('DB_HOST', '127.0.0.1')),
+            'host' => env('UPSI_DB_HOST', ''),
             'port' => env('UPSI_DB_PORT', '5432'),
             'database' => env('UPSI_DB_DATABASE', ''),
             'username' => env('UPSI_DB_USERNAME', ''),

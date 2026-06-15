@@ -72,7 +72,7 @@ class AdminStudentStatusController extends Controller
             $student->status_badge_class = $statusBadgeClasses[$statusRaw] ?? 'bg-gray-100 text-gray-800';
             $student->semester_display = $studentStatus && $studentStatus->hss_status === 'Graduated'
                 ? '-'
-                : ($studentStatus->hss_semester ?? '-');
+                : $this->formatSemesterDisplay($studentStatus?->hss_semester);
 
             $graduationDateRaw = optional($studentStatus)->hss_graduation_date;
             $student->graduation_date_display = $graduationDateRaw
@@ -236,6 +236,17 @@ class AdminStudentStatusController extends Controller
         } catch (\Exception $e) {
             return back()->with('error', 'Failed to send email: ' . $e->getMessage());
         }
+    }
+
+    private function formatSemesterDisplay(?string $semester): string
+    {
+        $value = trim((string) $semester);
+
+        if ($value === '') {
+            return '-';
+        }
+
+        return ctype_digit($value) ? "Semester {$value}" : $value;
     }
 
 }
