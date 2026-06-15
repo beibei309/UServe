@@ -3,21 +3,25 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Admin\Concerns\LogsAdminActions;
+use App\Http\Controllers\Admin\Concerns\SendsAdminNotifications;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Models\User;
 use App\Mail\UserBlacklisted;
 use App\Mail\UserUnblacklisted;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 
 class AdminCommunityController extends Controller
 {
-private function resolveProfileImageUrl(?string $path): string
-{
+    use LogsAdminActions;
+    use SendsAdminNotifications;
+
+    private function resolveProfileImageUrl(?string $path): string
+    {
     if (! $path) {
-        return 'https://ui-avatars.com/api/?name=User';
+        return upsi2u_avatar_url('User');
     }
 
     if (Str::startsWith($path, ['http://', 'https://'])) {
@@ -38,7 +42,7 @@ private function resolveProfileImageUrl(?string $path): string
         return asset($cleanPath);
     }
 
-    return 'https://ui-avatars.com/api/?name=User';
+    return upsi2u_avatar_url('User');
 }
 
    public function index(Request $request)
@@ -142,6 +146,12 @@ private function resolveProfileImageUrl(?string $path): string
 public function view($id)
 {
     $user = User::where('hu_role', 'community')->findOrFail($id);
+
+    $this->logAdminAction('community_user_deleted', [
+        'user_id' => $user->hu_id,
+        'email' => $user->hu_email,
+        'role' => $user->hu_role,
+    ]);
     $user->profile_image_url = $this->resolveProfileImageUrl($user->hu_profile_photo_path);
     $createdAt = $user->hu_created_at ?? $user->created_at;
     $updatedAt = $user->hu_updated_at ?? $user->updated_at;
@@ -255,7 +265,9 @@ public function blacklist(Request $request, $id)
         $user->hu_blacklist_reason = $request->blacklist_reason;
         $user->save();
 
-    Mail::to($user->hu_email)->send(new UserBlacklisted($user, $request->blacklist_reason));
+    $this->sendAdminMailSafely($user->hu_email, new UserBlacklisted($user, $request->blacklist_reason), 'community_blacklist', [
+        'user_id' => $user->hu_id,
+    ]);
 
     return redirect()->route('admin.community.index')
                      ->with('success', 'User has been blacklisted.');
@@ -271,7 +283,9 @@ public function unblacklist($id)
         $user->hu_blacklist_reason = null;
         $user->save();
 
-    Mail::to($user->hu_email)->send(new UserUnblacklisted($user));
+    $this->sendAdminMailSafely($user->hu_email, new UserUnblacklisted($user), 'community_unblacklist', [
+        'user_id' => $user->hu_id,
+    ]);
 
     return redirect()->route('admin.community.index')
                      ->with('success', 'Blacklist removed.');

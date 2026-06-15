@@ -40,7 +40,7 @@ class VerificationController extends Controller
             'step2_card_class' => $locationVerified ? '' : 'opacity-50 pointer-events-none',
             'profile_preview_url' => $hasProfilePhoto
                 ? asset($user->hu_profile_photo_path)
-                : 'https://ui-avatars.com/api/?name=' . urlencode($user->hu_name ?? 'User'),
+                : upsi2u_avatar_url($user->hu_name ?? 'User'),
             'step3_card_class' => $hasProfilePhoto ? '' : 'opacity-50 pointer-events-none',
             'selfie_status_text' => $hasSelfie ? 'Selfie Uploaded! ✅' : '',
             'step4_card_class' => $hasSelfie ? '' : 'opacity-50 pointer-events-none',
@@ -122,7 +122,7 @@ class VerificationController extends Controller
     $studentsVerificationUi = [
         'profile_preview_url' => $user->hu_profile_photo_path
             ? asset($user->hu_profile_photo_path)
-            : 'https://ui-avatars.com/api/?name=' . urlencode($user->hu_name ?? 'User'),
+            : upsi2u_avatar_url($user->hu_name ?? 'User'),
     ];
     return view('onboarding.students_verification', compact(
         'isEligible',

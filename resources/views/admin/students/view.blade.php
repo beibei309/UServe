@@ -38,8 +38,8 @@
                     
                     {{-- Profile Photo --}}
                     <div class="flex-shrink-0 text-center lg:text-left">
-                        <img src="{{ $student->hu_profile_photo_path ? asset($student->hu_profile_photo_path) : 'https://ui-avatars.com/api/?name=' . urlencode((string) ($student->hu_name ?? 'U')) }}" 
-                            onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name={{ urlencode((string) ($student->hu_name ?? 'U')) }}';"
+                        <img src="{{ $student->hu_profile_photo_path ? asset($student->hu_profile_photo_path) : upsi2u_avatar_url((string) ($student->hu_name ?? 'U')) }}" 
+                            onerror="this.onerror=null;this.src='{{ upsi2u_avatar_url((string) ($student->hu_name ?? 'U')) }}';"
                              alt="{{ $student->hu_name }}"                    
                              class="w-32 h-32 lg:w-40 lg:h-40 rounded-full object-cover border-4 shadow-lg mx-auto lg:mx-0 transition-transform hover:scale-105" 
                              style="border-color: var(--border-color);" />

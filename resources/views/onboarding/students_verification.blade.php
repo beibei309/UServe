@@ -173,7 +173,6 @@
         data-upsi-lng="101.5927"
         data-radius-km="25"></div>
     @push('scripts')
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script src="{{ asset('js/students-verification.js') }}"></script>
     @endpush
     <style>.animate-fadeIn{animation:fadeIn 0.5s ease-out forwards}@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}.animate-bounce-short{animation:bounceShort 2s infinite}@keyframes bounceShort{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}</style>

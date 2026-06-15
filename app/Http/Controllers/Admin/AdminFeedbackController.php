@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Admin\Concerns\SendsAdminNotifications;
 use App\Mail\AccountBannedMail;
 use App\Mail\AccountWarnedMail;
 use App\Mail\SellerBlockedMail;
@@ -10,10 +11,11 @@ use App\Mail\SellerUnblockedMail;
 use App\Mail\UserBlacklisted;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Mail;
 
 class AdminFeedbackController extends Controller
 {
+    use SendsAdminNotifications;
+
     private const FEEDBACK_ROLES = ['student', 'community', 'helper'];
 
     private function userWarningLimit(): int
@@ -127,7 +129,9 @@ class AdminFeedbackController extends Controller
         }
 
         $user->increment('hu_warning_count');
-        Mail::to($user->hu_email)->send(new AccountWarnedMail($user, $reason));
+        $this->sendAdminMailSafely($user->hu_email, new AccountWarnedMail($user, $reason), 'feedback_warning', [
+            'user_id' => $user->hu_id,
+        ]);
 
         if ($user->hu_warning_count >= $limit) {
             $label = $this->finalActionLabelForRole($user->hu_role);
@@ -167,7 +171,9 @@ class AdminFeedbackController extends Controller
             $user->hu_is_blacklisted = false;
             $user->hu_blacklist_reason = $reason;
             $user->save();
-            Mail::to($user->hu_email)->send(new SellerBlockedMail($user, $reason));
+            $this->sendAdminMailSafely($user->hu_email, new SellerBlockedMail($user, $reason), 'feedback_helper_block', [
+                'user_id' => $user->hu_id,
+            ]);
 
             return back()->with('success', "Helper {$user->hu_name} has been blocked from seller actions.");
         }
@@ -178,7 +184,9 @@ class AdminFeedbackController extends Controller
             $user->hu_is_blocked = false;
             $user->hu_blacklist_reason = $reason;
             $user->save();
-            Mail::to($user->hu_email)->send(new UserBlacklisted($user, $reason));
+            $this->sendAdminMailSafely($user->hu_email, new UserBlacklisted($user, $reason), 'feedback_community_blacklist', [
+                'user_id' => $user->hu_id,
+            ]);
 
             return back()->with('success', "Community user {$user->hu_name} has been blacklisted after reaching {$limit} warnings.");
         }
@@ -188,7 +196,9 @@ class AdminFeedbackController extends Controller
         $user->hu_is_blocked = false;
         $user->hu_blacklist_reason = $reason;
         $user->save();
-        Mail::to($user->hu_email)->send(new AccountBannedMail($user, $reason));
+        $this->sendAdminMailSafely($user->hu_email, new AccountBannedMail($user, $reason), 'feedback_user_suspend', [
+            'user_id' => $user->hu_id,
+        ]);
 
         return back()->with('success', "User {$user->hu_name} has been suspended after reaching {$limit} warnings.");
     }
@@ -205,7 +215,9 @@ class AdminFeedbackController extends Controller
 
         $user->hu_is_blocked = false;
         $user->save();
-        Mail::to($user->hu_email)->send(new SellerUnblockedMail($user));
+        $this->sendAdminMailSafely($user->hu_email, new SellerUnblockedMail($user), 'feedback_helper_unblock', [
+            'user_id' => $user->hu_id,
+        ]);
 
         return back()->with('success', "Helper {$user->hu_name} has been unblocked for seller actions.");
     }

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Admin\Concerns\LogsAdminActions;
+use App\Http\Controllers\Admin\Concerns\SendsAdminNotifications;
 use App\Models\User;
 use App\Models\StudentService;
 use Illuminate\Support\Carbon;
@@ -10,8 +12,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Log;
 use App\Mail\AccountBannedMail;
 use App\Mail\AccountUnbannedMail;
 
@@ -19,6 +19,9 @@ use App\Mail\AccountUnbannedMail;
 
 class AdminStudentController extends Controller
 {
+    use LogsAdminActions;
+    use SendsAdminNotifications;
+
     public function index(Request $request)
 {
     $search  = $request->input('search');
@@ -100,6 +103,13 @@ class AdminStudentController extends Controller
     public function edit($id)
 {
     $student = User::whereIn('hu_role', ['student', 'helper'])->findOrFail($id);
+
+    $this->logAdminAction('student_user_deleted', [
+        'user_id' => $student->hu_id,
+        'email' => $student->hu_email,
+        'role' => $student->hu_role,
+        'student_id' => $student->hu_student_id,
+    ]);
         $student->faculty_display = $this->normalizeFacultyName($student->hu_faculty);
 
     return view('admin.students.edit', compact('student'));
@@ -215,7 +225,9 @@ class AdminStudentController extends Controller
         'hu_blacklist_reason' => $request->blacklist_reason,
     ]);
 
-    Mail::to($student->hu_email)->send(new AccountBannedMail($student, $request->blacklist_reason));
+    $this->sendAdminMailSafely($student->hu_email, new AccountBannedMail($student, $request->blacklist_reason), 'student_suspend', [
+        'user_id' => $student->hu_id,
+    ]);
 
     return redirect()->route('admin.students.index')
         ->with('success', 'User banned and email notification sent.');
@@ -247,7 +259,9 @@ class AdminStudentController extends Controller
         'hu_blacklist_reason' => null,
     ]);
 
-    Mail::to($student->hu_email)->send(new AccountUnbannedMail($student));
+    $this->sendAdminMailSafely($student->hu_email, new AccountUnbannedMail($student), 'student_reactivate', [
+        'user_id' => $student->hu_id,
+    ]);
 
     return redirect()->route('admin.students.index')
         ->with('success', 'User reactivated and email notification sent.');
@@ -334,12 +348,10 @@ public function revokeHelper($id)
         'hu_helper_verified_at' => null
     ]);
 
-    // Notify the user
-    try {
-        $student->notify(new \App\Notifications\SellerStatusRevokedNotification());
-    } catch (\Throwable $e) {
-        // Optionally log error
-    }
+    // Notify the user without blocking the admin action if delivery fails.
+    $this->notifyAdminUserSafely($student, new \App\Notifications\SellerStatusRevokedNotification(), 'seller_status_revoked', [
+        'user_id' => $student->hu_id,
+    ]);
 
     return redirect()->back()->with('success', 'Seller status revoked, user notified, and all associated services have been deleted.');
 }

@@ -1,6 +1,4 @@
 <x-guest-layout>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
     <div class="min-h-screen bg-slate-50 flex items-center justify-center p-3 sm:p-4">
         <div class="upsi-card w-full max-w-5xl p-4 sm:p-8 md:p-10">
             

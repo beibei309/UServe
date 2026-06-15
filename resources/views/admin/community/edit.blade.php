@@ -37,7 +37,7 @@
             <div class="flex items-center gap-4">
                 <div class="w-12 h-12 rounded-full overflow-hidden border-2 border-blue-200">
                     <img src="{{ $user->profile_image_url }}"
-                        onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name={{ urlencode($user->hu_name ?? 'User') }}';"
+                        onerror="this.onerror=null;this.src='{{ upsi2u_avatar_url($user->hu_name ?? 'User') }}';"
                         class="w-full h-full object-cover" alt="Profile" />
                 </div>
                 <div>
@@ -77,7 +77,7 @@
                             <div class="h-24 w-24 rounded-xl overflow-hidden border-2 shadow-lg transition-colors duration-300"
                                  style="border-color: var(--border-color);">
                                 <img src="{{ $user->profile_image_url }}"
-                                    onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name={{ urlencode($user->hu_name ?? 'User') }}';"
+                                    onerror="this.onerror=null;this.src='{{ upsi2u_avatar_url($user->hu_name ?? 'User') }}';"
                                     class="w-full h-full object-cover" alt="Profile" />
                             </div>
                             <div class="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-white flex items-center justify-center">

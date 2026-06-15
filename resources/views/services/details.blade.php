@@ -297,7 +297,7 @@
                         <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 font-bold text-sm uppercase overflow-hidden">
                             @if($review->reviewer->hu_profile_photo_path)
                                 <img src="{{ asset($review->reviewer->hu_profile_photo_path) }}"
-                                    data-fallback-src="https://ui-avatars.com/api/?name={{ urlencode((string) ($review->ui_reviewer_initial ?? 'U')) }}"
+                                    data-fallback-src="{{ upsi2u_avatar_url((string) ($review->ui_reviewer_initial ?? 'U')) }}"
                                     class="w-full h-full object-cover">
                             @else
                                 {{ $review->ui_reviewer_initial }}

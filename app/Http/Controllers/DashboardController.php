@@ -202,7 +202,7 @@ public function index(Request $request)
 
     private function resolveDashboardServiceImageUrl(?string $path, ?string $title): string
     {
-        $fallback = 'https://ui-avatars.com/api/?name=' . urlencode($title ?? 'Service');
+        $fallback = upsi2u_avatar_url($title ?? 'Service');
 
         return $this->serviceImageUrlResolver->resolveGeneralImageUrl($path, $fallback);
     }
@@ -215,7 +215,7 @@ public function index(Request $request)
             }
             return asset($path);
         }
-        return 'https://ui-avatars.com/api/?name=' . urlencode($name ?? 'User');
+        return upsi2u_avatar_url($name ?? 'User');
     }
 
     private function mapDashboardServiceCard(StudentService $service): array

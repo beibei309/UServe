@@ -2,27 +2,7 @@
     const config = document.getElementById('studentsEditProfileConfig');
     if (!config) return;
 
-    const ensureSwal = () => new Promise((resolve) => {
-        if (window.Swal) {
-            resolve(window.Swal);
-            return;
-        }
-
-        const existingScript = document.querySelector('script[data-swal-cdn="1"]');
-        if (existingScript) {
-            existingScript.addEventListener('load', () => resolve(window.Swal || null), { once: true });
-            existingScript.addEventListener('error', () => resolve(null), { once: true });
-            return;
-        }
-
-        const script = document.createElement('script');
-        script.src = 'https://cdn.jsdelivr.net/npm/sweetalert2@11';
-        script.async = true;
-        script.dataset.swalCdn = '1';
-        script.onload = () => resolve(window.Swal || null);
-        script.onerror = () => resolve(null);
-        document.head.appendChild(script);
-    });
+    const ensureSwal = () => Promise.resolve(window.Swal || null);
 
     let swal = null;
 

@@ -3,17 +3,20 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Admin\Concerns\LogsAdminActions;
+use App\Http\Controllers\Admin\Concerns\SendsAdminNotifications;
 use App\Models\User;
 use App\Models\StudentStatus;
 use Illuminate\Http\Request;
 use App\Mail\GraduationReminderMail;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Carbon;
 use App\Notifications\StudyDurationReminder; // Make sure this import exists
 
 class AdminStudentStatusController extends Controller
 {
+    use LogsAdminActions;
+    use SendsAdminNotifications;
+
     // 1. DISPLAY ALL STUDENTS & HELPERS WITH STATUS
     public function index(Request $request)
     {
@@ -211,7 +214,16 @@ class AdminStudentStatusController extends Controller
     // 6. DELETE STATUS
     public function destroy($id)
     {
-        StudentStatus::findOrFail($id)->delete();
+        $status = StudentStatus::findOrFail($id);
+
+        $this->logAdminAction('student_status_deleted', [
+            'status_id' => $status->hss_id,
+            'student_id' => $status->hss_student_id,
+            'matric_no' => $status->hss_matric_no,
+            'status' => $status->hss_status,
+        ]);
+
+        $status->delete();
 
         return redirect()->route('admin.student_status.index')
             ->with('success', 'Status deleted.');
@@ -228,14 +240,11 @@ class AdminStudentStatusController extends Controller
             return back()->with('error', 'Student has no graduation date set.');
         }
 
-        // Send the email
-        // Make sure you have created the Mailable (see step 3)
-        try {
-            Mail::to($user->hu_email)->send(new GraduationReminderMail($user));
-            return back()->with('success', 'Reminder email sent to ' . $user->hu_name);
-        } catch (\Exception $e) {
-            return back()->with('error', 'Failed to send email: ' . $e->getMessage());
-        }
+        $this->sendAdminMailSafely($user->hu_email, new GraduationReminderMail($user), 'student_graduation_reminder', [
+            'user_id' => $user->hu_id,
+        ]);
+
+        return back()->with('success', 'Reminder email queued/sent to ' . $user->hu_name);
     }
 
     private function formatSemesterDisplay(?string $semester): string

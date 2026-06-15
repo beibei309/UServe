@@ -3,11 +3,14 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Admin\Concerns\LogsAdminActions;
 use App\Models\Faq;
 use Illuminate\Http\Request;
 
 class AdminFaqsController extends Controller
 {
+    use LogsAdminActions;
+
     public function index()
     {
         $faqs = Faq::orderBy('hfq_category')
@@ -69,6 +72,12 @@ class AdminFaqsController extends Controller
 
     public function destroy(Faq $faq)
     {
+        $this->logAdminAction('faq_deleted', [
+            'faq_id' => $faq->hfq_id,
+            'category' => $faq->hfq_category,
+            'question' => $faq->hfq_question,
+        ]);
+
         $faq->delete();
         return redirect()->route('admin.faqs.index')->with('success', 'FAQ deleted successfully!');    }
 

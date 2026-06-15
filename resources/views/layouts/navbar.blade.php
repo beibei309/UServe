@@ -194,7 +194,7 @@
                             id="user-menu-button">
                             <span class="sr-only">Open user menu</span>
                             <img class="h-9 w-9 rounded-full object-cover border border-gray-200"
-                                src="{{ $user->hu_profile_photo_path ? asset($user->hu_profile_photo_path) : 'https://ui-avatars.com/api/?name=' . urlencode($user->hu_name) . '&background=random' }}"
+                                src="{{ $user->hu_profile_photo_path ? asset($user->hu_profile_photo_path) : upsi2u_avatar_url($user->hu_name) }}"
                                 alt="{{ $user->hu_name }}">
                             @if ($user->hu_verification_status === 'approved')
                                 <span
@@ -300,7 +300,7 @@
                 <div class="flex items-center px-4 min-w-0">
                     <div class="flex-shrink-0 relative">
                         <img class="h-9 w-9 rounded-full border border-gray-200 object-cover"
-                            src="{{ $user->hu_profile_photo_path ? asset($user->hu_profile_photo_path) : 'https://ui-avatars.com/api/?name=' . urlencode($user->hu_name) }}"
+                            src="{{ $user->hu_profile_photo_path ? asset($user->hu_profile_photo_path) : upsi2u_avatar_url($user->hu_name) }}"
                             alt="">
                         @if ($user->hu_verification_status === 'approved')
                             <span

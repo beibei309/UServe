@@ -230,7 +230,7 @@ class ProfileController extends Controller
         $studentsCreateUi = [
             'profile_photo_preview_url' => $user->hu_profile_photo_path
                 ? asset($user->hu_profile_photo_path)
-                : 'https://ui-avatars.com/api/?name='.urlencode($user->hu_name ?? 'User'),
+                : upsi2u_avatar_url($user->hu_name ?? 'User'),
             'default_bio' => $user->hu_bio,
             'default_faculty' => $user->hu_faculty,
             'default_course' => $user->hu_course,

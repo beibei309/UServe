@@ -41,7 +41,7 @@
                         <div class="w-32 h-32 lg:w-40 lg:h-40 rounded-full overflow-hidden border-4 shadow-lg mx-auto lg:mx-0 transition-transform hover:scale-105" 
                              style="border-color: var(--border-color);">
                             <img src="{{ $user->profile_image_url }}"
-                                onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name={{ urlencode($user->hu_name ?? 'User') }}';"
+                                onerror="this.onerror=null;this.src='{{ upsi2u_avatar_url($user->hu_name ?? 'User') }}';"
                                 class="w-full h-full object-cover" alt="{{ $user->hu_name }}" />
                         </div>
                     </div>

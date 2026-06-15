@@ -87,11 +87,11 @@ class StudentServiceController extends Controller
         $isAuthenticated = Auth::check();
         $services->getCollection()->transform(function (StudentService $service) use ($isAuthenticated) {
             $service->ui_image_url = $this->resolveServiceCardImageUrl($service->hss_image_path, $service->hss_title);
-            $service->ui_image_fallback = 'https://ui-avatars.com/api/?name='.urlencode($service->hss_title ?? 'Service');
+            $service->ui_image_fallback = upsi2u_avatar_url($service->hss_title ?? 'Service');
             $service->ui_details_url = route('services.details', $service->hss_id);
 
             $sellerName = (string) ($service->user->hu_name ?? 'User');
-            $sellerAvatarFallback = 'https://ui-avatars.com/api/?name='.urlencode($sellerName);
+            $sellerAvatarFallback = upsi2u_avatar_url($sellerName);
 
             $sellerPhotoPath = (string) ($service->user->hu_profile_photo_path ?? '');
             if ($sellerPhotoPath !== '') {
@@ -720,7 +720,7 @@ class StudentServiceController extends Controller
         $services->transform(function (StudentService $service) {
             $status = strtolower((string) $service->hss_approval_status);
             $service->ui_is_suspended = $status === 'suspended';
-            $service->ui_image_fallback = 'https://ui-avatars.com/api/?name='.urlencode($service->hss_title ?? 'Service');
+            $service->ui_image_fallback = upsi2u_avatar_url($service->hss_title ?? 'Service');
             $service->ui_image_url = $this->resolveServiceImageUrl(
                 $service->hss_image_path,
                 $service->ui_image_fallback
@@ -907,13 +907,13 @@ class StudentServiceController extends Controller
         ];
         $detailsCurrentPackage = $service->hss_basic_price ? 'basic' : ($service->hss_standard_price ? 'standard' : 'premium');
         $detailsSessionDuration = (int) ($service->hss_session_duration ?? 60);
-        $detailsImagePlaceholder = 'https://ui-avatars.com/api/?name='.urlencode($service->hss_title ?? 'Service');
+        $detailsImagePlaceholder = upsi2u_avatar_url($service->hss_title ?? 'Service');
         $detailsImageUrl = $this->resolveServiceImageUrl($service->hss_image_path, $detailsImagePlaceholder);
         $detailsWhatsappUrl = $this->buildServiceWhatsappUrl($service);
         $detailsHasPhone = ! empty($detailsWhatsappUrl);
         $providerName = $service->user->hu_name ?? 'User';
         $providerMaskedName = Str::substr($providerName, 0, 1).'****';
-        $detailsProviderAvatarFallback = 'https://ui-avatars.com/api/?name='.urlencode($providerName);
+        $detailsProviderAvatarFallback = upsi2u_avatar_url($providerName);
         $detailsProviderAvatarUrl = $this->resolveServiceImageUrl($service->user->hu_profile_photo_path, $detailsProviderAvatarFallback);
         $isFavouritedByViewer = $isAuthenticatedViewer && (bool) ($service->is_favourited ?? false);
         $daysMap = [

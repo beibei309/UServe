@@ -6,15 +6,17 @@ use App\Mail\AccountBannedMail;
 use App\Mail\AccountWarnedMail;
 use App\Mail\SellerBlockedMail;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Admin\Concerns\SendsAdminNotifications;
 use App\Models\Report;
 use App\Models\User;
 use App\Notifications\AdminWarningNotification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Mail;
 
 class ReportAdminController extends Controller
 {
+    use SendsAdminNotifications;
+
     public function index()
     {
         $reports = Report::query()
@@ -56,12 +58,18 @@ class ReportAdminController extends Controller
 
             $targetUser->increment('hu_warning_count');
 
-            Mail::to($targetUser->hu_email)->send(new AccountWarnedMail(
+            $this->sendAdminMailSafely($targetUser->hu_email, new AccountWarnedMail(
                 $targetUser,
                 $warningReason
-            ));
+            ), 'report_warning', [
+                'report_id' => $report->hrp_id,
+                'user_id' => $targetUser->hu_id,
+            ]);
 
-            $targetUser->notify(new AdminWarningNotification((int) $targetUser->hu_warning_count, $warningReason));
+            $this->notifyAdminUserSafely($targetUser, new AdminWarningNotification((int) $targetUser->hu_warning_count, $warningReason), 'report_warning_notification', [
+                'report_id' => $report->hrp_id,
+                'user_id' => $targetUser->hu_id,
+            ]);
         }
 
         if ($targetUser && $status === 'banned') {
@@ -75,7 +83,10 @@ class ReportAdminController extends Controller
                     'hu_blacklist_reason' => $reason,
                 ]);
 
-                Mail::to($targetUser->hu_email)->send(new SellerBlockedMail($targetUser, $reason));
+                $this->sendAdminMailSafely($targetUser->hu_email, new SellerBlockedMail($targetUser, $reason), 'report_helper_block', [
+                    'report_id' => $report->hrp_id,
+                    'user_id' => $targetUser->hu_id,
+                ]);
             } elseif ($targetUser->hu_role === 'community') {
                 $targetUser->update([
                     'hu_is_blacklisted' => true,
@@ -84,7 +95,10 @@ class ReportAdminController extends Controller
                     'hu_blacklist_reason' => $reason,
                 ]);
 
-                Mail::to($targetUser->hu_email)->send(new AccountBannedMail($targetUser, $reason));
+                $this->sendAdminMailSafely($targetUser->hu_email, new AccountBannedMail($targetUser, $reason), 'report_community_blacklist', [
+                    'report_id' => $report->hrp_id,
+                    'user_id' => $targetUser->hu_id,
+                ]);
             } else {
                 $targetUser->update([
                     'hu_is_suspended' => true,
@@ -93,7 +107,10 @@ class ReportAdminController extends Controller
                     'hu_blacklist_reason' => $reason,
                 ]);
 
-                Mail::to($targetUser->hu_email)->send(new AccountBannedMail($targetUser, $reason));
+                $this->sendAdminMailSafely($targetUser->hu_email, new AccountBannedMail($targetUser, $reason), 'report_user_suspend', [
+                    'report_id' => $report->hrp_id,
+                    'user_id' => $targetUser->hu_id,
+                ]);
             }
         }
 

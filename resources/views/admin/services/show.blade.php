@@ -35,7 +35,7 @@
                         @if ($service->hss_image_url)
                             <img src="{{ $service->hss_image_url }}" 
                                 alt="{{ $service->hss_title }}"
-                                onerror="if (this.dataset.fallbackApplied === '1') return; this.dataset.fallbackApplied = '1'; this.src='https://ui-avatars.com/api/?name={{ urlencode($service->hss_title) }}';"
+                                onerror="if (this.dataset.fallbackApplied === '1') return; this.dataset.fallbackApplied = '1'; this.src='{{ upsi2u_avatar_url($service->hss_title) }}';"
                                  class="w-full h-full object-cover">
                         @else
                             <div class="flex items-center justify-center h-full transition-colors duration-300" style="color: var(--text-muted);">

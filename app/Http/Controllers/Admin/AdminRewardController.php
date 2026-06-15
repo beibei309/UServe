@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Admin\Concerns\LogsAdminActions;
 use App\Models\CertificateRedemption;
 use App\Models\Reward;
 use App\Models\RewardRedemption;
@@ -13,6 +14,8 @@ use Carbon\Carbon;
 
 class AdminRewardController extends Controller
 {
+    use LogsAdminActions;
+
     /**
      * Display rewards dashboard with statistics
      */
@@ -202,11 +205,23 @@ class AdminRewardController extends Controller
         
         if ($redemptionsCount > 0) {
             // Soft delete - just deactivate
+            $this->logAdminAction('reward_deactivated_by_delete', [
+                'reward_id' => $reward->hr_id,
+                'title' => $reward->hr_title,
+            ], [
+                'redemptions_count' => $redemptionsCount,
+            ]);
+
             $reward->update(['hr_is_active' => false]);
             return redirect()->back()
                 ->with('success', 'Reward deactivated (has existing redemptions)');
         } else {
             // Hard delete - safe to remove
+            $this->logAdminAction('reward_deleted', [
+                'reward_id' => $reward->hr_id,
+                'title' => $reward->hr_title,
+            ]);
+
             $reward->delete();
             return redirect()->back()
                 ->with('success', 'Reward deleted successfully!');

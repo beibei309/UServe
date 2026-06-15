@@ -97,13 +97,13 @@ public function index()
     $favourites->getCollection()->transform(function (StudentService $service) {
         $service->ui_image_url = $this->serviceImageUrlResolver->resolveGeneralImageUrl(
             $service->hss_image_path,
-            'https://via.placeholder.com/800x600?text=No+Image'
+            upsi2u_avatar_url('No Image')
         );
 
-        $service->ui_image_fallback = 'https://via.placeholder.com/800x600?text=No+Image';
+        $service->ui_image_fallback = upsi2u_avatar_url('No Image');
 
         $sellerName = (string) ($service->user->hu_name ?? 'User');
-        $sellerAvatarFallback = 'https://ui-avatars.com/api/?name=' . urlencode($sellerName);
+        $sellerAvatarFallback = upsi2u_avatar_url($sellerName);
 
         $sellerPhotoPath = (string) ($service->user->hu_profile_photo_path ?? '');
         if ($sellerPhotoPath !== '') {

@@ -360,7 +360,7 @@ class ServiceRequestController extends BaseController
             ->contains(fn (Review $review) => (int) $review->hr_reviewer_id === $currentUserId);
         $contactPhone = $isProvider ? $serviceRequest->requester->hu_phone : $serviceRequest->provider->hu_phone;
 
-        $serviceImageFallback = 'https://ui-avatars.com/api/?name='.urlencode($service->hss_title ?? 'Service');
+        $serviceImageFallback = upsi2u_avatar_url($service->hss_title ?? 'Service');
         $serviceImageUrl = $this->serviceImageUrlResolver->resolveGeneralImageUrl(
             $service->hss_image_path,
             $serviceImageFallback

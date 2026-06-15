@@ -57,7 +57,7 @@
                     <div class="bg-gradient-to-b from-indigo-500 to-blue-600 p-4 sm:p-5 text-white">
                         <div class="grid grid-cols-3 gap-3 sm:gap-4 items-end text-center">
                             <div>
-                                <img src="{{ $buyerLeaderboard->get(1)?->hu_profile_photo_path ? asset($buyerLeaderboard->get(1)?->hu_profile_photo_path) : ('https://ui-avatars.com/api/?name=' . urlencode($buyerLeaderboard->get(1)?->hu_name ?? 'User')) }}"
+                                <img src="{{ $buyerLeaderboard->get(1)?->hu_profile_photo_path ? asset($buyerLeaderboard->get(1)?->hu_profile_photo_path) : upsi2u_avatar_url($buyerLeaderboard->get(1)?->hu_name ?? 'User') }}"
                                      alt="{{ $buyerLeaderboard->get(1)?->hu_name }}"
                                      class="w-12 h-12 sm:w-14 sm:h-14 rounded-full mx-auto mb-2 border-2 border-white/70 object-cover shadow" />
                                 <p class="text-sm font-semibold truncate">{{ $buyerLeaderboard->get(1)?->hu_name }}</p>
@@ -65,7 +65,7 @@
                                 <div class="mt-2 h-12 sm:h-16 rounded-t-lg bg-cyan-300/90 border border-white/25 border-b-0 flex items-center justify-center text-xl sm:text-2xl font-bold">2</div>
                             </div>
                             <div>
-                                <img src="{{ $buyerLeaderboard->get(0)?->hu_profile_photo_path ? asset($buyerLeaderboard->get(0)?->hu_profile_photo_path) : ('https://ui-avatars.com/api/?name=' . urlencode($buyerLeaderboard->get(0)?->hu_name ?? 'User')) }}"
+                                <img src="{{ $buyerLeaderboard->get(0)?->hu_profile_photo_path ? asset($buyerLeaderboard->get(0)?->hu_profile_photo_path) : upsi2u_avatar_url($buyerLeaderboard->get(0)?->hu_name ?? 'User') }}"
                                      alt="{{ $buyerLeaderboard->get(0)?->hu_name }}"
                                      class="w-14 h-14 sm:w-16 sm:h-16 rounded-full mx-auto mb-2 border-2 border-white object-cover shadow" />
                                 <p class="text-base font-semibold truncate">{{ $buyerLeaderboard->get(0)?->hu_name }}</p>
@@ -73,7 +73,7 @@
                                 <div class="mt-2 h-16 sm:h-24 rounded-t-lg bg-amber-300/90 border border-white/25 border-b-0 flex items-center justify-center text-2xl sm:text-3xl font-bold">1</div>
                             </div>
                             <div>
-                                <img src="{{ $buyerLeaderboard->get(2)?->hu_profile_photo_path ? asset($buyerLeaderboard->get(2)?->hu_profile_photo_path) : ('https://ui-avatars.com/api/?name=' . urlencode($buyerLeaderboard->get(2)?->hu_name ?? 'User')) }}"
+                                <img src="{{ $buyerLeaderboard->get(2)?->hu_profile_photo_path ? asset($buyerLeaderboard->get(2)?->hu_profile_photo_path) : upsi2u_avatar_url($buyerLeaderboard->get(2)?->hu_name ?? 'User') }}"
                                      alt="{{ $buyerLeaderboard->get(2)?->hu_name }}"
                                      class="w-12 h-12 sm:w-14 sm:h-14 rounded-full mx-auto mb-2 border-2 border-white/70 object-cover shadow" />
                                 <p class="text-sm font-semibold truncate">{{ $buyerLeaderboard->get(2)?->hu_name }}</p>
@@ -91,7 +91,7 @@
                             <div class="flex items-center justify-between gap-4">
                                 <div class="flex items-center gap-3 min-w-0">
                                     <span class="w-7 text-sm text-gray-500">{{ ($buyerLeaderboard->count() >= 3 ? 4 : 1) + $index }}</span>
-                                    <img src="{{ $user->hu_profile_photo_path ? asset($user->hu_profile_photo_path) : ('https://ui-avatars.com/api/?name=' . urlencode($user->hu_name ?? 'User')) }}"
+                                    <img src="{{ $user->hu_profile_photo_path ? asset($user->hu_profile_photo_path) : upsi2u_avatar_url($user->hu_name ?? 'User') }}"
                                          alt="{{ $user->hu_name }}"
                                          class="w-8 h-8 rounded-full object-cover border border-gray-200" />
                                     <span class="text-sm font-medium text-gray-900 truncate">{{ $user->hu_name }}</span>

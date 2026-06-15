@@ -3,12 +3,15 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Admin\Concerns\LogsAdminActions;
 use App\Models\Admin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 
 class SuperAdminController extends Controller
 {
+    use LogsAdminActions;
+
     public function adminsIndex()
 {
         $admins = \App\Models\Admin::orderBy('ha_role')->get();
@@ -88,6 +91,13 @@ public function destroy($id)
 }
 
     $admin = \App\Models\Admin::findOrFail($id);
+
+    $this->logAdminAction('admin_account_deleted', [
+        'target_admin_id' => $admin->ha_id,
+        'target_admin_email' => $admin->ha_email,
+        'target_admin_role' => $admin->ha_role,
+    ]);
+
     $admin->delete();
 
     return redirect()->route('admin.super.admins.index')
@@ -96,6 +106,10 @@ public function destroy($id)
 
 public function createStorageLink()
 {
+    if (! (bool) env('ALLOW_WEB_STORAGE_LINK', false)) {
+        abort(404);
+    }
+
     Artisan::call('storage:link');
     return response('Storage Link Created!');
 }

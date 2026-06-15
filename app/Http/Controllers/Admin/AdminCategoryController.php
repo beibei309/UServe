@@ -3,12 +3,15 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Admin\Concerns\LogsAdminActions;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class AdminCategoryController extends Controller
 {
+    use LogsAdminActions;
+
     private function iconOptions(): array
     {
         return [
@@ -107,6 +110,12 @@ class AdminCategoryController extends Controller
 
     public function destroy(Category $category)
     {
+        $this->logAdminAction('category_deleted', [
+            'category_id' => $category->hc_id,
+            'name' => $category->hc_name,
+            'slug' => $category->hc_slug,
+        ]);
+
         $category->delete();
         return redirect()->route('admin.categories.index')->with('success', 'Category deleted successfully.');
     }

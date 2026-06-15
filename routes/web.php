@@ -18,6 +18,7 @@ use App\Http\Controllers\Admin\SuperAdminController;
 use App\Http\Controllers\Admin\UserAdminController;
 use App\Http\Controllers\Admin\VerificationController as AdminVerificationController;
 use App\Http\Controllers\AvailabilityController;
+use App\Http\Controllers\AvatarController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\HelpController;
@@ -37,6 +38,7 @@ use Illuminate\Support\Facades\Route;
 
 // -- PUBLIC ROUTES --
 Route::get('/', [HomeController::class, 'home'])->name('home');
+Route::get('/avatar.svg', [AvatarController::class, 'initials'])->name('avatar.initials');
 Route::get('/about', [HomeController::class, 'about'])->name('about');
 Route::get('/help', [HelpController::class, 'index'])->name('help');
 

@@ -3,13 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Admin\Concerns\LogsAdminActions;
+use App\Http\Controllers\Admin\Concerns\SendsAdminNotifications;
 use App\Models\User;
 use App\Models\StudentService;
 use App\Models\Category;
 use App\Models\Review;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Log;
 use App\Mail\ServiceWarningMail;
 use App\Mail\ServiceSuspendedMail;
 use App\Mail\ServiceApprovedMail; 
@@ -22,13 +22,16 @@ use App\Notifications\ServiceStatusNotification;
 
 class AdminServicesController extends Controller
 {
-private function serviceWarningLimit(): int
-{
-    return (int) config('moderation.service_warning_limit', 3);
-}
+    use LogsAdminActions;
+    use SendsAdminNotifications;
 
-private function resolveServiceImageUrl(?string $path): ?string
-{
+    private function serviceWarningLimit(): int
+    {
+    return (int) config('moderation.service_warning_limit', 3);
+    }
+
+    private function resolveServiceImageUrl(?string $path): ?string
+    {
     if (!$path) {
         return null;
     }
@@ -105,12 +108,18 @@ private function resolveServiceImageUrl(?string $path): ?string
         $service->save();
 
         if ($service->user && $service->user->hu_email) {
-            Mail::to($service->user->hu_email)->send(new ServiceApprovedMail($service));
+            $this->sendAdminMailSafely($service->user->hu_email, new ServiceApprovedMail($service), 'service_approved', [
+                'service_id' => $service->hss_id,
+                'user_id' => $service->hss_user_id,
+            ]);
         }
 
         // 2. Send Database Notification
         if ($service->user) {
-            $service->user->notify(new ServiceStatusNotification('approved', $service));
+            $this->notifyAdminUserSafely($service->user, new ServiceStatusNotification('approved', $service), 'service_approved_notification', [
+                'service_id' => $service->hss_id,
+                'user_id' => $service->hss_user_id,
+            ]);
         }
 
         return redirect()->route('admin.services.index')->with('success', 'Service approved.');
@@ -131,12 +140,18 @@ private function resolveServiceImageUrl(?string $path): ?string
 
     // 3. Send Email (Now $service contains the reject_reason)
     if ($service->user && $service->user->hu_email) {
-        Mail::to($service->user->hu_email)->send(new ServiceRejectedMail($service));
+        $this->sendAdminMailSafely($service->user->hu_email, new ServiceRejectedMail($service), 'service_rejected', [
+            'service_id' => $service->hss_id,
+            'user_id' => $service->hss_user_id,
+        ]);
     }
 
     // 4. Send Database Notification
     if ($service->user) {
-        $service->user->notify(new ServiceStatusNotification('rejected', $service));
+        $this->notifyAdminUserSafely($service->user, new ServiceStatusNotification('rejected', $service), 'service_rejected_notification', [
+            'service_id' => $service->hss_id,
+            'user_id' => $service->hss_user_id,
+        ]);
     }
 
     return redirect()->route('admin.services.index')->with('success', 'Service rejected successfully.');
@@ -145,6 +160,12 @@ private function resolveServiceImageUrl(?string $path): ?string
     // Delete/Destroy service record
     public function destroy(StudentService $service)
     {
+        $this->logAdminAction('service_deleted', [
+            'service_id' => $service->hss_id,
+            'provider_id' => $service->hss_user_id,
+            'title' => $service->hss_title,
+        ]);
+
         $service->delete();
 
         return redirect()->route('admin.services.index')->with('success', 'Service has been permanently deleted.');
@@ -179,12 +200,10 @@ private function resolveServiceImageUrl(?string $path): ?string
     $service->save();
 
     // 4. Send Email
-    try {
-        Mail::to($student->hu_email)->send(new ServiceWarningMail($service, $request->reason));
-
-    } catch (\Exception $e) {
-        Log::error('Failed to send warning email: ' . $e->getMessage());
-    }
+    $this->sendAdminMailSafely($student->hu_email, new ServiceWarningMail($service, $request->reason), 'service_warning', [
+        'service_id' => $service->hss_id,
+        'user_id' => $student->hu_id,
+    ]);
 
     // 5. Response UI
     if ($service->hss_warning_count >= $limit) {
@@ -201,7 +220,10 @@ public function suspend(StudentService $service)
 
     // Send Email
     if ($service->user && $service->user->hu_email) {
-        Mail::to($service->user->hu_email)->send(new ServiceSuspendedMail($service));
+        $this->sendAdminMailSafely($service->user->hu_email, new ServiceSuspendedMail($service), 'service_suspended', [
+            'service_id' => $service->hss_id,
+            'user_id' => $service->hss_user_id,
+        ]);
     }
 
     return back()->with('error', 'Service has been suspended and email notification sent.');
@@ -243,7 +265,10 @@ public function suspend(StudentService $service)
 
         // Notify user (optional kalau nak)
         if ($service->user) {
-            $service->user->notify(new ServiceStatusNotification('unblocked', $service));
+            $this->notifyAdminUserSafely($service->user, new ServiceStatusNotification('unblocked', $service), 'service_unblocked_notification', [
+                'service_id' => $service->hss_id,
+                'user_id' => $service->hss_user_id,
+            ]);
         }
 
         return back()->with('success', 'Service has been unblocked and approved again.');

@@ -3,11 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Admin\Concerns\LogsAdminActions;
+use App\Http\Controllers\Admin\Concerns\SendsAdminNotifications;
 use App\Models\ServiceRequest;
 use App\Models\User;
 use App\Models\Category;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Mail; 
 use App\Mail\AccountBannedMail;
 use App\Mail\AccountWarnedMail;
 use Illuminate\Support\Carbon;
@@ -16,6 +17,9 @@ use Illuminate\Support\Str;
 
 class AdminRequestController extends Controller
 {
+    use LogsAdminActions;
+    use SendsAdminNotifications;
+
     private function userWarningLimit(): int
     {
         return (int) config('moderation.user_warning_limit', 3);
@@ -214,10 +218,16 @@ public function resolveDispute(Request $request, $id)
         $user->increment('hu_warning_count');
         
         // Email
-        Mail::to($user->hu_email)->send(new AccountWarnedMail($user, $note));
+        $this->sendAdminMailSafely($user->hu_email, new AccountWarnedMail($user, $note), 'request_dispute_warn', [
+            'service_request_id' => $serviceRequest->hsr_id,
+            'user_id' => $user->hu_id,
+        ]);
         
         // In-App Notification (Assuming AdminWarningNotification exists)
-        $user->notify(new \App\Notifications\AdminWarningNotification($user->hu_warning_count, $note));
+        $this->notifyAdminUserSafely($user, new \App\Notifications\AdminWarningNotification($user->hu_warning_count, $note), 'request_dispute_warning_notification', [
+            'service_request_id' => $serviceRequest->hsr_id,
+            'user_id' => $user->hu_id,
+        ]);
 
         // RESUME the request (instead of cancelling)
         $resumeStatus = $this->resolveStatusAfterDispute($serviceRequest);
@@ -238,11 +248,17 @@ public function resolveDispute(Request $request, $id)
        
         if ($user->hu_role === 'community') {
             $user->update(['hu_is_blacklisted' => 1, 'hu_is_suspended' => 0, 'hu_blacklist_reason' => $note]);
-            Mail::to($user->hu_email)->send(new \App\Mail\UserBlacklisted($user, $note)); // Ensure fully qualified or imported
+            $this->sendAdminMailSafely($user->hu_email, new \App\Mail\UserBlacklisted($user, $note), 'request_dispute_blacklist', [
+                'service_request_id' => $serviceRequest->hsr_id,
+                'user_id' => $user->hu_id,
+            ]);
             $message = "User blacklisted. Request cancelled.";
         } else {
             $user->update(['hu_is_suspended' => 1, 'hu_is_blacklisted' => 0, 'hu_blacklist_reason' => $note]);
-            Mail::to($user->hu_email)->send(new AccountBannedMail($user, $note));
+            $this->sendAdminMailSafely($user->hu_email, new AccountBannedMail($user, $note), 'request_dispute_suspend', [
+                'service_request_id' => $serviceRequest->hsr_id,
+                'user_id' => $user->hu_id,
+            ]);
             $message = "User suspended. Request cancelled.";
         }
         
@@ -293,6 +309,14 @@ public function resolveDispute(Request $request, $id)
     public function destroy($id)
     {
         $serviceRequest = ServiceRequest::findOrFail($id);
+
+        $this->logAdminAction('service_request_deleted', [
+            'request_id' => $serviceRequest->hsr_id,
+            'requester_id' => $serviceRequest->hsr_requester_id,
+            'provider_id' => $serviceRequest->hsr_provider_id,
+            'service_id' => $serviceRequest->hsr_student_service_id,
+        ]);
+
         $serviceRequest->delete();
 
         return redirect()->route('admin.requests.index')->with('success', 'Service request deleted successfully.');
