@@ -209,11 +209,17 @@ window.UServeAdmin.register('requests', 'adminModuleRequestsConfig', (config) =>
         previewEl.className = 'text-[11px] mt-2 rounded-md px-2 py-1 border bg-indigo-50 border-indigo-200 text-indigo-800';
         previewEl.classList.remove('hidden');
 
-        if (confirm(confirmMsg)) {
+        window.UServeAdmin.confirm({
+            title: action === 'suspend_or_blacklist' ? 'Apply Account Action?' : 'Send Warning?',
+            text: confirmMsg,
+            confirmButtonText: action === 'suspend_or_blacklist' ? 'Yes, apply action' : 'Yes, send warning',
+            confirmButtonColor: action === 'suspend_or_blacklist' ? '#dc2626' : '#4f46e5',
+        }).then((confirmed) => {
+            if (!confirmed) return;
             document.getElementById('inputActionType').value = action;
             document.getElementById('inputTargetUserId').value = targetId;
             document.getElementById('disciplineForm').submit();
-        }
+        });
     };
 
     document.addEventListener('click', (event) => {

@@ -29,7 +29,11 @@ window.UServeAdmin.register('communityIndex', 'adminModuleCommunityIndexConfig',
     window.submitBlacklist = function () {
         const reason = document.getElementById('blacklistReason').value.trim();
         if (!reason) {
-            alert('Please enter account suspended reason.');
+            window.UServeAdmin.alert({
+                icon: 'warning',
+                title: 'Reason Required',
+                text: 'Please enter account suspended reason.',
+            });
             return;
         }
 

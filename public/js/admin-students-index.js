@@ -18,7 +18,11 @@ window.UServeAdmin.register('studentsIndex', 'adminModuleStudentsIndexConfig', (
     window.submitBan = function () {
         const reason = document.getElementById('banReason').value.trim();
         if (!reason) {
-            alert('Please enter a ban reason.');
+            window.UServeAdmin.alert({
+                icon: 'warning',
+                title: 'Reason Required',
+                text: 'Please enter a ban reason.',
+            });
             return;
         }
 

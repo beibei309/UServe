@@ -575,9 +575,27 @@
 
         const requiresLoginLink = event.target.closest('[data-requires-login-confirm]');
         if (requiresLoginLink) {
-            const proceed = window.confirm('Please sign in to view the full profile details.');
-            if (!proceed) {
-                event.preventDefault();
+            event.preventDefault();
+            const href = requiresLoginLink.href;
+
+            if (window.Swal) {
+                window.Swal.fire({
+                    title: 'Sign In Required',
+                    text: 'Please sign in to view the full profile details.',
+                    icon: 'info',
+                    showCancelButton: true,
+                    confirmButtonColor: '#4f46e5',
+                    cancelButtonColor: '#6b7280',
+                    confirmButtonText: 'Sign in',
+                    cancelButtonText: 'Cancel',
+                }).then((result) => {
+                    if (result.isConfirmed && href) window.location.href = href;
+                });
+                return;
+            }
+
+            if (window.confirm('Please sign in to view the full profile details.')) {
+                window.location.href = href;
             }
         }
     });

@@ -35,7 +35,11 @@ window.UServeAdmin.register('studentsView', 'adminModuleStudentsViewConfig', (co
     window.submitBan = function () {
         const reason = document.getElementById('banReason').value.trim();
         if (!reason) {
-            alert('Please enter a reason.');
+            window.UServeAdmin.alert({
+                icon: 'warning',
+                title: 'Reason Required',
+                text: 'Please enter a reason.',
+            });
             return;
         }
 
@@ -103,9 +107,15 @@ window.UServeAdmin.register('studentsView', 'adminModuleStudentsViewConfig', (co
         const submitButton = event.target.closest('button[data-confirm-message]');
         if (submitButton) {
             const message = submitButton.dataset.confirmMessage || 'Are you sure?';
-            if (!window.confirm(message)) {
-                event.preventDefault();
-            }
+            event.preventDefault();
+            window.UServeAdmin.confirm({
+                title: 'Please Confirm',
+                text: message,
+                confirmButtonText: submitButton.dataset.confirmButtonText || 'Yes, continue',
+            }).then((confirmed) => {
+                if (!confirmed) return;
+                submitButton.closest('form')?.submit();
+            });
         }
     });
 

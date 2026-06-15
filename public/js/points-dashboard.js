@@ -1,21 +1,39 @@
 (() => {
+    const showError = (message) => {
+        if (window.Swal) {
+            return window.Swal.fire({
+                title: 'Error',
+                text: message,
+                icon: 'error',
+                confirmButtonColor: '#dc2626',
+            });
+        }
+
+        window.alert(message);
+        return Promise.resolve();
+    };
+
+    const askConfirm = ({ title, text, confirmButtonText = 'Yes', confirmButtonColor = '#059669' }) => {
+        if (window.Swal) {
+            return window.Swal.fire({
+                title,
+                text,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor,
+                cancelButtonColor: '#6b7280',
+                confirmButtonText,
+                cancelButtonText: 'Cancel',
+            }).then((result) => result.isConfirmed);
+        }
+
+        return Promise.resolve(window.confirm([title, text].filter(Boolean).join('\n')));
+    };
+
     function redeemCertificate(config) {
         const redeemUrl = config?.dataset?.redeemUrl;
         const csrfToken = config?.dataset?.csrfToken;
         if (!redeemUrl || !csrfToken) return;
-
-        const showError = (message) => {
-            if (typeof Swal !== 'undefined') {
-                Swal.fire({
-                    title: 'Error',
-                    text: message,
-                    icon: 'error',
-                    confirmButtonColor: '#dc2626',
-                });
-            } else {
-                alert(message);
-            }
-        };
 
         const proceed = () => {
             if (typeof Swal !== 'undefined') {
@@ -62,27 +80,13 @@
                 });
         };
 
-        if (typeof Swal !== 'undefined') {
-            Swal.fire({
-                title: 'Unlock Certificate Achievement?',
-                text: 'Congratulations! You have earned enough points to unlock your certificate achievement.',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#059669',
-                cancelButtonColor: '#6b7280',
-                confirmButtonText: 'Yes, Unlock Achievement!',
-                cancelButtonText: 'Cancel',
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    proceed();
-                }
-            });
-            return;
-        }
-
-        if (confirm('Unlock your certificate achievement now?')) {
-            proceed();
-        }
+        askConfirm({
+            title: 'Unlock Certificate Achievement?',
+            text: 'Congratulations! You have earned enough points to unlock your certificate achievement.',
+            confirmButtonText: 'Yes, Unlock Achievement!',
+        }).then((confirmed) => {
+            if (confirmed) proceed();
+        });
     }
 
     document.addEventListener('click', (event) => {
@@ -95,9 +99,14 @@
         const cancelButton = event.target.closest('[data-points-cancel-redemption]');
         if (!cancelButton) return;
 
-        const confirmed = confirm('Are you sure you want to cancel this redemption? Points will be refunded.');
-        if (!confirmed) {
-            event.preventDefault();
-        }
+        event.preventDefault();
+        askConfirm({
+            title: 'Cancel Redemption?',
+            text: 'Points will be refunded after cancellation.',
+            confirmButtonText: 'Yes, cancel redemption',
+            confirmButtonColor: '#dc2626',
+        }).then((confirmed) => {
+            if (confirmed) cancelButton.closest('form')?.submit();
+        });
     });
 })();

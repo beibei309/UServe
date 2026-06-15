@@ -31,19 +31,7 @@ function readFlashMessages() {
 
 function fireAlert({ icon, title, text }) {
     const opts = getThemeSwalOptions();
-    if (typeof Swal === 'undefined') {
-        alert(text);
-        return;
-    }
-
-    Swal.fire({
-        icon,
-        title,
-        text,
-        timer: 3000,
-        showConfirmButton: false,
-        ...opts,
-    });
+    window.UServeAdmin.alert({ icon, title, text, ...opts });
 }
 
 document.addEventListener('DOMContentLoaded', function () {
