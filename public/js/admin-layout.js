@@ -273,6 +273,20 @@
         }
 
         function executeScripts(container) {
+            const stylesheets = container.querySelectorAll('link[rel="stylesheet"][href]');
+            stylesheets.forEach((link) => {
+                const href = link.href;
+                if (!href || document.querySelector(`link[data-admin-dynamic-href="${href}"]`)) {
+                    return;
+                }
+
+                const newLink = document.createElement('link');
+                newLink.rel = 'stylesheet';
+                newLink.href = href;
+                newLink.setAttribute('data-admin-dynamic-href', href);
+                document.head.appendChild(newLink);
+            });
+
             const scripts = container.querySelectorAll('script');
             scripts.forEach((script) => {
                 if (script.src) {
@@ -285,6 +299,21 @@
 
                     const newScript = document.createElement('script');
                     newScript.src = script.src;
+                    if (script.type) {
+                        newScript.type = script.type;
+                    }
+                    if (script.defer) {
+                        newScript.defer = true;
+                    }
+                    if (script.async) {
+                        newScript.async = true;
+                    }
+                    if (script.crossOrigin) {
+                        newScript.crossOrigin = script.crossOrigin;
+                    }
+                    if (script.referrerPolicy) {
+                        newScript.referrerPolicy = script.referrerPolicy;
+                    }
                     newScript.setAttribute('data-admin-dynamic-src', script.src);
                     document.head.appendChild(newScript);
                 } else {

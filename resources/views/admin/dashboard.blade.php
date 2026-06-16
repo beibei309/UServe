@@ -132,5 +132,5 @@
     <div id="adminDashboardConfig"
         data-students-per-month='@json(array_values($studentsPerMonth))'
         data-services-per-month='@json(array_values($servicesPerMonth))'></div>
-    <script src="{{ asset('js/admin-dashboard.js') }}"></script>
+    <script defer src="{{ asset('js/admin-dashboard.js') }}?v={{ filemtime(public_path('js/admin-dashboard.js')) }}"></script>
 @endsection

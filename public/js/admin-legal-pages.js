@@ -35,7 +35,7 @@ window.UServeAdmin.register('legalPages', 'adminLegalPagesConfig', () => {
     }
 
     let attempts = 0;
-    const maxAttempts = 15;
+    const maxAttempts = 40;
     const waitMs = 120;
 
     const bootEditors = () => {
@@ -54,6 +54,7 @@ window.UServeAdmin.register('legalPages', 'adminLegalPagesConfig', () => {
         }
     };
 
+    window.addEventListener('upsi2u:editor-tools-ready', bootEditors, { once: true });
     bootEditors();
 });
 

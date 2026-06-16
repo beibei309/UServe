@@ -130,5 +130,5 @@
 @section('scripts')
     @vite(['resources/js/editor-tools.js'])
     <div id="adminLegalPagesConfig"></div>
-    <script src="{{ asset('js/admin-legal-pages.js') }}"></script>
+    <script defer src="{{ asset('js/admin-legal-pages.js') }}?v={{ filemtime(public_path('js/admin-legal-pages.js')) }}"></script>
 @endsection

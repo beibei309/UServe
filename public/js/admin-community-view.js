@@ -56,7 +56,6 @@ window.UServeAdmin.register('communityView', 'adminModuleCommunityViewConfig', (
         const loader = document.getElementById('docLoading');
 
         loader.classList.remove('hidden');
-        // Add cache-busting query string to force reload
         const url = `/admin/verifications/${id}/document`;
         const cacheBuster = `cb=${Date.now()}`;
         frame.src = url + (url.includes('?') ? '&' : '?') + cacheBuster;
@@ -88,6 +87,44 @@ window.UServeAdmin.register('communityView', 'adminModuleCommunityViewConfig', (
         modal.classList.remove('flex');
         document.body.style.overflow = 'auto';
     };
+
+    const bootMap = (() => {
+        let initialized = false;
+        let attempts = 0;
+        const maxAttempts = 40;
+        const waitMs = 120;
+
+        return function bootMapWhenReady() {
+            if (initialized) return;
+            attempts += 1;
+
+            if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+
+            const mapEl = document.getElementById('map');
+            if (!mapEl) return;
+
+            if (typeof L === 'undefined') {
+                if (attempts < maxAttempts) {
+                    window.setTimeout(bootMapWhenReady, waitMs);
+                }
+                return;
+            }
+
+            initialized = true;
+
+            const map = L.map('map').setView([lat, lng], 15);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors',
+            }).addTo(map);
+
+            L.marker([lat, lng])
+                .addTo(map)
+                .bindPopup(`<b>${userName}</b><br>Location Registered.`)
+                .openPopup();
+        };
+    })();
+
+    window.addEventListener('upsi2u:map-tools-ready', bootMap, { once: true });
 
     document.addEventListener('keydown', (event) => {
         if (event.key === 'Escape') window.closeSelfieModal();
@@ -129,26 +166,24 @@ window.UServeAdmin.register('communityView', 'adminModuleCommunityViewConfig', (
             document.body.style.overflow = 'hidden';
             if (loader) loader.classList.remove('hidden');
 
-            // Remove old iframe if exists
             const oldFrame = document.getElementById('modalDocumentFrame');
             if (oldFrame) {
                 oldFrame.parentNode.removeChild(oldFrame);
             }
-            // Create new iframe
+
             const newFrame = document.createElement('iframe');
             newFrame.id = 'modalDocumentFrame';
             newFrame.className = 'w-full h-full border-none';
             newFrame.src = '';
-            // Attach loader hide logic
             newFrame.addEventListener('load', () => {
                 if (loader) loader.classList.add('hidden');
             });
-            // Insert new iframe into modal
+
             const container = modal.querySelector('.flex-grow.bg-slate-200.relative');
             if (container) {
                 container.appendChild(newFrame);
             }
-            // Set src after short delay
+
             setTimeout(() => {
                 const url = documentOpen.dataset.documentUrl || '';
                 const cacheBuster = `cb=${Date.now()}`;
@@ -170,20 +205,8 @@ window.UServeAdmin.register('communityView', 'adminModuleCommunityViewConfig', (
                 if (loader) loader.classList.add('hidden');
             });
         }
-        if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
-        if (typeof L === 'undefined') return;
-        const mapEl = document.getElementById('map');
-        if (!mapEl) return;
 
-        const map = L.map('map').setView([lat, lng], 15);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors',
-        }).addTo(map);
-
-        L.marker([lat, lng])
-            .addTo(map)
-            .bindPopup(`<b>${userName}</b><br>Location Registered.`)
-            .openPopup();
+        bootMap();
     });
 });
 
