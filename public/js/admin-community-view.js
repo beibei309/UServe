@@ -180,14 +180,7 @@ window.UServeAdmin.register('communityView', 'adminModuleCommunityViewConfig', (
             attribution: '© OpenStreetMap contributors',
         }).addTo(map);
 
-        const userIcon = L.icon({
-            iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
-            iconSize: [38, 38],
-            iconAnchor: [19, 38],
-            popupAnchor: [0, -38],
-        });
-
-        L.marker([lat, lng], { icon: userIcon })
+        L.marker([lat, lng])
             .addTo(map)
             .bindPopup(`<b>${userName}</b><br>Location Registered.`)
             .openPopup();

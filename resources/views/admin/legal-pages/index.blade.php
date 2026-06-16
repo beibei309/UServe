@@ -1,8 +1,6 @@
 @extends('admin.layout')
 
 @section('content')
-    <link href="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.snow.css" rel="stylesheet">
-
     <style>
         /* Theme-align Quill editor with admin dark/light variables */
         .ql-toolbar.ql-snow,
@@ -130,7 +128,7 @@
 @endsection
 
 @section('scripts')
+    @vite(['resources/js/editor-tools.js'])
     <div id="adminLegalPagesConfig"></div>
-    <script src="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.min.js"></script>
     <script src="{{ asset('js/admin-legal-pages.js') }}"></script>
 @endsection

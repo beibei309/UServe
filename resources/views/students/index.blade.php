@@ -310,7 +310,7 @@
         data-end-date="{{ $user->hu_unavailable_end_date ?? '' }}"
         data-availability-update-url="{{ route('availability.updateSettings') }}"></div>
     @push('scripts')
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        @vite(['resources/js/chart-tools.js'])
         <script src="{{ asset('js/students-index.js') }}"></script>
     @endpush
 @endsection

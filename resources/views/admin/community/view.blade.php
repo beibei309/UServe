@@ -406,6 +406,7 @@
 @endsection
 
 @section('scripts')
+    @vite(['resources/js/map-tools.js'])
     <div id="adminModuleCommunityViewConfig"
         data-csrf-token="{{ csrf_token() }}"
         data-blacklist-route-template="{{ route('admin.community.blacklist', 'ID_PLACEHOLDER') }}"

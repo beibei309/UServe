@@ -3,10 +3,6 @@
 @section('content')
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
-{{-- Rich text editor --}}
-<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
-<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
-
 <style>
     /* Quill Customization */
     .ql-toolbar { border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem; border-color: #e5e7eb !important; background-color: #f9fafb; }
@@ -317,6 +313,7 @@
     data-store-url="{{ route('services.store') }}"
     data-manage-url="{{ route('services.manage') }}"></div>
 @push('scripts')
+    @vite(['resources/js/editor-tools.js'])
     <script src="{{ asset('js/nonadmin-services-create.js') }}"></script>
 @endpush
 @endsection

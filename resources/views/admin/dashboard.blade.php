@@ -128,7 +128,7 @@
 
 
 @section('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    @vite(['resources/js/chart-tools.js'])
     <div id="adminDashboardConfig"
         data-students-per-month='@json(array_values($studentsPerMonth))'
         data-services-per-month='@json(array_values($servicesPerMonth))'></div>
