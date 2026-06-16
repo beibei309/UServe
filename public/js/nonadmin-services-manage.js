@@ -15,8 +15,8 @@
 
         const serviceId = service.hss_id ?? service.id;
         const getField = (prefixed, fallback) => service[prefixed] ?? service[fallback] ?? null;
-        const imageUrl = service.ui_image_url || 'https://via.placeholder.com/400x300?text=Service+Image';
-        const imageFallback = service.ui_image_fallback || 'https://via.placeholder.com/400x300?text=Service+Image';
+        const imageUrl = service.ui_image_url || '/avatar.svg?name=Service%20Image';
+        const imageFallback = service.ui_image_fallback || '/avatar.svg?name=Service%20Image';
 
         document.getElementById('modalTitle').textContent = getField('hss_title', 'title') || 'Untitled Service';
         const modalImage = document.getElementById('modalImage');
@@ -26,7 +26,7 @@
             modalImage.onerror = () => {
                 if (modalImage.dataset.fallbackApplied === '1') return;
                 modalImage.dataset.fallbackApplied = '1';
-                modalImage.src = modalImage.dataset.fallbackSrc || 'https://via.placeholder.com/400x300?text=Service+Image';
+                modalImage.src = modalImage.dataset.fallbackSrc || '/avatar.svg?name=Service%20Image';
             };
             modalImage.src = imageUrl;
         }
