@@ -3,15 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Category;
-use App\Models\CertificateRedemption;
 use App\Models\Report;
-use App\Models\Review;
-use App\Models\RewardRedemption;
 use App\Models\ServiceRequest;
 use App\Models\User;
 use App\Models\StudentService;
-use Illuminate\Support\Facades\DB;
 
 class AdminDashboardController extends Controller
 {
@@ -24,8 +19,6 @@ class AdminDashboardController extends Controller
         $totalCommunityUsers = User::where('hu_role', 'community')->count();
     $totalServices = StudentService::count();
     $totalRequests = ServiceRequest::count();
-    $totalReports = Report::count();
-    $totalReviews = Review::count();
 
     // ===============================
         // 🔔 ADMIN ACTION REQUIRED
@@ -57,59 +50,6 @@ class AdminDashboardController extends Controller
               ->from('h2u_student_statuses');
     })
     ->count();
-
-    $serviceStatusCounts = StudentService::select('hss_approval_status', DB::raw('COUNT(*) as total'))
-        ->groupBy('hss_approval_status')
-        ->pluck('total', 'hss_approval_status')
-        ->all();
-
-    $requestStatusCounts = ServiceRequest::select('hsr_status', DB::raw('COUNT(*) as total'))
-        ->groupBy('hsr_status')
-        ->pluck('total', 'hsr_status')
-        ->all();
-
-    $paymentStatusCounts = ServiceRequest::select('hsr_payment_status', DB::raw('COUNT(*) as total'))
-        ->groupBy('hsr_payment_status')
-        ->pluck('total', 'hsr_payment_status')
-        ->all();
-
-    $moderationCounts = [
-        'blocked' => User::where('hu_is_blocked', true)->count(),
-        'suspended' => User::where('hu_is_suspended', true)->count(),
-        'blacklisted' => User::where('hu_is_blacklisted', true)->count(),
-        'warned' => User::where('hu_warning_count', '>', 0)->count(),
-    ];
-
-    $topCategories = Category::withCount('services')
-        ->orderByDesc('services_count')
-        ->limit(5)
-        ->get(['hc_id', 'hc_name', 'hc_color']);
-
-    $topServices = StudentService::with(['user', 'category'])
-        ->withAvg('reviews as reviews_avg_rating', 'hr_rating')
-        ->withCount('reviews')
-        ->orderByDesc('reviews_count')
-        ->orderByDesc('reviews_avg_rating')
-        ->limit(5)
-        ->get();
-
-    $highWarningServices = StudentService::with(['user'])
-        ->where('hss_warning_count', '>', 0)
-        ->orderByDesc('hss_warning_count')
-        ->limit(5)
-        ->get(['hss_id', 'hss_title', 'hss_user_id', 'hss_warning_count', 'hss_approval_status']);
-
-    $recentRequests = ServiceRequest::with(['studentService', 'requester', 'provider'])
-        ->latest()
-        ->limit(5)
-        ->get();
-
-    $rewardSnapshot = [
-        'redemptions' => RewardRedemption::count(),
-        'pendingRedemptions' => RewardRedemption::where('hrr_status', 'pending')->count(),
-        'certificates' => CertificateRedemption::count(),
-        'pendingCertificates' => CertificateRedemption::where('hcr_status', 'pending')->count(),
-    ];
 
     /* ---------------------------------------------
      |  MONTHLY STUDENT REGISTRATIONS (Line Chart)
@@ -144,8 +84,6 @@ class AdminDashboardController extends Controller
         'totalCommunityUsers',
         'totalServices',
         'totalRequests',
-        'totalReports',
-        'totalReviews',
         'pendingStudents',
         'pendingHelpers',  
         'pendingServices',
@@ -156,15 +94,6 @@ class AdminDashboardController extends Controller
         'studentsPerMonth',
         'servicesPerMonth',
         'studentsWithoutStatus',
-        'serviceStatusCounts',
-        'requestStatusCounts',
-        'paymentStatusCounts',
-        'moderationCounts',
-        'topCategories',
-        'topServices',
-        'highWarningServices',
-        'recentRequests',
-        'rewardSnapshot',
     ));
 }
 
