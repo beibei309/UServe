@@ -1,10 +1,28 @@
 @extends('admin.layout')
 
 @section('content')
-    <div class="px-4 sm:px-6">
-        <h1 class="text-3xl font-bold mb-4 transition-colors duration-300" style="color: var(--text-primary);">Manage Students</h1>
+    <div class="admin-list-page">
+        <div class="admin-list-header">
+            <div>
+                <h1 class="admin-list-title">Manage Students</h1>
+                <p class="admin-list-subtitle">Review student and helper accounts, verification status, and account restrictions.</p>
+            </div>
 
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-5">
+            <div class="admin-list-actions">
+                <a href="{{ route('admin.students.export', ['format' => 'csv'] + request()->all()) }}"
+                    class="admin-export-action">
+                    <i class="fa-solid fa-file-csv"></i>
+                    Export CSV
+                </a>
+                <a href="{{ route('admin.students.export', ['format' => 'pdf'] + request()->all()) }}"
+                    class="admin-secondary-action">
+                    <i class="fa-solid fa-file-pdf"></i>
+                    Export PDF
+                </a>
+            </div>
+        </div>
+
+        <div class="admin-filter-card">
             <form method="GET" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full md:w-auto">
                 <input type="text" name="search" placeholder="Search name, email, student ID..."
                     class="w-full md:w-80 px-4 py-2 border rounded-lg text-sm transition-colors duration-300
@@ -21,12 +39,6 @@
                     Search
                 </button>
             </form>
-
-            <a href="{{ route('admin.students.export', ['format' => 'csv'] + request()->all()) }}"
-                class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all duration-300 text-sm">
-                <i class="fa-solid fa-file-csv"></i>
-                Export CSV
-            </a>
         </div>
 
         <div class="flex flex-wrap gap-2 mb-6">
@@ -63,10 +75,9 @@
             </a>
         </div>
 
-        <div class="shadow-xl rounded-lg p-6 border transition-all duration-300"
-             style="background-color: var(--bg-secondary); border-color: var(--border-color);">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left">
+        <div class="admin-table-card">
+            <div class="admin-table-scroll">
+                <table class="admin-table">
                     <thead>
                         <tr class="text-sm border-b transition-colors duration-300"
                             style="background-color: var(--bg-tertiary); color: var(--text-secondary); border-color: var(--border-color);">
@@ -166,7 +177,7 @@
                 </tbody>
             </table>
 
-            <div class="mt-4">
+            <div class="admin-pagination">
                 {{ $students->links() }}
             </div>
         </div>

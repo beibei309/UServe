@@ -100,6 +100,63 @@ class AdminServicesController extends Controller
     ));
 }
 
+    public function export(Request $request)
+    {
+        $search = $request->query('search');
+        $categoryId = $request->query('category');
+        $studentId = $request->query('student');
+        $status = $request->query('status');
+        $rating = $request->query('rating');
+
+        $services = StudentService::with(['user', 'category'])
+            ->withAvg('reviews as reviews_avg_rating', 'hr_rating')
+            ->withCount('reviews')
+            ->when($status, fn($q) => $q->where('hss_approval_status', $status))
+            ->when($rating, function ($q, $rating) {
+                [$min, $max] = explode('-', $rating);
+                $q->havingBetween('reviews_avg_rating', [(float) $min, (float) $max]);
+            })
+            ->when($search, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('hss_title', 'like', "%{$search}%")
+                        ->orWhere('hss_description', 'like', "%{$search}%")
+                        ->orWhereHas('user', function ($u) use ($search) {
+                            $u->where('hu_name', 'like', "%{$search}%");
+                        });
+                });
+            })
+            ->when($categoryId, fn($q) => $q->where('hss_category_id', $categoryId))
+            ->when($studentId, fn($q) => $q->where('hss_user_id', $studentId))
+            ->latest()
+            ->get();
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="services_' . date('Y-m-d') . '.csv"',
+        ];
+
+        return response()->stream(function () use ($services) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, ['Service ID', 'Title', 'Category', 'Provider', 'Status', 'Average Rating', 'Reviews', 'Warnings', 'Created At']);
+
+            foreach ($services as $service) {
+                fputcsv($file, [
+                    $service->hss_id,
+                    $service->hss_title,
+                    $service->category->hc_name ?? 'No Category',
+                    $service->user->hu_name ?? 'Unknown',
+                    $service->hss_approval_status,
+                    number_format((float) ($service->reviews_avg_rating ?? 0), 2),
+                    (int) ($service->reviews_count ?? 0),
+                    (int) ($service->hss_warning_count ?? 0),
+                    optional($service->created_at)->format('Y-m-d H:i:s'),
+                ]);
+            }
+
+            fclose($file);
+        }, 200, $headers);
+    }
+
 
     // Approve a service
     public function approve(StudentService $service)

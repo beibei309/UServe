@@ -1,18 +1,25 @@
 @extends('admin.layout')
 
 @section('content')
-    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+    <div class="admin-list-page">
         
         <!-- Header Section -->
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+        <div class="admin-list-header">
             <div>
-                <h1 class="text-3xl font-bold transition-colors duration-300" style="color: var(--text-primary);">Manage Community Users</h1>
-                <p class="mt-1 font-medium transition-colors duration-300" style="color: var(--text-secondary);">Monitor and manage community members, their verification status, and ratings.</p>
+                <h1 class="admin-list-title">Manage Community Users</h1>
+                <p class="admin-list-subtitle">Monitor community members, verification status, ratings, and account restrictions.</p>
+            </div>
+            <div class="admin-list-actions">
+                <a href="{{ route('admin.community.export', array_merge(request()->only('search', 'status'), ['format' => 'csv'])) }}"
+                    class="admin-export-action">
+                    <i class="fa-solid fa-file-csv"></i>
+                    Export CSV
+                </a>
             </div>
         </div>
 
         <!-- Search + Export Row -->
-        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
+        <div class="admin-filter-card">
 
             <!-- Search -->
             <form method="GET" class="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">
@@ -51,13 +58,6 @@
                     </a>
                 @endif
             </form>
-
-            <!-- Export -->
-            <a href="{{ route('admin.community.export', array_merge(request()->only('search', 'status'), ['format' => 'csv'])) }}"
-                class="inline-flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-400 hover:to-green-500 text-white rounded-xl transition-all duration-300 text-sm font-medium shadow-lg hover:shadow-xl">
-                <i class="fa-solid fa-file-csv"></i>
-                Export CSV
-            </a>
 
         </div>
 
@@ -102,11 +102,10 @@
 
 
     <!-- Data Table -->
-    <div class="rounded-2xl shadow-xl border transition-all duration-300 overflow-hidden"
-         style="background-color: var(--bg-secondary); border-color: var(--border-color);">
+    <div class="admin-table-card">
 
-        <div class="overflow-x-auto">
-            <table class="w-full">
+        <div class="admin-table-scroll">
+            <table class="admin-table">
                 <thead>
                     <tr style="background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%);">
                         <th class="py-4 px-6 text-left font-semibold transition-colors duration-300" style="color: var(--text-secondary);">User</th>
@@ -345,7 +344,7 @@
         </div>
 
         <!-- Pagination -->
-        <div class="border-t px-6 py-4" style="border-color: var(--border-color); background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%);">
+        <div class="admin-pagination">
             {{ $communityUsers->links() }}
         </div>
 

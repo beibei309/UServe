@@ -94,6 +94,63 @@ class AdminStudentStatusController extends Controller
         return view('admin.student_status.index', compact('students'));
     }
 
+    public function export(Request $request)
+    {
+        $filter = $request->input('grad_filter');
+        $search = $request->input('search');
+
+        $students = User::whereIn('hu_role', ['student', 'helper'])
+            ->with('studentStatus')
+            ->when($search, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('hu_name', 'like', "%{$search}%")
+                        ->orWhere('hu_student_id', 'like', "%{$search}%");
+                });
+            })
+            ->when($filter, function ($query, $filter) {
+                $query->whereHas('studentStatus', function ($q) use ($filter) {
+                    $q->whereNotNull('hss_graduation_date')
+                        ->where('hss_status', '!=', 'Graduated');
+
+                    if ($filter === 'expired') {
+                        $q->whereDate('hss_graduation_date', '<', today());
+                    } elseif ($filter === '3_months') {
+                        $q->whereBetween('hss_graduation_date', [today(), today()->addMonths(3)]);
+                    } elseif ($filter === '6_months') {
+                        $q->whereBetween('hss_graduation_date', [today(), today()->addMonths(6)]);
+                    } elseif ($filter === '12_months') {
+                        $q->whereBetween('hss_graduation_date', [today(), today()->addMonths(12)]);
+                    }
+                });
+            })
+            ->orderBy('hu_name')
+            ->get();
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="student_status_' . date('Y-m-d') . '.csv"',
+        ];
+
+        return response()->stream(function () use ($students) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, ['Student Name', 'Matric No', 'Role', 'Current Semester', 'Graduation Date', 'Status']);
+
+            foreach ($students as $student) {
+                $status = $student->studentStatus;
+                fputcsv($file, [
+                    $student->hu_name,
+                    $student->hu_student_id,
+                    $student->hu_role,
+                    $status->hss_semester ?? '',
+                    $status?->hss_graduation_date ? Carbon::parse($status->hss_graduation_date)->format('Y-m-d') : '',
+                    $status->hss_status ?? 'Not Set',
+                ]);
+            }
+
+            fclose($file);
+        }, 200, $headers);
+    }
+
     // 2. SHOW CREATE FORM
     public function create(Request $request)
     {

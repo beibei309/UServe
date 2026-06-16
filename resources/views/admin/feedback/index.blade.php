@@ -2,11 +2,14 @@
 
 @section('content')
 
-<div class="px-2 sm:px-4 lg:px-6 py-4">
+<div class="admin-list-page">
 
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2 gap-4">
+    <div class="admin-list-header">
         <div class="relative inline-flex items-center gap-2">
-            <h1 class="text-3xl font-bold transition-colors duration-300" style="color: var(--text-primary);">Feedback & Moderation</h1>
+            <div>
+                <h1 class="admin-list-title">Feedback & Moderation</h1>
+                <p class="admin-list-subtitle">Monitor reviews, warnings, and account enforcement actions.</p>
+            </div>
             <button type="button"
                 class="group relative inline-flex items-center justify-center w-6 h-6 rounded-full border text-xs font-bold transition-colors duration-300"
                 style="background-color: var(--bg-tertiary); border-color: var(--border-color); color: var(--text-secondary);"
@@ -21,12 +24,15 @@
                 </span>
             </button>
         </div>
+        <div class="admin-list-actions">
+            <a href="{{ route('admin.feedback.export', request()->query()) }}" class="admin-export-action">
+                <i class="fa-solid fa-download text-xs"></i> Export CSV
+            </a>
+        </div>
     </div>
-    <div class="mb-6"></div>
 
     {{-- Search Bar --}}
-    <div class="rounded-xl border shadow-sm mb-6 p-4 transition-colors duration-300"
-         style="background-color: var(--bg-secondary); border-color: var(--border-color);">
+    <div class="admin-filter-card">
         <form method="GET" action="{{ route('admin.feedback.index') }}">
             <div class="flex flex-col sm:flex-row gap-3">
                 <div class="relative flex-1">
@@ -49,7 +55,7 @@
     </div>
 
     {{-- Role Filter Tabs --}}
-    <div class="rounded-xl border shadow-sm mb-6 p-3 transition-colors duration-300 flex flex-wrap gap-2"
+    <div class="admin-filter-card flex flex-wrap gap-2"
          style="background-color: var(--bg-secondary); border-color: var(--border-color);">
         <a href="{{ route('admin.feedback.index', request()->except('role')) }}"
             class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2
@@ -67,9 +73,9 @@
         @endforeach
     </div>
 
-    <div class="shadow-lg rounded-lg p-4 sm:p-6 border transition-colors duration-300" style="background-color: var(--bg-secondary); border-color: var(--border-color);">
-        <div class="overflow-x-auto">
-        <table class="w-full text-left min-w-[760px]">
+    <div class="admin-table-card">
+        <div class="admin-table-scroll">
+        <table class="admin-table">
             <thead class="transition-colors duration-300" style="background-color: var(--bg-tertiary);">
                 <tr class="border-b">
                     <th class="py-3 px-4 text-sm font-medium transition-colors duration-300" style="color: var(--text-secondary);">User Details</th>
@@ -169,7 +175,7 @@
         </div>
 
         {{-- Pagination --}}
-        <div class="mt-4">
+        <div class="admin-pagination">
             {{ $usersWithReviews->links() }}
         </div>
     </div>

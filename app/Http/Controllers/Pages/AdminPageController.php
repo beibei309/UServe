@@ -29,6 +29,46 @@ class AdminPageController extends Controller
         ]);
     }
 
+    public function exportVerifications()
+    {
+        $user = Auth::guard('admin')->user();
+        if (!$user) {
+            abort(Response::HTTP_FORBIDDEN);
+        }
+
+        $pending = User::query()
+            ->where('hu_role', 'community')
+            ->where('hu_verification_status', 'pending')
+            ->orderBy('created_at')
+            ->get();
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="pending_verifications_' . date('Y-m-d') . '.csv"',
+        ];
+
+        return response()->stream(function () use ($pending) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, ['User ID', 'Name', 'Email', 'Phone', 'Verification Status', 'Has Profile Photo', 'Has Selfie', 'Has Document', 'Submitted At']);
+
+            foreach ($pending as $communityUser) {
+                fputcsv($file, [
+                    $communityUser->hu_id,
+                    $communityUser->hu_name,
+                    $communityUser->hu_email,
+                    $communityUser->hu_phone,
+                    $communityUser->hu_verification_status,
+                    $communityUser->hu_profile_photo_path ? 'Yes' : 'No',
+                    $communityUser->hu_selfie_media_path ? 'Yes' : 'No',
+                    $communityUser->hu_verification_document_path ? 'Yes' : 'No',
+                    optional($communityUser->created_at)->format('Y-m-d H:i:s'),
+                ]);
+            }
+
+            fclose($file);
+        }, 200, $headers);
+    }
+
     public function reports()
     {
         $user = Auth::guard('admin')->user();

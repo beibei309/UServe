@@ -54,13 +54,20 @@
         }
     </style>
 
-    <div class="px-4 sm:px-6 py-4">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-            <h1 class="text-3xl font-bold transition-colors duration-300" style="color: var(--text-primary);">Manage Services</h1>
+    <div class="admin-list-page">
+        <div class="admin-list-header">
+            <div>
+                <h1 class="admin-list-title">Manage Services</h1>
+                <p class="admin-list-subtitle">Review service listings, ratings, warnings, and approval status.</p>
+            </div>
+            <div class="admin-list-actions">
+                <a href="{{ route('admin.services.export', request()->query()) }}" class="admin-export-action">
+                    <i class="fa-solid fa-download text-xs"></i> Export CSV
+                </a>
+            </div>
         </div>
 
-        <div class="p-4 rounded-lg shadow-xl mb-6 border transition-all duration-300"
-             style="background-color: var(--bg-secondary); border-color: var(--border-color);">
+        <div class="admin-filter-card">
             <form method="GET" action="{{ route('admin.services.index') }}" class="flex flex-wrap gap-3 sm:gap-4">
 
                 {{-- Search --}}
@@ -122,10 +129,9 @@
         
         
         {{-- Data Table --}}
-        <div class="p-4 rounded-lg shadow-xl border transition-all duration-300"
-             style="background-color: var(--bg-secondary); border-color: var(--border-color);">
-            <div class="overflow-x-auto">
-                <table class="min-w-full">
+        <div class="admin-table-card">
+            <div class="admin-table-scroll">
+                <table class="admin-table">
                     <thead>
                         <tr style="background-color: var(--bg-tertiary);">
                             <th class="py-3 px-3 text-left text-xs font-medium"
@@ -279,7 +285,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="py-8 text-center text-gray-400">No services found.</td>
+                                <td colspan="8" class="admin-empty-row">No services found.</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -288,7 +294,7 @@
         </div>
 
         @if ($services->hasPages())
-            <div class="mt-4 px-4">
+            <div class="admin-pagination">
                 {{ $services->links() }}
             </div>
         @endif

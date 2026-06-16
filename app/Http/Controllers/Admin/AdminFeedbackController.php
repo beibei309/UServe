@@ -105,6 +105,53 @@ class AdminFeedbackController extends Controller
         ]);
     }
 
+    public function export(Request $request)
+    {
+        $query = User::whereIn('hu_role', self::FEEDBACK_ROLES)
+            ->has('reviewsReceived')
+            ->withAvg('reviewsReceived as reviews_received_avg_rating', 'hr_rating')
+            ->withCount('reviewsReceived')
+            ->orderByDesc('reviews_received_avg_rating');
+
+        $selectedRole = $request->input('role');
+        if (in_array($selectedRole, self::FEEDBACK_ROLES, true)) {
+            $query->where('hu_role', $selectedRole);
+        }
+
+        if ($search = $request->input('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('hu_name', 'like', '%' . $search . '%')
+                    ->orWhere('hu_email', 'like', '%' . $search . '%');
+            });
+        }
+
+        $users = $query->get();
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="feedback_moderation_' . date('Y-m-d') . '.csv"',
+        ];
+
+        return response()->stream(function () use ($users) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, ['User ID', 'Name', 'Email', 'Role', 'Average Rating', 'Reviews', 'Warnings', 'Moderation Status']);
+
+            foreach ($users as $user) {
+                fputcsv($file, [
+                    $user->hu_id,
+                    $user->hu_name,
+                    $user->hu_email,
+                    $user->hu_role,
+                    number_format((float) ($user->reviews_received_avg_rating ?? 0), 2),
+                    (int) ($user->reviews_received_count ?? 0),
+                    (int) $user->hu_warning_count,
+                    $user->moderationStatusKey(),
+                ]);
+            }
+
+            fclose($file);
+        }, 200, $headers);
+    }
+
     public function sendWarning(Request $request, User $user)
     {
         if (!in_array($user->hu_role, self::FEEDBACK_ROLES, true)) {

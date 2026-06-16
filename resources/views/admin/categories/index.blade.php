@@ -1,21 +1,23 @@
 @extends('admin.layout')
 
 @section('content')
-    <div class="px-4 sm:px-6 py-4">
+    <div class="admin-list-page">
         
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-            <h1 class="text-3xl font-bold transition-colors duration-300" style="color: var(--text-primary);">Manage Categories</h1>
+        <div class="admin-list-header">
+            <div>
+                <h1 class="admin-list-title">Manage Categories</h1>
+                <p class="admin-list-subtitle">Maintain the service categories shown to students and community users.</p>
+            </div>
             <a href="{{ route('admin.categories.create') }}"
-               class="inline-flex items-center gap-1.5 px-5 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-medium rounded shadow transition-all duration-300 whitespace-nowrap">
+               class="admin-primary-action">
                 <i class="fa-solid fa-plus text-xs"></i> Add Category
             </a>
         </div>
 
         {{-- Data Table --}}
-        <div class="p-4 rounded-lg shadow-xl border transition-all duration-300"
-             style="background-color: var(--bg-secondary); border-color: var(--border-color);">
-            <div class="overflow-x-auto">
-                <table class="min-w-full">
+        <div class="admin-table-card">
+            <div class="admin-table-scroll">
+                <table class="admin-table">
                     <thead>
                         <tr style="background-color: var(--bg-tertiary);">
                             <th class="py-3 px-3 text-left text-xs font-medium" style="color: var(--text-secondary);">Icon</th>
@@ -113,7 +115,7 @@
     
     {{-- Pagination --}}
     @if(method_exists($categories, 'links'))
-        <div class="mt-4 px-4">
+        <div class="admin-pagination">
             {{ $categories->links() }}
         </div>
     @endif

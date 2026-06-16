@@ -179,6 +179,168 @@
             color: #fde68a;
         }
 
+        .admin-list-page {
+            width: 100%;
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        @media (min-width: 640px) {
+            .admin-list-page {
+                padding: 1.25rem 1.5rem;
+            }
+        }
+
+        .admin-list-header {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (min-width: 768px) {
+            .admin-list-header {
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+            }
+        }
+
+        .admin-list-title {
+            margin: 0;
+            color: var(--text-primary);
+            font-size: 1.75rem;
+            line-height: 2.125rem;
+            font-weight: 800;
+            letter-spacing: 0;
+        }
+
+        .admin-list-subtitle {
+            margin-top: 0.35rem;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            line-height: 1.35rem;
+        }
+
+        .admin-list-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .admin-filter-card,
+        .admin-table-card {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 18px 45px -28px var(--shadow);
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+
+        .admin-filter-card {
+            border-radius: 0.875rem;
+            padding: 1rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .admin-table-card {
+            border-radius: 1rem;
+            overflow: hidden;
+        }
+
+        .admin-table-scroll {
+            overflow-x: auto;
+        }
+
+        .admin-table {
+            width: 100%;
+            min-width: 760px;
+            text-align: left;
+            border-collapse: collapse;
+        }
+
+        .admin-table thead tr {
+            background-color: var(--bg-tertiary);
+            color: var(--text-secondary);
+        }
+
+        .admin-table th {
+            padding: 0.875rem 1rem;
+            font-size: 0.75rem;
+            line-height: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            white-space: nowrap;
+        }
+
+        .admin-table td {
+            padding: 0.875rem 1rem;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+
+        .admin-table tbody tr:last-child td {
+            border-bottom: 0;
+        }
+
+        .admin-table tbody tr:hover {
+            background-color: var(--hover-bg);
+        }
+
+        .admin-pagination {
+            border-top: 1px solid var(--border-color);
+            background-color: var(--bg-primary);
+            padding: 0.875rem 1rem;
+        }
+
+        .admin-primary-action,
+        .admin-export-action,
+        .admin-secondary-action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            min-height: 2.5rem;
+            padding: 0.625rem 1rem;
+            border-radius: 0.75rem;
+            font-size: 0.875rem;
+            font-weight: 700;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .admin-primary-action {
+            color: #ffffff;
+            background: linear-gradient(135deg, #06b6d4, #2563eb);
+        }
+
+        .admin-export-action {
+            color: #ffffff;
+            background: linear-gradient(135deg, #16a34a, #059669);
+        }
+
+        .admin-secondary-action {
+            color: var(--text-secondary);
+            background-color: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+        }
+
+        .admin-primary-action:hover,
+        .admin-export-action:hover,
+        .admin-secondary-action:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.05);
+        }
+
+        .admin-empty-row {
+            padding: 2rem 1rem;
+            text-align: center;
+            color: var(--text-muted);
+        }
+
         .badge-dark {
             background: #6b7280;
             color: white;

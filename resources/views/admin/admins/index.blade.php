@@ -7,12 +7,15 @@
         data-success-message="{{ session('success') }}"
         data-error-message="{{ session('error') }}"
     ></div>
-    <div class="px-4 sm:px-6 py-4">
+    <div class="admin-list-page">
         
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-            <h1 class="text-3xl font-bold transition-colors duration-300" style="color: var(--text-primary);">Manage Admin Accounts</h1>
+        <div class="admin-list-header">
+            <div>
+                <h1 class="admin-list-title">Manage Admin Accounts</h1>
+                <p class="admin-list-subtitle">Control admin access for platform management.</p>
+            </div>
             <a href="{{ route('admin.super.admins.create') }}"
-               class="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-lg hover:from-cyan-400 hover:to-blue-500 transition-all duration-300 {{ $admins->count() >= 3 ? 'opacity-50 pointer-events-none' : '' }}">
+               class="admin-primary-action {{ $admins->count() >= 3 ? 'opacity-50 pointer-events-none' : '' }}">
                 + Add Admin
             </a>
         </div>
@@ -27,10 +30,9 @@
         @endif
 
         {{-- Data Table --}}
-        <div class="p-4 rounded-lg shadow-xl border transition-all duration-300"
-             style="background-color: var(--bg-secondary); border-color: var(--border-color);">
-            <div class="overflow-x-auto">
-                <table class="min-w-full">
+        <div class="admin-table-card">
+            <div class="admin-table-scroll">
+                <table class="admin-table">
                     <thead>
                         <tr style="background-color: var(--bg-tertiary);">
                             <th class="py-3 px-3 text-left text-xs font-medium" style="color: var(--text-secondary);">Name</th>

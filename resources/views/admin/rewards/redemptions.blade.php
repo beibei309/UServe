@@ -3,38 +3,40 @@
 @section('title', 'Reward Redemptions')
 
 @section('content')
-<div class="p-6">
+<div class="admin-list-page">
     <!-- Header -->
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+    <div class="admin-list-header">
         <div>
-            <h1 class="text-3xl font-bold transition-colors duration-300" style="color: var(--text-primary);">Reward Redemptions</h1>
-            <p class="mt-1 transition-colors duration-300" style="color: var(--text-secondary);">Manage all reward redemptions and their statuses</p>
+            <h1 class="admin-list-title">Reward Redemptions</h1>
+            <p class="admin-list-subtitle">Manage all reward redemptions and their statuses.</p>
         </div>
-        <div class="flex space-x-3 mt-4 sm:mt-0">
+        <div class="admin-list-actions">
             <a href="{{ route('admin.rewards.export-redemptions') }}" 
-               class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition duration-200">
+               class="admin-export-action">
                 <i class="fas fa-download mr-2"></i>Export CSV
             </a>
             <a href="{{ route('admin.rewards.index') }}" 
-               class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition duration-200">
+               class="admin-secondary-action">
                 <i class="fas fa-arrow-left mr-2"></i>Back to Dashboard
             </a>
         </div>
     </div>
 
     <!-- Filters -->
-    <div class="rounded-lg shadow mb-6 transition-colors duration-300" style="background-color: var(--bg-primary); border: 1px solid var(--border-color);">
-        <form method="GET" class="p-6">
+    <div class="admin-filter-card">
+        <form method="GET">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Search</label>
+                    <label class="block text-sm font-medium mb-2" style="color: var(--text-secondary);">Search</label>
                     <input type="text" name="search" value="{{ request('search') }}" 
                            placeholder="User name or redemption code..." 
-                           class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500">
+                           class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500"
+                           style="background-color: var(--bg-secondary); border-color: var(--border-color); color: var(--text-primary);">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
-                    <select name="status" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500">
+                    <label class="block text-sm font-medium mb-2" style="color: var(--text-secondary);">Status</label>
+                    <select name="status" class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500"
+                            style="background-color: var(--bg-secondary); border-color: var(--border-color); color: var(--text-primary);">
                         <option value="">All Statuses</option>
                         <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>Pending</option>
                         <option value="approved" {{ request('status') === 'approved' ? 'selected' : '' }}>Approved</option>
@@ -43,8 +45,9 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Reward Type</label>
-                    <select name="reward_type" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500">
+                    <label class="block text-sm font-medium mb-2" style="color: var(--text-secondary);">Reward Type</label>
+                    <select name="reward_type" class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500"
+                            style="background-color: var(--bg-secondary); border-color: var(--border-color); color: var(--text-primary);">
                         <option value="">All Types</option>
                         <option value="discount" {{ request('reward_type') === 'discount' ? 'selected' : '' }}>Discount</option>
                         <option value="service_credit" {{ request('reward_type') === 'service_credit' ? 'selected' : '' }}>Service Credit</option>
@@ -61,9 +64,9 @@
     </div>
 
     <!-- Redemptions Table -->
-    <div class="rounded-lg shadow overflow-hidden transition-colors duration-300" style="background-color: var(--bg-primary); border: 1px solid var(--border-color);">
-        <div class="overflow-x-auto">
-            <table class="min-w-full">
+    <div class="admin-table-card">
+        <div class="admin-table-scroll">
+            <table class="admin-table">
                 <thead class="transition-colors duration-300" style="background-color: var(--bg-secondary); border-bottom: 1px solid var(--border-color);">
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User & Reward</th>
@@ -170,7 +173,7 @@
         </div>
 
         @if($redemptions->hasPages())
-        <div class="px-6 py-4 border-t border-gray-200">
+        <div class="admin-pagination">
             {{ $redemptions->links() }}
         </div>
         @endif

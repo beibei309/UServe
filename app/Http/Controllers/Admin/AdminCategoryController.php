@@ -30,7 +30,7 @@ class AdminCategoryController extends Controller
 
     public function index()
     {
-        $categories = Category::all();
+        $categories = Category::orderBy('hc_name')->paginate(10);
         return view('admin.categories.index', compact('categories'));
     }
 

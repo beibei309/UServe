@@ -425,4 +425,100 @@ class AdminRewardController extends Controller
         
         return response()->stream($callback, 200, $headers);
     }
+
+    public function exportRewards(Request $request)
+    {
+        $query = Reward::withCount('redemptions');
+
+        if ($request->filled('type')) {
+            $query->where('hr_type', $request->type);
+        }
+
+        if ($request->filled('status')) {
+            if ($request->status === 'active') {
+                $query->where('hr_is_active', true);
+            } elseif ($request->status === 'inactive') {
+                $query->where('hr_is_active', false);
+            } elseif ($request->status === 'expired') {
+                $query->where('hr_expires_at', '<', Carbon::now());
+            }
+        }
+
+        if ($request->filled('search')) {
+            $query->where('hr_title', 'ILIKE', '%' . $request->search . '%');
+        }
+
+        $rewards = $query->orderBy('created_at', 'desc')->get();
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="rewards_' . date('Y-m-d') . '.csv"',
+        ];
+
+        return response()->stream(function () use ($rewards) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, ['Reward ID', 'Title', 'Type', 'Points Cost', 'Value', 'Usage Limit', 'Redemptions', 'Active', 'Expires At', 'Created At']);
+
+            foreach ($rewards as $reward) {
+                fputcsv($file, [
+                    $reward->hr_id,
+                    $reward->hr_title,
+                    $reward->hr_type,
+                    $reward->hr_points_cost,
+                    $reward->hr_value,
+                    $reward->hr_usage_limit,
+                    $reward->redemptions_count,
+                    $reward->hr_is_active ? 'Yes' : 'No',
+                    optional($reward->hr_expires_at)->format('Y-m-d H:i:s'),
+                    optional($reward->created_at)->format('Y-m-d H:i:s'),
+                ]);
+            }
+
+            fclose($file);
+        }, 200, $headers);
+    }
+
+    public function exportCertificates(Request $request)
+    {
+        $query = CertificateRedemption::with('user');
+
+        if ($request->filled('status')) {
+            $query->where('hcr_status', $request->status);
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('hcr_certificate_number', 'ILIKE', '%' . $search . '%')
+                    ->orWhereHas('user', function ($userQuery) use ($search) {
+                        $userQuery->where('hu_name', 'ILIKE', '%' . $search . '%');
+                    });
+            });
+        }
+
+        $certificates = $query->orderBy('created_at', 'desc')->get();
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="certificates_' . date('Y-m-d') . '.csv"',
+        ];
+
+        return response()->stream(function () use ($certificates) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, ['Certificate ID', 'Certificate Number', 'User Name', 'User Email', 'Status', 'Points Used', 'Issued At', 'Created At']);
+
+            foreach ($certificates as $certificate) {
+                fputcsv($file, [
+                    $certificate->hcr_id,
+                    $certificate->hcr_certificate_number,
+                    $certificate->user->hu_name ?? 'Unknown',
+                    $certificate->user->hu_email ?? $certificate->user->email ?? 'Unknown',
+                    $certificate->hcr_status,
+                    $certificate->hcr_points_used,
+                    optional($certificate->hcr_issued_at)->format('Y-m-d H:i:s'),
+                    optional($certificate->created_at)->format('Y-m-d H:i:s'),
+                ]);
+            }
+
+            fclose($file);
+        }, 200, $headers);
+    }
 }

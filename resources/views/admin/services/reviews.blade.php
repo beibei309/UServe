@@ -1,28 +1,27 @@
 @extends('admin.layout')
 
 @section('content')
-    <div class="px-4 sm:px-6 py-4">
+    <div class="admin-list-page">
         
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+        <div class="admin-list-header">
             <div>
-                <h1 class="text-3xl font-bold transition-colors duration-300" style="color: var(--text-primary);">
+                <h1 class="admin-list-title">
                     Reviews for: {{ $service->hss_title }}
                 </h1>
-                <p class="text-sm transition-colors duration-300 mt-1" style="color: var(--text-secondary);">
+                <p class="admin-list-subtitle">
                     Seller: {{ $service->user->hu_name ?? 'Unknown' }}
                 </p>
             </div>
             <a href="{{ route('admin.services.index') }}"
-               class="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-lg hover:from-cyan-400 hover:to-blue-500 transition-all duration-300">
+               class="admin-secondary-action">
                 Back to Services
             </a>
         </div>
 
         {{-- Data Table --}}
-        <div class="p-4 rounded-lg shadow-xl border transition-all duration-300"
-             style="background-color: var(--bg-secondary); border-color: var(--border-color);">
-            <div class="overflow-x-auto">
-                <table class="min-w-full">
+        <div class="admin-table-card">
+            <div class="admin-table-scroll">
+                <table class="admin-table">
                     <thead>
                         <tr style="background-color: var(--bg-tertiary);">
                             <th class="py-3 px-3 text-left text-xs font-medium" style="color: var(--text-secondary);">Reviewer</th>
@@ -71,7 +70,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="4" class="py-8 text-center transition-colors duration-300" style="color: var(--text-secondary);">
+                            <td colspan="4" class="admin-empty-row">
                                 No reviews yet.
                             </td>
                         </tr>
@@ -82,7 +81,7 @@
         </div>
 
         @if($reviews->hasPages())
-            <div class="mt-4 px-4">
+            <div class="admin-pagination">
                 {{ $reviews->links() }}
             </div>
         @endif

@@ -3,22 +3,27 @@
 @section('title', 'All Rewards')
 
 @section('content')
-<div class="p-6">
+<div class="admin-list-page">
     <!-- Header -->
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+    <div class="admin-list-header">
         <div>
-            <h1 class="text-3xl font-bold transition-colors duration-300" style="color: var(--text-primary);">All Rewards</h1>
-            <p class="mt-1 transition-colors duration-300" style="color: var(--text-secondary);">Manage all reward offerings</p>
+            <h1 class="admin-list-title">All Rewards</h1>
+            <p class="admin-list-subtitle">Manage all reward offerings.</p>
         </div>
-        <a href="{{ route('admin.rewards.create') }}" 
-           class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200 mt-4 sm:mt-0">
-            <i class="fas fa-plus mr-2"></i>Create Reward
-        </a>
+        <div class="admin-list-actions">
+            <a href="{{ route('admin.rewards.export-list', request()->query()) }}" class="admin-export-action">
+                <i class="fas fa-download mr-2"></i>Export CSV
+            </a>
+            <a href="{{ route('admin.rewards.create') }}"
+               class="admin-primary-action">
+                <i class="fas fa-plus mr-2"></i>Create Reward
+            </a>
+        </div>
     </div>
 
     <!-- Filters -->
-    <div class="rounded-lg shadow mb-6 transition-colors duration-300" style="background-color: var(--bg-primary); border: 1px solid var(--border-color);">
-        <form method="GET" class="p-6">
+    <div class="admin-filter-card">
+        <form method="GET">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div>
                     <label class="block text-sm font-medium mb-2 transition-colors duration-300" style="color: var(--text-secondary);">Search</label>
@@ -57,9 +62,9 @@
     </div>
 
     <!-- Rewards Table -->
-    <div class="rounded-lg shadow overflow-hidden transition-colors duration-300" style="background-color: var(--bg-primary); border: 1px solid var(--border-color);">
-        <div class="overflow-x-auto">
-            <table class="min-w-full">
+    <div class="admin-table-card">
+        <div class="admin-table-scroll">
+            <table class="admin-table">
                 <thead class="transition-colors duration-300" style="background-color: var(--bg-secondary); border-bottom: 1px solid var(--border-color);">
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider transition-colors duration-300" style="color: var(--text-secondary);">Reward</th>
@@ -150,7 +155,7 @@
         </div>
 
         @if($rewards->hasPages())
-        <div class="px-6 py-4 transition-colors duration-300" style="border-top: 1px solid var(--border-color);">
+        <div class="admin-pagination">
             {{ $rewards->links() }}
         </div>
         @endif

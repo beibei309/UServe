@@ -257,7 +257,9 @@ Route::middleware(['auth:admin', 'prevent-back-history'])->prefix('admin')->grou
     // ========================================
     Route::get('/reports', [AdminPageController::class, 'reports'])->name('admin.reports.page');
     Route::post('/reports/{report}/resolve', [ReportAdminController::class, 'resolve'])->name('admin.reports.resolve');
+    Route::get('/verifications/export', [AdminPageController::class, 'exportVerifications'])->name('admin.verifications.export');
     Route::get('/feedback', [AdminFeedbackController::class, 'index'])->name('admin.feedback.index');
+    Route::get('/feedback/export', [AdminFeedbackController::class, 'export'])->name('admin.feedback.export');
     Route::post('/feedback/{user}/warning', [AdminFeedbackController::class, 'sendWarning'])->name('admin.feedback.warning');
     Route::post('/feedback/{user}/enforce', [AdminFeedbackController::class, 'enforceRoleAction'])->name('admin.feedback.enforce');
     Route::post('/feedback/{user}/block', [AdminFeedbackController::class, 'blockUser'])->name('admin.feedback.block');
@@ -268,6 +270,7 @@ Route::middleware(['auth:admin', 'prevent-back-history'])->prefix('admin')->grou
     // SERVICE MODERATION
     // ========================================
     Route::get('/services', [AdminServicesController::class, 'index'])->name('admin.services.index');
+    Route::get('/services/export', [AdminServicesController::class, 'export'])->name('admin.services.export');
     Route::get('/services/{service}', [AdminServicesController::class, 'show'])->name('admin.services.show');
     Route::get('/services/{service}/reviews', [AdminServicesController::class, 'reviews'])->name('admin.services.reviews');
     Route::patch('/services/{service}/approve', [AdminServicesController::class, 'approve'])->name('admin.services.approve');
@@ -333,6 +336,7 @@ Route::middleware(['auth:admin', 'prevent-back-history'])->prefix('admin')->grou
     // ========================================
     Route::prefix('student-status')->name('admin.student_status.')->group(function () {
         Route::get('/', [AdminStudentStatusController::class, 'index'])->name('index');
+        Route::get('/export', [AdminStudentStatusController::class, 'export'])->name('export');
         Route::get('/create', [AdminStudentStatusController::class, 'create'])->name('create');
         Route::post('/store', [AdminStudentStatusController::class, 'store'])->name('store');
         Route::get('/edit/{id}', [AdminStudentStatusController::class, 'edit'])->name('edit');
@@ -347,6 +351,7 @@ Route::middleware(['auth:admin', 'prevent-back-history'])->prefix('admin')->grou
     Route::prefix('rewards')->name('admin.rewards.')->group(function () {
         Route::get('/', [AdminRewardController::class, 'index'])->name('index');
         Route::get('/list', [AdminRewardController::class, 'rewards'])->name('list');
+        Route::get('/list/export', [AdminRewardController::class, 'exportRewards'])->name('export-list');
         Route::get('/create', [AdminRewardController::class, 'create'])->name('create');
         Route::post('/store', [AdminRewardController::class, 'store'])->name('store');
         Route::get('/{reward}/edit', [AdminRewardController::class, 'edit'])->name('edit');
@@ -360,6 +365,7 @@ Route::middleware(['auth:admin', 'prevent-back-history'])->prefix('admin')->grou
         
         // Certificates management
         Route::get('/certificates', [AdminRewardController::class, 'certificates'])->name('certificates');
+        Route::get('/certificates/export', [AdminRewardController::class, 'exportCertificates'])->name('export-certificates');
         Route::get('/certificates/{certificate}', [AdminRewardController::class, 'showCertificate'])->name('certificates.show');
         
         // Analytics and exports

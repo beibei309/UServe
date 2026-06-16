@@ -1,31 +1,41 @@
 @extends('admin.layout')
 
 @section('content')
-    <div class="max-w-7xl mx-auto">
-        <h1 class="text-2xl sm:text-3xl font-bold mb-6 text-white">Pending Community Verifications</h1>
+    <div class="admin-list-page">
+        <div class="admin-list-header">
+            <div>
+                <h1 class="admin-list-title">Pending Community Verifications</h1>
+                <p class="admin-list-subtitle">Review profile photos, selfies, and uploaded identity documents.</p>
+            </div>
+            <div class="admin-list-actions">
+                <a href="{{ route('admin.verifications.export') }}" class="admin-export-action">
+                    <i class="fa-solid fa-download text-xs"></i> Export CSV
+                </a>
+            </div>
+        </div>
 
-        <div class="bg-slate-800 shadow-xl rounded-lg p-4 sm:p-6 border border-slate-700">
-            <div class="overflow-x-auto">
-            <table class="w-full text-left min-w-[780px]">
+        <div class="admin-table-card">
+            <div class="admin-table-scroll">
+            <table class="admin-table" style="min-width: 780px;">
                 <thead>
-                    <tr class="bg-slate-900 border-b border-slate-700">
-                        <th class="py-3 px-4 text-slate-200 font-semibold">User</th>
-                        <th class="py-3 px-4 text-slate-200 font-semibold">Profile Photo</th>
-                        <th class="py-3 px-4 text-slate-200 font-semibold">Live Selfie</th>
-                        <th class="py-3 px-4 text-slate-200 font-semibold">Document</th>
-                        <th class="py-3 px-4 text-slate-200 font-semibold">Actions</th>
+                    <tr>
+                        <th>User</th>
+                        <th>Profile Photo</th>
+                        <th>Live Selfie</th>
+                        <th>Document</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
 
-                <tbody class="divide-y divide-slate-700">
+                <tbody>
                     @forelse ($pending as $user)
-                        <tr class="border-b border-slate-700 hover:bg-slate-700 transition">
+                        <tr>
                             <!-- USER INFO -->
                             <td class="py-3 px-4">
                                 <div>
-                                    <p class="font-semibold text-white text-sm">{{ $user->hu_name }}</p>
-                                    <p class="text-xs text-slate-400">{{ $user->hu_email }}</p>
-                                    <p class="text-xs text-slate-400">{{ $user->hu_phone ?? '-' }}</p>
+                                    <p class="font-semibold text-sm" style="color: var(--text-primary);">{{ $user->hu_name }}</p>
+                                    <p class="text-xs" style="color: var(--text-secondary);">{{ $user->hu_email }}</p>
+                                    <p class="text-xs" style="color: var(--text-secondary);">{{ $user->hu_phone ?? '-' }}</p>
                                 </div>
                             </td>
 
@@ -36,7 +46,7 @@
                                          class="w-16 h-16 rounded-full object-cover border shadow-sm" 
                                          alt="Profile">
                                 @else
-                                    <span class="text-xs text-slate-300">No photo</span>
+                                    <span class="text-xs" style="color: var(--text-muted);">No photo</span>
                                 @endif
                             </td>
 
@@ -49,7 +59,8 @@
                                             View Selfie
                                         </button>
                                         @if($user->hu_verification_note)
-                                            <span class="text-[10px] font-bold text-slate-300 bg-slate-700 px-2 py-0.5 rounded border border-slate-600">
+                                            <span class="text-[10px] font-bold px-2 py-0.5 rounded border"
+                                                style="background-color: var(--bg-tertiary); color: var(--text-secondary); border-color: var(--border-color);">
                                                 {{ $user->hu_verification_note }}
                                             </span>
                                         @endif
@@ -101,7 +112,7 @@
             </table>
             </div>
 
-            <div class="mt-4">
+            <div class="admin-pagination">
                 {{ $pending->links() }}
             </div>
         </div>
