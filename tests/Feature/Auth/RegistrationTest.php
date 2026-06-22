@@ -15,6 +15,7 @@ test('new users can register', function () {
         'role' => 'community',
         'phone' => '0123456789',
         'community_type' => 'public',
+        'terms' => '1',
     ]);
 
     $this->assertAuthenticated();

@@ -70,6 +70,7 @@ class RegisteredUserController extends Controller
             'phone' => ['required', 'string', 'max:20'],
             'student_id' => ['required_if:role,student', 'nullable', 'string', 'max:20'],
             'community_type' => ['nullable', 'in:public,staff'],
+            'terms' => ['accepted'],
         ]);
 
         try {
@@ -81,6 +82,7 @@ class RegisteredUserController extends Controller
                     'hu_password' => Hash::make($request->password),
                     'hu_role' => $request->role,
                     'hu_phone' => $request->phone,
+                    'hu_terms_accepted_at' => now(),
                     'hu_student_id' => $request->student_id,
                     'hu_verification_status' => 'pending',
                     'hu_is_available' => $request->role === 'student',
@@ -162,6 +164,7 @@ class RegisteredUserController extends Controller
                 'hu_password' => Hash::make($request->password),
                 'hu_role' => $request->role,
                 'hu_phone' => $request->phone,
+                'hu_terms_accepted_at' => $now,
                 'hu_student_id' => $request->student_id,
                 'hu_verification_status' => 'pending',
                 'hu_is_available' => $request->role === 'student',

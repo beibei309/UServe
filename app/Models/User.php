@@ -38,6 +38,11 @@ class User extends Authenticatable implements MustVerifyEmail
         'hu_name',
         'hu_email',
         'hu_password',
+        'hu_google_id',
+        'hu_google_avatar',
+        'hu_auth_provider',
+        'hu_email_verified_at',
+        'hu_terms_accepted_at',
         'hu_role',
         'hu_phone',
         'hu_student_id',
@@ -92,6 +97,7 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return [
             'hu_email_verified_at' => 'datetime',
+            'hu_terms_accepted_at' => 'datetime',
             'hu_public_verified_at' => 'datetime',
             'hu_staff_verified_at' => 'datetime',
             'hu_helper_verified_at' => 'datetime',

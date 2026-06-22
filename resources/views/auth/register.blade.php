@@ -317,6 +317,52 @@
             transform: translateY(-1px);
         }
 
+        .provider-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            height: 52px;
+            margin-top: 22px;
+            border: 1px solid #c7c9dd;
+            border-radius: 14px;
+            color: #111827;
+            background: #fff;
+            font-size: 16px;
+            font-weight: 800;
+            text-decoration: none;
+        }
+
+        .provider-dot {
+            display: grid;
+            place-items: center;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #eef2ff;
+            color: #1d4ed8;
+            font-size: 14px;
+            font-weight: 900;
+        }
+
+        .provider-divider {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin: 18px 0 2px;
+            color: #94a3b8;
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .provider-divider::before,
+        .provider-divider::after {
+            content: "";
+            flex: 1;
+            border-top: 1px solid #d8daea;
+        }
+
         .signin-line {
             margin-top: 22px;
             text-align: center;
@@ -433,6 +479,13 @@
                 <h2>Create an account</h2>
                 <p class="intro">Enter your details below to get started.</p>
 
+                <a href="{{ route('auth.google.redirect') }}" class="provider-button">
+                    <span class="provider-dot">G</span>
+                    <span>Continue with Google</span>
+                </a>
+
+                <div class="provider-divider">or register with email</div>
+
                 <form method="POST" action="{{ route('register') }}" class="register-form" id="registerForm">
                     @csrf
 
@@ -525,9 +578,10 @@
                     </div>
 
                     <label for="terms" class="terms-row">
-                        <input id="terms" type="checkbox" required>
+                        <input id="terms" type="checkbox" name="terms" value="1" required>
                         <span>I agree to the <a href="{{ route('terms') }}">Terms</a> and <a href="{{ route('privacy') }}">Privacy Policy</a>.</span>
                     </label>
+                    <x-input-error :messages="$errors->get('terms')" class="mb-3 text-xs text-red-500" />
 
                     <button type="submit" class="register-primary">Create account</button>
 

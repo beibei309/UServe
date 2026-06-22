@@ -263,6 +263,52 @@
             transform: translateY(-1px);
         }
 
+        .provider-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            height: 52px;
+            margin-top: 26px;
+            border: 1px solid #c7c9dd;
+            border-radius: 14px;
+            color: #111827;
+            background: #fff;
+            font-size: 16px;
+            font-weight: 800;
+            text-decoration: none;
+        }
+
+        .provider-dot {
+            display: grid;
+            place-items: center;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #eef2ff;
+            color: #1d4ed8;
+            font-size: 14px;
+            font-weight: 900;
+        }
+
+        .provider-divider {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin: 20px 0 0;
+            color: #94a3b8;
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .provider-divider::before,
+        .provider-divider::after {
+            content: "";
+            flex: 1;
+            border-top: 1px solid #d8daea;
+        }
+
         .divider {
             display: flex;
             align-items: center;
@@ -441,6 +487,13 @@
                 <p class="auth-desc">Sign in with your registered email to continue.</p>
 
                 <x-auth-session-status class="mb-4" :status="session('status')" />
+
+                <a href="{{ route('auth.google.redirect') }}" class="provider-button">
+                    <span class="provider-dot">G</span>
+                    <span>Continue with Google</span>
+                </a>
+
+                <div class="provider-divider">or sign in with email</div>
 
                 <form method="POST" action="{{ route('login') }}" class="auth-form">
                     @csrf
