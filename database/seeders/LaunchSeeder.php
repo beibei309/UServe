@@ -33,22 +33,23 @@ class LaunchSeeder extends Seeder
         $hasIconColumn = Schema::hasColumn('h2u_categories', 'hc_icon');
 
         foreach ($this->categoryDefinitions() as $categoryData) {
-            $payload = [
-                'hc_name' => $categoryData['name'],
-                'hc_description' => $categoryData['description'],
-                'hc_image_path' => $categoryData['image_path'],
-                'hc_color' => $categoryData['color'],
-                'hc_is_active' => true,
-            ];
+            $category = Category::query()->firstOrNew([
+                'hc_slug' => Str::slug($categoryData['name']),
+            ]);
 
-            if ($hasIconColumn) {
-                $payload['hc_icon'] = $categoryData['icon'];
+            if (! $category->exists) {
+                $category->hc_name = $categoryData['name'];
+                $category->hc_description = $categoryData['description'];
+                $category->hc_image_path = $categoryData['image_path'];
+                $category->hc_color = $categoryData['color'];
+                $category->hc_is_active = true;
+
+                if ($hasIconColumn) {
+                    $category->hc_icon = $categoryData['icon'];
+                }
             }
 
-            Category::query()->updateOrCreate(
-                ['hc_slug' => Str::slug($categoryData['name'])],
-                $payload
-            );
+            $category->save();
         }
     }
 
@@ -59,7 +60,7 @@ class LaunchSeeder extends Seeder
         }
 
         foreach ($this->legalPages() as $page) {
-            LegalPage::query()->updateOrCreate(
+            LegalPage::query()->firstOrCreate(
                 ['hlp_slug' => $page['hlp_slug']],
                 $page
             );

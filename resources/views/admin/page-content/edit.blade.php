@@ -117,9 +117,19 @@
 
                 <div class="space-y-5">
                     @foreach ($groupedBlocks['media'] as $block)
+                        @php($isLogoUpload = in_array($block->hpc_slug, ['settings.platform_logo', 'settings.platform_favicon', 'settings.institution_logo'], true))
                         <div class="rounded-lg border p-4" style="border-color: var(--border-color);">
                             <label class="block text-sm font-semibold mb-1" style="color: var(--text-primary);">{{ $block->hpc_label }}</label>
-                            <p class="text-xs mb-3" style="color: var(--text-muted);">{{ $block->hpc_slug }}</p>
+                            <p class="text-xs mb-1" style="color: var(--text-muted);">{{ $block->hpc_slug }}</p>
+                            <p class="text-xs mb-3" style="color: var(--text-muted);">
+                                @if ($block->hpc_type === 'video')
+                                    MP4 or WebM up to 50MB.
+                                @elseif ($isLogoUpload)
+                                    JPG, PNG, or WebP up to 1MB.
+                                @else
+                                    JPG, PNG, or WebP up to 5MB.
+                                @endif
+                            </p>
 
                             <div class="mb-3 rounded border p-2" style="border-color: var(--border-color); background-color: var(--bg-primary);">
                                 @if ($block->hpc_type === 'image')
@@ -131,9 +141,10 @@
                                 @endif
                             </div>
 
-                            <form method="POST" action="{{ route('admin.page-content.upload-media', $block->hpc_slug) }}" enctype="multipart/form-data" class="flex flex-wrap items-center gap-2 mb-2">
+                            <form method="POST" action="{{ route('admin.page-content.upload-media', $block->hpc_slug) }}" enctype="multipart/form-data" class="flex flex-wrap items-center gap-2 mb-2"
+                                @if ($isLogoUpload) data-logo-upload-form data-max-size-bytes="1048576" @endif>
                                 @csrf
-                                <input type="file" name="file" class="text-xs" required>
+                                <input type="file" name="file" class="text-xs" required @if ($isLogoUpload) data-logo-upload-input @endif>
                                 <button type="submit" class="text-xs px-3 py-1.5 rounded text-white bg-indigo-600 hover:bg-indigo-700">Replace File</button>
                             </form>
 
@@ -165,6 +176,36 @@
 
         textarea.addEventListener('input', renderCount);
         renderCount();
+    });
+
+    document.querySelectorAll('[data-logo-upload-form]').forEach(function (form) {
+        form.addEventListener('submit', function (event) {
+            var input = form.querySelector('[data-logo-upload-input]');
+            var file = input && input.files ? input.files[0] : null;
+            var maxSize = Number(form.dataset.maxSizeBytes || 1048576);
+
+            if (!file || file.size <= maxSize) {
+                return;
+            }
+
+            event.preventDefault();
+
+            var message = 'Logo files must be 1MB or below. Please compress the image or choose a smaller file.';
+
+            if (window.Swal) {
+                window.Swal.fire({
+                    icon: 'warning',
+                    title: 'Logo file too large',
+                    text: message,
+                    confirmButtonText: 'Choose another file',
+                    confirmButtonColor: '#4f46e5',
+                });
+            } else {
+                alert(message);
+            }
+
+            input.value = '';
+        });
     });
 })();
 </script>

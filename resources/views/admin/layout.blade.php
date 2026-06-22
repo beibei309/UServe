@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel | UPSI2u</title>
+    <title>Admin Panel | {{ upsi2u_platform_name() }}</title>
+    <link rel="icon" type="image/png" href="{{ upsi2u_platform_favicon_url() }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         :root {
@@ -463,7 +464,7 @@
             <div class="flex items-center justify-between p-6 h-16 border-b transition-colors duration-300"
                  style="border-color: var(--sidebar-border); background-color: var(--sidebar-bg);">
                 <div>
-                    <h1 class="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-600 bg-clip-text text-transparent tracking-wider">UPSI2u</h1>
+                    <h1 class="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-600 bg-clip-text text-transparent tracking-wider">{{ upsi2u_platform_name() }}</h1>
                     <p class="text-xs uppercase tracking-widest mt-1 transition-colors duration-300" style="color: var(--text-muted);">Admin</p>
                 </div>
                 <button type="button" data-sidebar-toggle class="lg:hidden hover:text-red-500 focus:outline-none transition-colors duration-300" style="color: var(--text-muted);">

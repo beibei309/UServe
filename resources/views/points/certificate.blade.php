@@ -3,6 +3,7 @@
 @section('title', 'Certificate - ' . $redemption->hcr_certificate_number)
 
 @section('content')
+@php($platformName = upsi2u_platform_name())
 <div class="min-h-screen bg-gray-50 py-5 sm:py-8 certificate-print-wrapper">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 certificate-print-content">
         {{-- Header Section --}}
@@ -18,17 +19,17 @@
         <div class="certificate-container">
             <div class="certificate-header">
                 <h1 class="certificate-title">Certificate of Achievement</h1>
-                <p class="certificate-subtitle">UPSI2u Seller Excellence Program</p>
+                <p class="certificate-subtitle">{{ $platformName }} Seller Excellence Program</p>
             </div>
 
             <div class="certificate-body">
-                <img src="{{ asset('images/upsilogo.png') }}" alt="UPSI Logo" class="certificate-logo">
+                <img src="{{ upsi2u_institution_logo_url() }}" alt="UPSI Logo" class="certificate-logo">
 
                 <p class="certificate-to">This is to certify that</p>
                 <h2 class="certificate-name">{{ $redemption->user->hu_name }}</h2>
 
                 <p class="certificate-description">
-                    has successfully completed <strong>3 sales</strong> in the UPSI2u platform and demonstrated
+                    has successfully completed <strong>3 sales</strong> in the {{ $platformName }} platform and demonstrated
                     excellence in providing quality services to the UPSI community.
                 </p>
 
@@ -61,7 +62,7 @@
                     <div class="certificate-signatures">
                         <div class="certificate-signature-grid">
                             <div class="certificate-signature">
-                                <p class="certificate-signature-name">UPSI2u Administrator</p>
+                                <p class="certificate-signature-name">{{ $platformName }} Administrator</p>
                                 <p class="certificate-signature-title">Digital Certificate</p>
                             </div>
                             <div class="certificate-signature">
@@ -79,7 +80,7 @@
                         <span class="certificate-footer-icon">
                             <i class="fas fa-shield-alt"></i>
                         </span>
-                        <span>Verified by UPSI2u Platform</span>
+                        <span>Verified by {{ $platformName }} Platform</span>
                     </div>
                     <div class="certificate-footer-item">
                         <span class="certificate-footer-icon">
@@ -121,7 +122,7 @@
             </h3>
             <div class="text-sm text-blue-800">
                 <ul class="space-y-2">
-                    <li>• This certificate acknowledges your dedication to providing quality services on the UPSI2u platform.</li>
+                    <li>• This certificate acknowledges your dedication to providing quality services on the {{ $platformName }} platform.</li>
                     <li>• Certificates are issued after successfully completing 3 verified sales transactions.</li>
                     <li>• This digital certificate is officially recognized by UPSI and can be used for portfolio purposes.</li>
                     <li>• You can continue earning more certificates as you complete additional sales milestones.</li>

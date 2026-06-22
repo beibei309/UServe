@@ -72,9 +72,17 @@ class AdminPageContentController extends Controller
 
         abort_unless(in_array($block->hpc_type, ['image', 'video'], true), 422);
 
+        $logoSlugs = [
+            'settings.platform_logo',
+            'settings.platform_favicon',
+            'settings.institution_logo',
+        ];
+
+        $imageMaxKb = in_array($block->hpc_slug, $logoSlugs, true) ? 1024 : 5120;
+
         $rules = $block->hpc_type === 'video'
             ? ['file' => 'required|file|mimes:mp4,webm|max:51200']
-            : ['file' => 'required|file|mimes:jpg,jpeg,png,webp|max:5120'];
+            : ['file' => 'required|file|mimes:jpg,jpeg,png,webp|max:' . $imageMaxKb];
 
         $validated = $request->validate($rules);
         $file = $validated['file'];

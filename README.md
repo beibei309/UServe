@@ -17,9 +17,10 @@ The project follows prefixed physical tables and columns as source of truth.
 
 - Prefixed schema remap completed for models/controllers/views.
 - Default destructive seeding is blocked in production unless explicitly allowed.
-- Use `LaunchSeeder` or focused page/admin seeders for production setup.
+- Use `LaunchSeeder` only for first-time production defaults, or focused seeders for later content-only updates.
 - UPSI student status can run in the supervisor-required single-connection mode.
 - Service request payment proof files are served through authorized controller routes.
+- Platform logo, favicon, and display name can be updated from Admin > Page Management > Settings.
 
 ## Release Check Commands
 
@@ -29,7 +30,7 @@ Run these before release:
 2. `npm ci`
 3. `npm run build`
 4. `php artisan migrate --force`
-5. `php artisan db:seed --class=LaunchSeeder --force`
+5. `php artisan db:seed --class=LaunchSeeder --force` for first-time production defaults only, or `php artisan db:seed --class=PageContentSeeder --force` for content/settings defaults only.
 6. `php artisan test`
 7. `php artisan config:cache`
 8. `php artisan route:cache`
@@ -37,6 +38,13 @@ Run these before release:
 10. `php artisan event:list`
 
 Do not run `php artisan migrate:fresh --seed --force` on production data. The default `DatabaseSeeder` truncates application tables and is intended for local reset/demo data only.
+
+## Seeder Guide
+
+- `PageContentSeeder`: safe content/settings defaults. Use this after deployment when you only need missing page content, support links, logo, favicon, or platform name rows added. Existing admin-edited values are preserved.
+- `LaunchSeeder`: first-time production defaults. It creates missing page content, FAQs, rewards, default admin accounts, categories, and legal pages. Existing records are preserved, but it should still be treated as a launch setup command, not a daily reset command.
+- `TesterSeeder`: local/demo data only. It creates tester student/community accounts and demo services for screenshots or training. Do not run it on the official university database unless demo data is explicitly approved.
+- `DatabaseSeeder`: local reset/demo only. It truncates application tables and is blocked in production unless `ALLOW_DESTRUCTIVE_DATABASE_SEEDING=true`.
 
 ## Production Launch Checklist
 
@@ -105,7 +113,7 @@ composer install --no-dev --optimize-autoloader
 npm ci
 npm run build
 php artisan migrate --force
-php artisan db:seed --class=PageContentSeeder --force
+php artisan db:seed --class=LaunchSeeder --force
 php artisan optimize:clear
 php artisan config:cache
 php artisan route:cache

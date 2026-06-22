@@ -5,7 +5,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="csrf-token" content="{{ csrf_token() }}" />
-    <title>{{ $service->hss_title ?? 'Service Page' }} - UPSI2u</title>
+    <title>{{ $service->hss_title ?? 'Service Page' }} - {{ upsi2u_platform_name() }}</title>
+    <link rel="icon" type="image/png" href="{{ upsi2u_platform_favicon_url() }}">
 
     {{-- Fonts & CSS --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">

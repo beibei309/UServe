@@ -1,5 +1,7 @@
 <footer class="bg-slate-950 text-white pt-12 sm:pt-16 lg:pt-24 pb-8 sm:pb-12 border-t border-slate-900 relative overflow-hidden">
     @php
+        $platformName = upsi2u_platform_name();
+        $platformTagline = upsi2u_platform_tagline();
         $facebookUrl = \App\Models\PageContent::get('settings.facebook_url', 'https://www.facebook.com/UPSIMalaysia/');
         $instagramUrl = \App\Models\PageContent::get('settings.instagram_url', 'https://www.instagram.com/upsi_malaysia');
         $tiktokUrl = \App\Models\PageContent::get('settings.tiktok_url', 'https://www.tiktok.com/@upsi_malaysia');
@@ -13,7 +15,7 @@
             <div class="col-span-1 sm:col-span-2 lg:col-span-1">
                 <div class="flex items-center gap-2 mb-4 sm:mb-6">
                     <span class="text-2xl sm:text-3xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">
-                       UPSI2u 
+                       {{ $platformName }}
                     </span>
                 </div>
                 <p class="text-slate-400 text-sm leading-relaxed mb-5 sm:mb-8 max-w-md lg:max-w-xs">
@@ -78,7 +80,7 @@
 
         <div class="pt-8 border-t border-slate-900 flex flex-col md:flex-row justify-between items-center gap-6">
             <div class="text-slate-500 text-xs tracking-wide">
-                &copy; {{ date('Y') }} <span class="text-slate-300 font-semibold">UPSI2u | UPSI Service Circle</span>. All rights reserved.
+                &copy; {{ date('Y') }} <span class="text-slate-300 font-semibold">{{ $platformName }} | {{ $platformTagline }}</span>. All rights reserved.
             </div>
             
             <div class="flex items-center gap-6">

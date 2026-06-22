@@ -3,6 +3,7 @@
 @section('title', 'Certificate - ' . $redemption->hcr_certificate_number)
 
 @section('content')
+@php($platformName = upsi2u_platform_name())
 <div class="p-6">
     <div class="max-w-5xl mx-auto">
         <div class="flex items-center justify-between mb-6">
@@ -20,7 +21,7 @@
         <div class="bg-white rounded-xl shadow-lg border transition-colors duration-300" style="background-color: var(--bg-primary); border-color: var(--border-color);">
             <div class="bg-gradient-to-r from-blue-600 to-purple-700 px-8 py-6 text-white text-center rounded-t-xl">
                 <h2 class="text-2xl font-bold mb-1">Certificate of Achievement</h2>
-                <p class="text-blue-100 text-sm">UServe Seller Excellence Program</p>
+                <p class="text-blue-100 text-sm">{{ $platformName }} Seller Excellence Program</p>
             </div>
 
             <div class="p-8 md:p-10">
@@ -30,7 +31,7 @@
                         {{ $redemption->user->hu_name ?? 'Unknown User' }}
                     </h3>
                     <p class="text-base md:text-lg leading-relaxed transition-colors duration-300" style="color: var(--text-secondary);">
-                        has successfully completed <strong>3 sales</strong> in the UServe platform and demonstrated
+                        has successfully completed <strong>3 sales</strong> in the {{ $platformName }} platform and demonstrated
                         excellence in providing quality services to the UPSI community.
                     </p>
                 </div>

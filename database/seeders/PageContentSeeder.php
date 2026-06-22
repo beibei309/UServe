@@ -49,6 +49,8 @@ class PageContentSeeder extends Seeder
             ['page' => 'about', 'slug' => 'about.cta_subtitle', 'label' => 'CTA - Subtext', 'type' => 'textarea', 'value' => 'Join UPSI2u and grow together with your campus community.', 'default' => 'Join UPSI2u and grow together with your campus community.', 'active' => true],
 
             // Settings blocks
+            ['page' => 'settings', 'slug' => 'settings.platform_name', 'label' => 'Platform Name', 'type' => 'text', 'value' => 'UPSI2u', 'default' => 'UPSI2u', 'active' => true],
+            ['page' => 'settings', 'slug' => 'settings.platform_tagline', 'label' => 'Platform Tagline', 'type' => 'text', 'value' => 'UPSI Service Circle', 'default' => 'UPSI Service Circle', 'active' => true],
             ['page' => 'settings', 'slug' => 'settings.support_email', 'label' => 'Support Email Address', 'type' => 'text', 'value' => 'support@upsi2u.upsi.edu.my', 'default' => 'support@upsi2u.upsi.edu.my', 'active' => true],
             ['page' => 'settings', 'slug' => 'settings.support_hours', 'label' => 'Support Hours', 'type' => 'text', 'value' => 'Mon-Fri, 8AM-5PM', 'default' => 'Mon-Fri, 8AM-5PM', 'active' => true],
             ['page' => 'settings', 'slug' => 'settings.phone_number', 'label' => 'Contact Phone / WhatsApp', 'type' => 'text', 'value' => '60123456789', 'default' => '60123456789', 'active' => true],
@@ -73,20 +75,25 @@ class PageContentSeeder extends Seeder
             ['page' => 'about', 'slug' => 'about.hero_image', 'label' => 'About - Hero Image', 'type' => 'image', 'value' => 'images/about.jpg', 'default' => 'images/about.jpg', 'active' => true],
             ['page' => 'about', 'slug' => 'about.story_image', 'label' => 'About - Story Image', 'type' => 'image', 'value' => 'images/about2.jpg', 'default' => 'images/about2.jpg', 'active' => true],
             ['page' => 'dashboard', 'slug' => 'dashboard.hero_image', 'label' => 'Dashboard Banner', 'type' => 'image', 'value' => 'images/bgupsi.jpg', 'default' => 'images/bgupsi.jpg', 'active' => true],
+            ['page' => 'settings', 'slug' => 'settings.platform_logo', 'label' => 'Platform Logo', 'type' => 'image', 'value' => 'images/upsi2u-logo-generated.png', 'default' => 'images/upsi2u-logo-generated.png', 'active' => true],
+            ['page' => 'settings', 'slug' => 'settings.platform_favicon', 'label' => 'Browser Tab Icon / Favicon', 'type' => 'image', 'value' => 'images/upsi2u-favicon-generated.png', 'default' => 'images/upsi2u-favicon-generated.png', 'active' => true],
+            ['page' => 'settings', 'slug' => 'settings.institution_logo', 'label' => 'Institution Logo', 'type' => 'image', 'value' => 'images/upsilogo.png', 'default' => 'images/upsilogo.png', 'active' => true],
         ];
 
         foreach ($blocks as $block) {
-            PageContent::query()->updateOrCreate(
-                ['hpc_slug' => $block['slug']],
-                [
-                    'hpc_page' => $block['page'],
-                    'hpc_label' => $block['label'],
-                    'hpc_type' => $block['type'],
-                    'hpc_value' => $block['value'],
-                    'hpc_default' => $block['default'],
-                    'hpc_is_active' => $block['active'],
-                ]
-            );
+            $content = PageContent::query()->firstOrNew(['hpc_slug' => $block['slug']]);
+
+            $content->hpc_page = $block['page'];
+            $content->hpc_label = $block['label'];
+            $content->hpc_type = $block['type'];
+            $content->hpc_default = $block['default'];
+
+            if (! $content->exists) {
+                $content->hpc_value = $block['value'];
+                $content->hpc_is_active = $block['active'];
+            }
+
+            $content->save();
         }
     }
 }

@@ -7,6 +7,9 @@
         /* Gray-100 */
     }
 </style>
+@php
+    $platformName = upsi2u_platform_name();
+@endphp
 
 {{-- TOP UTILITY BAR --}}
 <div class="w-full bg-white border-b border-slate-100 font-sans">
@@ -22,7 +25,7 @@
         {{-- CENTER LOGO: Dengan Kesan Hover --}}
         <div class="absolute left-1/2 transform -translate-x-1/2 z-20">
             <a href="https://www.upsi.edu.my/" class="block transition-transform duration-300 hover:scale-105 active:scale-95">
-                <img src="{{ asset('images/upsilogo.png') }}" class="h-9 sm:h-10 md:h-16 w-auto object-contain"
+                <img src="{{ upsi2u_institution_logo_url() }}" class="h-9 sm:h-10 md:h-16 w-auto object-contain"
                     alt="UPSI Logo">
             </a>
         </div>
@@ -60,7 +63,7 @@
 
             <a href="{{ $isLoggedIn ? route('dashboard') : route('home') }}" class="flex-shrink-0 flex items-center cursor-pointer gap-2 min-w-0">
 
-                <img src="{{ asset('images/logo-svg.png') }}" alt="UPSI2u Logo" class="h-12 md:h-20 w-auto object-contain">
+                <img src="{{ upsi2u_platform_logo_url() }}" alt="{{ $platformName }} Logo" class="h-8 sm:h-9 md:h-11 w-auto object-contain">
 
                 @if ($viewMode === 'seller')
                     <span

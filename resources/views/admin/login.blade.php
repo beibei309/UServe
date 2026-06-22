@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UPSI2u Admin Login</title>
+    <title>{{ upsi2u_platform_name() }} Admin Login</title>
+    <link rel="icon" type="image/png" href="{{ upsi2u_platform_favicon_url() }}">
     @vite(['resources/css/app.css'])
     <style>
         .gradient-bg {
@@ -28,7 +29,7 @@
                 <div class="absolute bottom-10 right-10 w-80 h-80 bg-white rounded-full blur-3xl"></div>
             </div>
             <div class="relative z-10 text-white text-center">
-                <h1 class="text-5xl font-bold mb-4">UPSI2u</h1>
+                <h1 class="text-5xl font-bold mb-4">{{ upsi2u_platform_name() }}</h1>
                 <p class="text-xl opacity-90">Admin Control Panel</p>
             </div>
         </div>
@@ -41,7 +42,7 @@
                 <div class="mb-8 sm:mb-12">
                     <div class="flex items-center gap-3 mb-6 sm:mb-8">
                         <div class="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-lg"></div>
-                        <span class="text-white text-xl sm:text-2xl font-bold">UPSI2u</span>
+                        <span class="text-white text-xl sm:text-2xl font-bold">{{ upsi2u_platform_name() }}</span>
                     </div>
                     <h2 class="text-white text-2xl sm:text-3xl font-bold mb-2">Welcome Back!</h2>
                     <p class="text-slate-400 text-sm">Sign in to your admin account</p>

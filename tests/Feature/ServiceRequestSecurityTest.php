@@ -28,7 +28,7 @@ function seedServiceRequestSecurityFlow(string $status = 'pending'): array
 
     DB::table('h2u_student_statuses')->insert([
         'hss_student_id' => $helperId,
-        'hss_matric_no' => 'D2024999999',
+        'hss_matric_no' => 'D2023999999',
         'hss_program' => 'Security Test Program',
         'hss_program_desc' => 'Security Test Program',
         'hss_status' => 'Active',

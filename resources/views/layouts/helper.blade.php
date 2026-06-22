@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>UPSI2u | UPSI Service Circle</title>
-    <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
+    <title>{{ upsi2u_platform_title() }}</title>
+    <link rel="icon" type="image/png" href="{{ upsi2u_platform_favicon_url() }}">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

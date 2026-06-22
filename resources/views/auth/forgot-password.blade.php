@@ -3,8 +3,8 @@
         
         <div class="mb-6">
             <a href="/" class="flex items-center gap-2">
-                <div class="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">S</div>
-                <span class="text-2xl font-bold text-gray-900 tracking-tight">UPSI2u</span>
+                <img src="{{ upsi2u_platform_favicon_url() }}" alt="{{ upsi2u_platform_name() }} Logo" class="w-10 h-10 rounded-lg object-contain">
+                <span class="text-2xl font-bold text-gray-900 tracking-tight">{{ upsi2u_platform_name() }}</span>
             </a>
         </div>
 

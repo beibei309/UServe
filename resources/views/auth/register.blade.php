@@ -1,202 +1,546 @@
-<x-guest-layout>
-    <div class="fixed inset-0 w-full h-full overflow-hidden z-0">
-        <video autoplay muted loop playsinline class="absolute min-w-full min-h-full object-cover">
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    <title>{{ upsi2u_platform_title('Register') }}</title>
+    <link rel="icon" type="image/png" href="{{ upsi2u_platform_favicon_url() }}">
+
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <style>
+        .hidden {
+            display: none !important;
+        }
+
+        .upsi-register {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 18px;
+            position: relative;
+            overflow: hidden;
+            color: #0f172a;
+        }
+
+        .upsi-register video {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -3;
+        }
+
+        .upsi-register::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            z-index: -2;
+            background: rgba(239, 246, 255, .72);
+            backdrop-filter: blur(5px);
+        }
+
+        .register-shell {
+            width: min(100%, 980px);
+            display: grid;
+            grid-template-columns: .75fr 1.25fr;
+            overflow: hidden;
+            border-radius: 22px;
+            background: #fff;
+            box-shadow: 0 28px 90px rgba(15, 23, 42, .18);
+        }
+
+        .register-brand {
+            padding: 34px;
+            background: #eef2ff;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 28px;
+        }
+
+        .brand-lockup {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .brand-icon {
+            width: 46px;
+            height: 46px;
+            border-radius: 12px;
+            background: #fff;
+            display: grid;
+            place-items: center;
+            box-shadow: 0 10px 24px rgba(15, 23, 42, .08);
+        }
+
+        .brand-icon img {
+            width: 35px;
+            height: 35px;
+            object-fit: contain;
+        }
+
+        .brand-title {
+            color: #1d1fd8;
+            font-size: 21px;
+            line-height: 1;
+            font-weight: 800;
+            letter-spacing: -.02em;
+        }
+
+        .register-brand h1 {
+            max-width: 360px;
+            font-size: clamp(28px, 3.2vw, 36px);
+            line-height: 1.16;
+            font-weight: 800;
+            letter-spacing: -.04em;
+        }
+
+        .register-brand p {
+            max-width: 355px;
+            margin-top: 16px;
+            color: #334155;
+            font-size: 16px;
+            line-height: 1.45;
+        }
+
+        .quote-card {
+            max-width: 360px;
+            padding: 22px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, .64);
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .65);
+        }
+
+        .stars {
+            color: #eab308;
+            font-size: 20px;
+            letter-spacing: 6px;
+        }
+
+        .quote-card blockquote {
+            margin: 16px 0 14px;
+            color: #334155;
+            font-size: 15px;
+            line-height: 1.5;
+            font-style: italic;
+        }
+
+        .quote-card cite {
+            color: #111827;
+            font-size: 14px;
+            font-style: normal;
+            font-weight: 800;
+        }
+
+        .register-panel {
+            padding: 38px 46px 34px;
+        }
+
+        .top-link {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 14px;
+        }
+
+        .top-link a,
+        .signin-line a {
+            color: #1d1fd8;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .eyebrow {
+            color: #1d1fd8;
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+        }
+
+        .register-panel h2 {
+            margin-top: 10px;
+            color: #0f172a;
+            font-size: clamp(30px, 3.6vw, 38px);
+            line-height: 1.05;
+            font-weight: 800;
+            letter-spacing: -.04em;
+        }
+
+        .register-panel .intro {
+            margin-top: 6px;
+            color: #475569;
+            font-size: 16px;
+        }
+
+        .register-form {
+            margin-top: 24px;
+        }
+
+        .form-field {
+            margin-bottom: 16px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .form-field label,
+        .form-label {
+            display: block;
+            margin-bottom: 10px;
+            color: #111827;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .form-field input[type="text"],
+        .form-field input[type="email"],
+        .form-field input[type="tel"],
+        .form-field input[type="password"] {
+            width: 100%;
+            height: 50px;
+            border-radius: 13px;
+            border: 1px solid #c7c9dd;
+            padding: 0 18px;
+            outline: none;
+            color: #111827;
+            font-size: 15px;
+            transition: border-color .18s ease, box-shadow .18s ease;
+        }
+
+        .form-field input:focus {
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, .12);
+        }
+
+        .role-tabs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            padding: 5px;
+            border-radius: 13px;
+            background: #eef2ff;
+        }
+
+        .role-tab {
+            border-radius: 10px;
+            padding: 12px 10px;
+            text-align: center;
+            color: #111827;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background .18s ease, color .18s ease, box-shadow .18s ease;
+        }
+
+        .role-tab.is-active {
+            background: #3730a3;
+            color: #fff;
+            box-shadow: 0 10px 20px rgba(55, 48, 163, .18);
+        }
+
+        .role-check {
+            display: none;
+        }
+
+        .role-section {
+            margin-bottom: 16px;
+            padding: 16px;
+            border-radius: 16px;
+            background: #eef2ff;
+            color: #312e81;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .role-section strong {
+            display: block;
+            margin-bottom: 10px;
+            color: #312e81;
+            font-size: 12px;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+        }
+
+        .community-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px;
+            margin-bottom: 12px;
+        }
+
+        .community-options label,
+        .terms-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .terms-row {
+            margin: 4px 0 22px;
+            color: #475569;
+            font-size: 14px;
+            line-height: 1.45;
+        }
+
+        .terms-row a {
+            color: #1d1fd8;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .register-primary {
+            width: 100%;
+            height: 54px;
+            border: 0;
+            border-radius: 14px;
+            background: #3730a3;
+            color: #fff;
+            font-size: 19px;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 16px 28px rgba(55, 48, 163, .25);
+            transition: transform .18s ease, background .18s ease;
+        }
+
+        .register-primary:hover {
+            background: #312e81;
+            transform: translateY(-1px);
+        }
+
+        .signin-line {
+            margin-top: 22px;
+            text-align: center;
+            color: #111827;
+            font-size: 15px;
+        }
+
+        @media (max-width: 960px) {
+            .upsi-register {
+                align-items: flex-start;
+                padding: 18px 12px 28px;
+            }
+
+            .register-shell {
+                grid-template-columns: 1fr;
+                border-radius: 18px;
+            }
+
+            .register-brand {
+                padding: 24px;
+                gap: 18px;
+            }
+
+            .register-brand h1,
+            .quote-card {
+                display: none;
+            }
+
+            .register-brand p {
+                margin-top: 10px;
+                font-size: 15px;
+            }
+
+            .register-panel {
+                padding: 28px 20px 24px;
+            }
+
+            .top-link {
+                justify-content: flex-start;
+            }
+
+            .register-panel h2 {
+                font-size: 32px;
+            }
+
+            .register-panel .intro {
+                font-size: 15px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+
+            .form-field {
+                margin-bottom: 18px;
+            }
+
+            .form-field input[type="text"],
+            .form-field input[type="email"],
+            .form-field input[type="tel"],
+            .form-field input[type="password"] {
+                height: 52px;
+                font-size: 15px;
+            }
+
+            .role-tab {
+                font-size: 14px;
+                padding: 12px 8px;
+            }
+
+            .register-primary {
+                height: 56px;
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="upsi-register">
+        <video autoplay muted loop playsinline>
             <source src="{{ asset('videos/background-myupsi-small.mp4') }}" type="video/mp4">
             Your browser does not support the video tag.
         </video>
-        {{-- Dark Overlay --}}
-        <div class="absolute inset-0 bg-black/60"></div>
-    </div>
 
-    <div class="relative z-10 min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0">
-        
-        <div class="mb-6 mt-16">
-            <a href="/" class="flex items-center gap-2 group">
-                <img src="{{ asset('images/logo.png') }}" alt="Logo"
-                    class="w-25 h-20 rounded-xl shadow-lg group-hover:opacity-90 transition">
-            </a>
-        </div>
-
-        <div class="w-full sm:max-w-xl mt-6 px-6 py-8 bg-white shadow-xl rounded-2xl border border-gray-100">
-            
-            <div class="text-center mb-8">
-                <h2 class="text-2xl font-bold text-gray-900 tracking-tight">Create an Account</h2>
-                <p class="mt-2 text-sm text-gray-500">Join the community to connect, learn, and earn.</p>
-            </div>
-
-            <form method="POST" action="{{ route('register') }}" class="space-y-5" id="registerForm">
-                @csrf
-
-                @if($errors->has('registration'))
-                    <div class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-                        <div class="font-semibold">Registration failed</div>
-                        <div class="mt-1">{{ $errors->first('registration') }}</div>
-                    </div>
-                @endif
+        <section class="register-shell">
+            <aside class="register-brand">
+                <a href="{{ url('/') }}" class="brand-lockup">
+                    <span class="brand-icon">
+                        <img src="{{ upsi2u_platform_favicon_url() }}" alt="{{ upsi2u_platform_name() }} Logo">
+                    </span>
+                    <span class="brand-title">{{ upsi2u_platform_tagline() }}</span>
+                </a>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-3">I am registering as:</label>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <label class="relative flex flex-col p-4 bg-white border rounded-xl cursor-pointer transition-all hover:shadow-md {{ $registerUi['is_student_selected'] ? 'border-indigo-600 ring-1 ring-indigo-600 bg-indigo-50/50' : 'border-gray-200 hover:border-gray-300' }}"
-                            data-role-card="student"
-                            data-active-class="border-indigo-600 ring-1 ring-indigo-600 bg-indigo-50/50"
-                            data-inactive-class="border-gray-200 hover:border-gray-300">
-                            <input type="radio" name="role" value="student" class="sr-only" {{ $registerUi['is_student_selected'] ? 'checked' : '' }}>
-                            <span class="flex items-center gap-2 mb-1">
-                                <span class="font-semibold text-gray-900">Student</span>
-                                <span class="bg-indigo-100 text-indigo-700 text-[10px] font-bold px-2 py-0.5 rounded-full">UPSI</span>
-                            </span>
-                            <span class="text-xs text-gray-500">I want to offer services or find help.</span>
-                            <div data-role-check="student" class="absolute top-4 right-4 text-indigo-600 {{ $registerUi['is_student_selected'] ? '' : 'hidden' }}">
-                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                            </div>
-                        </label>
-
-                        <label class="relative flex flex-col p-4 bg-white border rounded-xl cursor-pointer transition-all hover:shadow-md {{ $registerUi['is_community_selected'] ? 'border-indigo-600 ring-1 ring-indigo-600 bg-indigo-50/50' : 'border-gray-200 hover:border-gray-300' }}"
-                            data-role-card="community"
-                            data-active-class="border-indigo-600 ring-1 ring-indigo-600 bg-indigo-50/50"
-                            data-inactive-class="border-gray-200 hover:border-gray-300">
-                            <input type="radio" name="role" value="community" class="sr-only" {{ $registerUi['is_community_selected'] ? 'checked' : '' }}>
-                            <span class="flex items-center gap-2 mb-1">
-                                <span class="font-semibold text-gray-900">Community</span>
-                                <span class="bg-yellow-100 text-yellow-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Public/Staff</span>
-                            </span>
-                            <span class="text-xs text-gray-500">I want to hire students for tasks.</span>
-                            <div data-role-check="community" class="absolute top-4 right-4 text-indigo-600 {{ $registerUi['is_community_selected'] ? '' : 'hidden' }}">
-                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                            </div>
-                        </label>
-                    </div>
-                    <x-input-error :messages="$errors->get('role')" class="mt-2 text-red-500 text-xs" />
+                    <h1>Start your journey with us.</h1>
+                    <p>Access student services, trusted campus support, and community help in one unified platform.</p>
                 </div>
 
-                <div class="space-y-4">
-                    <div>
-                        <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                        <input id="name" type="text" name="name" value="{{ old('name') }}" required autofocus autocomplete="name"
-                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-colors"
-                            placeholder="John Doe">
-                        <x-input-error :messages="$errors->get('name')" class="mt-1 text-red-500 text-xs" />
-                    </div>
+                <div class="quote-card">
+                    <div class="stars">★★★★★</div>
+                    <blockquote>"{{ upsi2u_platform_name() }} makes it easier to find student help and support the UPSI community."</blockquote>
+                    <cite>UPSI2u Community</cite>
+                </div>
+            </aside>
 
-                    <div>
-                        <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-                        <input id="email" type="email" name="email" value="{{ old('email') }}" required autocomplete="username"
-                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-colors"
-                            placeholder="email@mail.com">
-                        <x-input-error :messages="$errors->get('email')" class="mt-1 text-red-500 text-xs" />
-                    </div>
-
-                    
+            <section class="register-panel">
+                <div class="top-link">
+                    <a href="{{ url('/') }}">← Back to Home</a>
                 </div>
 
-                <div data-role-section="student" class="bg-indigo-50 p-4 rounded-xl border border-indigo-100 space-y-4 {{ $registerUi['show_student_section'] ? '' : 'hidden' }}">
-                    
-                    <h3 class="text-xs font-bold text-indigo-800 uppercase tracking-wider mb-2">Student Verification</h3>
-                    
-                    <div>
-                        <label for="student_id" class="block text-sm font-medium text-gray-700 mb-1">Student ID</label>
-                        <input id="student_id" type="text" name="student_id" value="{{ old('student_id') }}" 
-                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
-                            placeholder="D202XXXXXX">
-                        <x-input-error :messages="$errors->get('student_id')" class="mt-1 text-red-500 text-xs" />
-                    </div>
-                    
-                    <div class="flex items-start gap-3 bg-white/60 p-3 rounded-lg border border-indigo-200">
-                         <svg class="w-5 h-5 text-indigo-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>
-                         <p class="text-xs text-indigo-800 leading-snug">
-                             You must use your <b>@siswa.upsi.edu.my</b> email in the "Email Address" field above for instant processing.
-                         </p>
-                    </div>
-                </div>
-                <div>
-                        <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                        <input id="phone" type="tel" name="phone" value="{{ old('phone') }}" required
-                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-colors"
-                            placeholder="0123456789">
-                        <x-input-error :messages="$errors->get('phone')" class="mt-1 text-red-500 text-xs" />
-                    </div>
+                <div class="eyebrow">{{ upsi2u_platform_tagline() }}</div>
+                <h2>Create an account</h2>
+                <p class="intro">Enter your details below to get started.</p>
 
-                <div data-role-section="community" class="bg-yellow-50 p-4 rounded-xl border border-yellow-100 space-y-4 {{ $registerUi['show_community_section'] ? '' : 'hidden' }}">
-                    
-                    <h3 class="text-xs font-bold text-yellow-800 uppercase tracking-wider mb-2">Community Details</h3>
+                <form method="POST" action="{{ route('register') }}" class="register-form" id="registerForm">
+                    @csrf
 
-                    <div>
-                        <span class="block text-sm font-medium text-gray-700 mb-2">I am a:</span>
-                        <div class="flex gap-4">
-                            <label class="flex items-center gap-2 cursor-pointer">
-                                <input type="radio" name="community_type" value="public" class="text-indigo-600 focus:ring-indigo-500" {{ $registerUi['initial_community_type'] === 'public' ? 'checked' : '' }}>
-                                <span class="text-sm text-gray-700">Public User</span>
+                    @if($errors->has('registration'))
+                        <div class="role-section" style="background:#fff1f2;color:#be123c;border:1px solid #fecdd3;">
+                            <strong style="color:#be123c;">Registration failed</strong>
+                            {{ $errors->first('registration') }}
+                        </div>
+                    @endif
+
+                    <div class="form-field">
+                        <span class="form-label">Account type</span>
+                        <div class="role-tabs">
+                            <label class="role-tab {{ $registerUi['is_student_selected'] ? 'is-active' : '' }}"
+                                data-role-card="student"
+                                data-active-class="is-active"
+                                data-inactive-class="">
+                                <input type="radio" name="role" value="student" class="hidden" {{ $registerUi['is_student_selected'] ? 'checked' : '' }}>
+                                Student
+                                <span data-role-check="student" class="role-check {{ $registerUi['is_student_selected'] ? '' : 'hidden' }}"></span>
                             </label>
-                            <label class="flex items-center gap-2 cursor-pointer">
-                                <input type="radio" name="community_type" value="staff" class="text-indigo-600 focus:ring-indigo-500" {{ $registerUi['initial_community_type'] === 'staff' ? 'checked' : '' }}>
-                                <span class="text-sm text-gray-700">UPSI Staff</span>
+
+                            <label class="role-tab {{ $registerUi['is_community_selected'] ? 'is-active' : '' }}"
+                                data-role-card="community"
+                                data-active-class="is-active"
+                                data-inactive-class="">
+                                <input type="radio" name="role" value="community" class="hidden" {{ $registerUi['is_community_selected'] ? 'checked' : '' }}>
+                                Community Member
+                                <span data-role-check="community" class="role-check {{ $registerUi['is_community_selected'] ? '' : 'hidden' }}"></span>
                             </label>
+                        </div>
+                        <x-input-error :messages="$errors->get('role')" class="mt-2 text-xs text-red-500" />
+                    </div>
+
+                    <div class="form-field">
+                        <label for="name">Full name</label>
+                        <input id="name" type="text" name="name" value="{{ old('name') }}" required autofocus autocomplete="name" placeholder="Enter your full name">
+                        <x-input-error :messages="$errors->get('name')" class="mt-2 text-xs text-red-500" />
+                    </div>
+
+                    <div class="form-field">
+                        <label for="email">Email address</label>
+                        <input id="email" type="email" name="email" value="{{ old('email') }}" required autocomplete="username" placeholder="you@student.upsi.edu.my">
+                        <x-input-error :messages="$errors->get('email')" class="mt-2 text-xs text-red-500" />
+                    </div>
+
+                    <div data-role-section="student" class="role-section {{ $registerUi['show_student_section'] ? '' : 'hidden' }}">
+                        <strong>Student verification</strong>
+                        <div class="form-field" style="margin-bottom:12px;">
+                            <label for="student_id">Student ID</label>
+                            <input id="student_id" type="text" name="student_id" value="{{ old('student_id') }}" placeholder="e.g. D20231234567">
+                            <x-input-error :messages="$errors->get('student_id')" class="mt-2 text-xs text-red-500" />
+                        </div>
+                        Use your <b>@siswa.upsi.edu.my</b> email for faster student processing.
+                    </div>
+
+                    <div class="form-field">
+                        <label for="phone">Phone number</label>
+                        <input id="phone" type="tel" name="phone" value="{{ old('phone') }}" required placeholder="0123456789">
+                        <x-input-error :messages="$errors->get('phone')" class="mt-2 text-xs text-red-500" />
+                    </div>
+
+                    <div data-role-section="community" class="role-section {{ $registerUi['show_community_section'] ? '' : 'hidden' }}" style="background:#fef9c3;color:#854d0e;">
+                        <strong style="color:#854d0e;">Community details</strong>
+                        <div class="community-options">
+                            <label>
+                                <input type="radio" name="community_type" value="public" {{ $registerUi['initial_community_type'] === 'public' ? 'checked' : '' }}>
+                                <span>Public user</span>
+                            </label>
+                            <label>
+                                <input type="radio" name="community_type" value="staff" {{ $registerUi['initial_community_type'] === 'staff' ? 'checked' : '' }}>
+                                <span>UPSI staff</span>
+                            </label>
+                        </div>
+                        <span data-community-message="staff" class="{{ $registerUi['initial_community_type'] === 'staff' ? '' : 'hidden' }}">Staff: Use your <b>@upsi.edu.my</b> email above for auto-verification.</span>
+                        <span data-community-message="public" class="{{ $registerUi['initial_community_type'] === 'public' ? '' : 'hidden' }}">Public: Upload your verification document after registration so you can request services.</span>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-field">
+                            <label for="password">Password</label>
+                            <input id="password" type="password" name="password" required autocomplete="new-password" placeholder="Enter password">
+                            <x-input-error :messages="$errors->get('password')" class="mt-2 text-xs text-red-500" />
+                        </div>
+                        <div class="form-field">
+                            <label for="password_confirmation">Confirm password</label>
+                            <input id="password_confirmation" type="password" name="password_confirmation" required placeholder="Re-enter password">
+                            <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2 text-xs text-red-500" />
                         </div>
                     </div>
 
-                    <div class="flex items-start gap-3 bg-white/60 p-3 rounded-lg border border-yellow-200">
-                        <svg class="w-5 h-5 text-yellow-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>
-                        <p class="text-xs text-yellow-800 leading-snug">
-                            <span data-community-message="staff" class="{{ $registerUi['initial_community_type'] === 'staff' ? '' : 'hidden' }}">Staff: Use your <b>@upsi.edu.my</b> email above for auto-verification.</span>
-                            <span data-community-message="public" class="{{ $registerUi['initial_community_type'] === 'public' ? '' : 'hidden' }}">Public: You will need to upload proof of ID/Residence.</span>
-                        </p>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                        <input id="password" type="password" name="password" required autocomplete="new-password"
-                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
-                            placeholder="••••••••">
-                        <x-input-error :messages="$errors->get('password')" class="mt-1 text-red-500 text-xs" />
-                    </div>
-                    <div>
-                        <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
-                        <input id="password_confirmation" type="password" name="password_confirmation" required
-                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
-                            placeholder="••••••••">
-                        <x-input-error :messages="$errors->get('password_confirmation')" class="mt-1 text-red-500 text-xs" />
-                    </div>
-                </div>
-
-                <div class="flex items-center">
-                    <input id="terms" type="checkbox" required class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded cursor-pointer">
-                    <label for="terms" class="ml-2 text-sm text-gray-600">
-                        I agree to the <a href="{{ route('terms') }}" class="text-indigo-600 hover:underline">Terms</a> and <a href="{{ route('privacy') }}" class="text-indigo-600 hover:underline">Privacy Policy</a>.
+                    <label for="terms" class="terms-row">
+                        <input id="terms" type="checkbox" required>
+                        <span>I agree to the <a href="{{ route('terms') }}">Terms</a> and <a href="{{ route('privacy') }}">Privacy Policy</a>.</span>
                     </label>
-                </div>
 
-                <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all transform hover:-translate-y-0.5">
-                    Create Account
-                </button>
+                    <button type="submit" class="register-primary">Create account</button>
 
-                <div class="relative my-6">
-                    <div class="absolute inset-0 flex items-center">
-                        <div class="w-full border-t border-gray-200"></div>
-                    </div>
-                    <div class="relative flex justify-center text-sm">
-                        <span class="px-3 bg-white text-gray-500 font-medium">Already have an account?</span>
-                    </div>
-                </div>
+                    <p class="signin-line">Already have an account? <a href="{{ route('login') }}">Sign in</a></p>
+                </form>
+            </section>
+        </section>
+    </main>
 
-                <a href="{{ route('login') }}" class="w-full flex justify-center py-3 px-4 border border-gray-300 rounded-lg shadow-sm text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all">
-                    Sign In
-                </a>
-            </form>
-        </div>
-
-        <div class="mt-8 mb-8 text-center">
-            {{-- Updated text color to gray-200 for better visibility over dark video --}}
-            <a href="{{ url('/') }}" class="inline-flex items-center gap-2 text-sm font-medium text-gray-200 hover:text-white transition-colors group">
-                <svg class="w-4 h-4 transform group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                Back to Home
-            </a>
-        </div>
-    </div>
     <div id="registerConfig"
         data-initial-role="{{ $registerUi['initial_role'] }}"
         data-initial-community-type="{{ $registerUi['initial_community_type'] }}"></div>
     <script src="{{ asset('js/nonadmin-auth-register.js') }}"></script>
-</x-guest-layout>
+</body>
+
+</html>
