@@ -5,6 +5,8 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Routing\Exceptions\InvalidSignatureException;
+use Illuminate\Session\TokenMismatchException;
+use Symfony\Component\HttpFoundation\Response;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withCommands([
@@ -44,5 +46,25 @@ return Application::configure(basePath: dirname(__DIR__))
             }
 
             return null;
+        });
+
+        $exceptions->render(function (TokenMismatchException $e, $request) {
+            if ($request->expectsJson()) {
+                return null;
+            }
+
+            return redirect()
+                ->guest(route('login'))
+                ->with('status', 'Your session expired. Please sign in again to continue.');
+        });
+
+        $exceptions->respond(function (Response $response, $exception, $request) {
+            if ($response->getStatusCode() !== 419 || $request->expectsJson()) {
+                return $response;
+            }
+
+            return redirect()
+                ->guest(route('login'))
+                ->with('status', 'Your session expired. Please sign in again to continue.');
         });
     })->create();
