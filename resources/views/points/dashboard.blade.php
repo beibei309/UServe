@@ -5,6 +5,42 @@
 @section('content')
 <div class="min-h-screen bg-gray-50 py-5 sm:py-8">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {{-- Coming Soon Modal Overlay --}}
+<div id="coming-soon-overlay"
+     class="fixed inset-0 z-50 flex items-center justify-center p-4"
+     style="backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); background: rgba(17, 10, 50, 0.5);">
+    <div class="bg-white rounded-2xl p-8 max-w-sm w-full text-center border border-orange-100">
+
+        {{-- Icon --}}
+        <div class="mx-auto mb-4 w-16 h-16 rounded-full bg-orange-50 flex items-center justify-center">
+            <i class="fas fa-coins text-orange-500 text-2xl"></i>
+        </div>
+
+        {{-- Badge --}}
+        <span class="inline-flex items-center gap-1 text-xs font-medium bg-orange-100 text-orange-800 px-3 py-1 rounded-full mb-3">
+            <i class="fas fa-clock text-xs"></i> Coming soon
+        </span>
+
+        {{-- Heading --}}
+        <h2 class="text-lg font-semibold text-orange-900 mb-2">Seller Points — Coming Soon</h2>
+
+        {{-- Body --}}
+        <p class="text-sm text-gray-500 leading-relaxed mb-6">
+            The Seller Points system is still being finalized. You can track your progress and view certificates,
+            but points and redemptions are not yet active.
+        </p>
+
+        {{-- Actions --}}
+        <button onclick="document.getElementById('coming-soon-overlay').style.display='none'"
+                class="w-full py-2.5 px-4 bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium rounded-lg transition-colors mb-2">
+            Got it, I'll check back later
+        </button>
+        <button onclick="document.getElementById('coming-soon-overlay').style.display='none'"
+                class="w-full py-2 px-4 text-sm text-gray-400 hover:text-gray-600 border border-gray-200 rounded-lg transition-colors">
+            Browse anyway
+        </button>
+    </div>
+</div>
         {{-- Header Section --}}
         <div class="upsi-card p-4 sm:p-5 mb-5 sm:mb-8">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
@@ -28,6 +64,20 @@
                         <i class="fas fa-trophy mr-2"></i>
                         Leaderboard
                     </a>
+                </div>
+            </div>
+        </div>
+
+        {{-- Warning Notification --}}
+        <div class="mb-6 bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-lg shadow-sm">
+            <div class="flex items-start">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-exclamation-triangle text-yellow-500 text-lg"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-yellow-700 font-medium">
+                        The Points are not finalized yet and cannot be used at the moment.
+                    </p>
                 </div>
             </div>
         </div>

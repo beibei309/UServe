@@ -5,6 +5,48 @@
 @section('content')
 <div class="min-h-screen bg-gray-50 py-6 sm:py-8">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {{-- Coming Soon Modal Overlay --}}
+<div id="coming-soon-overlay"
+     class="fixed inset-0 z-50 flex items-center justify-center p-4"
+     style="backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); background: rgba(17, 10, 50, 0.5);">
+    <div class="bg-white rounded-2xl shadow-xl p-8 max-w-sm w-full text-center border border-purple-100">
+
+        {{-- Icon --}}
+        <div class="mx-auto mb-4 w-16 h-16 rounded-full bg-purple-50 flex items-center justify-center">
+            <i class="fas fa-rocket text-purple-600 text-2xl"></i>
+        </div>
+
+        {{-- Badge --}}
+        <span class="inline-flex items-center gap-1 text-xs font-medium bg-purple-100 text-purple-800 px-3 py-1 rounded-full mb-3">
+            <i class="fas fa-clock text-xs"></i> Coming soon
+        </span>
+
+        {{-- Heading --}}
+        <h2 class="text-lg font-semibold text-purple-900 mb-2">Rewards are almost here</h2>
+
+        {{-- Body --}}
+        <p class="text-sm text-gray-500 leading-relaxed mb-6">
+            We're finalizing the Buyer Rewards system. You can already earn points —
+            redemptions will be unlocked once the system goes live.
+        </p>
+
+        {{-- Actions --}}
+        <button onclick="dismissOverlay()"
+                class="w-full py-2.5 px-4 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-colors mb-2">
+            Got it, I'll check back later
+        </button>
+        <button onclick="dismissOverlay()"
+                class="w-full py-2 px-4 text-sm text-gray-400 hover:text-gray-600 border border-gray-200 rounded-lg transition-colors">
+            Browse anyway
+        </button>
+    </div>
+</div>
+
+<script>
+    function dismissOverlay() {
+        document.getElementById('coming-soon-overlay').style.display = 'none';
+    }
+</script>
         {{-- Header Section --}}
         <div class="upsi-card p-4 sm:p-5 mb-6">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
@@ -28,6 +70,21 @@
                         <i class="fas fa-trophy mr-2"></i>
                         Leaderboard
                     </a>
+                </div>
+            </div>
+        </div>
+        
+        {{-- Warning Notification --}}
+        
+        <div class="mb-6 bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-lg shadow-sm">
+            <div class="flex items-start">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-exclamation-triangle text-yellow-500 text-lg"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-yellow-700 font-medium">
+                        The Reedem rewards are still not finalized and cannot be used at the moment.
+                    </p>
                 </div>
             </div>
         </div>
