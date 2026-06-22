@@ -6,6 +6,47 @@
         background-color: #f3f4f6;
         /* Gray-100 */
     }
+
+    .mobile-nav-section-label {
+        padding: 0.65rem 0.75rem 0.25rem;
+        color: #94a3b8;
+        font-size: 0.68rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+
+    .mobile-nav-link {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        padding: 0.625rem 0.75rem;
+        border-radius: 0.75rem;
+        color: #374151;
+        font-size: 0.875rem;
+        font-weight: 700;
+        transition: color .18s ease, background-color .18s ease;
+    }
+
+    .mobile-nav-link:hover {
+        color: #4f46e5;
+        background-color: #f8fafc;
+    }
+
+    .mobile-nav-badge {
+        min-width: 1.25rem;
+        height: 1.25rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 999px;
+        background: #ef4444;
+        color: #fff;
+        font-size: 0.68rem;
+        font-weight: 800;
+        padding: 0 0.35rem;
+    }
 </style>
 @php
     $platformName = upsi2u_platform_name();
@@ -271,30 +312,32 @@
         <div class="py-2 space-y-0.5 px-3">
             @if ($viewMode === 'seller')
                 {{-- MOBILE SELLER LINKS --}}
+                <div class="mobile-nav-section-label">Seller workspace</div>
                 <a href="{{ route('students.index') }}"
-                    class="block px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:text-indigo-600 hover:bg-gray-50">Dashboard</a>
+                    class="mobile-nav-link {{ request()->routeIs('students.index') ? 'nav-link-active' : '' }}">Dashboard</a>
                 <a href="{{ route('services.manage') }}"
-                    class="block px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:text-indigo-600 hover:bg-gray-50">My
+                    class="mobile-nav-link {{ request()->routeIs('services.manage') ? 'nav-link-active' : '' }}">My
                     Services</a>
                 <a href="{{ route('service-requests.index') }}"
-                    class="block px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:text-indigo-600 hover:bg-gray-50">Incoming
+                    class="mobile-nav-link {{ request()->routeIs('service-requests.index') ? 'nav-link-active' : '' }}">Incoming
                     Orders</a>
                 <a href="{{ route('points.dashboard') }}"
-                    class="block px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:text-indigo-600 hover:bg-gray-50">
+                    class="mobile-nav-link {{ request()->routeIs('points.dashboard') ? 'nav-link-active' : '' }}">
                     Points
                 </a>
             @else
                 {{-- MOBILE BUYER LINKS --}}
+                <div class="mobile-nav-section-label">Browse</div>
                 <a href="{{ $isLoggedIn ? route('dashboard') : route('home') }}"
-                    class="block px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:text-indigo-600 hover:bg-gray-50">Home</a>
+                    class="mobile-nav-link">Home</a>
                 <a href="{{ route('services.index') }}"
-                    class="block px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:text-indigo-600 hover:bg-gray-50">Find
+                    class="mobile-nav-link {{ request()->routeIs('services.index') ? 'nav-link-active' : '' }}">Find
                     Services</a>
                 <a href="{{ route('about') }}"
-                    class="block px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:text-indigo-600 hover:bg-gray-50">About
+                    class="mobile-nav-link {{ request()->routeIs('about') ? 'nav-link-active' : '' }}">About
                     Us</a>
                 <a href="{{ route('help') }}"
-                    class="block px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:text-indigo-600 hover:bg-gray-50">Help</a>
+                    class="mobile-nav-link {{ request()->routeIs('help') ? 'nav-link-active' : '' }}">Help</a>
             @endif
         </div>
 
@@ -323,28 +366,40 @@
                     </div>
                 </div>
                 <div class="mt-2 px-3 space-y-0.5">
+                    <div class="mobile-nav-section-label">Account</div>
                     <a href="{{ route('profile.edit') }}"
-                        class="block px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:text-indigo-600 hover:bg-gray-50">Your
+                        class="mobile-nav-link {{ request()->routeIs('profile.edit') ? 'nav-link-active' : '' }}">Your
                         Profile</a>
+                    <a href="{{ route('notifications.index') }}"
+                        class="mobile-nav-link {{ request()->routeIs('notifications.*') ? 'nav-link-active' : '' }}">
+                        <span>Notifications</span>
+                        @if ($unreadNotificationCount > 0)
+                            <span class="mobile-nav-badge">{{ $unreadNotificationCount > 99 ? '99+' : $unreadNotificationCount }}</span>
+                        @endif
+                    </a>
                     {{-- <a href="{{ route('chat.index') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50">Messages</a> --}}
 
                     @if ($viewMode === 'buyer')
+                        <div class="mobile-nav-section-label">Buyer tools</div>
                         <a href="{{ route('favorites.index') }}"
-                            class="block px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:text-indigo-600 hover:bg-gray-50">Favorites</a>
+                            class="mobile-nav-link {{ request()->routeIs('favorites.*') ? 'nav-link-active' : '' }}">Favorites</a>
                         <a href="{{ route('service-requests.index') }}"
-                            class="block px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:text-indigo-600 hover:bg-gray-50">Orders</a>
+                            class="mobile-nav-link {{ request()->routeIs('service-requests.*') ? 'nav-link-active' : '' }}">Orders</a>
+                        <a href="{{ route('points.buyer.dashboard') }}"
+                            class="mobile-nav-link {{ request()->routeIs('points.buyer.*') ? 'nav-link-active' : '' }}">Rewards</a>
                     @endif
 
                     @if ($user->hu_role === 'student')
                         <a href="{{ route('onboarding.students') }}"
-                            class="block px-3 py-2.5 rounded-xl text-sm font-semibold text-indigo-600 hover:bg-indigo-50">Become
+                            class="mobile-nav-link text-indigo-600 hover:bg-indigo-50">Become
                             a Seller</a>
                     @elseif ($isHelper && !$user->hu_is_blocked)
                         {{-- MOBILE SWITCH BUTTON --}}
+                        <div class="mobile-nav-section-label">Mode</div>
                         <form action="{{ route('switch.mode') }}" method="POST">
                             @csrf
                             <button type="submit"
-                                class="w-full text-left block px-3 py-2.5 rounded-xl text-sm font-semibold {{ $viewMode === 'seller' ? 'text-indigo-600 hover:bg-indigo-50' : 'text-green-600 hover:bg-green-50' }}">
+                                class="mobile-nav-link w-full text-left {{ $viewMode === 'seller' ? 'text-indigo-600 hover:bg-indigo-50' : 'text-green-600 hover:bg-green-50' }}">
                                 {{ $viewMode === 'seller' ? 'Switch to Buying' : 'Switch to Selling' }}
                             </button>
                         </form>
@@ -353,7 +408,7 @@
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit"
-                            class="block w-full text-left px-3 py-2.5 rounded-xl text-sm font-semibold text-red-600 hover:bg-red-50 hover:text-red-700">Sign
+                            class="mobile-nav-link w-full text-left text-red-600 hover:bg-red-50 hover:text-red-700">Sign
                             out</button>
                     </form>
                 </div>
