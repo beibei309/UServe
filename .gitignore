@@ -1,6 +1,8 @@
 *.log
 .DS_Store
 .superpowers/
+.codex_tmp/
+UAT/
 /docs
 .env
 .env.backup
@@ -21,6 +23,8 @@
 /public/storage
 /public/profile-photos
 /public/uploads
+/public/images/settings.platform_favicon-*.png
+/public/images/settings.platform_logo-*.png
 /storage/*.key
 /storage/app/public/services
 /storage/framework/cache/*
