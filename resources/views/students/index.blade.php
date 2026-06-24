@@ -311,6 +311,6 @@
         data-availability-update-url="{{ route('availability.updateSettings') }}"></div>
     @push('scripts')
         @vite(['resources/js/chart-tools.js'])
-        <script defer src="{{ asset('js/students-index.js') }}?v={{ filemtime(public_path('js/students-index.js')) }}"></script>
+        <script src="{{ asset('js/students-index.js') }}?v={{ filemtime(public_path('js/students-index.js')) }}"></script>
     @endpush
 @endsection

@@ -314,6 +314,6 @@
     data-manage-url="{{ route('services.manage') }}"></div>
 @push('scripts')
     @vite(['resources/js/editor-tools.js'])
-    <script defer src="{{ asset('js/nonadmin-services-create.js') }}?v={{ filemtime(public_path('js/nonadmin-services-create.js')) }}"></script>
+    <script src="{{ asset('js/nonadmin-services-create.js') }}?v={{ filemtime(public_path('js/nonadmin-services-create.js')) }}"></script>
 @endpush
 @endsection
