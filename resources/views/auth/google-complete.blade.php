@@ -199,12 +199,12 @@
 
                 @unless ($isStudentGoogleAccount)
                     <div class="field">
-                        <label for="full_name">Full name as shown on your ID</label>
+                        <label for="full_name">Full name as shown on your IC</label>
                         <input id="full_name" type="text" name="full_name"
                             value="{{ old('full_name', $googleUser['name'] ?? '') }}" required maxlength="255"
                             autocomplete="name" placeholder="Enter your full legal name">
                         <p style="margin:0.45rem 0 0;color:#64748b;font-size:0.78rem;line-height:1.45;">
-                            All community members must use the name matching their identity document.
+                            All community members must use the name matching their identity card.
                         </p>
                         <x-input-error :messages="$errors->get('full_name')" class="mt-2 text-xs text-red-500" />
                     </div>

@@ -116,7 +116,7 @@ it('asks community users for an identity document name but not students', functi
     $this->withSession($communitySession)
         ->get(route('auth.google.complete'))
         ->assertOk()
-        ->assertSee('Full name as shown on your ID')
+        ->assertSee('Full name as shown on your IC')
         ->assertSee('Google Display Name');
 
     $studentSession = [
@@ -131,7 +131,7 @@ it('asks community users for an identity document name but not students', functi
     $this->withSession($studentSession)
         ->get(route('auth.google.complete'))
         ->assertOk()
-        ->assertDontSee('Full name as shown on your ID');
+        ->assertDontSee('Full name as shown on your IC');
 });
 
 it('creates verified google community user after phone and terms are submitted', function () {
