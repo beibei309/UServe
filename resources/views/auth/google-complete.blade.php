@@ -176,7 +176,13 @@
             </div>
 
             <h1>Complete your account</h1>
-            <p class="intro">Your Google email is verified. Add your phone number and accept the terms to continue.</p>
+            <p class="intro">
+                @if ($isStudentGoogleAccount)
+                    Your Google email is verified. Your official student name will be obtained from UPSI.
+                @else
+                    Your Google email is verified. Confirm your identity details to continue.
+                @endif
+            </p>
 
             <div class="google-account">
                 Signed in as <strong>{{ $googleUser['email'] }}</strong>
@@ -190,6 +196,19 @@
 
             <form method="POST" action="{{ route('auth.google.complete') }}">
                 @csrf
+
+                @unless ($isStudentGoogleAccount)
+                    <div class="field">
+                        <label for="full_name">Full name as shown on your ID</label>
+                        <input id="full_name" type="text" name="full_name"
+                            value="{{ old('full_name', $googleUser['name'] ?? '') }}" required maxlength="255"
+                            autocomplete="name" placeholder="Enter your full legal name">
+                        <p style="margin:0.45rem 0 0;color:#64748b;font-size:0.78rem;line-height:1.45;">
+                            All community members must use the name matching their identity document.
+                        </p>
+                        <x-input-error :messages="$errors->get('full_name')" class="mt-2 text-xs text-red-500" />
+                    </div>
+                @endunless
 
                 <div class="field">
                     <label for="phone">Phone number</label>

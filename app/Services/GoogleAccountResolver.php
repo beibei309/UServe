@@ -18,6 +18,7 @@ class GoogleAccountResolver
             $source = $this->findUpsiSourceRecord($normalizedEmail);
             $studentId = $this->cleanString($source->sm_student_id ?? null)
                 ?? $this->detectStudentIdFromEmail($normalizedEmail);
+            $officialName = $this->cleanString($source->sm_student_name ?? null);
 
             if (! $studentId) {
                 throw new RuntimeException('Student ID could not be verified from your UPSI student email. Please use manual registration or contact admin.');
@@ -25,7 +26,7 @@ class GoogleAccountResolver
 
             return new ResolvedGoogleAccount(
                 googleId: $googleId,
-                name: $name,
+                name: $officialName ?? $name,
                 email: $normalizedEmail,
                 role: 'student',
                 studentId: $studentId,

@@ -1,8 +1,8 @@
 <?php
 
 use App\Services\GoogleAccountResolver;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 it('resolves siswa google account as student using UPSI source matric number', function () {
@@ -35,11 +35,12 @@ it('resolves siswa google account as student using UPSI source matric number', f
 
     $resolved = app(GoogleAccountResolver::class)->resolve(
         'google-123',
-        'Aina Google',
+        'Aina Nickname',
         'Aina.Google@siswa.upsi.edu.my'
     );
 
     expect($resolved->role)->toBe('student')
+        ->and($resolved->name)->toBe('Aina Google')
         ->and($resolved->studentId)->toBe('D2023999123')
         ->and($resolved->staffEmail)->toBeNull()
         ->and($resolved->publicVerifiedAt)->toBeNull();
@@ -98,8 +99,39 @@ it('requires phone and terms before completing google registration', function ()
         'phone' => '',
     ]);
 
-    $response->assertSessionHasErrors(['phone', 'terms']);
+    $response->assertSessionHasErrors(['full_name', 'phone', 'terms']);
     expect(DB::table('h2u_users')->where('hu_email', 'public.complete@gmail.com')->exists())->toBeFalse();
+});
+
+it('asks community users for an identity document name but not students', function () {
+    $communitySession = [
+        'google_auth_user' => [
+            'id' => 'google-name-community',
+            'name' => 'Google Display Name',
+            'email' => 'name.check@gmail.com',
+            'avatar' => null,
+        ],
+    ];
+
+    $this->withSession($communitySession)
+        ->get(route('auth.google.complete'))
+        ->assertOk()
+        ->assertSee('Full name as shown on your ID')
+        ->assertSee('Google Display Name');
+
+    $studentSession = [
+        'google_auth_user' => [
+            'id' => 'google-name-student',
+            'name' => 'Student Display Name',
+            'email' => 'D2023999888@siswa.upsi.edu.my',
+            'avatar' => null,
+        ],
+    ];
+
+    $this->withSession($studentSession)
+        ->get(route('auth.google.complete'))
+        ->assertOk()
+        ->assertDontSee('Full name as shown on your ID');
 });
 
 it('creates verified google community user after phone and terms are submitted', function () {
@@ -113,6 +145,7 @@ it('creates verified google community user after phone and terms are submitted',
     ]);
 
     $response = $this->post(route('auth.google.complete'), [
+        'full_name' => 'Nur Aisyah Abdullah',
         'phone' => '0123456789',
         'terms' => '1',
     ]);
@@ -123,6 +156,7 @@ it('creates verified google community user after phone and terms are submitted',
 
     expect($user)->not->toBeNull()
         ->and($user->hu_role)->toBe('community')
+        ->and($user->hu_name)->toBe('Nur Aisyah Abdullah')
         ->and($user->hu_phone)->toBe('0123456789')
         ->and($user->hu_email_verified_at)->not->toBeNull()
         ->and($user->hu_google_id)->toBe('google-complete-2')
@@ -160,7 +194,7 @@ it('creates google student user with detected matric number and student status r
     $this->withSession([
         'google_auth_user' => [
             'id' => 'google-student-1',
-            'name' => 'Student Google',
+            'name' => 'Student Nickname',
             'email' => 'student.google@siswa.upsi.edu.my',
             'avatar' => null,
         ],
@@ -177,6 +211,7 @@ it('creates google student user with detected matric number and student status r
 
     expect($user)->not->toBeNull()
         ->and($user->hu_role)->toBe('student')
+        ->and($user->hu_name)->toBe('Student Google')
         ->and($user->hu_student_id)->toBe('D2023999001')
         ->and($user->hu_email_verified_at)->not->toBeNull();
 

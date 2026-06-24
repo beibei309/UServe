@@ -63,6 +63,7 @@ class GoogleAuthController extends Controller
             ])->save();
 
             if (! $existingUser->hu_phone || ! $existingUser->hu_terms_accepted_at) {
+                $googlePayload['name'] = $existingUser->hu_name ?: $googlePayload['name'];
                 $request->session()->put('google_auth_user', $googlePayload);
                 $request->session()->put('google_existing_user_id', $existingUser->hu_id);
 
@@ -98,6 +99,10 @@ class GoogleAuthController extends Controller
 
         return view('auth.google-complete', [
             'googleUser' => $googlePayload,
+            'isStudentGoogleAccount' => str_ends_with(
+                $this->normalizeEmail($googlePayload['email']) ?? '',
+                '@siswa.upsi.edu.my',
+            ),
         ]);
     }
 
@@ -108,11 +113,6 @@ class GoogleAuthController extends Controller
             return redirect()->route('login')->with('error', 'Please start again with Google sign in.');
         }
 
-        $validated = $request->validate([
-            'phone' => ['required', 'string', 'max:20'],
-            'terms' => ['accepted'],
-        ]);
-
         $email = $this->normalizeEmail($googlePayload['email']);
         if (! $email) {
             throw ValidationException::withMessages([
@@ -120,12 +120,26 @@ class GoogleAuthController extends Controller
             ]);
         }
 
+        $isStudentGoogleAccount = str_ends_with($email, '@siswa.upsi.edu.my');
+        $validated = $request->validate([
+            'full_name' => $isStudentGoogleAccount
+                ? ['nullable']
+                : ['required', 'string', 'min:2', 'max:255', "regex:/^[\pL\pM][\pL\pM .'-]*$/u"],
+            'phone' => ['required', 'string', 'max:20'],
+            'terms' => ['accepted'],
+        ], [
+            'full_name.required' => 'Enter your full name as shown on your identity document.',
+            'full_name.regex' => 'Use your full name with letters, spaces, apostrophes, hyphens or full stops only.',
+        ]);
+
         $existingUserId = $request->session()->get('google_existing_user_id');
 
         try {
             $resolved = $resolver->resolve(
                 (string) $googlePayload['id'],
-                (string) ($googlePayload['name'] ?? $email),
+                $isStudentGoogleAccount
+                    ? (string) ($googlePayload['name'] ?? $email)
+                    : trim((string) $validated['full_name']),
                 $email
             );
 
@@ -138,7 +152,7 @@ class GoogleAuthController extends Controller
                 'error' => $exception->getMessage(),
             ]);
 
-            return back()->withInput($request->only('phone'))->withErrors([
+            return back()->withInput($request->only('full_name', 'phone'))->withErrors([
                 'google' => $exception->getMessage(),
             ]);
         }
@@ -154,6 +168,7 @@ class GoogleAuthController extends Controller
         $user = User::query()->findOrFail($userId);
 
         $user->forceFill([
+            'hu_name' => $resolved->name,
             'hu_phone' => $phone,
             'hu_google_id' => $user->hu_google_id ?: $resolved->googleId,
             'hu_google_avatar' => $googlePayload['avatar'] ?? null,
