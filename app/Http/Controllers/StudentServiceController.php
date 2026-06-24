@@ -8,16 +8,23 @@ use App\Models\ServiceRequest;
 use App\Models\StudentService;
 use App\Models\User;
 use App\Services\ServiceImageUrlResolver;
+use App\Services\ServicePackageDisplay;
+use App\Services\ServicePackageDuration;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class StudentServiceController extends Controller
 {
-    public function __construct(private readonly ServiceImageUrlResolver $serviceImageUrlResolver) {}
+    public function __construct(
+        private readonly ServiceImageUrlResolver $serviceImageUrlResolver,
+        private readonly ServicePackageDuration $servicePackageDuration,
+        private readonly ServicePackageDisplay $servicePackageDisplay,
+    ) {}
 
     public function index(Request $request)
     {
@@ -194,6 +201,7 @@ class StudentServiceController extends Controller
             $this->serviceValidationRules(false),
             $this->serviceValidationMessages()
         );
+        $this->validateAppointmentPackageDurations($request);
 
         // 3. Handle Image
         if ($request->hasFile('image')) {
@@ -332,6 +340,7 @@ class StudentServiceController extends Controller
 
         try {
             $service->delete();
+
             return response()->json([
                 'success' => true,
                 'message' => 'Service deleted successfully.',
@@ -481,6 +490,7 @@ class StudentServiceController extends Controller
                 $this->serviceValidationRules(true),
                 $this->serviceValidationMessages()
             );
+            $this->validateAppointmentPackageDurations($request);
 
             // 4. Save Overview
             $service->hss_title = $this->sanitizeInput($validated['title']);
@@ -653,6 +663,37 @@ class StudentServiceController extends Controller
         ];
     }
 
+    private function validateAppointmentPackageDurations(Request $request): void
+    {
+        if ($request->input('is_session_based') != '1') {
+            return;
+        }
+
+        $packages = $request->input('packages', []);
+        $schedule = $request->input('operating_hours', []);
+        $packageNames = ['Basic', 'Standard', 'Premium'];
+
+        foreach ($packageNames as $index => $packageName) {
+            $package = $packages[$index] ?? [];
+            if ($index > 0 && empty($package['price'])) {
+                continue;
+            }
+
+            $duration = $package['duration'] ?? null;
+            if ($this->servicePackageDuration->toMinutes($duration) === null) {
+                throw ValidationException::withMessages([
+                    "packages.$index.duration" => "$packageName package time must use minutes or hours, for example 90 minutes or 2 hours.",
+                ]);
+            }
+
+            if (! $this->servicePackageDuration->fitsAvailableDay($duration, $schedule)) {
+                throw ValidationException::withMessages([
+                    "packages.$index.duration" => "$packageName package is longer than your available hours. Make the package shorter or open a longer working day.",
+                ]);
+            }
+        }
+    }
+
     private function sanitizeInput($text)
     {
         if (is_null($text)) {
@@ -735,6 +776,9 @@ class StudentServiceController extends Controller
                 'rejected' => '<i class="fa-solid fa-circle-xmark mr-1"></i>',
                 default => '',
             };
+            $service->ui_basic_frequency_label = $this->servicePackageDisplay->frequencyLabel(
+                $service->hss_basic_frequency,
+            );
 
             return $service;
         });

@@ -137,8 +137,8 @@
                                             <div class="flex items-baseline gap-1">
                                                 <span class="text-xl font-extrabold text-gray-900">RM
                                                     {{ number_format($service->hss_basic_price) }}</span>
-                                                <span class="text-xs text-gray-500 font-medium">/
-                                                    {{ $service->hss_basic_frequency }}</span>
+                                                <span class="text-xs text-gray-500 font-medium">
+                                                    {{ $service->ui_basic_frequency_label }}</span>
                                             </div>
                                         @else
                                             <span class="text-sm italic text-gray-400">Price not set</span>

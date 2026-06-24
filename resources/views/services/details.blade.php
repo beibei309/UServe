@@ -439,7 +439,7 @@
                             {{-- Price & Simple Info Display --}}
                             <div class="flex flex-col items-end mb-5 text-right">
                                 <span class="font-bold text-gray-400 text-xs uppercase tracking-wider mb-1">
-                                    <span x-text="isSessionBased ? 'From' : 'Task Price'"></span>
+                                    <span x-text="priceLabel"></span>
                                 </span>
 
                                 {{-- Price --}}
@@ -471,20 +471,26 @@
                             {{-- Duration --}}
                             <div class="mb-5" x-show="isSessionBased">
                                 <div class="flex justify-between items-center mb-2">
-                                    <label class="text-xs font-bold text-gray-700 uppercase">Duration</label>
+                                    <label class="text-xs font-bold text-gray-700 uppercase">Service time</label>
                                     <span class="text-xs font-medium text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded"
                                         x-text="formatDuration(selectedDuration * sessionDuration)"></span>
                                 </div>
-                                <div class="grid grid-cols-3 min-[380px]:grid-cols-5 gap-2">
+                                <div x-show="canAdjustDuration" class="grid grid-cols-3 min-[380px]:grid-cols-5 gap-2">
                                     <template x-for="h in [1, 2, 3, 4, 5]" :key="h">
-                                        <button @click="selectDuration(h)" type="button"
+                                        <button @click="selectDuration(h)" type="button" :disabled="!canAdjustDuration"
                                             class="py-2.5 rounded-xl border text-sm font-bold transition-all"
                                             :class="selectedDuration === h ?
                                                 'bg-slate-800 text-white border-slate-800 shadow-md transform -translate-y-0.5' :
-                                                'bg-white text-gray-600 border-gray-200 hover:border-gray-300 hover:bg-gray-50'">
+                                                (canAdjustDuration
+                                                    ? 'bg-white text-gray-600 border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                                                    : 'bg-gray-50 text-gray-300 border-gray-100 cursor-not-allowed')">
                                             <span x-text="formatDuration(h * sessionDuration)"></span>
                                         </button>
                                     </template>
+                                </div>
+                                <div x-show="!canAdjustDuration"
+                                    class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+                                    This package has a fixed service time and fixed price.
                                 </div>
                                 <p class="mt-2 text-[11px] text-indigo-600" x-show="packageDurationHint" x-text="packageDurationHint"></p>
                             </div>

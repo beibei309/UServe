@@ -237,9 +237,7 @@
                                                                 <p class="text-xs font-medium text-gray-500 uppercase">
                                                                     Details</p>
                                                                 <p class="text-sm font-semibold text-gray-900">
-                                                                    {{ $request->ui_pkg_duration ? $request->ui_pkg_duration . ' Hrs' : 'N/A' }}
-                                                                    <span class="text-gray-300 mx-1">|</span>
-                                                                    {{ $request->ui_pkg_frequency ? ucfirst($request->ui_pkg_frequency) : 'One-time' }}
+                                                                    {{ $request->ui_pkg_summary }}
                                                                 </p>
                                                             </div>
                                                         </div>
@@ -248,9 +246,8 @@
 
                                                 @if ($request->hsr_message && !$request->ui_is_seller_restricted)
                                                     <div class="rounded-lg bg-gray-50 p-4 border border-gray-100 mb-6">
-                                                        <p class="text-xs font-bold text-gray-400 uppercase mb-1">Your
-                                                            Note</p>
-                                                        <p class="text-sm text-gray-600 italic">
+                                                        <p class="text-xs font-bold text-gray-400 uppercase mb-1">Your Message</p>
+                                                        <p class="text-sm text-gray-600 italic whitespace-pre-line break-words">
                                                             "{{ $request->hsr_message }}"</p>
                                                     </div>
                                                 @endif
@@ -697,9 +694,7 @@
                                                             <p class="text-xs font-medium text-gray-500 uppercase">
                                                                 Details</p>
                                                             <p class="text-sm font-semibold text-gray-700">
-                                                                {{ $request->ui_pkg_duration ? $request->ui_pkg_duration . ' Hrs' : 'Custom' }}
-                                                                <span class="text-gray-300 mx-1">|</span>
-                                                                {{ $request->ui_pkg_frequency ? ucfirst($request->ui_pkg_frequency) : 'N/A' }}
+                                                                {{ $request->ui_pkg_summary }}
                                                             </p>
                                                         </div>
                                                     </div>

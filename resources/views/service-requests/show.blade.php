@@ -104,7 +104,7 @@
                                     </div>
 
                                     <div>
-                                        <label class="text-xs font-semibold text-gray-400 uppercase tracking-wide">From</label>
+                                        <label class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Package Price</label>
                                         <p class="text-lg font-bold text-green-600 mt-1">
                                             @if ($serviceRequest->hsr_offered_price)
                                                 RM {{ number_format($serviceRequest->hsr_offered_price, 2) }}
@@ -113,6 +113,18 @@
                                             @endif
                                         </p>
                                     </div>
+
+                                    <div>
+                                        <label class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Package Time</label>
+                                        <p class="text-base font-medium text-gray-900 mt-1">{{ $selectedPackageSummary }}</p>
+                                    </div>
+
+                                    @if ($bookingTimeDisplay)
+                                        <div>
+                                            <label class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Booking Time</label>
+                                            <p class="text-base font-medium text-gray-900 mt-1">{{ $bookingTimeDisplay }}</p>
+                                        </div>
+                                    @endif
 
                                     <div class="sm:col-span-2">
                                         <label class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Requested Dates</label>
@@ -153,8 +165,10 @@
 
                                     @if ($serviceRequest->hsr_message)
                                         <div class="sm:col-span-2">
-                                            <label class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Message from Buyer</label>
-                                            <div class="mt-2 p-4 bg-white rounded-lg border border-gray-200 text-gray-600">
+                                            <label class="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+                                                {{ $isRequester ? 'Your Message' : 'Customer Message' }}
+                                            </label>
+                                            <div class="mt-2 p-4 bg-white rounded-lg border border-gray-200 text-gray-600 whitespace-pre-line break-words">
                                                 {{ $serviceRequest->hsr_message }}
                                             </div>
                                         </div>

@@ -6,6 +6,12 @@
     const deleteUrlTemplate = config.dataset.deleteUrlTemplate || '';
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
 
+    function formatFrequency(frequency) {
+        const value = String(frequency || '').trim().replace(/^(?:per\s+)+/i, '');
+        if (!value) return 'One-time';
+        return `Per ${value.replace(/\b\w/g, (letter) => letter.toUpperCase())}`;
+    }
+
     const tabButtons = document.querySelectorAll('.tab-btn');
     const tabContents = document.querySelectorAll('.tab-content');
 
@@ -58,6 +64,7 @@
         let hasPackages = false;
         tiers.forEach((tier) => {
             const price = getField(`hss_${tier.key}_price`, `${tier.key}_price`);
+            const duration = getField(`hss_${tier.key}_duration`, `${tier.key}_duration`);
             const frequency = getField(`hss_${tier.key}_frequency`, `${tier.key}_frequency`);
             if (!price) return;
 
@@ -70,7 +77,7 @@
                         <div class="flex items-baseline gap-1">
                             <span class="text-2xl font-extrabold text-gray-900">RM${price}</span>
                         </div>
-                        <span class="text-xs text-gray-500 font-medium">per ${frequency || 'session'}</span>
+                        <span class="text-xs text-gray-500 font-medium">${duration ? `${duration} | ` : ''}${formatFrequency(frequency)}</span>
                     </div>
                     <div class="md:w-2/3 prose prose-sm max-w-none text-gray-600 text-sm flex items-center">
                         <div>${desc || '<span class="italic opacity-50">No description provided.</span>'}</div>

@@ -71,6 +71,28 @@
                 return 'text-indigo-600';
             },
 
+            get billingFrequency() {
+                return String(this.packages[this.currentPackage]?.frequency || '').trim().toLowerCase();
+            },
+
+            get isHourlyBilling() {
+                return /\b(hourly|per\s*hours?|per\s*hrs?|\/\s*hours?|\/\s*hrs?)\b/i.test(this.billingFrequency);
+            },
+
+            get isSlotBilling() {
+                return /\b(per\s*slots?|\/\s*slots?)\b/i.test(this.billingFrequency);
+            },
+
+            get canAdjustDuration() {
+                return this.isHourlyBilling || this.isSlotBilling;
+            },
+
+            get priceLabel() {
+                if (!this.isSessionBased) return 'Task Price';
+                if (this.canAdjustDuration) return 'Estimated Total';
+                return 'Package Price';
+            },
+
             formatDuration(minutes) {
                 if (minutes < 60) return `${minutes}m`;
                 const hours = minutes / 60;
@@ -164,18 +186,29 @@
                     return;
                 }
 
-                const slotCount = Math.min(5, Math.max(1, Math.ceil(durationMinutes / this.sessionDuration)));
+                const slotCount = Math.max(1, Math.ceil(durationMinutes / this.sessionDuration));
                 this.selectedDuration = slotCount;
-                this.packageDurationHint = `Auto-selected ${this.formatDuration(slotCount * this.sessionDuration)} based on package duration.`;
+                const selectedLabel = this.formatDuration(slotCount * this.sessionDuration);
+                this.packageDurationHint = this.canAdjustDuration
+                    ? `Starts at ${selectedLabel} based on package duration. You can adjust the booking time.`
+                    : `Fixed ${selectedLabel} package duration.`;
                 this.selectedTime = null;
                 this.refreshTimeSlotsForSelectedDate();
             },
 
             calculateTotal() {
-                return (this.packages[this.currentPackage].price * this.selectedDuration).toFixed(2);
+                const basePrice = Number(this.packages[this.currentPackage]?.price || 0);
+                if (this.isHourlyBilling) {
+                    return (basePrice * ((this.selectedDuration * this.sessionDuration) / 60)).toFixed(2);
+                }
+                if (this.isSlotBilling) {
+                    return (basePrice * this.selectedDuration).toFixed(2);
+                }
+                return basePrice.toFixed(2);
             },
 
             selectDuration(hours) {
+                if (!this.canAdjustDuration) return;
                 this.selectedDuration = hours;
                 this.selectedTime = null;
                 if (!this.selectedDate) return;
@@ -377,16 +410,25 @@
                 const sendEndTime = this.isSessionBased ? this.calculateEndTime(this.selectedTime) : '23:59';
                 const displayTime = this.formatTimeDisplay(this.selectedTime);
 
+                const bookingSummary = this.isSessionBased
+                    ? `
+                        <p class="mb-1"><strong>Date:</strong> ${this.selectedDate}</p>
+                        <p class="mb-1"><strong>Booking time:</strong> ${displayTime}</p>
+                        <p class="mb-1"><strong>Service time:</strong> ${this.formatDuration(this.selectedDuration * this.sessionDuration)}</p>
+                    `
+                    : `
+                        <p class="mb-1"><strong>Package:</strong> ${this.currentPackage.charAt(0).toUpperCase() + this.currentPackage.slice(1)}</p>
+                        <p class="mb-1"><strong>Expected time:</strong> ${this.formatPackageDuration(this.packages[this.currentPackage]?.duration) || 'Discuss with seller'}</p>
+                    `;
+
                 const detailsHtml = `
                     <div class="text-left bg-gray-50 p-4 rounded-lg border border-gray-200 text-sm mb-4">
-                        <p class="mb-1"><strong>Date:</strong> ${this.selectedDate}</p>
-                        <p class="mb-1"><strong>Time:</strong> ${displayTime}</p>
-                        <p class="mb-1"><strong>Duration:</strong> ${this.formatDuration(this.selectedDuration * this.sessionDuration)}</p>
+                        ${bookingSummary}
                         <p class="text-lg font-bold text-indigo-600 mt-2">Total: RM${this.calculateTotal()}</p>
                     </div>
                     <div class="text-left">
-                        <label class="block text-sm font-bold text-gray-700 mb-1">Message to Seller</label>
-                        <textarea id="swal-message-input" class="w-full border rounded-lg p-3 text-sm" rows="3" placeholder="Describe your task..."></textarea>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">What do you need?</label>
+                        <textarea id="swal-message-input" class="w-full border rounded-lg p-3 text-sm" rows="3" maxlength="1000" placeholder="Share the important details with the seller..."></textarea>
                     </div>
                 `;
 
@@ -412,8 +454,6 @@
                     });
 
                     const userNote = result.value;
-                    const finalMessage = `BOOKING DETAILS:\nTime: ${displayTime}\nDuration: ${this.formatDuration(this.selectedDuration * this.sessionDuration)}\n\nNote: ${userNote}`;
-
                     fetch(detailsConfig.storeRequestUrl, {
                         method: 'POST',
                         headers: {
@@ -425,7 +465,7 @@
                             selected_dates: this.selectedDate,
                             start_time: sendStartTime,
                             end_time: sendEndTime,
-                            message: finalMessage,
+                            message: userNote,
                             selected_package: this.currentPackage,
                             offered_price: this.calculateTotal(),
                         }),

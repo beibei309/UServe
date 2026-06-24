@@ -274,7 +274,7 @@
         const map = { overview: 0, pricing: 1, description: 2, availability: 3 };
         const activeIndex = map[activeId];
         document.querySelectorAll('.step-link').forEach((link, index) => {
-            link.className = 'step-link w-1/4 py-4 px-1 border-b-2 font-medium text-sm flex items-center justify-center transition-colors';
+            link.className = 'step-link group min-w-28 sm:min-w-0 sm:flex-1 py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm flex items-center justify-center transition-colors';
             const circle = link.querySelector('span');
             if (index < activeIndex) {
                 link.classList.add('step-completed', 'border-green-500', 'text-green-600');
@@ -289,12 +289,25 @@
                 circle.className = 'w-6 h-6 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center text-xs mr-2 font-bold';
                 circle.innerHTML = index + 1;
             }
+
+            if (index === activeIndex && window.innerWidth < 640) {
+                link.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+            }
         });
     }
 
     async function submitForm() {
         const form = document.getElementById('editServiceForm');
         if (fpInstance) document.getElementById('unavailableDates').value = fpInstance.input.value;
+
+        const booksATime = form.querySelector('input[name="is_session_based"]')?.value === '1';
+        form.querySelectorAll('[data-package-frequency]').forEach((input) => {
+            const existingValue = String(input.value || '').toLowerCase();
+            const usesVariablePrice = /hour|slot/.test(existingValue);
+            if (!usesVariablePrice) {
+                input.value = booksATime ? 'Per Session' : 'Per Task';
+            }
+        });
 
         const validationError = validateClientLimitsBeforeSubmit();
         if (validationError) {

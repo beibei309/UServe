@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Review;
 use App\Models\Category;
+use App\Models\Review;
 use App\Models\ServiceRequest;
 use App\Models\StudentService;
-use App\Http\Controllers\PointsController;
 use App\Notifications\ServiceRequestStatusUpdated;
 use App\Services\ServiceImageUrlResolver;
+use App\Services\ServicePackageDisplay;
+use App\Services\ServicePackagePriceCalculator;
 use App\Services\ServiceRequestNotificationService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -17,12 +18,15 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class ServiceRequestController extends BaseController
 {
     public function __construct(
         private readonly ServiceRequestNotificationService $serviceRequestNotificationService,
-        private readonly ServiceImageUrlResolver $serviceImageUrlResolver
+        private readonly ServiceImageUrlResolver $serviceImageUrlResolver,
+        private readonly ServicePackagePriceCalculator $servicePackagePriceCalculator,
+        private readonly ServicePackageDisplay $servicePackageDisplay,
     ) {
         $this->middleware('auth');
     }
@@ -40,9 +44,9 @@ class ServiceRequestController extends BaseController
             $validated = $request->validate([
                 'student_service_id' => 'required|exists:h2u_student_services,hss_id',
                 'selected_dates' => 'required|date',
-                'start_time' => 'nullable|string',
-                'end_time' => 'nullable|string',
-                'selected_package' => 'required|string',
+                'start_time' => 'nullable|date_format:H:i',
+                'end_time' => 'nullable|date_format:H:i|after:start_time',
+                'selected_package' => 'required|string|in:basic,standard,premium',
                 'message' => 'nullable|string|max:1000',
                 'offered_price' => 'nullable|numeric|min:0|max:99999.99',
             ]);
@@ -56,7 +60,7 @@ class ServiceRequestController extends BaseController
                     'status' => 'error',
                     'success' => false,
                     'message' => 'Service or provider unavailable.',
-                    'data' => null
+                    'data' => null,
                 ], 400);
             }
 
@@ -71,7 +75,7 @@ class ServiceRequestController extends BaseController
                     'status' => 'error',
                     'success' => false,
                     'message' => 'You already have an active request with this helper.',
-                    'data' => null
+                    'data' => null,
                 ], 400);
             }
 
@@ -85,7 +89,7 @@ class ServiceRequestController extends BaseController
                         'status' => 'error',
                         'success' => false,
                         'message' => 'Start and End time are required for this service.',
-                        'data' => null
+                        'data' => null,
                     ], 422);
                 }
 
@@ -104,13 +108,20 @@ class ServiceRequestController extends BaseController
                         'status' => 'error',
                         'success' => false,
                         'message' => 'This time slot is booked. Please select another.',
-                        'data' => null
+                        'data' => null,
                     ], 400);
                 }
             } else {
                 $startTime = $startTime ?? '00:00';
                 $endTime = $endTime ?? '23:59';
             }
+
+            $calculatedPrice = $this->servicePackagePriceCalculator->calculate(
+                $studentService,
+                $validated['selected_package'],
+                $startTime,
+                $endTime,
+            );
 
             // Create Request
             $serviceRequest = ServiceRequest::create([
@@ -122,7 +133,7 @@ class ServiceRequestController extends BaseController
                 'hsr_end_time' => $endTime,
                 'hsr_selected_package' => [$validated['selected_package']],
                 'hsr_message' => $validated['message'] ?? null,
-                'hsr_offered_price' => $validated['offered_price'] ?? null,
+                'hsr_offered_price' => $calculatedPrice,
                 'hsr_status' => 'pending',
             ]);
 
@@ -134,18 +145,21 @@ class ServiceRequestController extends BaseController
                 'success' => true,
                 'message' => 'Service request sent successfully!',
                 'data' => [
-                    'request_id' => $serviceRequest->hsr_id
-                ]
+                    'request_id' => $serviceRequest->hsr_id,
+                ],
             ], 200);
             // ...existing code...
+        } catch (ValidationException $e) {
+            throw $e;
         } catch (\Exception $e) {
             Log::error('ServiceRequest store error: '.$e->getMessage());
+
             return response()->json([
                 'code' => 500,
                 'status' => 'error',
                 'success' => false,
                 'message' => 'Server error occurred.',
-                'data' => null
+                'data' => null,
             ], 500);
         }
     }
@@ -294,13 +308,13 @@ class ServiceRequestController extends BaseController
                 'serviceRequestsIndexJsVersion'
             ));
         } catch (\Exception $e) {
-            Log::error('ServiceRequest index error: ' . $e->getMessage());
+            Log::error('ServiceRequest index error: '.$e->getMessage());
             if ($request->expectsJson() || $request->ajax()) {
                 return response()->json([
                     'success' => false,
                     'data' => [],
                     'pagination' => null,
-                    'message' => 'Server error occurred.'
+                    'message' => 'Server error occurred.',
                 ], 500);
             }
 
@@ -335,11 +349,26 @@ class ServiceRequestController extends BaseController
         $buyerRestricted = (bool) ($serviceRequest->requester->hu_is_suspended || $serviceRequest->requester->hu_is_blacklisted);
         $isRestricted = $providerRestricted || $buyerRestricted;
 
-        $selectedPackageRaw = is_array($serviceRequest->hsr_selected_package)
-            ? ($serviceRequest->hsr_selected_package[0] ?? 'custom')
-            : ($serviceRequest->hsr_selected_package ?? 'custom');
+        $selectedPackageRaw = $this->selectedPackageValue($serviceRequest->hsr_selected_package);
         $selectedPackageLabel = trim(str_replace('"', '', (string) $selectedPackageRaw));
         $selectedPackageLabel = $selectedPackageLabel !== '' ? $selectedPackageLabel : 'Custom';
+        $selectedPackageKey = strtolower($selectedPackageLabel);
+        $selectedPackageDuration = in_array($selectedPackageKey, ['basic', 'standard', 'premium'], true)
+            ? $service->{"hss_{$selectedPackageKey}_duration"}
+            : null;
+        $selectedPackageFrequency = in_array($selectedPackageKey, ['basic', 'standard', 'premium'], true)
+            ? $service->{"hss_{$selectedPackageKey}_frequency"}
+            : null;
+        $selectedPackageSummary = $this->servicePackageDisplay->summary(
+            $selectedPackageDuration,
+            $selectedPackageFrequency,
+        );
+        $bookingTimeDisplay = null;
+        if ($service->hss_session_duration && $serviceRequest->hsr_start_time && $serviceRequest->hsr_end_time) {
+            $bookingTimeDisplay = Carbon::parse((string) $serviceRequest->hsr_start_time)->format('g:i A')
+                .' - '
+                .Carbon::parse((string) $serviceRequest->hsr_end_time)->format('g:i A');
+        }
 
         $headerVisual = $this->resolveShowHeaderVisual($serviceRequest->hsr_status, $isRestricted);
 
@@ -387,6 +416,8 @@ class ServiceRequestController extends BaseController
             'buyerRestricted',
             'isRestricted',
             'selectedPackageLabel',
+            'selectedPackageSummary',
+            'bookingTimeDisplay',
             'headerVisual',
             'requestedDateDisplays',
             'providerAverageRating',
@@ -404,7 +435,7 @@ class ServiceRequestController extends BaseController
     {
         $requestIds = $requests->pluck('hsr_id')->all();
         $reviewsByRequest = collect();
-        if (!empty($requestIds)) {
+        if (! empty($requestIds)) {
             $reviewsByRequest = Review::whereIn('hr_service_request_id', $requestIds)
                 ->get()
                 ->groupBy('hr_service_request_id');
@@ -413,9 +444,7 @@ class ServiceRequestController extends BaseController
         $requests->transform(function (ServiceRequest $request) use ($reviewsByRequest, $helperView, $currentUserId) {
             $service = $request->studentService;
             $requestReviews = $reviewsByRequest->get((int) $request->hsr_id, collect());
-            $selectedPackageRaw = is_array($request->hsr_selected_package)
-                ? ($request->hsr_selected_package[0] ?? 'custom')
-                : ($request->hsr_selected_package ?? 'custom');
+            $selectedPackageRaw = $this->selectedPackageValue($request->hsr_selected_package);
             $packageLabel = trim(str_replace('"', '', (string) $selectedPackageRaw));
             $packageLabel = $packageLabel !== '' ? $packageLabel : 'Custom';
             $pkgType = strtolower($packageLabel);
@@ -443,8 +472,12 @@ class ServiceRequestController extends BaseController
             }
 
             $request->ui_package_label = $packageLabel;
-            $request->ui_pkg_duration = $service->{$pkgType.'_duration'} ?? null;
-            $request->ui_pkg_frequency = $service->{$pkgType.'_frequency'} ?? null;
+            $request->ui_pkg_duration = $service->{"hss_{$pkgType}_duration"} ?? null;
+            $request->ui_pkg_frequency = $service->{"hss_{$pkgType}_frequency"} ?? null;
+            $request->ui_pkg_summary = $this->servicePackageDisplay->summary(
+                $request->ui_pkg_duration,
+                $request->ui_pkg_frequency,
+            );
             $request->ui_first_date_display = $firstDateDisplay;
             $request->ui_date_count = count($dates);
             $request->ui_is_seller_restricted = $isSellerRestricted;
@@ -485,6 +518,18 @@ class ServiceRequestController extends BaseController
 
             return $request;
         });
+    }
+
+    private function selectedPackageValue(mixed $selectedPackage): string
+    {
+        if (! is_array($selectedPackage)) {
+            return (string) ($selectedPackage ?: 'custom');
+        }
+
+        return (string) ($selectedPackage[0]
+            ?? $selectedPackage['tier']
+            ?? $selectedPackage['package']
+            ?? 'custom');
     }
 
     private function resolveBuyerInProgressStyles(string $status, bool $isSellerRestricted): array
@@ -823,7 +868,7 @@ class ServiceRequestController extends BaseController
             return back()->with('error', 'Only the buyer can submit this report.');
         }
 
-        if (!in_array($serviceRequest->hsr_status, ['in_progress', 'waiting_payment'], true)) {
+        if (! in_array($serviceRequest->hsr_status, ['in_progress', 'waiting_payment'], true)) {
             return back()->with('error', 'You can report only when the order is in progress or waiting payment.');
         }
 
@@ -855,7 +900,7 @@ class ServiceRequestController extends BaseController
             return back()->with('error', 'Only the helper can submit this report.');
         }
 
-        if (!in_array($serviceRequest->hsr_status, ['in_progress', 'waiting_payment'], true)) {
+        if (! in_array($serviceRequest->hsr_status, ['in_progress', 'waiting_payment'], true)) {
             return back()->with('error', 'You can report only when the order is in progress or waiting payment.');
         }
 
@@ -904,21 +949,20 @@ class ServiceRequestController extends BaseController
 
     private function resolveStatusAfterDispute(ServiceRequest $serviceRequest): string
     {
-        if (!is_null($serviceRequest->hsr_finished_at)) {
+        if (! is_null($serviceRequest->hsr_finished_at)) {
             return 'waiting_payment';
         }
 
-        if (!is_null($serviceRequest->hsr_started_at)) {
+        if (! is_null($serviceRequest->hsr_started_at)) {
             return 'in_progress';
         }
 
-        if (!is_null($serviceRequest->hsr_accepted_at)) {
+        if (! is_null($serviceRequest->hsr_accepted_at)) {
             return 'accepted';
         }
 
         return 'accepted';
     }
-
 
     public function markAsPaid($id)
     {

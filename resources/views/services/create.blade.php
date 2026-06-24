@@ -41,17 +41,17 @@
         {{-- Wizard Tabs --}}
         <div class="mb-6 md:mb-8 max-w-5xl mx-auto">
             <div class="border-b border-gray-200 overflow-x-auto">
-                <nav class="-mb-px flex min-w-max space-x-5 sm:space-x-8" aria-label="Tabs">
-                    <button class="step-link step-active min-w-28 sm:w-1/4 py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm flex items-center justify-center transition-colors" data-target="overview">
+                <nav class="-mb-px flex min-w-max space-x-5 sm:min-w-0 sm:space-x-8" aria-label="Tabs">
+                    <button class="step-link step-active min-w-28 sm:min-w-0 sm:flex-1 py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm flex items-center justify-center transition-colors" data-target="overview">
                         <span class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs mr-2 font-bold ring-1 ring-indigo-600">1</span> Overview
                     </button>
-                    <button class="step-link step-inactive min-w-28 sm:w-1/4 py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm flex items-center justify-center transition-colors pointer-events-none" data-target="pricing">
+                    <button class="step-link step-inactive min-w-28 sm:min-w-0 sm:flex-1 py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm flex items-center justify-center transition-colors pointer-events-none" data-target="pricing">
                         <span class="w-6 h-6 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center text-xs mr-2 font-bold">2</span> Pricing
                     </button>
-                    <button class="step-link step-inactive min-w-28 sm:w-1/4 py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm flex items-center justify-center transition-colors pointer-events-none" data-target="description">
+                    <button class="step-link step-inactive min-w-28 sm:min-w-0 sm:flex-1 py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm flex items-center justify-center transition-colors pointer-events-none" data-target="description">
                         <span class="w-6 h-6 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center text-xs mr-2 font-bold">3</span> Description
                     </button>
-                    <button class="step-link step-inactive min-w-28 sm:w-1/4 py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm flex items-center justify-center transition-colors pointer-events-none" data-target="availability">
+                    <button class="step-link step-inactive min-w-28 sm:min-w-0 sm:flex-1 py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm flex items-center justify-center transition-colors pointer-events-none" data-target="availability">
                         <span class="w-6 h-6 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center text-xs mr-2 font-bold">4</span> Availability
                     </button>
                 </nav>
@@ -104,8 +104,8 @@
             <div id="pricing" class="tab-section hidden p-5 sm:p-8">
                 <div class="mb-6">
                     <h2 class="text-xl font-bold text-gray-900">Packages & Pricing</h2>
-                    <p class="text-gray-500 text-sm">Define your costs and what students get per package.</p>
-                    <p class="text-gray-400 text-xs mt-1">Duration = how long the service takes (e.g. 1 hour). Billing Unit = how price is charged (e.g. per session / per hour).</p>
+                    <p class="text-gray-500 text-sm">Set the full price, time needed, and what the customer will receive.</p>
+                    <p class="text-gray-400 text-xs mt-1">Example: RM50 and 2 hours means the whole two-hour Basic package costs RM50.</p>
                 </div>
 
                 {{-- Basic Package (Required) --}}
@@ -114,20 +114,17 @@
                     <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center"><span class="w-3 h-3 bg-gray-800 rounded-full mr-2"></span> Basic Package</h3>
                     <input type="hidden" name="packages[0][package_type]" value="basic">
 
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                         <div>
                             <label class="text-xs font-bold text-gray-500 uppercase">Price (RM) <span class="text-red-500">*</span></label>
                             <input type="number" id="basic_price" name="packages[0][price]" class="w-full mt-1 border-gray-300 rounded-md focus:ring-gray-500 focus:border-gray-500">
                         </div>
                         <div>
-                            <label class="text-xs font-bold text-gray-500 uppercase">Duration (shown to student)</label>
+                            <label class="text-xs font-bold text-gray-500 uppercase">How long will it take?</label>
                             <input type="text" name="packages[0][duration]" maxlength="100" placeholder="e.g. 1 hour" class="w-full mt-1 border-gray-300 rounded-md">
+                            <p class="mt-1 text-[11px] text-gray-400">Use minutes or hours for bookings. Use days for one-off work.</p>
                         </div>
-                        <div>
-                            <label class="text-xs font-bold text-gray-500 uppercase">Billing Unit</label>
-                            <input type="text" name="packages[0][frequency]" maxlength="100" placeholder="e.g. per session" class="w-full mt-1 border-gray-300 rounded-md">
-                            <p class="mt-1 text-[11px] text-gray-400">Examples: per session, per hour, per day, per task, per page</p>
-                        </div>
+                        <input type="hidden" name="packages[0][frequency]" value="Per Session" data-package-frequency>
                     </div>
                     <div>
                         <label class="text-xs font-bold text-gray-500 uppercase mb-1 block">What's included?</label>
@@ -152,10 +149,10 @@
                     <div class="border border-blue-200 rounded-xl p-4 sm:p-6 bg-blue-50/50">
                         <h3 class="text-lg font-bold text-blue-800 mb-4 flex items-center"><span class="w-3 h-3 bg-blue-600 rounded-full mr-2"></span> Standard Package</h3>
                         <input type="hidden" name="packages[1][package_type]" value="standard">
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                             <div><label class="text-xs font-bold text-blue-600 uppercase">Price (RM)</label><input type="number" name="packages[1][price]" class="w-full mt-1 border-blue-200 rounded-md"></div>
-                            <div><label class="text-xs font-bold text-blue-600 uppercase">Duration (shown to student)</label><input type="text" name="packages[1][duration]" maxlength="100" placeholder="e.g. 2 hours" class="w-full mt-1 border-blue-200 rounded-md"></div>
-                            <div><label class="text-xs font-bold text-blue-600 uppercase">Billing Unit</label><input type="text" name="packages[1][frequency]" maxlength="100" placeholder="e.g. per session" class="w-full mt-1 border-blue-300 rounded-md"><p class="mt-1 text-[11px] text-blue-400">Examples: per session, per hour, per day, per task, per page</p></div>
+                            <div><label class="text-xs font-bold text-blue-600 uppercase">How long will it take?</label><input type="text" name="packages[1][duration]" maxlength="100" placeholder="e.g. 2 hours" class="w-full mt-1 border-blue-200 rounded-md"></div>
+                            <input type="hidden" name="packages[1][frequency]" value="Per Session" data-package-frequency>
                         </div>
                         <div class="bg-white rounded-md border border-blue-200 overflow-hidden"><div id="editor-standard" class="h-20"></div></div>
                         <input type="hidden" name="packages[1][description]" id="input-standard">
@@ -164,10 +161,10 @@
                     <div class="border border-purple-200 rounded-xl p-4 sm:p-6 bg-purple-50/50">
                         <h3 class="text-lg font-bold text-purple-800 mb-4 flex items-center"><span class="w-3 h-3 bg-purple-600 rounded-full mr-2"></span> Premium Package</h3>
                         <input type="hidden" name="packages[2][package_type]" value="premium">
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                             <div><label class="text-xs font-bold text-purple-600 uppercase">Price (RM)</label><input type="number" name="packages[2][price]" class="w-full mt-1 border-purple-200 rounded-md"></div>
-                            <div><label class="text-xs font-bold text-purple-600 uppercase">Duration (shown to student)</label><input type="text" name="packages[2][duration]" maxlength="100" placeholder="e.g. 3 hours" class="w-full mt-1 border-purple-200 rounded-md"></div>
-                            <div><label class="text-xs font-bold text-purple-600 uppercase">Billing Unit</label><input type="text" name="packages[2][frequency]" maxlength="100" placeholder="e.g. per session" class="w-full mt-1 border-purple-300 rounded-md"><p class="mt-1 text-[11px] text-purple-400">Examples: per session, per hour, per day, per task, per page</p></div>
+                            <div><label class="text-xs font-bold text-purple-600 uppercase">How long will it take?</label><input type="text" name="packages[2][duration]" maxlength="100" placeholder="e.g. 3 hours" class="w-full mt-1 border-purple-200 rounded-md"></div>
+                            <input type="hidden" name="packages[2][frequency]" value="Per Session" data-package-frequency>
                         </div>
                         <div class="bg-white rounded-md border border-purple-200 overflow-hidden"><div id="editor-premium" class="h-20"></div></div>
                         <input type="hidden" name="packages[2][description]" id="input-premium">
@@ -213,12 +210,12 @@
                         <div>
                             <h3 class="font-bold text-indigo-900">How is this service booked?</h3>
                             <p class="text-sm text-indigo-700 mt-1">
-                                <span x-show="isSessionBased"><strong>Appointment Based:</strong> Users book specific time slots.</span>
-                                <span x-show="!isSessionBased"><strong>Task Based:</strong> One-off requests (e.g. Laundry).</span>
+                                <span x-show="isSessionBased"><strong>Book a time:</strong> Customers choose a date and start time.</span>
+                                <span x-show="!isSessionBased"><strong>One-off task:</strong> Customers send a request without choosing a time.</span>
                             </p>
                         </div>
                         <div class="grid grid-cols-2 sm:flex sm:items-center bg-white rounded-lg p-1 border border-indigo-200 shadow-sm">
-                            <button type="button" @click="isSessionBased = true" :class="isSessionBased ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-500 hover:bg-gray-50'" class="px-4 py-2 rounded-md text-sm font-bold transition-all">Time Slots</button>
+                            <button type="button" @click="isSessionBased = true" :class="isSessionBased ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-500 hover:bg-gray-50'" class="px-4 py-2 rounded-md text-sm font-bold transition-all">Book a Time</button>
                             <button type="button" @click="isSessionBased = false" :class="!isSessionBased ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-500 hover:bg-gray-50'" class="px-4 py-2 rounded-md text-sm font-bold transition-all">One-off Task</button>
                         </div>
                         <input type="hidden" name="is_session_based" :value="isSessionBased ? 1 : 0">
@@ -226,10 +223,10 @@
 
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
                         <div class="lg:col-span-2 space-y-6">
-                            {{-- Session Duration --}}
+                            {{-- Booking start spacing --}}
                             <div x-show="isSessionBased" x-transition class="bg-white rounded-2xl sm:rounded-3xl shadow-sm border border-slate-100 p-5 sm:p-8">
-                                <h2 class="font-bold text-slate-800 text-lg">Session Duration</h2>
-                                <p class="text-sm text-slate-500 mb-6">How long is one slot?</p>
+                                <h2 class="font-bold text-slate-800 text-lg">Start time choices</h2>
+                                <p class="text-sm text-slate-500 mb-6">Choose the gap between the start times customers can select. For example, 60 minutes shows 9:00 AM, 10:00 AM, 11:00 AM.</p>
                                 <select name="session_duration" :disabled="!isSessionBased" class="w-full max-w-xs rounded-xl border-slate-200 shadow-sm focus:border-indigo-500 py-3 px-4 font-bold text-slate-700 bg-slate-50">
                                     <option value="15">15 Minutes</option>
                                     <option value="30">30 Minutes</option>
@@ -237,7 +234,7 @@
                                     <option value="90">90 Minutes</option>
                                     <option value="120">2 Hours</option>
                                 </select>
-                                <p class="mt-3 text-xs text-slate-500">Tip: for time-slot services, keep package durations aligned with this slot length (for example, 2 Hours with 60-minute slots means students choose 2 slots).</p>
+                                <p class="mt-3 text-xs text-slate-500"><strong>This is not rest time.</strong> A 3-hour package still uses 3 hours, and overlapping times are blocked after a booking is made.</p>
                             </div>
 
                             {{-- Weekly Schedule --}}

@@ -73,16 +73,16 @@
         }
     </style>
 
-    <div class="py-12 bg-gray-50 min-h-screen">
+    <div class="py-6 md:py-12 bg-gray-50 min-h-screen">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
 
-            <div class="flex items-center justify-between mb-8">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 md:mb-8">
                 <div>
-                    <h1 class="text-3xl font-bold text-gray-900">Edit Service</h1>
+                    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Edit Service</h1>
                     <p class="text-gray-600 mt-1">Update details for <strong>{{ $service->hss_title }}</strong></p>
                 </div>
                 <a href="{{ route('services.manage') }}"
-                    class="text-gray-600 hover:text-gray-900 font-medium flex items-center">
+                    class="text-gray-600 hover:text-gray-900 font-medium inline-flex items-center self-start sm:self-auto">
                     <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
@@ -91,32 +91,32 @@
                 </a>
             </div>
 
-            <div class="mb-8">
-                <div class="border-b border-gray-200">
-                    <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+            <div class="mb-6 md:mb-8">
+                <div class="border-b border-gray-200 overflow-x-auto">
+                    <nav class="-mb-px flex min-w-max space-x-5 sm:min-w-0 sm:space-x-8" aria-label="Tabs">
                         <button
-                            class="step-link step-active group w-1/4 py-4 px-1 border-b-2 font-medium text-sm flex items-center justify-center transition-colors"
+                            class="step-link step-active group min-w-28 sm:min-w-0 sm:flex-1 py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm flex items-center justify-center transition-colors"
                             data-target="overview" data-switch-tab="overview">
                             <span
                                 class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs mr-2 font-bold ring-1 ring-indigo-600">1</span>
                             Overview
                         </button>
                         <button
-                            class="step-link step-inactive group w-1/4 py-4 px-1 border-b-2 font-medium text-sm flex items-center justify-center transition-colors"
+                            class="step-link step-inactive group min-w-28 sm:min-w-0 sm:flex-1 py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm flex items-center justify-center transition-colors"
                             data-target="pricing" data-switch-tab="pricing">
                             <span
                                 class="w-6 h-6 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center text-xs mr-2 font-bold">2</span>
                             Pricing
                         </button>
                         <button
-                            class="step-link step-inactive group w-1/4 py-4 px-1 border-b-2 font-medium text-sm flex items-center justify-center transition-colors"
+                            class="step-link step-inactive group min-w-28 sm:min-w-0 sm:flex-1 py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm flex items-center justify-center transition-colors"
                             data-target="description" data-switch-tab="description">
                             <span
                                 class="w-6 h-6 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center text-xs mr-2 font-bold">3</span>
                             Description
                         </button>
                         <button
-                            class="step-link step-inactive group w-1/4 py-4 px-1 border-b-2 font-medium text-sm flex items-center justify-center transition-colors"
+                            class="step-link step-inactive group min-w-28 sm:min-w-0 sm:flex-1 py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm flex items-center justify-center transition-colors"
                             data-target="availability" data-switch-tab="availability">
                             <span
                                 class="w-6 h-6 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center text-xs mr-2 font-bold">4</span>
@@ -203,7 +203,7 @@
                         </h3>
                         <input type="hidden" name="packages[0][package_type]" value="basic">
 
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                             <div>
                                 <label class="text-xs font-bold text-gray-500 uppercase">Suggested Price From (RM) <span
                                         class="text-red-500">*</span></label>
@@ -211,15 +211,10 @@
                                     value="{{ $service->hss_basic_price }}"
                                     class="w-full mt-1 border-gray-300 rounded-md focus:ring-gray-500 focus:border-gray-500">
                             </div>
-                             <div><label class="text-xs font-bold text-gray-600 uppercase">Duration</label><input
+                             <div><label class="text-xs font-bold text-gray-600 uppercase">How long will it take?</label><input
                                         type="text" name="packages[0][duration]" value="{{ $service->hss_basic_duration }}" maxlength="100" placeholder="e.g. 1 hour"
                                         class="w-full mt-1 border-gray-200 rounded-md"></div>
-                            <div>
-                                <label class="text-xs font-bold text-gray-500 uppercase">Billing Unit</label>
-                                <input type="text" name="packages[0][frequency]" value="{{ $service->hss_basic_frequency }}" maxlength="100" placeholder="e.g. per session"
-                                    class="w-full mt-1 border-gray-300 rounded-md">
-                                <p class="mt-1 text-[11px] text-gray-400">Examples: per session, per hour, per day, per task</p>
-                            </div>
+                            <input type="hidden" name="packages[0][frequency]" value="{{ $service->hss_basic_frequency ?: 'Per Session' }}" data-package-frequency>
                         </div>
                         <div>
                             <label class="text-xs font-bold text-gray-500 uppercase mb-1 block">What's included?</label>
@@ -247,18 +242,14 @@
                             <h3 class="text-lg font-bold text-blue-800 mb-4 flex items-center"><span
                                     class="w-3 h-3 bg-blue-600 rounded-full mr-2"></span> Standard Package</h3>
                             <input type="hidden" name="packages[1][package_type]" value="standard">
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                 <div><label class="text-xs font-bold text-blue-600 uppercase">Price</label><input
                                         type="number" name="packages[1][price]" value="{{ $service->hss_standard_price }}"
                                         class="w-full mt-1 border-blue-200 rounded-md"></div>
-                                <div><label class="text-xs font-bold text-blue-600 uppercase">Duration (shown to student)</label><input
+                                <div><label class="text-xs font-bold text-blue-600 uppercase">How long will it take?</label><input
                                     type="text" name="packages[1][duration]" value="{{ $service->hss_standard_duration }}" maxlength="100" placeholder="e.g. 2 hours"
                                         class="w-full mt-1 border-blue-200 rounded-md"></div>
-                                <div><label class="text-xs font-bold text-blue-600 uppercase">Billing Unit</label>
-                                    <input type="text" name="packages[1][frequency]" value="{{ $service->hss_standard_frequency }}" maxlength="100" placeholder="e.g. per session, per hour"
-                                    class="w-full mt-1 border-blue-300 rounded-md">
-                                    <p class="mt-1 text-[11px] text-blue-400">Examples: per session, per hour, per day, per task</p>
-                                </div>
+                                <input type="hidden" name="packages[1][frequency]" value="{{ $service->hss_standard_frequency ?: 'Per Session' }}" data-package-frequency>
                             </div>
                             <div class="bg-white rounded-md border border-blue-200 overflow-hidden">
                                 <div id="editor-standard" class="h-20">{!! $service->hss_standard_description !!}</div>
@@ -271,18 +262,14 @@
                             <h3 class="text-lg font-bold text-purple-800 mb-4 flex items-center"><span
                                     class="w-3 h-3 bg-purple-600 rounded-full mr-2"></span> Premium Package</h3>
                             <input type="hidden" name="packages[2][package_type]" value="premium">
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                 <div><label class="text-xs font-bold text-purple-600 uppercase">Price</label><input
                                         type="number" name="packages[2][price]" value="{{ $service->hss_premium_price }}"
                                         class="w-full mt-1 border-purple-200 rounded-md"></div>
-                                 <div><label class="text-xs font-bold text-purple-600 uppercase">Duration (shown to student)</label><input
+                                 <div><label class="text-xs font-bold text-purple-600 uppercase">How long will it take?</label><input
                                     type="text" name="packages[2][duration]" value="{{ $service->hss_premium_duration }}" maxlength="100" placeholder="e.g. 3 hours"
                                         class="w-full mt-1 border-purple-200 rounded-md"></div>
-                                <div><label class="text-xs font-bold text-purple-600 uppercase">Billing Unit</label>
-                                     <input type="text" name="packages[2][frequency]" value="{{ $service->hss_premium_frequency }}" maxlength="100" placeholder="e.g. per session, per hour"
-                                    class="w-full mt-1 border-purple-300 rounded-md">
-                                      <p class="mt-1 text-[11px] text-purple-400">Examples: per session, per hour, per day, per task</p>
-                                </div>
+                                <input type="hidden" name="packages[2][frequency]" value="{{ $service->hss_premium_frequency ?: 'Per Session' }}" data-package-frequency>
                             </div>
                             <div class="bg-white rounded-md border border-purple-200 overflow-hidden">
                                 <div id="editor-premium" class="h-20">{!! $service->hss_premium_description !!}</div>
@@ -353,17 +340,15 @@
                             <div>
                                 <h3 class="font-bold text-indigo-900">How is this service booked?</h3>
                                 <p class="text-sm text-indigo-700 mt-1">
-                                    <span x-show="isSessionBased"><strong>Appointment Based:</strong> Users book specific
-                                        time slots.</span>
-                                    <span x-show="!isSessionBased"><strong>Task Based:</strong> One-off requests (no
-                                        specific duration).</span>
+                                    <span x-show="isSessionBased"><strong>Book a time:</strong> Customers choose a date and start time.</span>
+                                    <span x-show="!isSessionBased"><strong>One-off task:</strong> Customers send a request without choosing a time.</span>
                                 </p>
                             </div>
                             <div class="flex items-center bg-white rounded-lg p-1 border border-indigo-200 shadow-sm">
                                 <button type="button" @click="isSessionBased = true"
                                     :class="isSessionBased ? 'bg-indigo-600 text-white shadow-sm' :
                                         'text-gray-500 hover:bg-gray-50'"
-                                    class="px-4 py-2 rounded-md text-sm font-bold transition-all">Time Slots</button>
+                                    class="px-4 py-2 rounded-md text-sm font-bold transition-all">Book a Time</button>
                                 <button type="button" @click="isSessionBased = false"
                                     :class="!isSessionBased ? 'bg-indigo-600 text-white shadow-sm' :
                                         'text-gray-500 hover:bg-gray-50'"
@@ -384,8 +369,8 @@
                                         <div class="p-3.5 bg-indigo-50 rounded-2xl text-indigo-600"><i
                                                 class="fa-regular fa-hourglass-half text-2xl"></i></div>
                                         <div class="flex-1">
-                                            <h2 class="font-bold text-slate-800 text-lg">Session Duration</h2>
-                                            <p class="text-sm text-slate-500 mb-6">How long is one slot?</p>
+                                            <h2 class="font-bold text-slate-800 text-lg">Start time choices</h2>
+                                            <p class="text-sm text-slate-500 mb-6">Choose the gap between the start times customers can select. For example, 60 minutes shows 9:00 AM, 10:00 AM, 11:00 AM.</p>
                                             <div class="w-full max-w-xs relative">
                                                 <select name="session_duration" x-model.number="currentDuration"
                                                     @change="refreshPreview()" :disabled="!isSessionBased"
@@ -397,7 +382,7 @@
                                                     @endforeach
                                                 </select>
                                             </div>
-                                            <p class="mt-3 text-xs text-slate-500">Tip: for time-slot services, align package durations with this slot length (for example, 2 Hours with 60-minute slots means students choose 2 slots).</p>
+                                            <p class="mt-3 text-xs text-slate-500"><strong>This is not rest time.</strong> A 3-hour package still uses 3 hours, and overlapping times are blocked after a booking is made.</p>
                                         </div>
                                     </div>
                                 </div>

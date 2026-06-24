@@ -216,9 +216,7 @@
                                 <div>
                                     <p class="text-xs font-medium text-gray-500 uppercase">Requirements</p>
                                     <p class="text-sm font-semibold text-gray-900">
-                                        {{ $request->ui_pkg_duration ? $request->ui_pkg_duration . ' Hrs' : 'N/A' }} 
-                                        <span class="text-gray-300 mx-1">|</span> 
-                                        {{ $request->ui_pkg_frequency ? ucfirst($request->ui_pkg_frequency) : 'One-time' }}
+                                        {{ $request->ui_pkg_summary }}
                                     </p>
                                 </div>
                             </div>
@@ -226,8 +224,8 @@
 
                         @if ($request->hsr_message)
                             <div class="rounded-lg bg-gray-50 p-4 border border-gray-100 mb-6">
-                                <p class="text-xs font-bold text-gray-400 uppercase mb-1">Requester's Note</p>
-                                <p class="text-sm text-gray-600 italic">"{{ $request->hsr_message }}"</p>
+                                <p class="text-xs font-bold text-gray-400 uppercase mb-1">Customer Message</p>
+                                <p class="text-sm text-gray-600 italic whitespace-pre-line break-words">"{{ $request->hsr_message }}"</p>
                             </div>
                         @endif
 
@@ -239,7 +237,7 @@
 
                             <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
                                 
-                                <button type="button" data-open-reject="{{ $request->hsr_id }}" class="w-full sm:w-auto inline-flex justify-center items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 bg-white border border-red-200 rounded-lg hover:bg-red-50 hover:border-red-300 transition-colors focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
+                                <button type="button" data-open-reject="{{ $request->hsr_id }}" class="order-2 sm:order-1 w-full sm:w-auto inline-flex justify-center items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 bg-white border border-red-200 rounded-lg hover:bg-red-50 hover:border-red-300 transition-colors focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
                                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                     </svg>
@@ -247,7 +245,7 @@
                                 </button>
                                 <form id="reject-form-{{ $request->hsr_id }}" action="{{ route('service-requests.reject', $request->hsr_id) }}" method="POST" class="hidden">@csrf</form>
 
-                                <button type="button" data-accept-request="{{ $request->hsr_id }}" class="w-full sm:w-auto inline-flex justify-center items-center gap-2 px-6 py-2 text-sm font-bold text-white bg-indigo-600 rounded-lg shadow-sm hover:bg-indigo-700 hover:shadow-md transition-all focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                <button type="button" data-accept-request="{{ $request->hsr_id }}" class="order-1 sm:order-2 w-full sm:w-auto inline-flex justify-center items-center gap-2 px-6 py-2 text-sm font-bold text-white bg-indigo-600 rounded-lg shadow-sm hover:bg-indigo-700 hover:shadow-md transition-all focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
                                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                     </svg>
