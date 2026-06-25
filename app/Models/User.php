@@ -221,19 +221,25 @@ public function favoriteServices()
         return 'active';
     }
 
-    public function getTrustBadgeAttribute(): string
+    public function getHuTrustBadgeAttribute(): ?string
     {
-        // Staff gets priority badge even if they are community role
         if ($this->isVerifiedStaff()) {
-            return 'Staf UPSI Rasmi';
+            return 'Verified UPSI Staff';
         }
+
+        if ($this->hu_role === 'helper' && $this->hu_email_verified_at && $this->hu_helper_verified_at) {
+            return 'Verified UPSI Student Helper';
+        }
+
         if ($this->hu_role === 'student' && $this->hu_email_verified_at) {
-            return 'Pelajar UPSI Terkini';
+            return 'Verified UPSI Student';
         }
+
         if ($this->isVerifiedPublic()) {
-            return 'Pengguna Disahkan';
+            return 'Verified Community Member';
         }
-        return 'Belum Disahkan';
+
+        return null;
     }
 
     public function getAverageRatingAttribute(): ?float

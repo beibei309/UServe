@@ -204,6 +204,7 @@
 
         function loadContent(url, pushState = true) {
             showLoading();
+            let finalUrl = url;
 
             fetch(url, {
                 headers: {
@@ -212,6 +213,13 @@
                 },
             })
                 .then((response) => {
+                    finalUrl = response.url || url;
+
+                    if (response.redirected && isAdminLoginUrl(finalUrl)) {
+                        window.location.href = finalUrl;
+                        throw new Error('Redirecting to admin login');
+                    }
+
                     if (!response.ok) {
                         throw new Error('Network response was not ok');
                     }
@@ -221,7 +229,12 @@
                     const tempDiv = document.createElement('div');
                     tempDiv.innerHTML = html;
 
-                    const newContent = tempDiv.querySelector('main');
+                    if (isAdminLoginUrl(finalUrl) || tempDiv.querySelector('.admin-auth')) {
+                        window.location.href = finalUrl;
+                        return;
+                    }
+
+                    const newContent = tempDiv.querySelector('#main-content');
                     const currentMain = document.querySelector('#main-content');
 
                     if (newContent && currentMain) {
@@ -256,12 +269,24 @@
                             hideLoading();
                         }, 150);
                     } else {
-                        window.location.href = url;
+                        window.location.href = finalUrl;
                     }
                 })
-                .catch(() => {
-                    window.location.href = url;
+                .catch((error) => {
+                    if (error.message === 'Redirecting to admin login') {
+                        return;
+                    }
+
+                    window.location.href = finalUrl || url;
                 });
+        }
+
+        function isAdminLoginUrl(url) {
+            try {
+                return new URL(url, window.location.origin).pathname === '/admin/login';
+            } catch (error) {
+                return false;
+            }
         }
 
         function showLoading() {

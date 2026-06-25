@@ -65,7 +65,7 @@
                                         <span class="text-xs font-bold text-gray-900 flex items-center gap-1">
                                             {{ Str::limit($service->user->hu_name, 15) }}
                                             @if ($service->user->hu_trust_badge)
-                                                <i class="fas fa-check-circle text-blue-500 text-[10px]"></i>
+                                                <i class="fas fa-check-circle text-blue-500 text-[10px]" title="{{ $service->user->hu_trust_badge }}"></i>
                                             @endif
                                         </span>
                                         <span class="text-[10px] text-gray-500">Student seller</span>

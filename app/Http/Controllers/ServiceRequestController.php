@@ -8,6 +8,7 @@ use App\Models\ServiceRequest;
 use App\Models\StudentService;
 use App\Notifications\ServiceRequestStatusUpdated;
 use App\Services\ServiceImageUrlResolver;
+use App\Services\ServiceBookingValidator;
 use App\Services\ServicePackageDisplay;
 use App\Services\ServicePackagePriceCalculator;
 use App\Services\ServiceRequestNotificationService;
@@ -25,6 +26,7 @@ class ServiceRequestController extends BaseController
     public function __construct(
         private readonly ServiceRequestNotificationService $serviceRequestNotificationService,
         private readonly ServiceImageUrlResolver $serviceImageUrlResolver,
+        private readonly ServiceBookingValidator $serviceBookingValidator,
         private readonly ServicePackagePriceCalculator $servicePackagePriceCalculator,
         private readonly ServicePackageDisplay $servicePackageDisplay,
     ) {
@@ -92,6 +94,14 @@ class ServiceRequestController extends BaseController
                         'data' => null,
                     ], 422);
                 }
+
+                $this->serviceBookingValidator->validate(
+                    $studentService,
+                    $validated['selected_package'],
+                    $validated['selected_dates'],
+                    $startTime,
+                    $endTime,
+                );
 
                 $selectedDateJson = json_encode($validated['selected_dates']);
                 $overlapping = ServiceRequest::where('hsr_student_service_id', $studentService->hss_id)

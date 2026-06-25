@@ -16,10 +16,23 @@ if (!function_exists('seedMinimalServiceFlow')) {
             'hu_role' => 'helper',
             'hu_verification_status' => 'approved',
             'hu_public_verified_at' => $now,
+            'hu_helper_verified_at' => $now,
+            'hu_email_verified_at' => $now,
             'hu_is_available' => true,
             'created_at' => $now,
             'updated_at' => $now,
         ], 'hu_id');
+
+        DB::table('h2u_student_statuses')->insert([
+            'hss_student_id' => $helperId,
+            'hss_matric_no' => 'D2026999999',
+            'hss_semester' => '1',
+            'hss_status' => 'Active',
+            'hss_effective_date' => $now->toDateString(),
+            'hss_graduation_date' => $now->copy()->addYear()->toDateString(),
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
 
         $communityId = DB::table('h2u_users')->insertGetId([
             'hu_name' => 'Seeder Community',
@@ -28,6 +41,7 @@ if (!function_exists('seedMinimalServiceFlow')) {
             'hu_role' => 'community',
             'hu_verification_status' => 'approved',
             'hu_public_verified_at' => $now,
+            'hu_email_verified_at' => $now,
             'hu_is_available' => true,
             'created_at' => $now,
             'updated_at' => $now,

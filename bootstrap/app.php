@@ -4,6 +4,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Routing\Exceptions\InvalidSignatureException;
 use Illuminate\Session\TokenMismatchException;
 use Symfony\Component\HttpFoundation\Response;
@@ -30,6 +31,20 @@ return Application::configure(basePath: dirname(__DIR__))
     })
 
     ->withExceptions(function (Exceptions $exceptions): void {
+        $exceptions->render(function (AuthenticationException $e, $request) {
+            if ($request->expectsJson()) {
+                return null;
+            }
+
+            if ($request->is('admin') || $request->is('admin/*') || in_array('admin', $e->guards(), true)) {
+                return redirect()
+                    ->guest(route('admin.login'))
+                    ->with('status', 'Your admin session expired. Please sign in again to continue.');
+            }
+
+            return null;
+        });
+
         $exceptions->render(function (InvalidSignatureException $e, $request) {
             if ($request->routeIs('verification.verify')) {
                 return redirect()->route('verification.notice')
@@ -53,6 +68,12 @@ return Application::configure(basePath: dirname(__DIR__))
                 return null;
             }
 
+            if ($request->is('admin') || $request->is('admin/*')) {
+                return redirect()
+                    ->guest(route('admin.login'))
+                    ->with('status', 'Your admin session expired. Please sign in again to continue.');
+            }
+
             return redirect()
                 ->guest(route('login'))
                 ->with('status', 'Your session expired. Please sign in again to continue.');
@@ -61,6 +82,12 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->respond(function (Response $response, $exception, $request) {
             if ($response->getStatusCode() !== 419 || $request->expectsJson()) {
                 return $response;
+            }
+
+            if ($request->is('admin') || $request->is('admin/*')) {
+                return redirect()
+                    ->guest(route('admin.login'))
+                    ->with('status', 'Your admin session expired. Please sign in again to continue.');
             }
 
             return redirect()

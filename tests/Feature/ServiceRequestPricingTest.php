@@ -5,7 +5,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
-function seedPricingService(string $frequency, float $price): array
+function seedPricingService(string $frequency, float $price, array $serviceOverrides = []): array
 {
     $now = now();
     $suffix = uniqid('', true);
@@ -47,7 +47,7 @@ function seedPricingService(string $frequency, float $price): array
         'updated_at' => $now,
     ], 'hc_id');
 
-    $serviceId = DB::table('h2u_student_services')->insertGetId([
+    $serviceId = DB::table('h2u_student_services')->insertGetId(array_merge([
         'hss_user_id' => $providerId,
         'hss_category_id' => $categoryId,
         'hss_title' => "Pricing Service {$suffix}",
@@ -55,6 +55,16 @@ function seedPricingService(string $frequency, float $price): array
         'hss_status' => 'available',
         'hss_booking_mode' => 'session',
         'hss_session_duration' => 60,
+        'hss_operating_hours' => json_encode([
+            'mon' => ['enabled' => true, 'start' => '09:00', 'end' => '17:00'],
+            'tue' => ['enabled' => true, 'start' => '09:00', 'end' => '17:00'],
+            'wed' => ['enabled' => true, 'start' => '09:00', 'end' => '17:00'],
+            'thu' => ['enabled' => true, 'start' => '09:00', 'end' => '17:00'],
+            'fri' => ['enabled' => true, 'start' => '09:00', 'end' => '17:00'],
+            'sat' => ['enabled' => false, 'start' => '09:00', 'end' => '17:00'],
+            'sun' => ['enabled' => false, 'start' => '09:00', 'end' => '17:00'],
+        ]),
+        'hss_unavailable_dates' => json_encode([]),
         'hss_is_active' => true,
         'hss_approval_status' => 'approved',
         'hss_basic_duration' => '2 hours',
@@ -62,7 +72,7 @@ function seedPricingService(string $frequency, float $price): array
         'hss_basic_price' => $price,
         'created_at' => $now,
         'updated_at' => $now,
-    ], 'hss_id');
+    ], $serviceOverrides), 'hss_id');
 
     return [
         'buyer' => User::findOrFail($buyerId),
@@ -125,4 +135,64 @@ it('rejects a package name that does not belong to the service', function () {
         ])
         ->assertUnprocessable()
         ->assertJsonValidationErrors('selected_package');
+});
+
+it('rejects a fixed-price booking whose submitted time does not match the package duration', function () {
+    $seed = seedPricingService('Per Session', 250.00);
+
+    $this->actingAs($seed['buyer'])
+        ->postJson(route('service-requests.store'), [
+            'student_service_id' => $seed['service_id'],
+            'selected_dates' => now()->nextWeekday()->toDateString(),
+            'start_time' => '09:00',
+            'end_time' => '10:00',
+            'selected_package' => 'basic',
+        ])
+        ->assertUnprocessable()
+        ->assertJsonPath('message', 'The selected package requires a 2h booking.');
+});
+
+it('rejects a booking outside the providers working hours', function () {
+    $seed = seedPricingService('Per Session', 250.00);
+
+    $this->actingAs($seed['buyer'])
+        ->postJson(route('service-requests.store'), [
+            'student_service_id' => $seed['service_id'],
+            'selected_dates' => now()->nextWeekday()->toDateString(),
+            'start_time' => '16:00',
+            'end_time' => '18:00',
+            'selected_package' => 'basic',
+        ])
+        ->assertUnprocessable()
+        ->assertJsonPath('message', 'Choose a time within the provider\'s working hours.');
+});
+
+it('rejects a booking on a disabled day', function () {
+    $seed = seedPricingService('Per Session', 250.00);
+
+    $this->actingAs($seed['buyer'])
+        ->postJson(route('service-requests.store'), [
+            'student_service_id' => $seed['service_id'],
+            'selected_dates' => now()->next('Saturday')->toDateString(),
+            'start_time' => '09:00',
+            'end_time' => '11:00',
+            'selected_package' => 'basic',
+        ])
+        ->assertUnprocessable()
+        ->assertJsonPath('message', 'The provider is not available on the selected day.');
+});
+
+it('rejects a start time that does not follow the providers booking interval', function () {
+    $seed = seedPricingService('Per Hour', 150.00);
+
+    $this->actingAs($seed['buyer'])
+        ->postJson(route('service-requests.store'), [
+            'student_service_id' => $seed['service_id'],
+            'selected_dates' => now()->nextWeekday()->toDateString(),
+            'start_time' => '09:30',
+            'end_time' => '11:30',
+            'selected_package' => 'basic',
+        ])
+        ->assertUnprocessable()
+        ->assertJsonPath('message', 'Choose one of the available start times.');
 });

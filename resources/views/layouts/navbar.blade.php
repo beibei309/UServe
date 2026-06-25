@@ -240,10 +240,10 @@
                             <img class="h-9 w-9 rounded-full object-cover border border-gray-200"
                                 src="{{ $user->hu_profile_photo_path ? asset($user->hu_profile_photo_path) : upsi2u_avatar_url($user->hu_name) }}"
                                 alt="{{ $user->hu_name }}">
-                            @if ($user->hu_verification_status === 'approved')
+                            @if ($user->hu_trust_badge)
                                 <span
                                     class="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-blue-500 ring-2 ring-white"
-                                    title="Verified">
+                                    title="{{ $user->hu_trust_badge }}">
                                     <svg class="h-2.5 w-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd"
                                             d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
@@ -348,10 +348,10 @@
                         <img class="h-9 w-9 rounded-full border border-gray-200 object-cover"
                             src="{{ $user->hu_profile_photo_path ? asset($user->hu_profile_photo_path) : upsi2u_avatar_url($user->hu_name) }}"
                             alt="">
-                        @if ($user->hu_verification_status === 'approved')
+                        @if ($user->hu_trust_badge)
                             <span
                                 class="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-blue-500 ring-2 ring-white"
-                                title="Verified">
+                                title="{{ $user->hu_trust_badge }}">
                                 <svg class="h-2.5 w-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd"
                                         d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"

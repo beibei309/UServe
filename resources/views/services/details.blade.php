@@ -206,7 +206,7 @@
                             {{-- Verified Badge (Only show if logged in, or keep visible but on top of blur) --}}
                             @if ($service->user->hu_trust_badge ?? false)
                                 <div class="absolute bottom-1 right-1 bg-blue-500 text-white w-7 h-7 flex items-center justify-center rounded-full border-2 border-white shadow-sm z-20"
-                                    title="Verified Student">
+                                    title="{{ $service->user->hu_trust_badge }}">
                                     <i class="fas fa-check text-xs"></i>
                                 </div>
                             @endif

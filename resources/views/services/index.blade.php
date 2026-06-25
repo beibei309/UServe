@@ -379,6 +379,7 @@
 
                                                     @if ($service->user->hu_trust_badge)
                                                         <div
+                                                            title="{{ $service->user->hu_trust_badge }}"
                                                             class="absolute -top-1 -right-1 bg-blue-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-[8px] border-2 border-white shadow-sm">
                                                             <i class="fas fa-check"></i>
                                                         </div>
@@ -399,13 +400,13 @@
 
                                             <div class="flex items-center justify-between sm:justify-end gap-4 sm:gap-6">
                                                 @if ($service->hss_basic_price)
-                                                    <div class="text-right hidden sm:block">
-                                                        <p
-                                                            class="text-[10px] text-slate-400 font-black uppercase tracking-tighter">
-                                                            Starts at</p>
-                                                        <p class="text-xl font-black text-slate-900">
-                                                            <span class="text-sm font-bold text-indigo-600">RM
-                                                            </span>{{ number_format($service->hss_basic_price, 2) }}
+                                                    <div class="hidden sm:flex sm:flex-col sm:items-end leading-tight min-w-[120px]">
+                                                        <p class="text-[10px] text-slate-400 font-black uppercase tracking-wide">
+                                                            From
+                                                        </p>
+                                                        <p class="text-xl font-black text-slate-900 whitespace-nowrap">
+                                                            <span class="text-sm font-bold text-indigo-600">RM</span>
+                                                            {{ number_format($service->hss_basic_price, 2) }}
                                                         </p>
                                                     </div>
                                                 @endif
