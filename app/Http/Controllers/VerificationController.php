@@ -448,6 +448,7 @@ class VerificationController extends Controller
                     // Update User
                     $user->hu_verification_document_path = $path;
                     $user->hu_verification_status = 'approved';
+                    $user->hu_public_verified_at = now();
                     $user->save();
 
                     return redirect()->back()->with('success', 'Verification document saved successfully. Your account is approved and the document is kept for admin record checks.');

@@ -377,19 +377,21 @@
                                                         </div>
                                                     @endguest
 
-                                                    @if ($service->user->hu_trust_badge)
-                                                        <div
-                                                            title="{{ $service->user->hu_trust_badge }}"
-                                                            class="absolute -top-1 -right-1 bg-blue-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-[8px] border-2 border-white shadow-sm">
-                                                            <i class="fas fa-check"></i>
-                                                        </div>
-                                                    @endif
                                                 </div>
                                                 <div class="flex flex-col min-w-0">
-                                                    <span
-                                                        class="text-sm font-black text-slate-800 group-hover/user:text-indigo-600 transition truncate"
-                                                        @guest title="Login to view full name" @endguest>
-                                                        {{ $service->ui_seller_display_name }}
+                                                    <span class="flex items-center gap-1.5 min-w-0">
+                                                        <span
+                                                            class="text-sm font-black text-slate-800 group-hover/user:text-indigo-600 transition truncate"
+                                                            @guest title="Login to view full name" @endguest>
+                                                            {{ $service->ui_seller_display_name }}
+                                                        </span>
+                                                        @if ($service->user->hu_trust_badge)
+                                                            <span
+                                                                title="{{ $service->user->hu_trust_badge }}"
+                                                                class="inline-flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full bg-blue-500 text-white text-[8px] shadow-sm">
+                                                                <i class="fas fa-check"></i>
+                                                            </span>
+                                                        @endif
                                                     </span>
                                                     <span
                                                         class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
