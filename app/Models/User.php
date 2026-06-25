@@ -242,6 +242,11 @@ public function favoriteServices()
         return null;
     }
 
+    public function getTrustBadgeAttribute(): ?string
+    {
+        return $this->hu_trust_badge;
+    }
+
     public function getAverageRatingAttribute(): ?float
     {
         return $this->reviewsReceived()->avg('hr_rating');

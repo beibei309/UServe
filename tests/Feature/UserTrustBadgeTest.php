@@ -10,13 +10,15 @@ it('does not give an unverified community account a trust badge', function () {
         'hu_staff_verified_at' => null,
     ]);
 
-    expect($user->hu_trust_badge)->toBeNull();
+    expect($user->hu_trust_badge)->toBeNull()
+        ->and($user->trust_badge)->toBeNull();
 });
 
 it('labels verified account types clearly', function (array $attributes, string $expectedBadge) {
     $user = User::factory()->make($attributes);
 
-    expect($user->hu_trust_badge)->toBe($expectedBadge);
+    expect($user->hu_trust_badge)->toBe($expectedBadge)
+        ->and($user->trust_badge)->toBe($expectedBadge);
 })->with([
     'student' => [[
         'hu_role' => 'student',
