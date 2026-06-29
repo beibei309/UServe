@@ -172,7 +172,7 @@
         $aboutStoryQuote = \App\Models\PageContent::get('about.story_quote', '"UPSI2u was developed in 2025 out of a simple need: a trusted, friendly, and more effective way for UPSI students to help one another."');
         $aboutStoryBody1 = \App\Models\PageContent::get('about.story_body_1', 'Founded by a group of students who experienced the frustration of searching for reliable academic help and creative services. Tired of unreliable providers and cluttered listings, they decided to build the solution the UPSI community deserved.');
         $aboutStoryHighlight = \App\Models\PageContent::get('about.story_highlight', 'What started as a small project has now become a movement, transforming how we connect and support each other\'s financial and academic growth.');
-        $aboutStoryBody2 = \App\Models\PageContent::get('about.story_body_2', 'Today, UPSI2u stands as a leader in student-led services at UPSI, continuously growing as more students turn to us for verified, peer-to-peer excellence.');
+        $aboutStoryBody2 = \App\Models\PageContent::get('about.story_body_2', 'Today, UPSI2u supports student empowerment by helping UPSI students share their skills, gain experience, and connect with the community through verified peer-to-peer services.');
         $aboutCtaTitle = \App\Models\PageContent::get('about.cta_title', 'Ready to be part of the movement?');
         $aboutCtaSubtitle = \App\Models\PageContent::get('about.cta_subtitle', 'Join UPSI2u and grow together with your campus community.');
         $aboutHeroImage = \App\Models\PageContent::get('about.hero_image', 'images/about.jpg');
