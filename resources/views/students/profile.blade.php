@@ -113,7 +113,7 @@
                                             @if ($profileHasPhone)
                                                 <a href="{{ $profileWhatsappUrl }}" target="_blank"
                                                     class="inline-flex items-center justify-center px-6 py-3 bg-green-500 hover:bg-green-600 text-white font-bold rounded-xl transition shadow-lg shadow-green-500/30 transform hover:-translate-y-0.5">
-                                                    <i class="fa-brands fa-whatsapp text-xl mr-2"></i>
+                                                    <i class="fab fa-whatsapp text-xl mr-2"></i>
                                                     Chat
                                                 </a>
                                             @else
