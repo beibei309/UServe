@@ -289,7 +289,7 @@
                                                             <a href="https://wa.me/6{{ $request->provider->hu_phone }}"
                                                                 target="_blank"
                                                                 class="flex-1 sm:flex-none inline-flex justify-center items-center gap-2 px-6 py-2 text-sm font-medium text-white bg-green-500 rounded-lg hover:bg-green-600 shadow-sm transition-all hover:-translate-y-0.5">
-                                                                <i class="fab fa-whatsapp text-lg"></i>
+                                                                <i class="fa-brands fa-whatsapp text-lg"></i>
                                                                 WhatsApp
                                                             </a>
                                                         </div>
@@ -546,7 +546,7 @@
                                                             <a href="https://wa.me/6{{ $request->provider->hu_phone }}"
                                                                 target="_blank"
                                                                 class="inline-flex items-center justify-center gap-2 rounded-lg border border-green-200 bg-green-50 px-3 py-2 text-xs font-bold text-green-700 hover:bg-green-100 transition-colors">
-                                                                <i class="fab fa-whatsapp text-lg"></i>
+                                                                <i class="fa-brands fa-whatsapp text-lg"></i>
                                                                 WhatsApp
                                                             </a>
                                                         </div>

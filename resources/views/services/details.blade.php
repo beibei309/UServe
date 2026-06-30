@@ -639,13 +639,13 @@
                             @auth
                                 <a href="{{ $detailsWhatsappUrl }}" target="_blank"
                                     class="flex items-center justify-center w-full py-3 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-xl font-bold transition-all shadow-md shadow-green-500/20 hover:shadow-green-500/40 hover:-translate-y-0.5 mb-6 group">
-                                    <i class="fab fa-whatsapp text-xl mr-2 transition-transform group-hover:scale-110"></i>
+                                    <i class="fa-brands fa-whatsapp text-xl mr-2 transition-transform group-hover:scale-110"></i>
                                     Chat on WhatsApp
                                 </a>
                             @else
                                 <a href="{{ route('login') }}"
                                     class="flex items-center justify-center w-full py-3 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-xl font-bold transition-all shadow-md shadow-green-500/20 hover:shadow-green-500/40 hover:-translate-y-0.5 mb-6 group">
-                                    <i class="fab fa-whatsapp text-xl mr-2 transition-transform group-hover:scale-110"></i>
+                                    <i class="fa-brands fa-whatsapp text-xl mr-2 transition-transform group-hover:scale-110"></i>
                                     Sign in to Chat
                                 </a>
                             @endauth

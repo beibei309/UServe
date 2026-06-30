@@ -438,7 +438,7 @@
                                 {{-- Short Button: WhatsApp --}}
                                 <a href="https://wa.me/6{{ $request->requester->hu_phone }}" target="_blank" 
                                     class="inline-flex items-center justify-center gap-2 rounded-lg border border-green-200 bg-green-50 px-3 py-2 text-xs font-bold text-green-700 hover:bg-green-100 transition-colors">
-                                    <i class="fab fa-whatsapp text-lg"></i>
+                                    <i class="fa-brands fa-whatsapp text-lg"></i>
                                     WhatsApp
                                 </a>
                                 

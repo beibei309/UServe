@@ -375,7 +375,7 @@
                                         @if ($contactPhone)
                                             <a href="https://wa.me/6{{ $contactPhone }}" target="_blank"
                                                 class="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-lg font-semibold shadow-sm transition-all hover:shadow-md">
-                                                <i class="fab fa-whatsapp text-lg"></i>
+                                                <i class="fa-brands fa-whatsapp text-lg"></i>
                                                 Chat on WhatsApp
                                             </a>
                                         @endif
