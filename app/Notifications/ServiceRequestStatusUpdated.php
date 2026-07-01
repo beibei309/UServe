@@ -79,9 +79,6 @@ class ServiceRequestStatusUpdated extends Notification
     /**
      * Email notification
      */
-    /**
-     * Email notification
-     */
     public function toMail($notifiable)
     {
         $serviceTitle = $this->serviceRequest->studentService->hss_title;
@@ -92,64 +89,70 @@ class ServiceRequestStatusUpdated extends Notification
             ? \Carbon\Carbon::parse($date)->format('d M Y')
             : '-';
         
-        // Tetapkan Subject, Intro Message, dan Next Step mengikut status
         switch ($this->status) {
             case 'accepted':
                 $subject = 'Good News: Request Accepted!';
-                $intro = "Great news! **{$providerName}** has accepted your request for **{$serviceTitle}**.";
-                $instruction = "Please communicate with the provider to discuss further details or wait for the service to start.";
-                $color = 'success'; // Hijau
+                $title = 'Request Accepted';
+                $intro = "Great news! {$providerName} has accepted your request.";
+                $instruction = "Please communicate with the helper to discuss further details or wait for the service to start.";
+                $theme = 'success';
                 break;
 
             case 'rejected':
                 $subject = 'Request Update: Rejected';
-                $intro = "We are sorry to inform you that **{$providerName}** is unable to accept your request for **{$serviceTitle}** at this time.";
-                $instruction = "You may look for other providers offering similar services on our platform.";
-                $color = 'error'; // Merah
+                $title = 'Request Rejected';
+                $intro = "{$providerName} is unable to accept your request at this time.";
+                $instruction = "You may look for other helpers offering similar services on our platform.";
+                $theme = 'error';
                 break;
 
             case 'in_progress':
                 $subject = 'Service Started: ' . $serviceTitle;
-                $intro = "The service **{$serviceTitle}** has been marked as **In Progress**.";
-                $instruction = "The provider has started working on your request.";
-                $color = 'primary'; // Biru
+                $title = 'Service Started';
+                $intro = "Your service request is now in progress.";
+                $instruction = "The helper has started working on your request.";
+                $theme = 'primary';
                 break;
 
             case 'completed':
                 $subject = 'Service Completed: ' . $serviceTitle;
-                $intro = "The service **{$serviceTitle}** has been marked as **Completed** by the provider.";
-                $instruction = "Please log in to confirm the completion and **leave a review** for the student seller. Your feedback helps our community!";
-                $color = 'success'; // Hijau
+                $title = 'Service Completed';
+                $intro = "The service has been marked as completed by the helper.";
+                $instruction = "Please leave a review for the student seller. Your feedback helps the UPSI2u community choose trusted helpers.";
+                $theme = 'success';
                 break;
 
             case 'cancelled':
                 $subject = 'Request Cancelled';
-                $intro = "The service request for **{$serviceTitle}** has been cancelled.";
+                $title = 'Request Cancelled';
+                $intro = "This service request has been cancelled.";
                 $instruction = "If this was a mistake, please make a new request.";
-                $color = 'gray';
+                $theme = 'gray';
                 break;
 
             default:
                 $subject = 'Update on your Service Request';
-                $intro = "The status of your request for **{$serviceTitle}** has been updated to **{$this->status}**.";
+                $title = 'Request Update';
+                $intro = "The status of your request has been updated to " . str_replace('_', ' ', $this->status) . ".";
                 $instruction = "Please check your dashboard for more details.";
-                $color = 'primary';
+                $theme = 'primary';
         }
 
         return (new MailMessage)
             ->subject($subject)
-            ->greeting('Hi ' . $notifiable->hu_name . ',')
-            ->line($intro)
-            
-            // Paparkan kotak detail ringkas
-            ->line('__Request Details:__')
-            ->line('Date: ' . $formattedDate)
-            ->line('Seller: ' . $providerName)
-            ->line('Price: RM' . number_format((float) $this->serviceRequest->hsr_offered_price, 2))
-            
-            ->line($instruction)
-            ->action('View Request & Chat', route('service-requests.show', $this->serviceRequest->hsr_id))
-            ->line('Thank you for using UPSI2u.')
-            ->salutation('Regards, The UPSI2u Team');
+            ->view('emails.service_request_status', [
+                'notifiable' => $notifiable,
+                'serviceRequest' => $this->serviceRequest,
+                'status' => $this->status,
+                'theme' => $theme,
+                'title' => $title,
+                'intro' => $intro,
+                'instruction' => $instruction,
+                'serviceTitle' => $serviceTitle,
+                'providerName' => $providerName,
+                'formattedDate' => $formattedDate,
+                'price' => number_format((float) $this->serviceRequest->hsr_offered_price, 2),
+                'actionUrl' => route('service-requests.show', $this->serviceRequest->hsr_id),
+            ]);
     }
 }
