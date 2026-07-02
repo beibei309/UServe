@@ -282,7 +282,7 @@
                             <div class="bg-white rounded-2xl sm:rounded-3xl shadow-sm border border-slate-100 p-5 sm:p-6 lg:sticky lg:top-24">
                                 <h2 class="font-bold text-slate-800 mb-2">Block Dates</h2>
                                 <p class="text-xs text-slate-500 mb-6">Select specific dates when unavailable.</p>
-                                <input type="text" id="unavailableDates" name="unavailable_dates" class="w-full pl-10 rounded-xl border-slate-200 focus:ring-indigo-500 text-sm py-3 font-medium shadow-sm" placeholder="Select dates...">
+                                <input type="text" id="unavailableDates" name="unavailable_dates" class="w-full pl-10 rounded-xl border-slate-200 focus:ring-indigo-500 text-sm py-3 font-medium shadow-sm" placeholder="dd/mm/yyyy">
                                 <div class="grid grid-cols-2 gap-3 mt-4">
                                     <button type="button" data-quick-block="1|week" class="px-3 py-2 bg-slate-50 text-slate-600 text-xs rounded-lg font-bold border border-slate-200">+ 1 Week</button>
                                     <button type="button" data-quick-block="1|month" class="px-3 py-2 bg-slate-50 text-slate-600 text-xs rounded-lg font-bold border border-slate-200">+ 1 Month</button>

@@ -247,6 +247,10 @@
         fpInstance = flatpickr('#unavailableDates', {
             mode: 'multiple',
             dateFormat: 'Y-m-d',
+            altInput: true,
+            altFormat: 'd/m/Y',
+            allowInput: false,
+            disableMobile: true,
             minDate: 'today',
             conjunction: ', ',
             locale: { firstDayOfWeek: 1 },

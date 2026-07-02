@@ -32,7 +32,9 @@ class StudentServiceController extends Controller
         $q = $request->string('q')->toString();
         $category_id = $request->category_id;
         $sort = $request->sort ?? 'recommended';
-        $available_only = $request->available_only;
+        $available_only = $request->has('available_only')
+            ? $request->input('available_only')
+            : '1';
 
         $currentUserId = Auth::id();
 
@@ -57,13 +59,18 @@ class StudentServiceController extends Controller
         }
 
         if ($available_only === '1') {
-            // Jika user nak cari yang Available sahaja
-            $query->where('hss_status', 'available');
+            $query->where('hss_status', 'available')
+                ->whereHas('student', function ($q) {
+                    $q->where('hu_is_available', true);
+                });
         } elseif ($available_only === '0') {
-            // Jika user nak cari yang Busy (Unavailable) sahaja
-            $query->where('hss_status', 'unavailable');
+            $query->where(function ($q) {
+                $q->where('hss_status', 'unavailable')
+                    ->orWhereHas('student', function ($sub) {
+                        $sub->where('hu_is_available', false);
+                    });
+            });
         }
-        // Jika $available_only null/kosong, ia akan tunjuk KEDUA-DUA (Available & Busy)
 
         // --- 4. Search filter ---
         if ($q) {
@@ -121,6 +128,16 @@ class StudentServiceController extends Controller
                 ? route('students.profile', $service->user)
                 : route('login');
             $service->ui_created_human = $service->created_at->diffForHumans();
+            if ($service->hss_status !== 'available') {
+                $service->ui_availability_label = 'Service Unavailable';
+                $service->ui_availability_badge_class = 'text-rose-600 bg-rose-50 border-rose-100';
+            } elseif (! (bool) $service->user->hu_is_available) {
+                $service->ui_availability_label = 'Seller Not Accepting Orders';
+                $service->ui_availability_badge_class = 'text-amber-700 bg-amber-50 border-amber-100';
+            } else {
+                $service->ui_availability_label = 'Available';
+                $service->ui_availability_badge_class = 'text-emerald-600 bg-emerald-50 border-emerald-100';
+            }
 
             return $service;
         });
@@ -130,6 +147,7 @@ class StudentServiceController extends Controller
             'categories' => Category::all(),
             'category_id' => $category_id,
             'sort' => $sort,
+            'available_only' => $available_only,
         ]);
     }
 

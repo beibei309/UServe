@@ -239,12 +239,12 @@
                                     <div class="relative min-w-0 md:w-44 group">
                                         <select name="available_only" data-auto-submit
                                             class="block w-full pl-3 lg:pl-4 pr-8 lg:pr-10 py-3.5 lg:py-4 bg-slate-50 border-none rounded-xl lg:rounded-[1.5rem] text-slate-700 focus:bg-white focus:ring-2 focus:ring-indigo-500 text-xs sm:text-sm cursor-pointer appearance-none font-bold transition-all">
-                                            <option value="">🔘 All Status</option>
+                                            <option value="" {{ $available_only === '' ? 'selected' : '' }}>All Status</option>
                                             <option value="1"
-                                                {{ request('available_only') == '1' ? 'selected' : '' }}>🟢 Available
+                                                {{ $available_only === '1' ? 'selected' : '' }}>Available
                                             </option>
                                             <option value="0"
-                                                {{ request('available_only') == '0' ? 'selected' : '' }}>🔴 Unavailable
+                                                {{ $available_only === '0' ? 'selected' : '' }}>Not Available
                                             </option>
                                         </select>
                                         <div
@@ -320,8 +320,8 @@
                                                 </span>
                                                 <span class="w-1 h-1 rounded-full bg-slate-200"></span>
                                                 <span
-                                                    class="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-tighter border {{ $service->hss_status === 'available' ? 'text-emerald-600 bg-emerald-50 border-emerald-100' : 'text-rose-500 bg-rose-50 border-rose-100' }}">
-                                                    {{ $service->hss_status }}
+                                                    class="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-tighter border {{ $service->ui_availability_badge_class }}">
+                                                    {{ $service->ui_availability_label }}
                                                 </span>
                                             </div>
 

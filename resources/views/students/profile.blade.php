@@ -278,10 +278,14 @@
     </div>
 </a>                                        {{-- Service Details --}}
                                         <div class="p-5 flex flex-col flex-1">
-                                            <div class="mb-2">
+                                            <div class="mb-2 flex flex-wrap items-center gap-2">
                                                 <span
                                                     class="text-xs font-bold text-indigo-600 uppercase tracking-wider">
                                                     {{ $service->category->hc_name ?? 'Service' }}
+                                                </span>
+                                                <span
+                                                    class="inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-black uppercase tracking-tight {{ $service->ui_availability_badge_class }}">
+                                                    {{ $service->ui_availability_label }}
                                                 </span>
                                             </div>
 

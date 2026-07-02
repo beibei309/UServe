@@ -256,16 +256,16 @@
                     <div x-show="!draftIsAvailable" x-transition class="space-y-4">
                         <p class="text-sm text-gray-500">Please select the dates you will be away. Your services will be
                             hidden during this period.</p>
-                        <div class="grid grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Start Date</label>
-                                <input type="date" x-model="draftStartDate"
-                                    class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm py-2.5">
+                                <input type="text" x-ref="draftStartDateInput" placeholder="dd/mm/yyyy" readonly
+                                    class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm py-2.5 bg-white">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold uppercase text-gray-500 mb-1">End Date</label>
-                                <input type="date" x-model="draftEndDate"
-                                    class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm py-2.5">
+                                <input type="text" x-ref="draftEndDateInput" placeholder="dd/mm/yyyy" readonly
+                                    class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm py-2.5 bg-white">
                             </div>
                         </div>
 

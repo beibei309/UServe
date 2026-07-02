@@ -174,28 +174,82 @@
             draftIsAvailable: isAvailableInitial,
             draftStartDate: startDateInitial,
             draftEndDate: endDateInitial,
+            startDatePicker: null,
+            endDatePicker: null,
+
+            init() {
+                this.$nextTick(() => this.initDatePickers());
+            },
+
+            initDatePickers() {
+                if (!window.flatpickr || this.startDatePicker || !this.$refs.draftStartDateInput || !this.$refs.draftEndDateInput) {
+                    return;
+                }
+
+                const pickerOptions = {
+                    dateFormat: 'Y-m-d',
+                    altInput: true,
+                    altFormat: 'd/m/Y',
+                    allowInput: false,
+                    disableMobile: true,
+                    minDate: 'today',
+                    locale: { firstDayOfWeek: 1 },
+                };
+
+                this.startDatePicker = flatpickr(this.$refs.draftStartDateInput, {
+                    ...pickerOptions,
+                    defaultDate: this.draftStartDate || null,
+                    onChange: (_selectedDates, dateStr) => {
+                        this.draftStartDate = dateStr;
+                        if (this.endDatePicker) {
+                            this.endDatePicker.set('minDate', dateStr || 'today');
+                        }
+                        if (dateStr && this.draftEndDate && new Date(dateStr) > new Date(this.draftEndDate)) {
+                            this.draftEndDate = dateStr;
+                            this.endDatePicker?.setDate(dateStr, false);
+                        }
+                    },
+                });
+
+                this.endDatePicker = flatpickr(this.$refs.draftEndDateInput, {
+                    ...pickerOptions,
+                    defaultDate: this.draftEndDate || null,
+                    minDate: this.draftStartDate || 'today',
+                    onChange: (_selectedDates, dateStr) => {
+                        this.draftEndDate = dateStr;
+                    },
+                });
+            },
+
+            syncDatePickers() {
+                if (!this.startDatePicker || !this.endDatePicker) return;
+                this.startDatePicker.setDate(this.draftStartDate || null, false);
+                this.endDatePicker.set('minDate', this.draftStartDate || 'today');
+                this.endDatePicker.setDate(this.draftEndDate || null, false);
+            },
 
             openModal() {
                 this.draftIsAvailable = this.isAvailable;
                 this.draftStartDate = this.startDate;
                 this.draftEndDate = this.endDate;
                 this.showModal = true;
+                this.$nextTick(() => {
+                    this.initDatePickers();
+                    this.syncDatePickers();
+                });
             },
 
             closeModal() {
                 this.draftIsAvailable = this.isAvailable;
                 this.draftStartDate = this.startDate;
                 this.draftEndDate = this.endDate;
+                this.syncDatePickers();
                 this.showModal = false;
             },
 
             formatDate(dateString) {
                 if (!dateString) return '';
-                return new Date(dateString).toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                    year: 'numeric',
-                });
+                return new Date(`${dateString}T12:00:00`).toLocaleDateString('en-GB');
             },
 
             quickToggle() {
@@ -220,12 +274,14 @@
                 if (daysToAdd > 0) dateObj.setDate(dateObj.getDate() + daysToAdd);
                 if (monthsToAdd > 0) dateObj.setMonth(dateObj.getMonth() + monthsToAdd);
                 this.draftEndDate = dateObj.toISOString().split('T')[0];
+                this.syncDatePickers();
             },
 
             deleteDates() {
                 this.draftStartDate = '';
                 this.draftEndDate = '';
                 this.draftIsAvailable = true;
+                this.syncDatePickers();
             },
 
             saveChanges() {
@@ -289,6 +345,7 @@
                         this.draftIsAvailable = this.isAvailable;
                         this.draftStartDate = this.startDate;
                         this.draftEndDate = this.endDate;
+                        this.syncDatePickers();
                         this.isSaving = false;
                         this.closeModal();
                         Swal.fire({

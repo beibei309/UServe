@@ -105,6 +105,11 @@
             previewMessage: 'Select a date above to manage slots.',
             init() {
                 flatpickr('#preview-date-picker', {
+                    dateFormat: 'Y-m-d',
+                    altInput: true,
+                    altFormat: 'd/m/Y',
+                    allowInput: false,
+                    disableMobile: true,
                     minDate: 'today',
                     defaultDate: new Date(),
                     onChange: (_selectedDates, dateStr) => {
@@ -407,6 +412,10 @@
         fpInstance = flatpickr('#unavailableDates', {
             mode: 'multiple',
             dateFormat: 'Y-m-d',
+            altInput: true,
+            altFormat: 'd/m/Y',
+            allowInput: false,
+            disableMobile: true,
             minDate: 'today',
             conjunction: ', ',
             defaultDate: unavailableDates,

@@ -589,6 +589,16 @@ public function deleteWorkExperienceFile()
             $service->ui_basic_price_display = number_format((float) ($service->hss_basic_price ?? 0), 0);
             $service->ui_description_preview = Str::limit(strip_tags($service->hss_description), 80);
             $service->ui_reviews_avg_rating_display = number_format((float) ($service->reviews_avg_rating ?? 0), 1);
+            if ($service->hss_status !== 'available') {
+                $service->ui_availability_label = 'Service Unavailable';
+                $service->ui_availability_badge_class = 'text-rose-600 bg-rose-50 border-rose-100';
+            } elseif (! (bool) $service->user->hu_is_available) {
+                $service->ui_availability_label = 'Seller Not Accepting Orders';
+                $service->ui_availability_badge_class = 'text-amber-700 bg-amber-50 border-amber-100';
+            } else {
+                $service->ui_availability_label = 'Available';
+                $service->ui_availability_badge_class = 'text-emerald-600 bg-emerald-50 border-emerald-100';
+            }
             return $service;
         });
         $memberSinceSource = $user->created_at ?? $user->hu_created_at;

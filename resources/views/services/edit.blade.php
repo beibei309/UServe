@@ -470,7 +470,7 @@
                                         </div>
                                         <input type="text" id="preview-date-picker"
                                             class="text-xs border-slate-200 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 w-full md:w-auto"
-                                            placeholder="Pick date">
+                                            placeholder="dd/mm/yyyy">
                                     </div>
 
                                     {{-- Hidden Input to send Blocked Slots to Backend --}}
@@ -573,7 +573,7 @@
                                         <div class="relative mb-4">
                                             <input id="unavailableDates" name="unavailable_dates"
                                                 class="w-full pl-10 px-4 py-3 border border-slate-200 rounded-xl bg-white focus:ring-indigo-500"
-                                                placeholder="Select dates..."
+                                                placeholder="dd/mm/yyyy"
                                                 value="{{ $serviceEditUi['unavailable_dates_csv'] ?? '' }}">
                                             <i class="fa-regular fa-calendar absolute left-3.5 top-3.5 text-slate-400"></i>
                                         </div>
