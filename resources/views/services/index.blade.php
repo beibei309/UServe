@@ -226,14 +226,6 @@
                                             <option value="price_high" {{ $sort == 'price_high' ? 'selected' : '' }}>
                                                 Price: High-Low</option>
                                         </select>
-                                        <div
-                                            class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor"
-                                                viewBox="0 0 24 24">
-                                                <path d="M19 9l-7 7-7-7" stroke-width="2" stroke-linecap="round"
-                                                    stroke-linejoin="round"></path>
-                                            </svg>
-                                        </div>
                                     </div>
 
                                     <div class="relative min-w-0 md:w-44 group">
@@ -247,14 +239,6 @@
                                                 {{ $available_only === '0' ? 'selected' : '' }}>Not Available
                                             </option>
                                         </select>
-                                        <div
-                                            class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor"
-                                                viewBox="0 0 24 24">
-                                                <path d="M19 9l-7 7-7-7" stroke-width="2" stroke-linecap="round"
-                                                    stroke-linejoin="round"></path>
-                                            </svg>
-                                        </div>
                                     </div>
 
                                     <button type="submit"
