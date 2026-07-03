@@ -35,6 +35,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('buyer_points');
+        Schema::dropIfExists('h2u_buyer_points');
     }
 };

@@ -53,10 +53,30 @@ class ServiceRequestController extends BaseController
                 'offered_price' => 'nullable|numeric|min:0|max:99999.99',
             ]);
 
-            $studentService = StudentService::findOrFail($validated['student_service_id']);
+            $studentService = StudentService::with('user')->findOrFail($validated['student_service_id']);
+
+            if ((int) $studentService->hss_user_id === (int) $user->hu_id) {
+                return response()->json([
+                    'code' => 403,
+                    'status' => 'error',
+                    'success' => false,
+                    'message' => 'You cannot request your own service.',
+                    'data' => null,
+                ], 403);
+            }
 
             // Check availability
-            if (! $studentService->hss_is_active || ! $studentService->user->hu_is_available) {
+            $provider = $studentService->user;
+            $serviceIsBookable = (bool) $studentService->hss_is_active
+                && $studentService->hss_status === 'available'
+                && $studentService->hss_approval_status === 'approved';
+            $providerIsBookable = $provider
+                && (bool) $provider->hu_is_available
+                && ! (bool) $provider->hu_is_suspended
+                && ! (bool) $provider->hu_is_blacklisted
+                && ! (bool) $provider->hu_is_blocked;
+
+            if (! $serviceIsBookable || ! $providerIsBookable) {
                 return response()->json([
                     'code' => 400,
                     'status' => 'error',

@@ -75,6 +75,7 @@ function seedPricingService(string $frequency, float $price, array $serviceOverr
     ], $serviceOverrides), 'hss_id');
 
     return [
+        'provider' => User::findOrFail($providerId),
         'buyer' => User::findOrFail($buyerId),
         'service_id' => $serviceId,
     ];
@@ -86,7 +87,7 @@ it('keeps a per-session package price fixed regardless of package duration', fun
     $this->actingAs($seed['buyer'])
         ->postJson(route('service-requests.store'), [
             'student_service_id' => $seed['service_id'],
-            'selected_dates' => now()->addDay()->toDateString(),
+            'selected_dates' => now()->nextWeekday()->toDateString(),
             'start_time' => '09:00',
             'end_time' => '11:00',
             'selected_package' => 'basic',
@@ -106,7 +107,7 @@ it('scales an hourly package price using the booked duration', function () {
     $this->actingAs($seed['buyer'])
         ->postJson(route('service-requests.store'), [
             'student_service_id' => $seed['service_id'],
-            'selected_dates' => now()->addDay()->toDateString(),
+            'selected_dates' => now()->nextWeekday()->toDateString(),
             'start_time' => '09:00',
             'end_time' => '11:00',
             'selected_package' => 'basic',
@@ -126,7 +127,7 @@ it('rejects a package name that does not belong to the service', function () {
     $this->actingAs($seed['buyer'])
         ->postJson(route('service-requests.store'), [
             'student_service_id' => $seed['service_id'],
-            'selected_dates' => now()->addDay()->toDateString(),
+            'selected_dates' => now()->nextWeekday()->toDateString(),
             'start_time' => '09:00',
             'end_time' => '11:00',
             'selected_package' => 'custom-free-package',
@@ -135,6 +136,58 @@ it('rejects a package name that does not belong to the service', function () {
         ])
         ->assertUnprocessable()
         ->assertJsonValidationErrors('selected_package');
+});
+
+it('rejects requests for services that are not currently available', function () {
+    $seed = seedPricingService('Per Session', 250.00, [
+        'hss_status' => 'unavailable',
+    ]);
+
+    $this->actingAs($seed['buyer'])
+        ->postJson(route('service-requests.store'), [
+            'student_service_id' => $seed['service_id'],
+            'selected_dates' => now()->nextWeekday()->toDateString(),
+            'start_time' => '09:00',
+            'end_time' => '11:00',
+            'selected_package' => 'basic',
+            'message' => 'Unavailable bypass attempt',
+        ])
+        ->assertStatus(400)
+        ->assertJsonPath('message', 'Service or provider unavailable.');
+});
+
+it('rejects requests for services that are not approved', function () {
+    $seed = seedPricingService('Per Session', 250.00, [
+        'hss_approval_status' => 'pending',
+    ]);
+
+    $this->actingAs($seed['buyer'])
+        ->postJson(route('service-requests.store'), [
+            'student_service_id' => $seed['service_id'],
+            'selected_dates' => now()->nextWeekday()->toDateString(),
+            'start_time' => '09:00',
+            'end_time' => '11:00',
+            'selected_package' => 'basic',
+            'message' => 'Pending bypass attempt',
+        ])
+        ->assertStatus(400)
+        ->assertJsonPath('message', 'Service or provider unavailable.');
+});
+
+it('rejects helpers requesting their own service directly', function () {
+    $seed = seedPricingService('Per Session', 250.00);
+
+    $this->actingAs($seed['provider'])
+        ->postJson(route('service-requests.store'), [
+            'student_service_id' => $seed['service_id'],
+            'selected_dates' => now()->nextWeekday()->toDateString(),
+            'start_time' => '09:00',
+            'end_time' => '11:00',
+            'selected_package' => 'basic',
+            'message' => 'Self request attempt',
+        ])
+        ->assertStatus(403)
+        ->assertJsonPath('message', 'You cannot request your own service.');
 });
 
 it('rejects a fixed-price booking whose submitted time does not match the package duration', function () {
