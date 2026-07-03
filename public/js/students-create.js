@@ -8,12 +8,38 @@
     const form = document.querySelector('form[action]');
     const readyToHelp = config.dataset.readyToHelp === 'true';
     const servicesCreateUrl = config.dataset.servicesCreateUrl || '';
+    const maxProfilePhotoSizeBytes = 1024 * 1024;
     const maxWorkFileSizeBytes = 1024 * 1024;
+
+    const showFileTooLarge = (text, attempt = 0) => {
+        if (window.Swal) {
+            Swal.fire({
+                title: 'File too large',
+                text,
+                icon: 'error',
+            });
+            return;
+        }
+
+        if (attempt < 20) {
+            setTimeout(() => showFileTooLarge(text, attempt + 1), 50);
+            return;
+        }
+
+        alert(text);
+    };
 
     if (profilePhotoInput && profilePhotoPreview) {
         profilePhotoInput.addEventListener('change', (event) => {
             const file = event.target.files?.[0];
             if (!file) return;
+
+            if (file.size > maxProfilePhotoSizeBytes) {
+                profilePhotoInput.value = '';
+                showFileTooLarge('Profile photo must be 1MB or smaller.');
+                return;
+            }
+
             const reader = new FileReader();
             reader.onload = (e) => {
                 profilePhotoPreview.src = e.target?.result || profilePhotoPreview.src;
@@ -31,29 +57,25 @@
 
             if (file.size > maxWorkFileSizeBytes) {
                 workExperienceInput.value = '';
-                Swal.fire({
-                    title: 'File too large',
-                    text: 'Resume/CV file must be 1MB or smaller.',
-                    icon: 'error',
-                });
+                showFileTooLarge('Resume/CV file must be 1MB or smaller.');
             }
         });
     }
 
     if (form) {
         form.addEventListener('submit', (event) => {
-            const file = workExperienceInput?.files?.[0];
-            if (!file) {
+            const profilePhoto = profilePhotoInput?.files?.[0];
+            if (profilePhoto && profilePhoto.size > maxProfilePhotoSizeBytes) {
+                event.preventDefault();
+                profilePhotoInput.value = '';
+                showFileTooLarge('Profile photo must be 1MB or smaller.');
                 return;
             }
 
-            if (file.size > maxWorkFileSizeBytes) {
+            const file = workExperienceInput?.files?.[0];
+            if (file && file.size > maxWorkFileSizeBytes) {
                 event.preventDefault();
-                Swal.fire({
-                    title: 'File too large',
-                    text: 'Resume/CV file must be 1MB or smaller.',
-                    icon: 'error',
-                });
+                showFileTooLarge('Resume/CV file must be 1MB or smaller.');
             }
         });
     }

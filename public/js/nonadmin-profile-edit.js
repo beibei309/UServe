@@ -39,15 +39,46 @@
     const previewImage = document.getElementById('profile-photo-preview');
     const currentImage = document.getElementById('profile-photo-current');
     const fallback = document.getElementById('profile-photo-fallback');
+    const maxProfilePhotoSizeBytes = 1024 * 1024;
+
+    const showProfilePhotoSizeError = (attempt = 0) => {
+        if (window.Swal) {
+            Swal.fire({
+                icon: 'error',
+                title: 'File too large',
+                text: 'Profile photo must be 1MB or smaller.',
+            });
+            return;
+        }
+
+        if (attempt < 20) {
+            setTimeout(() => showProfilePhotoSizeError(attempt + 1), 50);
+            return;
+        }
+
+        alert('Profile photo must be 1MB or smaller.');
+    };
+
+    const resetProfilePhotoPreview = () => {
+        if (!previewImage) return;
+        previewImage.src = '';
+        previewImage.classList.add('hidden');
+        if (currentImage) currentImage.classList.remove('hidden');
+        if (fallback) fallback.classList.remove('hidden');
+    };
 
     if (photoInput && previewImage) {
         photoInput.addEventListener('change', (event) => {
             const file = event.target.files?.[0];
             if (!file) {
-                previewImage.src = '';
-                previewImage.classList.add('hidden');
-                if (currentImage) currentImage.classList.remove('hidden');
-                if (fallback) fallback.classList.remove('hidden');
+                resetProfilePhotoPreview();
+                return;
+            }
+
+            if (file.size > maxProfilePhotoSizeBytes) {
+                photoInput.value = '';
+                resetProfilePhotoPreview();
+                showProfilePhotoSizeError();
                 return;
             }
 
@@ -55,6 +86,17 @@
             previewImage.classList.remove('hidden');
             if (currentImage) currentImage.classList.add('hidden');
             if (fallback) fallback.classList.add('hidden');
+        });
+
+        const profileForm = photoInput.closest('form');
+        profileForm?.addEventListener('submit', (event) => {
+            const file = photoInput.files?.[0];
+            if (!file || file.size <= maxProfilePhotoSizeBytes) return;
+
+            event.preventDefault();
+            photoInput.value = '';
+            resetProfilePhotoPreview();
+            showProfilePhotoSizeError();
         });
     }
 

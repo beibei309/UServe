@@ -87,10 +87,10 @@
                         
                         <div class="flex-1">
                             <label class="block text-sm font-semibold mb-3 transition-colors duration-300" style="color: var(--text-primary);">Choose New Photo</label>
-                            <input type="file" name="profile_photo" 
+                            <input type="file" name="profile_photo" id="admin_community_profile_photo"
                                    class="w-full px-4 py-3 rounded-xl border transition-all duration-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                                    style="background-color: var(--bg-primary); border-color: var(--border-color); color: var(--text-primary);">
-                            <p class="text-xs mt-2 transition-colors duration-300" style="color: var(--text-muted);">Accepted formats: JPG, PNG, GIF (max 2MB)</p>
+                            <p class="text-xs mt-2 transition-colors duration-300" style="color: var(--text-muted);">Accepted formats: JPG, PNG, GIF (max 1MB)</p>
                         </div>
                     </div>
                 </div>
@@ -351,4 +351,47 @@
 </div>
 
 </div>
+@endsection
+
+@section('scripts')
+<script>
+(() => {
+    const photoInput = document.getElementById('admin_community_profile_photo');
+    if (!photoInput) return;
+
+    const maxPhotoSizeBytes = 1024 * 1024;
+    const showFileTooLarge = (attempt = 0) => {
+        if (window.Swal) {
+            window.Swal.fire({
+                icon: 'error',
+                title: 'File too large',
+                text: 'Profile photo must be 1MB or smaller.',
+            });
+            return;
+        }
+
+        if (attempt < 20) {
+            setTimeout(() => showFileTooLarge(attempt + 1), 50);
+            return;
+        }
+
+        alert('Profile photo must be 1MB or smaller.');
+    };
+
+    const validatePhoto = () => {
+        const file = photoInput.files?.[0];
+        if (!file || file.size <= maxPhotoSizeBytes) return true;
+
+        photoInput.value = '';
+        showFileTooLarge();
+        return false;
+    };
+
+    photoInput.addEventListener('change', validatePhoto);
+    photoInput.closest('form')?.addEventListener('submit', (event) => {
+        if (validatePhoto()) return;
+        event.preventDefault();
+    });
+})();
+</script>
 @endsection

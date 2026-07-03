@@ -20,7 +20,7 @@ class ProfileUpdateRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'phone' => ['nullable', 'string', 'max:20'],
             'bio' => ['nullable', 'string', 'max:500'],
-            'profile_photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,gif', 'max:10240'],
+            'profile_photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,gif', 'max:1024'],
         ];
 
         // Allow email updates ONLY for admins/superadmins
@@ -69,6 +69,9 @@ class ProfileUpdateRequest extends FormRequest
         return [
             'student_id.unique' => 'This student ID is already registered.',
             'bio.max' => 'Bio must not exceed 500 characters.',
+            'profile_photo.image' => 'Profile photo must be a valid image file.',
+            'profile_photo.mimes' => 'Profile photo must be a JPG, PNG, or GIF image.',
+            'profile_photo.max' => 'Profile photo must not be larger than 1MB.',
         ];
     }
 }

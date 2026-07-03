@@ -24,9 +24,66 @@
     const confirmSnapshotBtn = document.getElementById('confirm_snapshot');
     const cameraControls = document.getElementById('camera_controls');
     const cameraPlaceholder = document.getElementById('camera_placeholder');
+    const createProfileLink = document.getElementById('create_profile_link');
+    const maxProfilePhotoSizeBytes = 1024 * 1024;
 
     let stream = null;
     let selfieDataUrl = null;
+
+    const withSwal = (callback, attempt = 0) => {
+        if (window.Swal) {
+            callback(window.Swal);
+            return;
+        }
+
+        if (attempt < 20) {
+            setTimeout(() => withSwal(callback, attempt + 1), 50);
+            return;
+        }
+
+        callback(null);
+    };
+
+    const showSwal = (options) => {
+        withSwal((swal) => {
+            if (swal) {
+                swal.fire(options);
+                return;
+            }
+
+            alert(options?.text || options?.title || 'Something went wrong.');
+        });
+    };
+
+    const closeSwal = () => {
+        if (window.Swal) {
+            window.Swal.close();
+        }
+    };
+
+    const stopCameraStream = () => {
+        if (!stream) return;
+        stream.getTracks().forEach((track) => track.stop());
+        stream = null;
+    };
+
+    const showProfilePhotoSizeError = (attempt = 0) => {
+        if (window.Swal) {
+            Swal.fire({
+                icon: 'error',
+                title: 'File too large',
+                text: 'Profile photo must be 1MB or smaller.',
+            });
+            return;
+        }
+
+        if (attempt < 20) {
+            setTimeout(() => showProfilePhotoSizeError(attempt + 1), 50);
+            return;
+        }
+
+        alert('Profile photo must be 1MB or smaller.');
+    };
 
     const goToStep = (stepNumber) => {
         document.querySelectorAll('.step-panel').forEach((el) => el.classList.add('hidden'));
@@ -98,7 +155,7 @@
             })
             .catch((err) => {
                 locationStatus.innerHTML = '';
-                Swal.fire({ icon: 'error', text: err.message || 'Unable to verify location. Please try again.' });
+                showSwal({ icon: 'error', text: err.message || 'Unable to verify location. Please try again.' });
             });
     };
 
@@ -118,6 +175,13 @@
         profilePhotoInput.addEventListener('change', (event) => {
             const file = event.target.files?.[0];
             if (!file) return;
+
+            if (file.size > maxProfilePhotoSizeBytes) {
+                profilePhotoInput.value = '';
+                showProfilePhotoSizeError();
+                return;
+            }
+
             const reader = new FileReader();
             reader.onload = (e) => {
                 profilePreview.src = e.target?.result || profilePreview.src;
@@ -135,7 +199,7 @@
             if (!navigator.geolocation) {
                 detectLocationBtn.innerHTML = original;
                 detectLocationBtn.disabled = false;
-                Swal.fire({ icon: 'error', text: 'Location is not supported on this browser.' });
+                showSwal({ icon: 'error', text: 'Location is not supported on this browser.' });
                 return;
             }
 
@@ -155,12 +219,12 @@
                         addressVerified(lat, lng, `GPS: ${lat}, ${lng}`);
                         return;
                     }
-                    Swal.fire({ icon: 'error', text: 'You must be in Muallim District.' });
+                    showSwal({ icon: 'error', text: 'You must be in Muallim District.' });
                 },
                 () => {
                     detectLocationBtn.innerHTML = original;
                     detectLocationBtn.disabled = false;
-                    Swal.fire({ icon: 'error', text: 'Please allow location access.' });
+                    showSwal({ icon: 'error', text: 'Please allow location access.' });
                 }
             );
         });
@@ -169,12 +233,21 @@
     if (uploadPhotoForm) {
         uploadPhotoForm.addEventListener('submit', (e) => {
             e.preventDefault();
+            const profilePhoto = profilePhotoInput?.files?.[0];
+            if (profilePhoto && profilePhoto.size > maxProfilePhotoSizeBytes) {
+                profilePhotoInput.value = '';
+                showProfilePhotoSizeError();
+                return;
+            }
+
             const formData = new FormData(uploadPhotoForm);
-            Swal.fire({
-                title: 'Uploading...',
-                text: 'Please wait',
-                allowOutsideClick: false,
-                didOpen: () => Swal.showLoading(),
+            withSwal((swal) => {
+                swal?.fire({
+                    title: 'Uploading...',
+                    text: 'Please wait',
+                    allowOutsideClick: false,
+                    didOpen: () => swal.showLoading(),
+                });
             });
             fetch(uploadPhotoUrl, {
                 method: 'POST',
@@ -187,10 +260,10 @@
                 .then((response) => response.json())
                 .then((data) => {
                     if (!data.success) {
-                        Swal.fire({ icon: 'error', title: 'Upload Failed', text: data.message || 'Something went wrong' });
+                        showSwal({ icon: 'error', title: 'Upload Failed', text: data.message || 'Something went wrong' });
                         return;
                     }
-                    Swal.fire({
+                    showSwal({
                         icon: 'success',
                         title: 'Photo Uploaded!',
                         toast: true,
@@ -201,7 +274,7 @@
                     goToStep(3);
                 })
                 .catch(() => {
-                    Swal.fire({ icon: 'error', title: 'Error', text: 'Network error occurred.' });
+                    showSwal({ icon: 'error', title: 'Error', text: 'Network error occurred.' });
                 });
         });
     }
@@ -216,7 +289,7 @@
                 startCameraBtn.classList.add('hidden');
                 cameraControls.classList.remove('hidden');
             } catch (e) {
-                Swal.fire({ icon: 'error', text: 'Camera error.' });
+                showSwal({ icon: 'error', text: 'Camera error.' });
             }
         });
     }
@@ -251,11 +324,31 @@
 
     if (confirmSnapshotBtn) {
         confirmSnapshotBtn.addEventListener('click', () => {
-            Swal.fire({ title: 'Verifying...', didOpen: () => Swal.showLoading() });
+            if (!selfieDataUrl) {
+                showSwal({ icon: 'warning', title: 'No selfie captured', text: 'Please capture your selfie first.' });
+                return;
+            }
+
+            confirmSnapshotBtn.disabled = true;
+            confirmSnapshotBtn.textContent = 'Verifying...';
+
+            withSwal((swal) => {
+                swal?.fire({
+                    title: 'Verifying...',
+                    text: 'Please wait',
+                    allowOutsideClick: false,
+                    didOpen: () => swal.showLoading(),
+                });
+            });
+
             fetch(uploadSelfieUrl, {
                 method: 'POST',
                 body: JSON.stringify({ selfie_image: selfieDataUrl }),
-                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
+                headers: {
+                    'Content-Type': 'application/json',
+                    Accept: 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                },
             })
                 .then(async (response) => {
                     const data = await response.json().catch(() => ({}));
@@ -263,12 +356,20 @@
                         throw new Error(data.message || 'Verification failed. Please try again.');
                     }
 
-                    Swal.close();
+                    closeSwal();
+                    stopCameraStream();
+                    if (data.redirect && createProfileLink) {
+                        createProfileLink.href = data.redirect;
+                    }
                     goToStep('success');
                 })
                 .catch((error) => {
-                    Swal.close();
-                    Swal.fire({ icon: 'error', text: error.message || 'Verification failed. Please try again.' });
+                    closeSwal();
+                    showSwal({ icon: 'error', text: error.message || 'Verification failed. Please try again.' });
+                })
+                .finally(() => {
+                    confirmSnapshotBtn.disabled = false;
+                    confirmSnapshotBtn.textContent = 'Confirm & Upload';
                 });
         });
     }

@@ -37,7 +37,7 @@
                         </div>
                         <div class="flex-1 text-center sm:text-left">
                             <h3 class="text-lg font-semibold text-gray-900">Profile Picture</h3>
-                            <p class="text-sm text-gray-500 mt-1">Upload a professional photo to build trust. JPG or PNG, max 4MB.</p>
+                            <p class="text-sm text-gray-500 mt-1">Upload a professional photo to build trust. JPG or PNG, max 1MB.</p>
                             @error('profile_photo')
                                 <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                             @enderror

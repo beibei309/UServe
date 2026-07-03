@@ -197,7 +197,7 @@ class StudentsController extends Controller
     {
         // Validate input
         $validated = $request->validate([
-            'profile_photo' => 'nullable|image|max:4096',
+            'profile_photo' => 'nullable|image|max:1024',
             'faculty' => 'nullable|string|max:255',
             'course' => 'nullable|string|max:255',
             'bio' => 'nullable|string|max:1000',
@@ -335,7 +335,7 @@ class StudentsController extends Controller
         'skills' => 'nullable|string|max:500',
         'work_experience_message' => 'nullable|string|max:1000',
         'work_experience_file' => 'nullable|file|mimes:pdf,doc,docx,txt,jpg,jpeg,png|max:1024',
-        'profile_photo_path' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4096',
+        'profile_photo_path' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:1024',
     ]);
 
     // 2. Update Basic Information

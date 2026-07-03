@@ -118,7 +118,7 @@
                         </div>
                         <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mb-2">You are now registered as a Student Seller!</h2>
                         <p class="text-slate-500 mb-8">Please complete your profile details.</p>
-                        <a href="{{ route('students.create') }}" class="bg-slate-900 text-white px-8 py-3 rounded-xl font-bold shadow-lg">Create Profile</a>
+                        <a href="{{ route('students.create') }}" id="create_profile_link" class="bg-slate-900 text-white px-8 py-3 rounded-xl font-bold shadow-lg">Create Profile</a>
                     </div>
                 </div>
             </div>

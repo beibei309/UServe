@@ -178,7 +178,7 @@ public function update(Request $request, $id)
         'phone' => 'nullable|string|max:20',
         'bio' => 'nullable|string|max:1000',
         'verification_status' => 'required|in:pending,approved,rejected',
-        'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4096',
+        'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:1024',
         'blacklist_reason' => 'nullable|string|max:255',
         'remove_blacklist' => 'nullable|in:1',
     ]);
