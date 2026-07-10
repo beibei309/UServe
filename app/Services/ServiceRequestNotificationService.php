@@ -21,11 +21,6 @@ class ServiceRequestNotificationService
                 Mail::to($studentService->user->hu_email)
                     ->send(new NewServiceRequestNotification($serviceRequest, 'provider'));
             }
-
-            if ($requester->hu_email) {
-                Mail::to($requester->hu_email)
-                    ->send(new NewServiceRequestNotification($serviceRequest, 'student'));
-            }
         } catch (\Throwable $notifyError) {
             Log::warning('ServiceRequest notifications failed: '.$notifyError->getMessage(), [
                 'service_request_id' => $serviceRequest->hsr_id,
